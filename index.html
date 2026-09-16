@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>밥심 (Bapsim) - 문정동 한식뷔페 큐레이션 & 실시간 투표</title>
+  <title>밥심 (Bapsim) - 문정동 한식뷔페 그룹 투표 & 프라이빗 톡</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Firebase SDK v8 -->
@@ -18,7 +18,7 @@
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white">
 
-  <!-- 헤더 -->
+  <!-- 상단 네비게이션 헤더 -->
   <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
     <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -29,21 +29,27 @@
           <div class="flex items-center gap-2">
             <h1 class="font-black text-xl tracking-tight text-slate-900">밥심</h1>
             <span class="text-[11px] bg-orange-100 text-orange-700 font-bold px-2 py-0.5 rounded-full">문정 법조타운</span>
-            <span class="hidden sm:inline-flex items-center gap-1 text-[11px] bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-semibold px-2 py-0.5 rounded-full">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              실시간 연동
+            <!-- 현재 참여 중인 그룹 배지 -->
+            <span id="currentGroupBadge" class="inline-flex items-center gap-1 text-[11px] bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold px-2.5 py-0.5 rounded-full">
+              <i data-lucide="users" class="w-3 h-3"></i>
+              <span id="currentGroupNameText">전체 공개 로비</span>
             </span>
           </div>
-          <p class="text-[11px] text-slate-400 font-medium hidden sm:block">오늘 뭐 먹지? 문정러들의 실시간 한식뷔페 식단 & 투표소</p>
+          <p class="text-[11px] text-slate-400 font-medium hidden sm:block">비밀 그룹방 생성 · 팀원 전용 독립 투표 & 실시간 비밀 톡</p>
         </div>
       </div>
 
       <div class="flex items-center gap-2">
-        <button onclick="openAddModal()" class="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 active:scale-95 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-md shadow-orange-500/20 transition-all">
-          <i data-lucide="plus-circle" class="w-4 h-4"></i>
-          <span>식당/메뉴 추가</span>
+        <!-- 그룹 모달 열기 버튼 -->
+        <button onclick="openGroupListModal()" class="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white px-3 py-2 rounded-xl text-xs font-bold shadow-md shadow-indigo-600/20 transition-all">
+          <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+          <span>그룹 만들기/참여</span>
         </button>
-        <button onclick="openAuthModal()" class="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl text-xs font-semibold transition-colors">
+        <button onclick="openAddModal()" class="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 active:scale-95 text-white px-3 py-2 rounded-xl text-xs font-bold shadow-md shadow-orange-500/20 transition-all">
+          <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">식당/메뉴 추가</span>
+        </button>
+        <button onclick="openAuthModal()" class="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl text-xs font-semibold transition-colors">
           <i data-lucide="user" class="w-3.5 h-3.5"></i>
           <span id="userProfileText">프로필</span>
         </button>
@@ -54,33 +60,37 @@
   <!-- 메인 컨테이너 -->
   <main class="max-w-6xl mx-auto px-4 pt-6 space-y-6">
 
-    <!-- 상단 대시보드 배너 (11:30 타이머 & 투표 현황) -->
-    <div class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-orange-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-slate-900/10">
+    <!-- 상단 대시보드 배너 (11:30 타이머 & 그룹 현황) -->
+    <div class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-slate-900/10">
       <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div class="space-y-2">
-          <div class="flex items-center gap-2 text-xs font-bold text-orange-400">
-            <span class="w-2 h-2 rounded-full bg-orange-500 animate-ping"></span>
-            <span id="todayFullDate">2026년 오늘 식단</span>
+          <div class="flex items-center gap-2 text-xs font-bold text-indigo-300">
+            <span class="w-2 h-2 rounded-full bg-indigo-400 animate-ping"></span>
+            <span id="groupStatusIndicator">🏢 전체 공개 모드</span>
             <span class="text-slate-500">|</span>
-            <span class="text-slate-300">점심 투표 마감 카운트다운</span>
+            <span id="todayFullDate">오늘의 점심 식단표</span>
           </div>
           <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-white">
-            11시 30분 출발까지 <span id="timerCountdown" class="text-orange-400 font-mono tracking-normal underline decoration-orange-500/50 underline-offset-8">계산 중...</span>
+            11시 30분 출발까지 <span id="timerCountdown" class="text-orange-400 font-mono underline decoration-orange-500/50 underline-offset-8">계산 중...</span>
           </h2>
-          <p class="text-xs text-slate-300">가장 표를 많이 받은 한식뷔페가 11시 30분에 오늘의 목적지로 확정됩니다.</p>
+          <p id="groupBannerNotice" class="text-xs text-slate-300">현재 <strong class="text-white">전체 로비</strong> 상태입니다. 팀원들끼리만 투표하고 채팅하려면 상단 [그룹 만들기]를 이용하세요.</p>
         </div>
 
         <div class="flex flex-wrap gap-2 w-full md:w-auto">
           <button onclick="shareVoteRoom()" class="flex-1 md:flex-initial flex items-center justify-center gap-2 bg-white text-slate-900 font-bold px-4 py-3 rounded-2xl text-xs hover:bg-slate-100 active:scale-95 shadow-lg transition-all">
-            <i data-lucide="share-2" class="w-4 h-4 text-orange-500"></i>
-            투표 링크 공유
+            <i data-lucide="share-2" class="w-4 h-4 text-indigo-600"></i>
+            초대 링크 공유
           </button>
-          <button onclick="resetVotesPrompt()" class="flex items-center justify-center gap-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 font-semibold px-3 py-3 rounded-2xl text-xs transition-all" title="투표수 초기화">
+          <button onclick="leaveGroupToLobby()" id="leaveGroupBtn" class="hidden items-center justify-center gap-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 font-bold px-3 py-3 rounded-2xl text-xs transition-all" title="그룹 나가기">
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+            <span>로비로 나가기</span>
+          </button>
+          <button onclick="resetVotesPrompt()" class="flex items-center justify-center gap-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 font-semibold px-3 py-3 rounded-2xl text-xs transition-all" title="투표 초기화">
             <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
           </button>
         </div>
       </div>
-      <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
     </div>
 
     <!-- 식당 카드 그리드 섹션 -->
@@ -90,7 +100,7 @@
           <h3 class="font-extrabold text-slate-800 text-lg">문정동 한식뷔페 라인업</h3>
           <span id="restaurantCountBadge" class="text-xs bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded-md">0곳</span>
         </div>
-        <p class="text-xs text-slate-500">카드의 '식당/메뉴 수정'을 눌러 이름 변경이나 삭제가 가능합니다.</p>
+        <p class="text-xs text-slate-500">투표 결과는 현재 접속 중인 그룹원들에게만 실시간 반영됩니다.</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="restaurantCardsContainer">
@@ -101,35 +111,105 @@
 
   <!-- 하단 플로팅 채팅 버튼 및 대화창 -->
   <div class="fixed bottom-6 right-6 z-50">
-    <button id="chatToggleBtn" onclick="toggleChatWindow()" class="relative bg-gradient-to-tr from-orange-600 to-amber-500 text-white w-14 h-14 rounded-2xl shadow-xl shadow-orange-500/30 flex items-center justify-center transition-all hover:scale-105 active:scale-95">
+    <button id="chatToggleBtn" onclick="toggleChatWindow()" class="relative bg-gradient-to-tr from-indigo-600 to-indigo-800 text-white w-14 h-14 rounded-2xl shadow-xl shadow-indigo-600/30 flex items-center justify-center transition-all hover:scale-105 active:scale-95">
       <i data-lucide="message-square" class="w-6 h-6"></i>
       <span id="chatUnreadPulse" class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 border-2 border-white rounded-full"></span>
     </button>
 
     <!-- 대화창 본체 -->
-    <div id="chatWindow" class="hidden absolute bottom-16 right-0 w-80 sm:w-96 h-[480px] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden">
+    <div id="chatWindow" class="hidden absolute bottom-16 right-0 w-80 sm:w-96 h-[490px] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden">
       <div class="bg-slate-900 text-white p-4 flex items-center justify-between border-b border-slate-800">
         <div class="flex items-center gap-2">
           <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
-          <span class="font-bold text-sm">밥심 실시간 톡</span>
+          <div>
+            <span class="font-bold text-xs" id="chatHeaderTitle">전체 로비 톡</span>
+            <span class="block text-[10px] text-slate-400" id="chatHeaderSub">모든 사용자에게 공개되는 채팅</span>
+          </div>
         </div>
         <button onclick="toggleChatWindow()" class="text-slate-400 hover:text-white text-xs">✕</button>
       </div>
 
       <div id="chatMessages" class="flex-1 p-4 overflow-y-auto space-y-3 text-xs bg-slate-50">
-        <div class="text-center text-slate-400 py-6 text-xs">대화가 실시간으로 동기화됩니다.</div>
+        <div class="text-center text-slate-400 py-6 text-xs">메시지를 주고받아 보세요.</div>
       </div>
 
       <div class="px-3 py-2 bg-slate-100/90 border-t border-slate-200 flex gap-1.5 overflow-x-auto scrollbar-hide text-[11px]">
-        <button onclick="quickChat('🍗 오늘 닭강정 상태 극상입니다!')" class="whitespace-nowrap px-2.5 py-1 bg-white rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 font-medium">🍗 닭강정 대박</button>
-        <button onclick="quickChat('🏃‍♂️ 11시 30분에 로비에서 모여요!')" class="whitespace-nowrap px-2.5 py-1 bg-white rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 font-medium">🏃‍♂️ 30분 로비 집결</button>
-        <button onclick="quickChat('🪑 자리 선점하러 먼저 출발합니다!')" class="whitespace-nowrap px-2.5 py-1 bg-white rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 font-medium">🪑 자리 선점 출발</button>
+        <button onclick="quickChat('🍗 오늘 메인 요리 극상입니다!')" class="whitespace-nowrap px-2.5 py-1 bg-white rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 font-medium">🍗 메인 대박</button>
+        <button onclick="quickChat('🏃‍♂️ 11시 30분에 로비 집결!')" class="whitespace-nowrap px-2.5 py-1 bg-white rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 font-medium">🏃‍♂️ 30분 로비 집결</button>
+        <button onclick="quickChat('🪑 자리 선점하러 먼저 갑니다!')" class="whitespace-nowrap px-2.5 py-1 bg-white rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 font-medium">🪑 자리 선점 출발</button>
       </div>
 
       <form onsubmit="handleSendChat(event)" class="p-2.5 bg-white border-t border-slate-200 flex gap-2">
-        <input id="chatInput" type="text" placeholder="메시지를 입력하세요..." class="flex-1 bg-slate-100 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500" autocomplete="off" />
-        <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-colors">전송</button>
+        <input id="chatInput" type="text" placeholder="우리 그룹만의 비밀 대화..." class="flex-1 bg-slate-100 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" autocomplete="off" />
+        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-colors">전송</button>
       </form>
+    </div>
+  </div>
+
+  <!-- 그룹 목록 / 만들기 모달 -->
+  <div id="groupModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
+            <i data-lucide="shield-check" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="font-extrabold text-slate-900 text-base">그룹 비밀방 선택 & 생성</h3>
+            <p class="text-[11px] text-slate-400">우리 팀만의 비밀번호를 걸어 독립 투표와 채팅을 진행하세요.</p>
+          </div>
+        </div>
+        <button onclick="closeGroupModal()" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
+      </div>
+
+      <!-- 새 그룹 만들기 양식 -->
+      <div class="bg-indigo-50/70 border border-indigo-100 rounded-2xl p-4 space-y-3">
+        <h4 class="font-black text-xs text-indigo-900 flex items-center gap-1.5">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+          새로운 비밀 그룹 만들기 (내가 방장)
+        </h4>
+        <form onsubmit="handleCreateGroup(event)" class="space-y-2 text-xs">
+          <div>
+            <label class="font-bold text-slate-700 block mb-1">그룹 이름 <span class="text-indigo-600">*</span></label>
+            <input id="createGroupName" type="text" placeholder="예: 테라타워 4층 마케팅팀, 26학번 동기방" required class="w-full border border-slate-200 rounded-xl p-2.5 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+          </div>
+          <div>
+            <label class="font-bold text-slate-700 block mb-1">입장 비밀번호 <span class="text-indigo-600">*</span></label>
+            <input id="createGroupPass" type="password" placeholder="팀원들과 공유할 비밀번호 숫자/문자" required class="w-full border border-slate-200 rounded-xl p-2.5 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+          </div>
+          <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md shadow-indigo-600/20 transition-all mt-1">
+            그룹 생성하고 방장으로 입장하기
+          </button>
+        </form>
+      </div>
+
+      <!-- 개설된 그룹 목록 리스트 -->
+      <div class="space-y-2">
+        <h4 class="font-black text-xs text-slate-700 flex items-center justify-between">
+          <span>개설되어 있는 그룹 목록</span>
+          <span id="groupTotalCount" class="text-[10px] text-slate-400 font-normal">0개</span>
+        </h4>
+        <div id="groupListContainer" class="space-y-2 max-h-56 overflow-y-auto">
+          <!-- 동적 렌더링 -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 그룹 입장 비밀번호 확인 모달 -->
+  <div id="groupJoinModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-xs rounded-3xl shadow-2xl p-6 space-y-4">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="font-extrabold text-slate-900 text-sm" id="joinModalGroupName">그룹 입장</h3>
+        <button onclick="closeGroupJoinModal()" class="text-slate-400 hover:text-slate-600 text-xs">✕</button>
+      </div>
+      <div class="space-y-2 text-xs">
+        <label class="font-bold text-slate-700 block">방장이 설정한 비밀번호 입력</label>
+        <input id="joinGroupPassInput" type="password" placeholder="비밀번호를 입력하세요" class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-indigo-500 outline-none" />
+      </div>
+      <button onclick="submitJoinGroup()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs transition-colors">
+        확인하고 입장하기
+      </button>
     </div>
   </div>
 
@@ -184,12 +264,10 @@
           </div>
         </div>
 
-        <!-- 저장 버튼 -->
         <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl text-xs shadow-md shadow-orange-500/20 transition-all active:scale-95 mt-2">
           식당 정보 및 식단 저장
         </button>
 
-        <!-- 삭제 버튼 (수정 모드일 때만 노출) -->
         <div id="deleteActionWrapper" class="pt-2 border-t border-slate-100 hidden">
           <button type="button" onclick="handleDeleteCurrentRestaurant()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold py-2.5 rounded-xl text-xs border border-rose-200/80 transition-colors flex items-center justify-center gap-1.5">
             <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
@@ -209,7 +287,7 @@
       </div>
       <div class="space-y-2 text-xs">
         <label class="font-bold text-slate-700 block">투표 & 대화에 사용할 닉네임</label>
-        <input id="authNicknameInput" type="text" placeholder="예: 테라타워3년차" class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-orange-500 outline-none" />
+        <input id="authNicknameInput" type="text" placeholder="예: 테라타워3년차" class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-indigo-500 outline-none" />
       </div>
       <button onclick="saveUserProfile()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-2.5 rounded-xl text-xs transition-colors">
         저장하기
@@ -218,6 +296,7 @@
   </div>
 
   <script>
+    // 1. Firebase 설정
     const firebaseConfig = {
       apiKey: "AIzaSyDYTK4MRGsxXwZ_jzN7qlaFzrVhMVKgWxw",
       authDomain: "babsim-a3556.firebaseapp.com",
@@ -231,9 +310,14 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // 상태 관리
     let restaurants = {};
+    let allGroups = {};
+    let currentGroupId = localStorage.getItem('bapsim_current_group_id') || 'lobby';
+    let currentGroupName = localStorage.getItem('bapsim_current_group_name') || '전체 공개 로비';
     let currentUser = JSON.parse(localStorage.getItem('bapsim_user') || '{"nickname":"문정러"}');
-    let myVotedId = localStorage.getItem('bapsim_my_vote');
+    let myVotedId = localStorage.getItem(`bapsim_my_vote_${currentGroupId}`);
+    let targetJoinGroupId = null;
 
     // 타이머
     function updateCountdown() {
@@ -244,7 +328,7 @@
       const yyyy = now.getFullYear();
       const mm = String(now.getMonth() + 1).padStart(2, '0');
       const dd = String(now.getDate()).padStart(2, '0');
-      document.getElementById('todayFullDate').textContent = `${yyyy}년 ${mm}월 ${dd}일 오늘의 식단`;
+      document.getElementById('todayFullDate').textContent = `${yyyy}년 ${mm}월 ${dd}일 식단`;
 
       const diff = target.getTime() - now.getTime();
       const timerEl = document.getElementById('timerCountdown');
@@ -266,17 +350,71 @@
     const todayISO = new Date().toISOString().split('T')[0];
     document.getElementById('formRestDate').value = todayISO;
 
-    // Firebase 리스너
+    // 그룹 UI 상태 반영
+    function updateGroupUI() {
+      myVotedId = localStorage.getItem(`bapsim_my_vote_${currentGroupId}`);
+      const isLobby = (currentGroupId === 'lobby');
+
+      document.getElementById('currentGroupNameText').textContent = currentGroupName;
+      document.getElementById('currentGroupBadge').className = isLobby
+        ? "inline-flex items-center gap-1 text-[11px] bg-slate-100 text-slate-700 border border-slate-200 font-bold px-2.5 py-0.5 rounded-full"
+        : "inline-flex items-center gap-1 text-[11px] bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold px-2.5 py-0.5 rounded-full";
+
+      document.getElementById('groupStatusIndicator').textContent = isLobby ? "🏢 전체 공개 모드" : `🔒 비밀 그룹 [${currentGroupName}] 모드`;
+      document.getElementById('groupBannerNotice').innerHTML = isLobby
+        ? '현재 <strong class="text-white">전체 로비</strong> 상태입니다. 팀원들끼리만 투표하고 대화하려면 [그룹 만들기/참여]를 클릭하세요.'
+        : `현재 <strong class="text-indigo-300">[${currentGroupName}]</strong> 전용 독립 투표와 비밀 채팅이 진행 중입니다.`;
+
+      document.getElementById('leaveGroupBtn').style.display = isLobby ? 'none' : 'inline-flex';
+      document.getElementById('chatHeaderTitle').textContent = isLobby ? "전체 로비 톡" : `🔒 ${currentGroupName} 비밀 톡`;
+      document.getElementById('chatHeaderSub').textContent = isLobby ? "모든 사용자에게 공개되는 채팅" : "초대받은 팀원들만 볼 수 있는 대화";
+
+      // 채팅 리스너 재부착
+      attachChatListener();
+      renderCards();
+    }
+
+    // Firebase 그룹 목록 리스너
+    db.ref('groups').on('value', (snapshot) => {
+      allGroups = snapshot.val() || {};
+      renderGroupList();
+    });
+
+    // Firebase 식당 데이터 리스너
     db.ref('restaurants').on('value', (snapshot) => {
       restaurants = snapshot.val() || {};
       renderCards();
     });
 
-    db.ref('messages').limitToLast(40).on('child_added', (snapshot) => {
-      appendChatMessage(snapshot.val());
-    });
+    // 그룹별 투표수 리스너
+    let groupVotesRef = null;
+    let groupVotesData = {};
+    function attachVotesListener() {
+      if (groupVotesRef) groupVotesRef.off();
+      const votePath = currentGroupId === 'lobby' ? 'lobby_votes' : `groups/${currentGroupId}/votes`;
+      groupVotesRef = db.ref(votePath);
+      groupVotesRef.on('value', (snap) => {
+        groupVotesData = snap.val() || {};
+        renderCards();
+      });
+    }
+    attachVotesListener();
 
-    // 렌더링
+    // 그룹별 채팅 리스너
+    let chatRef = null;
+    function attachChatListener() {
+      if (chatRef) chatRef.off();
+      const chatContainer = document.getElementById('chatMessages');
+      chatContainer.innerHTML = '';
+
+      const chatPath = currentGroupId === 'lobby' ? 'lobby_messages' : `groups/${currentGroupId}/messages`;
+      chatRef = db.ref(chatPath).limitToLast(50);
+      chatRef.on('child_added', (snap) => {
+        appendChatMessage(snap.val());
+      });
+    }
+
+    // 카드 렌더링
     function renderCards() {
       const container = document.getElementById('restaurantCardsContainer');
       container.innerHTML = '';
@@ -288,9 +426,10 @@
       let topId = null;
 
       list.forEach(r => {
-        totalVotes += (r.votes || 0);
-        if ((r.votes || 0) > maxVote && (r.votes || 0) > 0) {
-          maxVote = r.votes;
+        const v = groupVotesData[r.id] || 0;
+        totalVotes += v;
+        if (v > maxVote && v > 0) {
+          maxVote = v;
           topId = r.id;
         }
       });
@@ -298,9 +437,10 @@
       const todayStr = new Date().toISOString().split('T')[0];
 
       list.forEach(r => {
+        const votesCount = groupVotesData[r.id] || 0;
         const isVoted = myVotedId === r.id;
         const isTop = topId === r.id;
-        const percent = totalVotes > 0 ? Math.round(((r.votes || 0) / totalVotes) * 100) : 0;
+        const percent = totalVotes > 0 ? Math.round((votesCount / totalVotes) * 100) : 0;
         const isToday = (r.menuDate === todayStr);
 
         const card = document.createElement('div');
@@ -308,7 +448,6 @@
 
         card.innerHTML = `
           <div>
-            <!-- 상단 뱃지 및 식당명 -->
             <div class="flex items-start justify-between gap-2 mb-3">
               <div>
                 <div class="flex items-center gap-1.5 flex-wrap">
@@ -326,7 +465,6 @@
               <span class="text-xs font-black text-slate-700 bg-slate-50 px-2.5 py-1 rounded-xl border border-slate-100">${r.price || '가격미정'}</span>
             </div>
 
-            <!-- 메인 반찬 배지 -->
             <div class="mt-4 space-y-2">
               <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">핵심 메인 반찬</span>
               <div class="flex flex-wrap gap-1.5">
@@ -338,7 +476,6 @@
               </div>
             </div>
 
-            <!-- 국 & 후식 깔끔한 인라인 태그 형태 (글자 줄바꿈 해결) -->
             <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5">
               <div class="flex items-center text-xs">
                 <span class="shrink-0 text-[11px] font-bold text-orange-600 bg-orange-50 border border-orange-100 px-2 py-0.5 rounded-md mr-2">국/찌개</span>
@@ -351,10 +488,9 @@
             </div>
           </div>
 
-          <!-- 하단 투표 및 수정 영역 -->
           <div class="mt-5 pt-4 border-t border-slate-100">
             <div class="flex items-center justify-between text-xs font-bold mb-1.5">
-              <span class="text-slate-500">${r.votes || 0}표 (${percent}%)</span>
+              <span class="text-slate-500">${votesCount}표 (${percent}%)</span>
               <button onclick="openEditModal('${r.id}')" class="text-[11px] text-slate-400 hover:text-orange-500 font-semibold flex items-center gap-1">
                 <i data-lucide="settings-2" class="w-3 h-3"></i>
                 식당/메뉴 수정
@@ -375,29 +511,138 @@
       lucide.createIcons();
     }
 
-    // 투표
+    // 투표 로직 (현재 그룹 전용 독립 반영)
     function castVote(id) {
-      if (myVotedId === id) {
-        db.ref(`restaurants/${id}/votes`).transaction(v => Math.max(0, (v || 1) - 1));
-        myVotedId = null;
-        localStorage.removeItem('bapsim_my_vote');
-      } else {
-        if (myVotedId && restaurants[myVotedId]) {
-          db.ref(`restaurants/${myVotedId}/votes`).transaction(v => Math.max(0, (v || 1) - 1));
-        }
-        db.ref(`restaurants/${id}/votes`).transaction(v => (v || 0) + 1);
-        myVotedId = id;
-        localStorage.setItem('bapsim_my_vote', id);
+      const votePath = currentGroupId === 'lobby' ? 'lobby_votes' : `groups/${currentGroupId}/votes`;
+      const chatPath = currentGroupId === 'lobby' ? 'lobby_messages' : `groups/${currentGroupId}/messages`;
 
-        db.ref('messages').push({
+      if (myVotedId === id) {
+        db.ref(`${votePath}/${id}`).transaction(v => Math.max(0, (v || 1) - 1));
+        myVotedId = null;
+        localStorage.removeItem(`bapsim_my_vote_${currentGroupId}`);
+      } else {
+        if (myVotedId) {
+          db.ref(`${votePath}/${myVotedId}`).transaction(v => Math.max(0, (v || 1) - 1));
+        }
+        db.ref(`${votePath}/${id}`).transaction(v => (v || 0) + 1);
+        myVotedId = id;
+        localStorage.setItem(`bapsim_my_vote_${currentGroupId}`, id);
+
+        // 해당 그룹 채팅방에만 투표 알림 발송
+        db.ref(chatPath).push({
           type: 'system',
-          text: `🔔 ${currentUser.nickname}님이 [${restaurants[id].name}]에 투표하셨습니다!`,
+          text: `🔔 ${currentUser.nickname}님이 [${restaurants[id]?.name || '식당'}]에 투표하셨습니다!`,
           timestamp: Date.now()
         });
       }
     }
 
-    // 식당 저장 (추가/수정)
+    // 그룹 생성
+    function handleCreateGroup(e) {
+      e.preventDefault();
+      const groupName = document.getElementById('createGroupName').value.trim();
+      const password = document.getElementById('createGroupPass').value.trim();
+      if (!groupName || !password) return alert('그룹 이름과 비밀번호를 모두 입력하세요.');
+
+      const gid = 'grp_' + Date.now();
+      const groupData = {
+        id: gid,
+        name: groupName,
+        password: password,
+        leader: currentUser.nickname,
+        createdAt: Date.now()
+      };
+
+      db.ref(`groups/${gid}`).set(groupData, (err) => {
+        if (err) return alert('그룹 생성 실패');
+        alert(`[${groupName}] 그룹이 생성되었습니다! 방장으로 바로 입장합니다.`);
+        enterGroup(gid, groupName);
+        closeGroupModal();
+      });
+    }
+
+    // 그룹 목록 렌더링
+    function renderGroupList() {
+      const listEl = document.getElementById('groupListContainer');
+      const groups = Object.values(allGroups || {});
+      document.getElementById('groupTotalCount').textContent = `${groups.length}개`;
+      listEl.innerHTML = '';
+
+      if (groups.length === 0) {
+        listEl.innerHTML = '<div class="text-center text-slate-400 py-3 text-xs">아직 생성된 그룹이 없습니다. 상단에서 첫 그룹을 만들어보세요!</div>';
+        return;
+      }
+
+      groups.forEach(g => {
+        const isCurrent = (currentGroupId === g.id);
+        const item = document.createElement('div');
+        item.className = `p-3 rounded-2xl border flex items-center justify-between gap-2 text-xs transition-all ${isCurrent ? 'bg-indigo-50/80 border-indigo-300' : 'bg-white border-slate-200 hover:border-indigo-200'}`;
+        item.innerHTML = `
+          <div>
+            <div class="flex items-center gap-1.5 font-bold text-slate-800">
+              <i data-lucide="lock" class="w-3 h-3 text-indigo-500"></i>
+              <span>${g.name}</span>
+              ${isCurrent ? '<span class="text-[10px] bg-indigo-600 text-white font-bold px-1.5 py-0.2 rounded">현재참여중</span>' : ''}
+            </div>
+            <span class="text-[10px] text-slate-400">방장: ${g.leader}</span>
+          </div>
+          <div>
+            ${isCurrent
+              ? '<span class="text-indigo-600 font-bold text-[11px] px-2">참여 중</span>'
+              : `<button onclick="promptJoinGroup('${g.id}')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-xl font-bold text-[11px] shadow-sm">입장하기</button>`
+            }
+          </div>
+        `;
+        listEl.appendChild(item);
+      });
+      lucide.createIcons();
+    }
+
+    // 그룹 입장 비밀번호 확인
+    function promptJoinGroup(gid) {
+      const g = allGroups[gid];
+      if (!g) return;
+      targetJoinGroupId = gid;
+      document.getElementById('joinModalGroupName').textContent = `[${g.name}] 입장`;
+      document.getElementById('joinGroupPassInput').value = '';
+      document.getElementById('groupJoinModal').classList.remove('hidden');
+    }
+
+    function submitJoinGroup() {
+      const inputPass = document.getElementById('joinGroupPassInput').value.trim();
+      const g = allGroups[targetJoinGroupId];
+      if (!g) return;
+
+      if (g.password === inputPass) {
+        alert(`[${g.name}] 그룹에 성공적으로 입장했습니다!`);
+        enterGroup(g.id, g.name);
+        closeGroupJoinModal();
+        closeGroupModal();
+      } else {
+        alert('비밀번호가 일치하지 않습니다.');
+      }
+    }
+
+    function enterGroup(gid, gname) {
+      currentGroupId = gid;
+      currentGroupName = gname;
+      localStorage.setItem('bapsim_current_group_id', gid);
+      localStorage.setItem('bapsim_current_group_name', gname);
+      attachVotesListener();
+      updateGroupUI();
+    }
+
+    function leaveGroupToLobby() {
+      if (!confirm('그룹에서 나와 전체 로비로 이동하시겠습니까?')) return;
+      enterGroup('lobby', '전체 공개 로비');
+    }
+
+    // 모달 컨트롤러
+    function openGroupListModal() { document.getElementById('groupModal').classList.remove('hidden'); }
+    function closeGroupModal() { document.getElementById('groupModal').classList.add('hidden'); }
+    function closeGroupJoinModal() { document.getElementById('groupJoinModal').classList.add('hidden'); }
+
+    // 식당 저장/수정/삭제
     function handleSaveRestaurant(e) {
       e.preventDefault();
       const editId = document.getElementById('editRestId').value;
@@ -416,50 +661,28 @@
         menuDate: document.getElementById('formRestDate').value,
         mains: mainsArr,
         soup: document.getElementById('formRestSoup').value.trim() || '-',
-        dessert: document.getElementById('formRestDessert').value.trim() || '-',
-        votes: (editId && restaurants[editId]) ? (restaurants[editId].votes || 0) : 0
+        dessert: document.getElementById('formRestDessert').value.trim() || '-'
       };
 
       db.ref(`restaurants/${id}`).set(restData, (err) => {
-        if (err) return alert('저장 중 오류가 발생했습니다.');
-
-        db.ref('messages').push({
-          type: 'system',
-          text: `📢 ${currentUser.nickname}님이 [${restData.name}] 정보를 업데이트했습니다!`,
-          timestamp: Date.now()
-        });
-
+        if (err) return alert('저장 중 오류 발생');
         closeAddModal();
       });
     }
 
-    // 식당 삭제
     function handleDeleteCurrentRestaurant() {
       const editId = document.getElementById('editRestId').value;
       if (!editId || !restaurants[editId]) return;
 
       const restName = restaurants[editId].name;
-      if (!confirm(`정말로 '${restName}' 식당을 완전히 삭제하시겠습니까?`)) return;
+      if (!confirm(`'${restName}' 식당을 완전히 삭제하시겠습니까?`)) return;
 
       db.ref(`restaurants/${editId}`).remove((err) => {
-        if (err) return alert('삭제 중 오류가 발생했습니다.');
-
-        if (myVotedId === editId) {
-          myVotedId = null;
-          localStorage.removeItem('bapsim_my_vote');
-        }
-
-        db.ref('messages').push({
-          type: 'system',
-          text: `🗑️ ${currentUser.nickname}님이 [${restName}] 식당을 삭제했습니다.`,
-          timestamp: Date.now()
-        });
-
+        if (err) return alert('삭제 중 오류 발생');
         closeAddModal();
       });
     }
 
-    // 모달 열기/닫기
     function openAddModal() {
       document.getElementById('modalTitle').textContent = "새 한식뷔페 등록";
       document.getElementById('editRestId').value = "";
@@ -486,14 +709,11 @@
       lucide.createIcons();
     }
 
-    function closeAddModal() {
-      document.getElementById('addModal').classList.add('hidden');
-    }
+    function closeAddModal() { document.getElementById('addModal').classList.add('hidden'); }
 
-    // 채팅
+    // 채팅 기능
     function toggleChatWindow() {
-      const w = document.getElementById('chatWindow');
-      w.classList.toggle('hidden');
+      document.getElementById('chatWindow').classList.toggle('hidden');
       document.getElementById('chatUnreadPulse').classList.add('hidden');
     }
 
@@ -503,7 +723,8 @@
       const text = input.value.trim();
       if (!text) return;
 
-      db.ref('messages').push({
+      const chatPath = currentGroupId === 'lobby' ? 'lobby_messages' : `groups/${currentGroupId}/messages`;
+      db.ref(chatPath).push({
         nickname: currentUser.nickname,
         text: text,
         timestamp: Date.now()
@@ -512,7 +733,8 @@
     }
 
     function quickChat(txt) {
-      db.ref('messages').push({
+      const chatPath = currentGroupId === 'lobby' ? 'lobby_messages' : `groups/${currentGroupId}/messages`;
+      db.ref(chatPath).push({
         nickname: currentUser.nickname,
         text: txt,
         timestamp: Date.now()
@@ -524,14 +746,14 @@
       const div = document.createElement('div');
 
       if (msg.type === 'system') {
-        div.className = "text-center text-[10px] text-orange-600 bg-orange-50/90 rounded-lg py-1 px-2 my-1 font-semibold";
+        div.className = "text-center text-[10px] text-indigo-600 bg-indigo-50/90 rounded-lg py-1 px-2 my-1 font-semibold";
         div.textContent = msg.text;
       } else {
         const isMe = (msg.nickname === currentUser.nickname);
         div.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'}`;
         div.innerHTML = `
           <span class="text-[10px] text-slate-400 mb-0.5">${msg.nickname}</span>
-          <div class="px-3.5 py-2 rounded-2xl max-w-[85%] leading-relaxed ${isMe ? 'bg-orange-500 text-white rounded-tr-none font-medium' : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none'}">
+          <div class="px-3.5 py-2 rounded-2xl max-w-[85%] leading-relaxed ${isMe ? 'bg-indigo-600 text-white rounded-tr-none font-medium' : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none'}">
             ${msg.text}
           </div>
         `;
@@ -540,7 +762,7 @@
       container.scrollTop = container.scrollHeight;
     }
 
-    // 프로필 및 초기화
+    // 프로필 & 유틸
     function openAuthModal() {
       document.getElementById('authNicknameInput').value = currentUser.nickname;
       document.getElementById('authModal').classList.remove('hidden');
@@ -555,20 +777,22 @@
     }
 
     function resetVotesPrompt() {
-      if (!confirm("전체 투표수를 0으로 리셋하시겠습니까?")) return;
-      Object.keys(restaurants).forEach(k => {
-        db.ref(`restaurants/${k}/votes`).set(0);
-      });
+      const votePath = currentGroupId === 'lobby' ? 'lobby_votes' : `groups/${currentGroupId}/votes`;
+      const targetName = currentGroupId === 'lobby' ? '전체 로비' : `[${currentGroupName}] 그룹`;
+      if (!confirm(`${targetName}의 투표수를 0으로 리셋하시겠습니까?`)) return;
+      db.ref(votePath).remove();
     }
 
     function shareVoteRoom() {
       navigator.clipboard.writeText(window.location.href);
-      alert("웹사이트 링크가 복사되었습니다! 팀 단톡방에 공유하세요.");
+      alert("웹사이트 링크가 복사되었습니다! 팀원들에게 링크와 그룹 비밀번호를 전달하세요.");
     }
 
     if (currentUser.nickname && currentUser.nickname !== "문정러") {
       document.getElementById('userProfileText').textContent = currentUser.nickname;
     }
+
+    updateGroupUI();
     lucide.createIcons();
   </script>
 </body>
