@@ -37,7 +37,6 @@
     /* 닉네임 배경 배지 커스텀 프리셋 */
     .nb-none { background: transparent; padding: 0; }
     
-    /* 1. 신화/초월 티어 (999,999P 전설의 태초 신화) */
     .nb-cosmic {
       background: linear-gradient(90deg, #ff007f, #7928ca, #0070f3, #00dfd8, #ff007f);
       background-size: 300% 300%;
@@ -108,59 +107,45 @@
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white">
 
-  <!-- 헤더 -->
-  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
-    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center text-white font-black text-xl shadow-md shadow-orange-500/20 tracking-tighter">
+  <!-- 깔끔하게 슬림화된 상단 헤더 -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
+      <!-- 좌측: 로고 + 그룹 정보 (긴 이름 말줄임표 처리 max-w 적용) -->
+      <div class="flex items-center gap-2.5 min-w-0 flex-1">
+        <div class="w-9 h-9 shrink-0 rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center text-white font-black text-lg shadow-md shadow-orange-500/20 tracking-tighter">
           밥
         </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h1 class="font-black text-xl tracking-tight text-slate-900">밥심</h1>
-            <span class="text-[11px] bg-orange-100 text-orange-700 font-bold px-2 py-0.5 rounded-full">문정 법조타운</span>
-            <span id="currentGroupBadge" class="inline-flex items-center gap-1 text-[11px] bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold px-2.5 py-0.5 rounded-full">
-              <i data-lucide="users" class="w-3 h-3"></i>
-              <span id="currentGroupNameText">전체 공개 로비</span>
-            </span>
-          </div>
-          <p class="text-[11px] text-slate-400 font-medium hidden sm:block">식단 비교 · 그룹 투표 · 포인트 부자 랭킹 & 상점</p>
+        <div class="flex items-center gap-2 min-w-0">
+          <h1 class="font-black text-lg tracking-tight text-slate-900 shrink-0">밥심</h1>
+          
+          <!-- 긴 그룹 이름 대응: max-w + truncate 적용 -->
+          <button onclick="openGroupListModal()" id="currentGroupBadge" class="inline-flex items-center gap-1 text-[11px] bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold px-2.5 py-1 rounded-xl transition-colors max-w-[140px] sm:max-w-[240px] md:max-w-[340px]" title="클릭하여 그룹 변경">
+            <i data-lucide="users" class="w-3.5 h-3.5 shrink-0"></i>
+            <span id="currentGroupNameText" class="truncate">전체 공개 로비</span>
+            <i data-lucide="chevron-down" class="w-3 h-3 shrink-0 opacity-60"></i>
+          </button>
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
-        <!-- 보유 포인트 표시 및 클릭 시 상점 오픈 -->
-        <button onclick="openShopModal()" class="flex items-center gap-1 bg-amber-50 hover:bg-amber-100 border border-amber-200/80 px-2.5 py-1.5 rounded-xl text-xs font-black text-amber-700 shadow-xs transition-colors" title="포인트 상점 열기">
+      <!-- 우측: 핵심 개인 상태 & 등록 버튼만 유지 -->
+      <div class="flex items-center gap-2 shrink-0">
+        <!-- 보유 포인트 (상점 모달 연결) -->
+        <button onclick="openShopModal()" class="flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200/80 px-2.5 py-1.5 rounded-xl text-xs font-black text-amber-700 transition-colors">
           <span>🪙</span>
           <span id="headerPointDisplay">0P</span>
-          <span class="text-[10px] text-amber-600 font-bold ml-0.5">상점</span>
         </button>
 
-        <!-- 포인트 채굴 미니게임 버튼 -->
-        <button onclick="openMiniGameModal()" class="flex items-center gap-1 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 active:scale-95 text-white px-2.5 py-2 rounded-xl text-xs font-bold shadow-md shadow-emerald-500/20 transition-all" title="포인트 획득 미니게임">
-          <i data-lucide="gamepad-2" class="w-3.5 h-3.5"></i>
-          <span class="hidden sm:inline">미니게임</span>
-        </button>
-
-        <button onclick="openRankModal()" class="flex items-center gap-1 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white px-2.5 py-2 rounded-xl text-xs font-bold shadow-md shadow-amber-500/20 transition-all" title="포인트 부자 랭킹">
-          <i data-lucide="medal" class="w-3.5 h-3.5"></i>
-          <span class="hidden sm:inline">랭킹</span>
-        </button>
-
-        <button onclick="openGroupListModal()" class="flex items-center gap-1 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white px-3 py-2 rounded-xl text-xs font-bold shadow-md shadow-indigo-600/20 transition-all">
-          <i data-lucide="lock" class="w-3.5 h-3.5"></i>
-          <span class="hidden sm:inline">그룹</span>
-        </button>
-
-        <button onclick="openAddModal()" class="flex items-center gap-1 bg-orange-500 hover:bg-orange-600 active:scale-95 text-white px-3 py-2 rounded-xl text-xs font-bold shadow-md shadow-orange-500/20 transition-all">
+        <!-- 식당/메뉴 등록 메인 액션 버튼 -->
+        <button onclick="openAddModal()" class="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 active:scale-95 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-md shadow-orange-500/20 transition-all">
           <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
-          <span class="hidden sm:inline">식당/메뉴(+50P)</span>
+          <span class="hidden sm:inline">식당/메뉴 등록</span>
           <span class="sm:hidden">등록</span>
         </button>
 
-        <button onclick="openAuthModal()" class="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl text-xs font-semibold transition-colors">
+        <!-- 프로필 버튼 -->
+        <button onclick="openAuthModal()" class="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-colors">
           <i data-lucide="user" class="w-3.5 h-3.5"></i>
-          <span id="userProfileText">프로필</span>
+          <span id="userProfileText" class="max-w-[70px] truncate">프로필</span>
         </button>
       </div>
     </div>
@@ -169,54 +154,74 @@
   <!-- 메인 영역 -->
   <main class="max-w-6xl mx-auto px-4 pt-6 space-y-6">
 
-    <!-- 배너 -->
-    <div class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-slate-900/10">
-      <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div class="space-y-2">
+    <!-- 배너: 상단 정보와 하단 유틸리티 툴바를 깔끔하게 분리 구조화 -->
+    <div class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 rounded-3xl p-6 sm:p-7 text-white shadow-xl shadow-slate-900/10 space-y-5">
+      
+      <!-- 상단: 타이머 및 현재 그룹 상태 -->
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div class="space-y-1.5 min-w-0">
           <div class="flex items-center gap-2 text-xs font-bold text-indigo-300">
             <span class="w-2 h-2 rounded-full bg-indigo-400 animate-ping"></span>
-            <span id="groupStatusIndicator">🏢 전체 공개 모드</span>
+            <span id="groupStatusIndicator" class="truncate max-w-[280px] sm:max-w-[400px]">🏢 전체 공개 모드</span>
             <span class="text-slate-500">|</span>
-            <span id="todayFullDate">오늘의 점심 식단표</span>
+            <span id="todayFullDate">오늘 식단</span>
           </div>
-          <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-white">
-            11시 30분 출발까지 <span id="timerCountdown" class="text-orange-400 font-mono underline decoration-orange-500/50 underline-offset-8">계산 중...</span>
+          <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-white flex flex-wrap items-baseline gap-2">
+            <span>11시 30분 출발까지</span>
+            <span id="timerCountdown" class="text-orange-400 font-mono underline decoration-orange-500/50 underline-offset-8">계산 중...</span>
           </h2>
-          <p id="groupBannerNotice" class="text-xs text-slate-300">미니게임과 식단 등록으로 포인트를 모아 999,999P 전설의 '코스믹 레인보우' 배지를 획득해보세요!</p>
+          <p id="groupBannerNotice" class="text-xs text-slate-300 truncate max-w-2xl">식단 등록 시 관리자 승인을 거쳐 50P가 지급됩니다.</p>
         </div>
 
-        <div class="flex flex-wrap gap-2 w-full md:w-auto">
-          <button onclick="openMiniGameModal()" class="flex items-center justify-center gap-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black px-3.5 py-3 rounded-2xl text-xs shadow-lg active:scale-95 transition-all">
-            <i data-lucide="sparkles" class="w-4 h-4"></i>
-            <span>포인트 채굴 게임</span>
-          </button>
-
-          <button onclick="openShopModal()" class="flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-amber-300 font-bold px-3.5 py-3 rounded-2xl text-xs shadow-lg active:scale-95 transition-all">
-            <i data-lucide="shopping-bag" class="w-4 h-4"></i>
-            <span>상점</span>
-          </button>
-
-          <button onclick="openRankModal()" class="flex items-center justify-center gap-1.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-slate-950 font-black px-3.5 py-3 rounded-2xl text-xs shadow-lg active:scale-95 transition-all">
-            <i data-lucide="award" class="w-4 h-4"></i>
-            <span>랭킹</span>
-          </button>
-
-          <button onclick="openRouletteModal()" class="flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-white font-bold px-3 py-3 rounded-2xl text-xs shadow-lg active:scale-95 transition-all">
-            <i data-lucide="disc" class="w-4 h-4 text-orange-400"></i>
-            <span>룰렛</span>
-          </button>
-
-          <button onclick="openDutchModal()" class="flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-white font-bold px-3 py-3 rounded-2xl text-xs shadow-lg active:scale-95 transition-all">
-            <i data-lucide="calculator" class="w-4 h-4"></i>
-            <span>N빵</span>
-          </button>
-
-          <button onclick="leaveGroupToLobby()" id="leaveGroupBtn" class="hidden items-center justify-center gap-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 font-bold px-3 py-3 rounded-2xl text-xs transition-all">
+        <!-- 로비 이동 버튼 (비밀그룹일 때만 노출) -->
+        <div id="leaveGroupWrapper" class="hidden shrink-0">
+          <button onclick="leaveGroupToLobby()" class="flex items-center gap-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 font-bold px-3 py-2 rounded-xl text-xs transition-all">
             <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-            <span>로비</span>
+            <span>로비로 나가기</span>
           </button>
         </div>
       </div>
+
+      <!-- 하단 기능 바: 모든 부가 기능을 1줄 툴바로 정리 -->
+      <div class="pt-4 border-t border-slate-700/60 flex flex-wrap items-center justify-between gap-2.5">
+        <span class="text-xs font-bold text-slate-400 hidden sm:inline-flex items-center gap-1.5">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
+          밥심 유틸리티
+        </span>
+
+        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          <!-- 1. 미니게임 -->
+          <button onclick="openMiniGameModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-2 rounded-xl text-xs shadow-md transition-all">
+            <i data-lucide="gamepad-2" class="w-3.5 h-3.5"></i>
+            <span>채굴 게임</span>
+          </button>
+
+          <!-- 2. 상점 -->
+          <button onclick="openShopModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-amber-300 font-bold px-3 py-2 rounded-xl text-xs shadow-md transition-all">
+            <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i>
+            <span>명품 상점</span>
+          </button>
+
+          <!-- 3. 랭킹 -->
+          <button onclick="openRankModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-3 py-2 rounded-xl text-xs shadow-md transition-all">
+            <i data-lucide="award" class="w-3.5 h-3.5"></i>
+            <span>부자 랭킹</span>
+          </button>
+
+          <!-- 4. 룰렛 -->
+          <button onclick="openRouletteModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-3 py-2 rounded-xl text-xs border border-slate-700 transition-all">
+            <i data-lucide="disc" class="w-3.5 h-3.5 text-orange-400"></i>
+            <span>룰렛</span>
+          </button>
+
+          <!-- 5. N빵 -->
+          <button onclick="openDutchModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-3 py-2 rounded-xl text-xs border border-slate-700 transition-all">
+            <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
+            <span>N빵</span>
+          </button>
+        </div>
+      </div>
+
       <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
     </div>
 
@@ -246,14 +251,14 @@
     <!-- 대화창 본체 -->
     <div id="chatWindow" class="hidden absolute bottom-16 right-0 w-80 sm:w-96 h-[510px] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden">
       <div class="bg-slate-900 text-white p-4 flex items-center justify-between border-b border-slate-800">
-        <div class="flex items-center gap-2">
-          <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
-          <div>
-            <span class="font-bold text-xs" id="chatHeaderTitle">전체 로비 톡</span>
-            <span class="block text-[10px] text-slate-400" id="chatHeaderSub">모든 사용자에게 공개되는 채팅</span>
+        <div class="flex items-center gap-2 min-w-0">
+          <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></div>
+          <div class="min-w-0">
+            <span class="font-bold text-xs truncate block" id="chatHeaderTitle">전체 로비 톡</span>
+            <span class="block text-[10px] text-slate-400 truncate" id="chatHeaderSub">모든 사용자에게 공개되는 채팅</span>
           </div>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 shrink-0">
           <span class="text-[10px] bg-amber-500/20 text-amber-300 font-bold px-2 py-0.5 rounded-md" id="chatPointDisplay">보유: 0P</span>
           <button onclick="toggleChatWindow()" class="text-slate-400 hover:text-white text-xs">✕</button>
         </div>
@@ -283,7 +288,7 @@
     </div>
   </div>
 
-  <!-- [6. 포인트 획득 미니게임: 밥알 모으기 클릭 챌린지] -->
+  <!-- [포인트 획득 미니게임: 밥알 모으기 클릭 챌린지] -->
   <div id="miniGameModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 text-center space-y-4">
       <div class="flex items-center justify-between border-b pb-2">
@@ -296,7 +301,7 @@
 
       <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-100 text-xs space-y-1">
         <p class="font-bold text-emerald-900">제한시간 10초 동안 밥그릇을 마구 클릭하세요!</p>
-        <p class="text-[11px] text-emerald-700">클릭 수만큼 포인트가 적립됩니다. (1일 무제한 플레이)</p>
+        <p class="text-[11px] text-emerald-700">클릭 수만큼 포인트가 적립됩니다.</p>
       </div>
 
       <div class="flex items-center justify-around font-black text-sm text-slate-700">
@@ -304,7 +309,6 @@
         <div>밥알(클릭): <span id="gameScore" class="text-emerald-600 font-mono text-lg">0</span>개</div>
       </div>
 
-      <!-- 클릭 대상 밥그릇 -->
       <div class="py-4">
         <button id="gameClickBtn" onclick="handleGameClick()" disabled class="w-28 h-28 mx-auto rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 text-white text-5xl shadow-xl flex items-center justify-center transition-transform active:scale-90 select-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
           🍚
@@ -355,7 +359,7 @@
     </div>
   </div>
 
-  <!-- [포인트 상점 모달 (장착/해체 인벤토리 시스템 포함)] -->
+  <!-- [포인트 상점 모달] -->
   <div id="shopModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
@@ -386,36 +390,30 @@
         </button>
       </div>
 
-      <!-- 1. 닉네임 칭호 특수문자 심볼 (3-1 요구사항) -->
+      <!-- 1. 심볼 -->
       <div class="space-y-2.5">
         <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5">
           <span>✨</span> 닉네임 칭호 특수문자 심볼 (각 150P)
         </span>
-        <div class="grid grid-cols-2 gap-2 text-xs" id="shopSymbolList">
-          <!-- 동적 렌더링 -->
-        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs" id="shopSymbolList"></div>
       </div>
 
-      <!-- 2. 닉네임 글자 색상 (각 300P, 4번 & 5번 수정 적용) -->
+      <!-- 2. 색상 -->
       <div class="space-y-2.5">
         <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5">
           <span>🎨</span> 닉네임 글자 색상 (각 300P)
         </span>
-        <div class="grid grid-cols-2 gap-2 text-xs" id="shopColorList">
-          <!-- 동적 렌더링 -->
-        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs" id="shopColorList"></div>
       </div>
 
-      <!-- 3. 닉네임 전용 배경 배지 (1번: 999,999P 코스믹 추가 + 5번: 구매 후 장착/해체) -->
+      <!-- 3. 배경 배지 -->
       <div class="space-y-3">
         <span class="text-xs font-extrabold text-slate-800 flex items-center justify-between">
           <span class="flex items-center gap-1.5">
-            <span>🏷️</span> 닉네임 배경 배지 (구매 후 자유롭게 장착/해체)
+            <span>🏷️</span> 닉네임 배경 배지 (장착/해체)
           </span>
         </span>
-        <div class="space-y-2 text-xs" id="shopBadgeList">
-          <!-- 동적 렌더링 -->
-        </div>
+        <div class="space-y-2 text-xs" id="shopBadgeList"></div>
       </div>
 
       <div class="pt-2 border-t flex justify-end">
@@ -426,7 +424,7 @@
     </div>
   </div>
 
-  <!-- [관리자 비밀번호 입력 모달 (09010)] -->
+  <!-- [관리자 비밀번호 입력 모달 (단축키: Ctrl + Shift + A / 비번: 09010)] -->
   <div id="adminAuthModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-xs rounded-3xl shadow-2xl p-6 space-y-4">
       <div class="text-center">
@@ -447,7 +445,7 @@
     </div>
   </div>
 
-  <!-- [관리자 전용 대시보드 모달 (2번: 확실한 포인트 조정 동기화 적용)] -->
+  <!-- [관리자 대시보드] -->
   <div id="adminDashboardModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
@@ -468,7 +466,6 @@
         <div id="adminPendingListContainer" class="space-y-2 max-h-60 overflow-y-auto"></div>
       </div>
 
-      <!-- 2번 수정: Firebase user_points 테이블 직접 수정 및 실시간 연동 강화 -->
       <div class="p-4 bg-slate-50 border rounded-2xl space-y-3 text-xs">
         <span class="font-bold text-slate-800 block">⚡ 회원 포인트 강제/수동 조정 도구 (즉시 DB 반영)</span>
         <div class="grid grid-cols-3 gap-2">
@@ -492,7 +489,7 @@
     </div>
   </div>
 
-  <!-- 식당 및 메뉴 등록 모달 -->
+  <!-- 식당 등록/수정 모달 -->
   <div id="addModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -565,7 +562,7 @@
     </div>
   </div>
 
-  <!-- 기타 모달 (룰렛, N빵, 그룹) -->
+  <!-- 기타 모달 (룰렛, N빵, 그룹, 프로필) -->
   <div id="rouletteModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 text-center space-y-5">
       <div class="flex items-center justify-between border-b pb-2">
@@ -629,7 +626,6 @@
     </div>
   </div>
 
-  <!-- [프로필 모달 (3번: 닉네임 특수문자 금지 정규식)] -->
   <div id="authModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-xs rounded-3xl shadow-2xl p-6 space-y-4 text-xs">
       <div class="flex items-center justify-between border-b pb-2">
@@ -639,7 +635,6 @@
       <div>
         <label class="block font-bold text-slate-700 mb-1">닉네임 (한글, 영문, 숫자만 가능)</label>
         <input id="authNicknameInput" type="text" placeholder="특수문자 제외" class="w-full border border-slate-200 rounded-xl p-2.5 outline-none font-bold" />
-        <p class="text-[10px] text-slate-400 mt-1">※ 특수문자는 상점의 심볼 아이템을 통해 추가할 수 있습니다.</p>
       </div>
       <button onclick="saveUserProfile()" class="w-full bg-slate-900 text-white font-bold py-2.5 rounded-xl">저장하기</button>
     </div>
@@ -660,7 +655,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 상태 관리
     let restaurants = {};
     let allGroups = {};
     let currentGroupId = localStorage.getItem('bapsim_current_group_id') || 'lobby';
@@ -669,18 +663,12 @@
     let myVotedId = localStorage.getItem(`bapsim_my_vote_${currentGroupId}`);
     let targetJoinGroupId = null;
 
-    // 포인트 및 상점 인벤토리 상태 (5번 요구사항: 구매 목록 인벤토리)
     let userPoints = parseInt(localStorage.getItem('bapsim_points') || '30', 10);
-    
-    // 장착 중인 아이템 상태
     let myNickColor = localStorage.getItem('bapsim_custom_color') || '';
     let myNickBg = localStorage.getItem('bapsim_custom_bg') || 'nb-none';
     let myNickSymbol = localStorage.getItem('bapsim_custom_symbol') || '';
-
-    // 보유 중인 인벤토리 목록 (JSON 파싱)
     let myInventory = JSON.parse(localStorage.getItem('bapsim_inventory') || '{"colors":[], "bgs":["nb-none"], "symbols":[]}');
 
-    // 상점 상품 메타데이터
     const SHOP_DATA = {
       symbols: [
         { id: "sym_star", name: "★ 별빛 칭호 ★", char: "★", cost: 150 },
@@ -713,7 +701,6 @@
       ]
     };
 
-    // Firebase 클라우드 DB와 포인트 및 장착 상태 양방향 동기화
     function syncUserPointToCloud() {
       if (!currentUser.nickname) return;
       db.ref(`user_points/${currentUser.nickname}`).update({
@@ -726,7 +713,6 @@
       });
     }
 
-    // 2번 해결: 관리자가 Firebase DB에서 포인트를 수정하면 실시간으로 내 화면에 즉각 반영
     function attachUserPointListener() {
       if (!currentUser.nickname) return;
       db.ref(`user_points/${currentUser.nickname}`).on('value', (snap) => {
@@ -771,13 +757,11 @@
       }
     }
 
-    // 3번 요구사항: 닉네임 특수문자 검증 함수 (한글, 영문, 숫자만 허용)
     function isValidNickname(nickname) {
-      const regex = /^[가-힣a-zA-Z0-9]+$/;
-      return regex.test(nickname);
+      return /^[가-힣a-zA-Z0-9]+$/.test(nickname);
     }
 
-    // [6. 미니게임 로직: 10초 밥알 클릭 채굴]
+    // 미니게임
     let gameInterval = null;
     let gameTimeLeft = 10.0;
     let gameClicks = 0;
@@ -809,7 +793,7 @@
       isGameRunning = true;
       document.getElementById('gameClickBtn').disabled = false;
       document.getElementById('gameStartBtn').disabled = true;
-      document.getElementById('gameStartBtn').textContent = "게임 진행 중! 밥그릇을 마구 클릭하세요!";
+      document.getElementById('gameStartBtn').textContent = "게임 진행 중! 클릭하세요!";
 
       const startTime = Date.now();
       gameInterval = setInterval(() => {
@@ -836,7 +820,6 @@
       document.getElementById('gameStartBtn').disabled = false;
       document.getElementById('gameStartBtn').textContent = "다시 플레이하기";
 
-      // 밥알 1개당 10포인트 환산 보상
       const earned = gameClicks * 10;
       userPoints += earned;
       updatePointsUI();
@@ -845,9 +828,8 @@
       alert(`🍚 미니게임 종료!\n총 클릭 수: ${gameClicks}회\n🎉 획득 포인트: +${earned.toLocaleString()}P 적립 완료!`);
     }
 
-    // [5번 요구사항: 상점 인벤토리 장착 / 해체 / 구매 시스템]
+    // 상점 UI 렌더링
     function renderShopUI() {
-      // 1. 심볼 렌더링
       const symContainer = document.getElementById('shopSymbolList');
       symContainer.innerHTML = '';
       SHOP_DATA.symbols.forEach(sym => {
@@ -873,7 +855,6 @@
         symContainer.appendChild(card);
       });
 
-      // 2. 글자 색상 렌더링 (4번 & 5번)
       const colContainer = document.getElementById('shopColorList');
       colContainer.innerHTML = '';
       SHOP_DATA.colors.forEach(col => {
@@ -899,7 +880,6 @@
         colContainer.appendChild(card);
       });
 
-      // 3. 배경 배지 렌더링 (1번: 999,999P 코스믹 포함)
       const bgContainer = document.getElementById('shopBadgeList');
       bgContainer.innerHTML = '';
       SHOP_DATA.bgs.forEach(bg => {
@@ -934,9 +914,8 @@
     }
     function closeShopModal() { document.getElementById('shopModal').classList.add('hidden'); }
 
-    // 심볼 구매/장착/해체
     function buySymbol(char, cost) {
-      if (userPoints < cost) return alert(`❌ 포인트가 부족합니다! (현재: ${userPoints.toLocaleString()}P / 필요: ${cost.toLocaleString()}P)`);
+      if (userPoints < cost) return alert(`❌ 포인트가 부족합니다!`);
       if (!confirm(`${cost}P로 [${char}] 심볼을 구매하시겠습니까?`)) return;
 
       userPoints -= cost;
@@ -957,7 +936,6 @@
       renderShopUI();
     }
 
-    // 글자 색상 구매/장착/해체 (4번 해결)
     function buyColor(hex, cost) {
       if (userPoints < cost) return alert(`❌ 포인트가 부족합니다!`);
       if (!confirm(`${cost}P로 해당 색상을 구매하시겠습니까?`)) return;
@@ -980,12 +958,9 @@
       renderShopUI();
     }
 
-    // 배경 배지 구매/장착/해체 (1번 & 5번)
     function buyBg(bgClass, cost, bgName) {
-      if (userPoints < cost) {
-        return alert(`❌ 포인트가 부족합니다!\n현재: ${userPoints.toLocaleString()}P / 필요: ${cost.toLocaleString()}P\n미니게임 및 식단 등록으로 포인트를 채굴해보세요!`);
-      }
-      if (!confirm(`정말로 ${cost.toLocaleString()}P를 결제하고 [${bgName}] 배지를 영구 소장하시겠습니까?`)) return;
+      if (userPoints < cost) return alert(`❌ 포인트가 부족합니다!`);
+      if (!confirm(`정말로 ${cost.toLocaleString()}P로 [${bgName}] 배지를 구매하시겠습니까?`)) return;
 
       userPoints -= cost;
       myInventory.bgs.push(bgClass);
@@ -994,7 +969,7 @@
       renderShopUI();
 
       if (window.confetti) confetti({ particleCount: 120, spread: 80 });
-      alert(`🎉 축하합니다! [${bgName}] 배지가 인벤토리에 추가되고 장착되었습니다!`);
+      alert(`🎉 [${bgName}] 배지가 장착되었습니다!`);
     }
     function equipBg(bgClass) {
       myNickBg = bgClass;
@@ -1016,50 +991,43 @@
       alert('모든 치장 아이템 장착을 해제했습니다.');
     }
 
-    // [2번 요구사항 해결: 관리자 포인트 수동 조정 즉각 동기화]
+    // 관리자 포인트 수동 조정
     function handleManualPointAdjust() {
       const target = document.getElementById('adminTargetNickname').value.trim();
       const amount = parseInt(document.getElementById('adminAmount').value, 10);
       if (!target || isNaN(amount)) return alert('닉네임과 조정할 포인트 금액을 올바르게 입력하세요.');
 
-      // Firebase Realtime DB의 user_points 노드에 직접 transaction으로 증감 반영
       db.ref(`user_points/${target}/points`).transaction((current) => {
         return (current || 0) + amount;
       }, (error, committed, snapshot) => {
         if (error) {
-          alert('DB 포인트 조정 중 오류가 발생했습니다: ' + error.message);
+          alert('DB 포인트 조정 오류: ' + error.message);
         } else if (committed) {
           const finalPoints = snapshot.val();
-          
-          // 공지 발송
           db.ref('lobby_messages').push({
             type: 'system',
             text: `⚙️ 관리자가 [${target}] 님의 포인트를 조정했습니다. (${amount > 0 ? '+' : ''}${amount.toLocaleString()}P ➔ 현재 ${finalPoints.toLocaleString()}P)`,
             timestamp: Date.now()
           });
 
-          // 만약 조정 대상이 본인이면 즉시 로컬 변수도 동기화
           if (currentUser.nickname === target) {
             userPoints = finalPoints;
             localStorage.setItem('bapsim_points', userPoints.toString());
             updatePointsUI(false);
           }
 
-          alert(`[${target}] 님의 포인트가 성공적으로 조정되었습니다. (현재 총합: ${finalPoints.toLocaleString()}P)`);
+          alert(`[${target}] 님의 포인트가 반영되었습니다. (총 ${finalPoints.toLocaleString()}P)`);
           document.getElementById('adminTargetNickname').value = '';
           document.getElementById('adminAmount').value = '';
         }
       });
     }
 
-    // [3번 요구사항: 닉네임 저장 시 특수문자 차단]
     function saveUserProfile() {
       const input = document.getElementById('authNicknameInput').value.trim();
       if (!input) return alert('닉네임을 입력해주세요.');
-
-      // 정규식 검증: 한글, 영문, 숫자만 통과
       if (!isValidNickname(input)) {
-        return alert('⚠️ 닉네임에는 특수문자를 사용할 수 없습니다!\n한글, 영문, 숫자만 입력해 주세요.\n(특수문자 심볼은 상점에서 구매하여 장착할 수 있습니다.)');
+        return alert('⚠️ 닉네임에는 특수문자를 사용할 수 없습니다!\n한글, 영문, 숫자만 입력해 주세요.');
       }
 
       currentUser = { nickname: input };
@@ -1102,7 +1070,7 @@
     const todayISO = new Date().toISOString().split('T')[0];
     document.getElementById('formRestDate').value = todayISO;
 
-    // 관리자 보안 인증
+    // 관리자 인증 단축키
     window.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
         e.preventDefault();
@@ -1202,7 +1170,6 @@
       alert('초기화되었습니다.');
     }
 
-    // 랭킹 렌더링
     function openRankModal() {
       renderPointRankings();
       document.getElementById('rankModal').classList.remove('hidden');
@@ -1261,7 +1228,6 @@
       });
     }
 
-    // 식당 저장
     function handleSaveRestaurant(e) {
       e.preventDefault();
       const editId = document.getElementById('editRestId').value;
@@ -1297,7 +1263,7 @@
           status: 'pending'
         });
 
-        alert(`✅ 메뉴가 성공적으로 등록되었습니다!\n관리자(09010) 승인 후 50P가 최종 적립됩니다.`);
+        alert(`✅ 메뉴가 등록되었습니다!\n관리자 승인 후 50P가 최종 적립됩니다.`);
 
         const chatPath = currentGroupId === 'lobby' ? 'lobby_messages' : `groups/${currentGroupId}/messages`;
         db.ref(chatPath).push({
@@ -1310,18 +1276,17 @@
       });
     }
 
-    // 그룹 & 리스너
     function updateGroupUI() {
       myVotedId = localStorage.getItem(`bapsim_my_vote_${currentGroupId}`);
       const isLobby = (currentGroupId === 'lobby');
 
       document.getElementById('currentGroupNameText').textContent = currentGroupName;
       document.getElementById('currentGroupBadge').className = isLobby
-        ? "inline-flex items-center gap-1 text-[11px] bg-slate-100 text-slate-700 border border-slate-200 font-bold px-2.5 py-0.5 rounded-full"
-        : "inline-flex items-center gap-1 text-[11px] bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold px-2.5 py-0.5 rounded-full";
+        ? "inline-flex items-center gap-1 text-[11px] bg-slate-100 text-slate-700 border border-slate-200 font-bold px-2.5 py-1 rounded-xl max-w-[140px] sm:max-w-[240px] md:max-w-[340px]"
+        : "inline-flex items-center gap-1 text-[11px] bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold px-2.5 py-1 rounded-xl max-w-[140px] sm:max-w-[240px] md:max-w-[340px]";
 
       document.getElementById('groupStatusIndicator').textContent = isLobby ? "🏢 전체 공개 모드" : `🔒 비밀 그룹 [${currentGroupName}] 모드`;
-      document.getElementById('leaveGroupBtn').style.display = isLobby ? 'none' : 'inline-flex';
+      document.getElementById('leaveGroupWrapper').style.display = isLobby ? 'none' : 'block';
       document.getElementById('chatHeaderTitle').textContent = isLobby ? "전체 로비 톡" : `🔒 ${currentGroupName} 비밀 톡`;
 
       attachVotesListener();
@@ -1361,7 +1326,6 @@
       chatRef.on('child_added', snap => appendChatMessage(snap.val()));
     }
 
-    // 카드 렌더링
     function renderCards() {
       const container = document.getElementById('restaurantCardsContainer');
       container.innerHTML = '';
@@ -1488,7 +1452,6 @@
       }
     }
 
-    // 채팅 및 이모티콘 (4번 색상 및 3-1 심볼 실시간 렌더링)
     function sendSticker(stickerType) {
       if (userPoints < 10) return alert('포인트가 부족합니다! (10P 필요)');
       userPoints -= 10;
@@ -1554,7 +1517,6 @@
           contentHTML = `<div class="px-3.5 py-2 rounded-2xl max-w-[85%] leading-relaxed ${isMe ? 'bg-indigo-600 text-white rounded-tr-none font-medium' : 'bg-white border text-slate-800 rounded-tl-none'}">${msg.text}</div>`;
         }
 
-        // 4번 수정: 인라인 스타일에 !important 적용하여 닉네임 색상 확실히 변경
         const colorStyle = msg.color ? `color: ${msg.color} !important;` : '';
         const bgClass = msg.bg || 'nb-none';
         const sym = msg.symbol ? `<span class="mr-0.5">${msg.symbol}</span>` : '';
@@ -1574,7 +1536,6 @@
       container.scrollTop = container.scrollHeight;
     }
 
-    // 룰렛 & N빵
     function openRouletteModal() {
       document.getElementById('rouletteSlotText').textContent = "???";
       document.getElementById('rouletteModal').classList.remove('hidden');
@@ -1624,7 +1585,6 @@
       if (window.confetti) confetti({ particleCount: 50 });
     }
 
-    // 그룹 관리
     function openGroupListModal() { document.getElementById('groupModal').classList.remove('hidden'); }
     function closeGroupModal() { document.getElementById('groupModal').classList.add('hidden'); }
     function closeGroupJoinModal() { document.getElementById('groupJoinModal').classList.add('hidden'); }
@@ -1649,8 +1609,8 @@
         const item = document.createElement('div');
         item.className = "p-3 rounded-2xl border flex items-center justify-between text-xs";
         item.innerHTML = `
-          <div class="font-bold">${g.name}</div>
-          <div>${isCurrent ? '<span class="text-indigo-600">참여중</span>' : `<button onclick="promptJoinGroup('${g.id}')" class="bg-indigo-600 text-white px-2.5 py-1 rounded-lg">입장</button>`}</div>
+          <div class="font-bold truncate max-w-[200px]">${g.name}</div>
+          <div>${isCurrent ? '<span class="text-indigo-600 font-bold">참여중</span>' : `<button onclick="promptJoinGroup('${g.id}')" class="bg-indigo-600 text-white px-2.5 py-1 rounded-lg font-bold">입장</button>`}</div>
         `;
         listEl.appendChild(item);
       });
@@ -1686,7 +1646,6 @@
       enterGroup('lobby', '전체 공개 로비');
     }
 
-    // 모달 및 프로필
     function openAddModal() {
       document.getElementById('modalTitle').textContent = "새 한식뷔페 등록";
       document.getElementById('editRestId').value = "";
