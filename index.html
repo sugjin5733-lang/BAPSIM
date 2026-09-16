@@ -3,52 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>밥심 (Bapsim) - 문정동 한식뷔페 일일 식단 & 실시간 팀 투표</title>
+  <title>밥심 (Bapsim) - 문정동 한식뷔페 큐레이션 & 실시간 투표</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Firebase SDK v8 -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
-    .badge-shimmer { background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%); background-size: 200% 100%; animation: shimmer 2.5s infinite; }
-    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    .card-glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+    .glow-orange { box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.25); }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen pb-24 selection:bg-orange-500 selection:text-white">
+<body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white">
 
-  <!-- 상단 네비게이션 바 -->
-  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200">
+  <!-- 헤더 -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
     <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div id="logoBadge" class="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center text-white font-extrabold text-xl shadow-md shadow-orange-500/30 cursor-pointer select-none active:scale-95 transition-transform" title="5번 클릭 시 관리자 모드">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center text-white font-black text-xl shadow-md shadow-orange-500/20 tracking-tighter">
           밥
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <h1 class="font-extrabold text-xl tracking-tight text-slate-900">밥심</h1>
-            <span class="text-xs bg-orange-100 text-orange-700 font-semibold px-2 py-0.5 rounded-full">문정 법조타운</span>
-            <span id="syncStatusBadge" class="text-xs bg-emerald-100 text-emerald-700 font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+            <h1 class="font-black text-xl tracking-tight text-slate-900">밥심</h1>
+            <span class="text-[11px] bg-orange-100 text-orange-700 font-bold px-2 py-0.5 rounded-full">문정 법조타운</span>
+            <span class="hidden sm:inline-flex items-center gap-1 text-[11px] bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-semibold px-2 py-0.5 rounded-full">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span id="syncStatusText">Firebase 클라우드 연동됨</span>
+              실시간 연동
             </span>
           </div>
-          <p class="text-xs text-slate-500">매일 아침 자동 업데이트되는 한식뷔페 식단 비교 & 실시간 투표</p>
+          <p class="text-[11px] text-slate-400 font-medium hidden sm:block">오늘 뭐 먹지? 문정러들의 실시간 한식뷔페 식단 & 투표소</p>
         </div>
       </div>
 
       <div class="flex items-center gap-2">
-        <!-- 프로필 / 로그인 버튼 -->
-        <button id="userProfileBtn" onclick="openAuthModal()" class="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors">
-          <i data-lucide="user" class="w-3.5 h-3.5"></i>
-          <span id="userProfileText">로그인/가입</span>
+        <button onclick="openAddModal()" class="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 active:scale-95 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-md shadow-orange-500/20 transition-all">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span>식당/메뉴 추가</span>
         </button>
-
-        <!-- 관리자 모드 버튼 -->
-        <button onclick="openAdminModal()" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-900 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition-all">
-          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-orange-400"></i>
-          <span>관리자</span>
+        <button onclick="openAuthModal()" class="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl text-xs font-semibold transition-colors">
+          <i data-lucide="user" class="w-3.5 h-3.5"></i>
+          <span id="userProfileText">프로필</span>
         </button>
       </div>
     </div>
@@ -56,146 +55,164 @@
 
   <!-- 메인 컨테이너 -->
   <main class="max-w-6xl mx-auto px-4 pt-6 space-y-6">
-    <!-- 상단 요약 배너 -->
-    <div class="bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl p-6 text-white shadow-lg shadow-orange-500/20 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-      <div>
-        <div class="flex items-center gap-2 text-xs font-semibold text-orange-100 mb-1">
-          <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
-          <span id="currentDateDisplay">오늘의 점심 식단표</span>
-          <span class="bg-white/20 px-2 py-0.5 rounded-md text-[11px]">실시간 투표 진행 중</span>
+
+    <!-- 상단 대시보드 배너 (11:30 타이머 & 투표 현황) -->
+    <div class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-orange-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-slate-900/10">
+      <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div class="space-y-2">
+          <div class="flex items-center gap-2 text-xs font-bold text-orange-400">
+            <span class="w-2 h-2 rounded-full bg-orange-500 animate-ping"></span>
+            <span id="todayFullDate">2026년 오늘 식단</span>
+            <span class="text-slate-500">|</span>
+            <span class="text-slate-300">점심 투표 마감 카운트다운</span>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-white">
+            11시 30분 출발까지 <span id="timerCountdown" class="text-orange-400 font-mono tracking-normal underline decoration-orange-500/50 underline-offset-8">계산 중...</span>
+          </h2>
+          <p class="text-xs text-slate-300">가장 표를 많이 받은 한식뷔페가 11시 30분에 오늘의 목적지로 확정됩니다.</p>
         </div>
-        <h2 class="text-2xl font-black tracking-tight">오늘 문정동 점심, 어디로 갈까요?</h2>
-        <p class="text-xs text-orange-100 mt-1">식당별 메인 요리를 확인하고 팀원들과 투표해 보세요.</p>
+
+        <div class="flex flex-wrap gap-2 w-full md:w-auto">
+          <button onclick="shareVoteRoom()" class="flex-1 md:flex-initial flex items-center justify-center gap-2 bg-white text-slate-900 font-bold px-4 py-3 rounded-2xl text-xs hover:bg-slate-100 active:scale-95 shadow-lg transition-all">
+            <i data-lucide="share-2" class="w-4 h-4 text-orange-500"></i>
+            투표 링크 공유
+          </button>
+          <button onclick="resetVotesPrompt()" class="flex items-center justify-center gap-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 font-semibold px-3 py-3 rounded-2xl text-xs transition-all" title="투표수 초기화">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
       </div>
-      <div class="flex gap-2 w-full md:w-auto">
-        <button onclick="shareVoteRoom()" class="flex-1 md:flex-initial flex items-center justify-center gap-2 bg-white text-orange-600 font-bold px-4 py-2.5 rounded-xl text-xs hover:bg-orange-50 shadow-md transition-all active:scale-95">
-          <i data-lucide="share-2" class="w-4 h-4"></i>
-          투표 링크 복사
-        </button>
-      </div>
+      <!-- 배경 장식 -->
+      <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
     </div>
 
-    <!-- 식당 카드 리스트 그리드 -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="restaurantCardsContainer">
-      <!-- 동적 카드 렌더링 영역 -->
+    <!-- 식당 카드 그리드 섹션 -->
+    <div>
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2">
+          <h3 class="font-extrabold text-slate-800 text-lg">문정동 한식뷔페 라인업</h3>
+          <span id="restaurantCountBadge" class="text-xs bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded-md">0곳</span>
+        </div>
+        <p class="text-xs text-slate-500">카드를 눌러 누구나 오늘의 메뉴를 수정·등록할 수 있습니다.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="restaurantCardsContainer">
+        <!-- 식당 카드 동적 렌더링 -->
+      </div>
     </div>
   </main>
 
-  <!-- 하단 플로팅 채팅 버튼 & 창 -->
+  <!-- 하단 플로팅 채팅 버튼 및 대화창 -->
   <div class="fixed bottom-6 right-6 z-50">
-    <button id="chatToggleBtn" onclick="toggleChatWindow()" class="relative bg-orange-500 hover:bg-orange-600 text-white w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all hover:scale-105 active:scale-95">
+    <button id="chatToggleBtn" onclick="toggleChatWindow()" class="relative bg-gradient-to-tr from-orange-600 to-amber-500 text-white w-14 h-14 rounded-2xl shadow-xl shadow-orange-500/30 flex items-center justify-center transition-all hover:scale-105 active:scale-95">
       <i data-lucide="message-square" class="w-6 h-6"></i>
-      <span id="unreadDot" class="absolute top-1 right-1 w-3.5 h-3.5 bg-red-500 border-2 border-white rounded-full hidden"></span>
+      <span id="chatUnreadPulse" class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 border-2 border-white rounded-full"></span>
     </button>
 
-    <!-- 채팅창 모달 -->
-    <div id="chatWindow" class="hidden absolute bottom-16 right-0 w-80 sm:w-96 h-[460px] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden">
-      <div class="bg-slate-900 text-white p-3.5 flex items-center justify-between">
+    <!-- 대화창 본체 -->
+    <div id="chatWindow" class="hidden absolute bottom-16 right-0 w-80 sm:w-96 h-[480px] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden">
+      <div class="bg-slate-900 text-white p-4 flex items-center justify-between border-b border-slate-800">
         <div class="flex items-center gap-2">
-          <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-          <span class="font-bold text-sm tracking-tight">밥심 톡 (실시간 전체 채팅)</span>
+          <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
+          <span class="font-bold text-sm">밥심 실시간 톡</span>
         </div>
-        <button onclick="toggleChatWindow()" class="text-slate-400 hover:text-white text-xs">닫기</button>
+        <button onclick="toggleChatWindow()" class="text-slate-400 hover:text-white text-xs">✕</button>
       </div>
 
-      <!-- 메시지 스크롤 영역 -->
-      <div id="chatMessages" class="flex-1 p-3 overflow-y-auto space-y-2.5 text-xs bg-slate-50">
-        <div class="text-center text-slate-400 py-4 text-[11px]">대화에 참여해보세요!</div>
+      <div id="chatMessages" class="flex-1 p-4 overflow-y-auto space-y-3 text-xs bg-slate-50">
+        <div class="text-center text-slate-400 py-6 text-xs">대화가 실시간으로 동기화됩니다.</div>
       </div>
 
-      <!-- 빠른 메시지 버튼 바 -->
-      <div class="px-2.5 py-1.5 bg-slate-100 border-t border-slate-200 flex gap-1.5 overflow-x-auto text-[11px]">
-        <button onclick="quickChat('🍗 오늘 닭강정 대박이네요')" class="whitespace-nowrap px-2 py-0.5 bg-white rounded-md border border-slate-200 text-slate-700 hover:bg-slate-50">🍗 닭강정 대박</button>
-        <button onclick="quickChat('🏃‍♂️ 11시 40분에 로비에서 봐요!')" class="whitespace-nowrap px-2 py-0.5 bg-white rounded-md border border-slate-200 text-slate-700 hover:bg-slate-50">🏃‍♂️ 40분 로비</button>
-        <button onclick="quickChat('🪑 자리 잡으러 먼저 갑니다')" class="whitespace-nowrap px-2 py-0.5 bg-white rounded-md border border-slate-200 text-slate-700 hover:bg-slate-50">🪑 자리 선점</button>
+      <div class="px-3 py-2 bg-slate-100/90 border-t border-slate-200 flex gap-1.5 overflow-x-auto scrollbar-hide text-[11px]">
+        <button onclick="quickChat('🍗 오늘 닭강정 상태 극상입니다!')" class="whitespace-nowrap px-2.5 py-1 bg-white rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 font-medium">🍗 닭강정 대박</button>
+        <button onclick="quickChat('🏃‍♂️ 11시 30분에 로비에서 모여요!')" class="whitespace-nowrap px-2.5 py-1 bg-white rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 font-medium">🏃‍♂️ 30분 로비 집결</button>
+        <button onclick="quickChat('🪑 자리 선점하러 먼저 출발합니다!')" class="whitespace-nowrap px-2.5 py-1 bg-white rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 font-medium">🪑 자리 선점 출발</button>
       </div>
 
-      <!-- 입력 인풋 폼 -->
-      <form onsubmit="handleSendChat(event)" class="p-2 bg-white border-t border-slate-200 flex gap-1.5">
-        <input id="chatInput" type="text" placeholder="메시지를 입력하세요..." class="flex-1 bg-slate-100 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-orange-500" autocomplete="off" />
-        <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-lg text-xs font-semibold">전송</button>
+      <form onsubmit="handleSendChat(event)" class="p-2.5 bg-white border-t border-slate-200 flex gap-2">
+        <input id="chatInput" type="text" placeholder="점심 메뉴 이야기 나눠보세요..." class="flex-1 bg-slate-100 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500" autocomplete="off" />
+        <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-colors">전송</button>
       </form>
     </div>
   </div>
 
-  <!-- 회원가입/프로필 모달 -->
+  <!-- 식당 및 메뉴 추가/수정 모달 -->
+  <div id="addModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h3 id="modalTitle" class="font-extrabold text-slate-900 text-base">식당 등록 및 메뉴 업데이트</h3>
+          <p class="text-[11px] text-slate-400">누구나 새로운 뷔페를 등록하거나 당일 메뉴를 갱신할 수 있습니다.</p>
+        </div>
+        <button onclick="closeAddModal()" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
+      </div>
+
+      <form id="restaurantForm" onsubmit="handleSaveRestaurant(event)" class="space-y-3.5 text-xs">
+        <input type="hidden" id="editRestId" value="" />
+
+        <div>
+          <label class="font-bold text-slate-700 block mb-1">식당 이름 <span class="text-orange-500">*</span></label>
+          <input id="formRestName" type="text" placeholder="예: 일루퓨전 한식뷔페" required class="w-full border border-slate-200 rounded-xl p-3 focus:border-orange-500 focus:outline-none bg-slate-50" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="font-bold text-slate-700 block mb-1">위치/건물 <span class="text-orange-500">*</span></label>
+            <input id="formRestBuilding" type="text" placeholder="예: 테라타워2차 B1" required class="w-full border border-slate-200 rounded-xl p-3 focus:border-orange-500 focus:outline-none bg-slate-50" />
+          </div>
+          <div>
+            <label class="font-bold text-slate-700 block mb-1">식권 가격</label>
+            <input id="formRestPrice" type="text" placeholder="예: 9,000원" class="w-full border border-slate-200 rounded-xl p-3 focus:border-orange-500 focus:outline-none bg-slate-50" />
+          </div>
+        </div>
+
+        <div>
+          <label class="font-bold text-slate-700 block mb-1">식단 기준 날짜 <span class="text-orange-500">*</span></label>
+          <input id="formRestDate" type="date" required class="w-full border border-slate-200 rounded-xl p-3 focus:border-orange-500 focus:outline-none bg-slate-50" />
+        </div>
+
+        <div>
+          <label class="font-bold text-slate-700 block mb-1">오늘의 메인 요리 (쉼표로 구분) <span class="text-orange-500">*</span></label>
+          <input id="formRestMains" type="text" placeholder="예: 생삼겹 수육, 닭강정, 오징어초무침" required class="w-full border border-slate-200 rounded-xl p-3 focus:border-orange-500 focus:outline-none bg-slate-50" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="font-bold text-slate-700 block mb-1">국 / 찌개</label>
+            <input id="formRestSoup" type="text" placeholder="예: 소고기 뭇국" class="w-full border border-slate-200 rounded-xl p-3 focus:border-orange-500 focus:outline-none bg-slate-50" />
+          </div>
+          <div>
+            <label class="font-bold text-slate-700 block mb-1">특식 / 후식</label>
+            <input id="formRestDessert" type="text" placeholder="예: 식혜, 샐러드" class="w-full border border-slate-200 rounded-xl p-3 focus:border-orange-500 focus:outline-none bg-slate-50" />
+          </div>
+        </div>
+
+        <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl text-xs shadow-md shadow-orange-500/20 transition-all active:scale-95 mt-2">
+          식단 저장 및 전체 동기화
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 프로필 모달 -->
   <div id="authModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 space-y-4">
-      <div class="flex items-center justify-between border-b pb-3">
-        <h3 class="font-extrabold text-slate-800 text-base">간편 프로필 설정</h3>
+    <div class="bg-white w-full max-w-xs rounded-3xl shadow-2xl p-6 space-y-4">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="font-extrabold text-slate-900 text-sm">내 닉네임 설정</h3>
         <button onclick="closeAuthModal()" class="text-slate-400 hover:text-slate-600 text-xs">✕</button>
       </div>
-      <div class="space-y-3 text-xs">
-        <div>
-          <label class="font-bold text-slate-700 block mb-1">닉네임</label>
-          <input id="authNicknameInput" type="text" placeholder="예: 테라타워직장인" class="w-full border border-slate-200 rounded-lg p-2.5 text-xs focus:ring-1 focus:ring-orange-500 outline-none" />
-        </div>
-        <div>
-          <label class="font-bold text-slate-700 block mb-1">소속 건물</label>
-          <select id="authBuildingSelect" class="w-full border border-slate-200 rounded-lg p-2.5 text-xs focus:ring-1 focus:ring-orange-500 outline-none">
-            <option value="테라타워 1차">문정 테라타워 1차</option>
-            <option value="테라타워 2차">문정 테라타워 2차</option>
-            <option value="엠스테이트">문정 엠스테이트</option>
-            <option value="H비즈니스파크">문정 H비즈니스파크</option>
-            <option value="SK V1 GL메트로시티">SK V1 GL메트로시티</option>
-            <option value="대명벨리온">문정 대명벨리온</option>
-            <option value="기타">기타 / 인근</option>
-          </select>
-        </div>
+      <div class="space-y-2 text-xs">
+        <label class="font-bold text-slate-700 block">투표 & 대화에 사용할 닉네임</label>
+        <input id="authNicknameInput" type="text" placeholder="예: 테라타워3년차" class="w-full border border-slate-200 rounded-xl p-2.5 focus:border-orange-500 outline-none" />
       </div>
-      <button onclick="saveUserProfile()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 rounded-xl text-xs transition-colors">
-        설정 완료 및 시작하기
+      <button onclick="saveUserProfile()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-2.5 rounded-xl text-xs transition-colors">
+        저장하기
       </button>
     </div>
   </div>
 
-  <!-- 관리자 모달 -->
-  <div id="adminModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl p-6 space-y-4 max-h-[90vh] flex flex-col">
-      <div class="flex items-center justify-between border-b pb-3">
-        <div class="flex items-center gap-2">
-          <i data-lucide="shield" class="w-5 h-5 text-orange-500"></i>
-          <h3 class="font-extrabold text-slate-800 text-base">밥심 관리자 대시보드</h3>
-        </div>
-        <button onclick="closeAdminModal()" class="text-slate-400 hover:text-slate-600 text-xs">✕</button>
-      </div>
-
-      <div class="flex-1 overflow-y-auto space-y-4 text-xs">
-        <!-- 투표 리셋 -->
-        <div class="p-4 bg-slate-50 border rounded-xl flex items-center justify-between">
-          <div>
-            <p class="font-bold text-slate-800">투표 현황 초기화</p>
-            <p class="text-slate-500 text-[11px]">오늘 투표된 표수를 0으로 리셋합니다.</p>
-          </div>
-          <button onclick="resetVotes()" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg font-bold">투표 초기화</button>
-        </div>
-
-        <!-- 메뉴 수동 수정 / 등록 -->
-        <div class="p-4 bg-slate-50 border rounded-xl space-y-3">
-          <p class="font-bold text-slate-800">오늘의 식단 수동 업데이트</p>
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="block text-slate-600 mb-1">식당 선택</label>
-              <select id="adminRestaurantSelect" class="w-full border rounded-lg p-2 bg-white">
-                <option value="illu">일루퓨전 한식뷔페</option>
-                <option value="mstate">엠스테이트 푸드스토리</option>
-                <option value="miso">테라타워 미소한식</option>
-                <option value="daon">H비즈니스 다온푸드</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-slate-600 mb-1">메인 요리 (쉼표로 구분)</label>
-              <input id="adminMainMenus" type="text" placeholder="예: 유자청 닭강정, 제육볶음, 돈까스" class="w-full border rounded-lg p-2 bg-white" />
-            </div>
-          </div>
-          <button onclick="updateRestaurantMenu()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 rounded-lg">식단 즉시 반영하기</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <script>
-    // 1. Firebase 실시간 DB 초기화 (제공해주신 프로젝트 키 연결)
+    // 1. Firebase 연결
     const firebaseConfig = {
       apiKey: "AIzaSyDYTK4MRGsxXwZ_jzN7qlaFzrVhMVKgWxw",
       authDomain: "babsim-a3556.firebaseapp.com",
@@ -206,53 +223,82 @@
       appId: "1:791532866408:web:891ef952af5e62386864dd",
       measurementId: "G-67HDKHR6WX"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 기본 식당 데이터
-    let restaurants = {
-      illu: { id: "illu", name: "일루퓨전 한식뷔페", building: "테라타워 2차 지하 1층", price: "9,000원", mains: ["유자청 닭강정", "생삼겹 수육", "오징어초무침"], soup: "얼큰 소고기 뭇국", votes: 0 },
-      mstate: { id: "mstate", name: "엠스테이트 푸드스토리", building: "엠스테이트 지하 1층", price: "8,500원", mains: ["바삭 수제돈가스", "고추장제육", "탕수육"], soup: "진한 차돌된장찌개", votes: 0 },
-      miso: { id: "miso", name: "테라타워 미소한식", building: "테라타워 1차 지하 1층", price: "8,500원", mains: ["간장 소불고기", "해물순두부", "계란말이"], soup: "맑은 황태해장국", votes: 0 },
-      daon: { id: "daon", name: "H비즈니스 다온푸드", building: "H비즈니스파크 B동 B1", price: "8,000원", mains: ["춘천 닭갈비", "오리불고기", "비빔만두"], soup: "칼칼 콩나물김칫국", votes: 0 }
-    };
-
-    let currentUser = JSON.param || JSON.parse(localStorage.getItem('bapsim_user') || '{"nickname":"익명 문정러","building":"테라타워"}');
+    // 로컬 상태
+    let restaurants = {};
+    let currentUser = JSON.parse(localStorage.getItem('bapsim_user') || '{"nickname":"문정러"}');
     let myVotedId = localStorage.getItem('bapsim_my_vote');
 
-    // 2. 날짜 표시
-    const now = new Date();
-    const dateStr = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
-    document.getElementById('currentDateDisplay').textContent = dateStr;
+    // 2. 11시 30분 마감 카운트다운 타이머
+    function updateCountdown() {
+      const now = new Date();
+      const target = new Date();
+      target.setHours(11, 30, 0, 0);
 
-    // 3. Firebase 실시간 리스너 (투표 & 식단)
+      // 오늘 날짜 텍스트 반영
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      const todayStr = `${yyyy}-${mm}-${dd}`;
+      document.getElementById('todayFullDate').textContent = `${yyyy}년 ${mm}월 ${dd}일 오늘의 식단`;
+
+      const diff = target.getTime() - now.getTime();
+      const timerEl = document.getElementById('timerCountdown');
+
+      if (diff > 0) {
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        timerEl.textContent = `${hours > 0 ? hours + '시간 ' : ''}${minutes}분 ${seconds < 10 ? '0' : ''}${seconds}초 남음`;
+        timerEl.className = "text-orange-400 font-mono tracking-normal underline decoration-orange-500/50 underline-offset-8 font-extrabold";
+      } else {
+        timerEl.textContent = "점심 투표 마감! 식사 맛있게 하세요 🍚";
+        timerEl.className = "text-emerald-400 font-bold";
+      }
+    }
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    // 3. 오늘 날짜를 추가 폼의 기본값으로 세팅
+    const todayISO = new Date().toISOString().split('T')[0];
+    document.getElementById('formRestDate').value = todayISO;
+
+    // 4. Firebase 실시간 리스너 (식당 데이터)
     db.ref('restaurants').on('value', (snapshot) => {
       const data = snapshot.val();
       if (data) {
         restaurants = data;
       } else {
+        // 초기 템플릿
+        restaurants = {
+          illu: { id: "illu", name: "일루퓨전 한식뷔페", building: "테라타워2차 B1", price: "9,000원", menuDate: todayISO, mains: ["유자청 닭강정", "생삼겹 수육", "오징어초무침"], soup: "얼큰 소고기 뭇국", dessert: "시원한 식혜", votes: 0 },
+          mstate: { id: "mstate", name: "엠스테이트 푸드스토리", building: "엠스테이트 B1", price: "8,500원", menuDate: todayISO, mains: ["바삭 돈가스", "고추장제육", "탕수육"], soup: "차돌된장찌개", dessert: "매실차", votes: 0 },
+          miso: { id: "miso", name: "테라타워 미소한식", building: "테라타워1차 B1", price: "8,500원", menuDate: todayISO, mains: ["간장 소불고기", "해물순두부", "계란말이"], soup: "황태해장국", dessert: "숭늉", votes: 0 }
+        };
         db.ref('restaurants').set(restaurants);
       }
       renderCards();
     });
 
-    // 4. Firebase 실시간 리스너 (채팅)
-    db.ref('messages').limitToLast(50).on('child_added', (snapshot) => {
-      const msg = snapshot.val();
-      appendChatMessage(msg);
+    // 5. Firebase 실시간 채팅 리스너
+    db.ref('messages').limitToLast(40).on('child_added', (snapshot) => {
+      appendChatMessage(snapshot.val());
     });
 
-    // 5. 카드 렌더링
+    // 6. 식당 카드 UI 렌더링
     function renderCards() {
       const container = document.getElementById('restaurantCardsContainer');
       container.innerHTML = '';
+      const list = Object.values(restaurants || {});
+      document.getElementById('restaurantCountBadge').textContent = `${list.length}곳`;
 
       let totalVotes = 0;
       let maxVote = -1;
       let topId = null;
 
-      Object.values(restaurants).forEach(r => {
+      list.forEach(r => {
         totalVotes += (r.votes || 0);
         if ((r.votes || 0) > maxVote && (r.votes || 0) > 0) {
           maxVote = r.votes;
@@ -260,53 +306,78 @@
         }
       });
 
-      Object.values(restaurants).forEach(r => {
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      list.forEach(r => {
         const isVoted = myVotedId === r.id;
         const isTop = topId === r.id;
         const percent = totalVotes > 0 ? Math.round(((r.votes || 0) / totalVotes) * 100) : 0;
+        const isToday = (r.menuDate === todayStr);
 
         const card = document.createElement('div');
-        card.className = `bg-white rounded-2xl p-5 border-2 transition-all flex flex-col justify-between shadow-sm hover:shadow-md ${isVoted ? 'border-orange-500 ring-2 ring-orange-100' : 'border-slate-100'}`;
+        card.className = `group bg-white rounded-3xl p-5 border transition-all duration-300 flex flex-col justify-between shadow-sm hover:shadow-xl hover:-translate-y-1 ${isVoted ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-slate-200/70'}`;
 
         card.innerHTML = `
           <div>
-            <div class="flex items-start justify-between gap-2 mb-2">
+            <!-- 상단 뱃지 및 식당명 -->
+            <div class="flex items-start justify-between gap-2 mb-3">
               <div>
-                <span class="text-[10px] font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-md">${r.building}</span>
-                <h3 class="font-extrabold text-slate-900 text-base mt-1 flex items-center gap-1.5">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="text-[11px] font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-lg border border-orange-100">${r.building}</span>
+                  <!-- 날짜 배지 -->
+                  <span class="text-[10px] font-semibold px-2 py-0.5 rounded-lg flex items-center gap-1 ${isToday ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500'}">
+                    <i data-lucide="clock" class="w-3 h-3"></i>
+                    ${r.menuDate || '날짜미지정'} ${isToday ? '(오늘메뉴)' : ''}
+                  </span>
+                </div>
+                <h4 class="font-black text-slate-900 text-lg mt-1.5 flex items-center gap-1.5">
                   ${r.name}
-                  ${isTop ? '<span class="text-xs bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">👑 1위</span>' : ''}
-                </h3>
+                  ${isTop ? '<span class="text-[10px] bg-amber-400 text-amber-950 font-black px-1.5 py-0.5 rounded-md shadow-sm">👑 1위</span>' : ''}
+                </h4>
               </div>
-              <span class="text-xs font-bold text-slate-600">${r.price}</span>
+              <span class="text-xs font-black text-slate-700 bg-slate-50 px-2.5 py-1 rounded-xl border border-slate-100">${r.price || '가격미정'}</span>
             </div>
 
             <!-- 메인 메뉴 -->
-            <div class="mt-3 space-y-1.5">
-              <span class="text-[11px] font-semibold text-slate-400 block">오늘의 3대 메인</span>
+            <div class="mt-4 space-y-2">
+              <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">핵심 메인 반찬</span>
               <div class="flex flex-wrap gap-1.5">
-                ${r.mains.map(m => `<span class="bg-slate-100 text-slate-800 px-2 py-1 rounded-md text-xs font-bold">${m}</span>`).join('')}
+                ${(r.mains || []).map(m => `
+                  <span class="bg-gradient-to-r from-slate-50 to-slate-100 text-slate-800 border border-slate-200/80 px-2.5 py-1 rounded-xl text-xs font-bold shadow-xs">
+                    ${m}
+                  </span>
+                `).join('')}
               </div>
             </div>
 
-            <!-- 국 -->
-            <div class="mt-3 text-xs text-slate-600 flex items-center gap-1.5">
-              <span class="text-orange-500 font-bold">국/찌개:</span>
-              <span>${r.soup}</span>
+            <!-- 국 & 후식 정보 -->
+            <div class="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-600 space-y-1">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-orange-500 w-10">국/찌개</span>
+                <span class="text-slate-700 font-medium truncate">${r.soup || '-'}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-amber-500 w-10">후식</span>
+                <span class="text-slate-700 font-medium truncate">${r.dessert || '-'}</span>
+              </div>
             </div>
           </div>
 
-          <!-- 투표 영역 -->
+          <!-- 하단 투표 및 수정 영역 -->
           <div class="mt-5 pt-4 border-t border-slate-100">
             <div class="flex items-center justify-between text-xs font-bold mb-1.5">
               <span class="text-slate-500">${r.votes || 0}표 (${percent}%)</span>
+              <button onclick="openEditModal('${r.id}')" class="text-[11px] text-slate-400 hover:text-orange-500 font-semibold flex items-center gap-1">
+                <i data-lucide="edit-3" class="w-3 h-3"></i>
+                메뉴 수정
+              </button>
             </div>
             <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-3">
-              <div class="bg-orange-500 h-full rounded-full transition-all duration-500" style="width: ${percent}%"></div>
+              <div class="bg-gradient-to-r from-orange-500 to-amber-500 h-full rounded-full transition-all duration-500" style="width: ${percent}%"></div>
             </div>
-            <button onclick="castVote('${r.id}')" class="w-full py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 ${isVoted ? 'bg-orange-500 text-white shadow-md shadow-orange-500/30' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">
+            <button onclick="castVote('${r.id}')" class="w-full py-2.5 rounded-2xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 ${isVoted ? 'bg-orange-500 text-white shadow-md shadow-orange-500/30' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">
               <i data-lucide="${isVoted ? 'check' : 'thumbs-up'}" class="w-3.5 h-3.5"></i>
-              <span>${isVoted ? '투표 완료' : '이곳으로 투표'}</span>
+              <span>${isVoted ? '투표 완료됨' : '여기로 투표'}</span>
             </button>
           </div>
         `;
@@ -316,7 +387,7 @@
       lucide.createIcons();
     }
 
-    // 6. 투표 실행
+    // 7. 투표 로직
     function castVote(id) {
       if (myVotedId === id) {
         db.ref(`restaurants/${id}/votes`).transaction(v => Math.max(0, (v || 1) - 1));
@@ -330,7 +401,6 @@
         myVotedId = id;
         localStorage.setItem('bapsim_my_vote', id);
 
-        // 채팅방 자동 알림 전송
         db.ref('messages').push({
           type: 'system',
           text: `🔔 ${currentUser.nickname}님이 [${restaurants[id].name}]에 투표하셨습니다!`,
@@ -339,7 +409,78 @@
       }
     }
 
-    // 7. 채팅 전송
+    // 8. 식당 및 메뉴 저장 (추가/수정)
+    function handleSaveRestaurant(e) {
+      e.preventDefault();
+      const editId = document.getElementById('editRestId').value;
+      const id = editId || ('rest_' + Date.now());
+
+      const mainsArr = document.getElementById('formRestMains').value
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean);
+
+      const restData = {
+        id: id,
+        name: document.getElementById('formRestName').value.trim(),
+        building: document.getElementById('formRestBuilding').value.trim(),
+        price: document.getElementById('formRestPrice').value.trim() || '8,500원',
+        menuDate: document.getElementById('formRestDate').value,
+        mains: mainsArr,
+        soup: document.getElementById('formRestSoup').value.trim() || '-',
+        dessert: document.getElementById('formRestDessert').value.trim() || '-',
+        votes: (editId && restaurants[editId]) ? (restaurants[editId].votes || 0) : 0
+      };
+
+      db.ref(`restaurants/${id}`).set(restData, (err) => {
+        if (err) return alert('저장 중 에러가 발생했습니다.');
+        
+        // 채팅방 공지 발송
+        db.ref('messages').push({
+          type: 'system',
+          text: `📢 ${currentUser.nickname}님이 [${restData.name}] ${restData.menuDate} 식단을 갱신했습니다!`,
+          timestamp: Date.now()
+        });
+
+        closeAddModal();
+      });
+    }
+
+    // 모달 제어 함수
+    function openAddModal() {
+      document.getElementById('modalTitle').textContent = "새 한식뷔페 등록";
+      document.getElementById('editRestId').value = "";
+      document.getElementById('restaurantForm').reset();
+      document.getElementById('formRestDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('addModal').classList.remove('hidden');
+    }
+
+    function openEditModal(id) {
+      const r = restaurants[id];
+      if (!r) return;
+      document.getElementById('modalTitle').textContent = `[${r.name}] 식단 업데이트`;
+      document.getElementById('editRestId').value = r.id;
+      document.getElementById('formRestName').value = r.name;
+      document.getElementById('formRestBuilding').value = r.building;
+      document.getElementById('formRestPrice').value = r.price || '';
+      document.getElementById('formRestDate').value = r.menuDate || new Date().toISOString().split('T')[0];
+      document.getElementById('formRestMains').value = (r.mains || []).join(', ');
+      document.getElementById('formRestSoup').value = r.soup || '';
+      document.getElementById('formRestDessert').value = r.dessert || '';
+      document.getElementById('addModal').classList.remove('hidden');
+    }
+
+    function closeAddModal() {
+      document.getElementById('addModal').classList.add('hidden');
+    }
+
+    // 9. 채팅 기능
+    function toggleChatWindow() {
+      const w = document.getElementById('chatWindow');
+      w.classList.toggle('hidden');
+      document.getElementById('chatUnreadPulse').classList.add('hidden');
+    }
+
     function handleSendChat(e) {
       e.preventDefault();
       const input = document.getElementById('chatInput');
@@ -348,19 +489,16 @@
 
       db.ref('messages').push({
         nickname: currentUser.nickname,
-        building: currentUser.building,
         text: text,
         timestamp: Date.now()
       });
-
       input.value = '';
     }
 
-    function quickChat(msg) {
+    function quickChat(txt) {
       db.ref('messages').push({
         nickname: currentUser.nickname,
-        building: currentUser.building,
-        text: msg,
+        text: txt,
         timestamp: Date.now()
       });
     }
@@ -370,88 +508,51 @@
       const div = document.createElement('div');
 
       if (msg.type === 'system') {
-        div.className = "text-center text-[10px] text-orange-600 bg-orange-50/80 rounded-md py-1 my-1 font-semibold";
+        div.className = "text-center text-[10px] text-orange-600 bg-orange-50/90 rounded-lg py-1 px-2 my-1 font-semibold";
         div.textContent = msg.text;
       } else {
-        const isMe = msg.nickname === currentUser.nickname;
+        const isMe = (msg.nickname === currentUser.nickname);
         div.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'}`;
         div.innerHTML = `
-          <span class="text-[10px] text-slate-400 mb-0.5">${msg.nickname} · ${msg.building || '문정'}</span>
-          <div class="px-3 py-1.5 rounded-xl max-w-[80%] ${isMe ? 'bg-orange-500 text-white rounded-tr-none' : 'bg-white border text-slate-800 rounded-tl-none'}">
+          <span class="text-[10px] text-slate-400 mb-0.5">${msg.nickname}</span>
+          <div class="px-3.5 py-2 rounded-2xl max-w-[85%] leading-relaxed ${isMe ? 'bg-orange-500 text-white rounded-tr-none font-medium' : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none'}">
             ${msg.text}
           </div>
         `;
       }
-
       container.appendChild(div);
       container.scrollTop = container.scrollHeight;
     }
 
-    // 8. 모달 및 팝업 컨트롤
-    function toggleChatWindow() {
-      const w = document.getElementById('chatWindow');
-      w.classList.toggle('hidden');
+    // 10. 프로필 설정 및 유틸리티
+    function openAuthModal() {
+      document.getElementById('authNicknameInput').value = currentUser.nickname;
+      document.getElementById('authModal').classList.remove('hidden');
     }
-    function openAuthModal() { document.getElementById('authModal').classList.remove('hidden'); }
     function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
-    function openAdminModal() { document.getElementById('adminModal').classList.remove('hidden'); }
-    function closeAdminModal() { document.getElementById('adminModal').classList.add('hidden'); }
-
     function saveUserProfile() {
-      const nick = document.getElementById('authNicknameInput').value.trim() || "문정러";
-      const bld = document.getElementById('authBuildingSelect').value;
-      currentUser = { nickname: nick, building: bld };
+      const n = document.getElementById('authNicknameInput').value.trim() || '문정러';
+      currentUser = { nickname: n };
       localStorage.setItem('bapsim_user', JSON.stringify(currentUser));
-      document.getElementById('userProfileText').textContent = `${nick} (${bld})`;
+      document.getElementById('userProfileText').textContent = n;
       closeAuthModal();
     }
 
-    function resetVotes() {
-      if (!confirm("전체 식당의 투표수를 0으로 초기화하시겠습니까?")) return;
+    function resetVotesPrompt() {
+      if (!confirm("전체 투표수를 0으로 리셋하시겠습니까?")) return;
       Object.keys(restaurants).forEach(k => {
         db.ref(`restaurants/${k}/votes`).set(0);
       });
-      alert("투표수가 리셋되었습니다.");
-    }
-
-    function updateRestaurantMenu() {
-      const id = document.getElementById('adminRestaurantSelect').value;
-      const mainsRaw = document.getElementById('adminMainMenus').value.trim();
-      if (!mainsRaw) return alert("메뉴를 입력해주세요.");
-
-      const mains = mainsRaw.split(',').map(s => s.trim()).filter(Boolean);
-      db.ref(`restaurants/${id}/mains`).set(mains);
-      alert("오늘의 식단이 클라우드에 성공적으로 반영되었습니다!");
-      closeAdminModal();
     }
 
     function shareVoteRoom() {
       navigator.clipboard.writeText(window.location.href);
-      alert("투표 링크가 복사되었습니다! 단톡방에 공유해보세요.");
+      alert("웹사이트 링크가 복사되었습니다! 팀 단톡방에 붙여넣어 함께 투표하세요.");
     }
 
-    // 로고 5회 클릭 시 관리자 열기
-    let clickCount = 0;
-    document.getElementById('logoBadge').addEventListener('click', () => {
-      clickCount++;
-      if (clickCount >= 5) {
-        clickCount = 0;
-        openAdminModal();
-      }
-    });
-
-    // 단축키 Ctrl + Shift + A
-    window.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
-        e.preventDefault();
-        openAdminModal();
-      }
-    });
-
-    if (currentUser.nickname !== "익명 문정러") {
-      document.getElementById('userProfileText').textContent = `${currentUser.nickname} (${currentUser.building})`;
+    if (currentUser.nickname && currentUser.nickname !== "문정러") {
+      document.getElementById('userProfileText').textContent = currentUser.nickname;
     }
-
     lucide.createIcons();
   </script>
 </body>
