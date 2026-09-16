@@ -34,17 +34,70 @@
       align-items: center; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.25));
     }
 
-    /* 닉네임 배경 커스텀 프리셋 */
+    /* 닉네임 배경 배지 커스텀 프리셋 */
     .nb-none { background: transparent; padding: 0; }
-    .nb-gold { background: linear-gradient(135deg, #fef08a, #fde047); border: 1px solid #eab308; padding: 1px 6px; border-radius: 6px; font-weight: 800; }
-    .nb-darkvip { background: #0f172a; color: #f8fafc !important; border: 1px solid #334155; padding: 1px 6px; border-radius: 6px; font-weight: 800; }
-    .nb-sunset { background: linear-gradient(135deg, #ffedd5, #fed7aa); border: 1px solid #fb923c; padding: 1px 6px; border-radius: 6px; font-weight: 800; }
-    .nb-neon { background: #09090b; border: 1px solid #22c55e; box-shadow: 0 0 6px rgba(34, 197, 94, 0.4); padding: 1px 6px; border-radius: 6px; font-weight: 800; }
+    
+    /* 1. 신화/초호화 티어 */
+    .nb-gold { 
+      background: linear-gradient(135deg, #fffbeb 0%, #fef08a 30%, #facc15 70%, #ca8a04 100%); 
+      color: #713f12 !important; border: 1.5px solid #eab308; 
+      box-shadow: 0 0 12px rgba(234, 179, 8, 0.6), inset 0 0 4px #ffffff; 
+      padding: 2px 8px; border-radius: 8px; font-weight: 900; letter-spacing: -0.02em;
+    }
+    .nb-darkvip { 
+      background: linear-gradient(135deg, #18181b 0%, #09090b 100%); 
+      color: #f43f5e !important; border: 1.5px solid #e11d48; 
+      box-shadow: 0 0 10px rgba(225, 29, 72, 0.4); 
+      padding: 2px 8px; border-radius: 8px; font-weight: 900; 
+    }
+    .nb-diamond { 
+      background: linear-gradient(135deg, #ecfeff 0%, #a5f3fc 50%, #38bdf8 100%); 
+      color: #0369a1 !important; border: 1.5px solid #0284c7; 
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.5); 
+      padding: 2px 8px; border-radius: 8px; font-weight: 900; 
+    }
+    .nb-galaxy {
+      background: linear-gradient(135deg, #312e81 0%, #4c1d95 50%, #831843 100%);
+      color: #fdf4ff !important; border: 1.5px solid #c084fc;
+      box-shadow: 0 0 8px rgba(192, 132, 252, 0.5);
+      padding: 2px 8px; border-radius: 8px; font-weight: 800;
+    }
+
+    /* 2. 프리미엄 티어 */
+    .nb-cyberpunk {
+      background: #050505; color: #f43f5e !important; border: 1.5px solid #06b6d4;
+      box-shadow: 2px 2px 0px #06b6d4, -1px -1px 0px #f43f5e;
+      padding: 2px 8px; border-radius: 4px; font-weight: 900;
+    }
+    .nb-neon { 
+      background: #09090b; color: #4ade80 !important; border: 1.5px solid #22c55e; 
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.45); 
+      padding: 2px 8px; border-radius: 8px; font-weight: 800; 
+    }
+    .nb-fire {
+      background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%);
+      color: #c2410c !important; border: 1.5px solid #ea580c;
+      padding: 2px 8px; border-radius: 8px; font-weight: 800;
+    }
+
+    /* 3. 베이직/입문 티어 */
+    .nb-sunset { 
+      background: linear-gradient(135deg, #fef3c7, #fed7aa); color: #9a3412 !important;
+      border: 1px solid #fb923c; padding: 2px 7px; border-radius: 7px; font-weight: 800; 
+    }
+    .nb-mint {
+      background: #ecfdf5; color: #065f46 !important; border: 1px solid #10b981;
+      padding: 2px 7px; border-radius: 7px; font-weight: 800;
+    }
+    .nb-lavender {
+      background: #f5f3ff; color: #5b21b6 !important; border: 1px solid #8b5cf6;
+      padding: 2px 7px; border-radius: 7px; font-weight: 800;
+    }
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white">
 
-  <!-- 헤더 (일반 사용자는 관리자 버튼 확인 불가) -->
+  <!-- 헤더 -->
   <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
     <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -60,7 +113,7 @@
               <span id="currentGroupNameText">전체 공개 로비</span>
             </span>
           </div>
-          <p class="text-[11px] text-slate-400 font-medium hidden sm:block">식단 비교 · 그룹 투표 · 포인트 상점 & 톡</p>
+          <p class="text-[11px] text-slate-400 font-medium hidden sm:block">식단 비교 · 그룹 투표 · 포인트 부자 랭킹 & 상점</p>
         </div>
       </div>
 
@@ -72,15 +125,21 @@
           <span class="text-[10px] text-amber-600 font-bold ml-0.5">상점</span>
         </button>
 
+        <!-- 포인트 랭킹 모달 열기 버튼 -->
+        <button onclick="openRankModal()" class="flex items-center gap-1 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white px-2.5 py-2 rounded-xl text-xs font-bold shadow-md shadow-amber-500/20 transition-all" title="포인트 부자 랭킹">
+          <i data-lucide="medal" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">포인트 랭킹</span>
+        </button>
+
         <button onclick="openGroupListModal()" class="flex items-center gap-1 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white px-3 py-2 rounded-xl text-xs font-bold shadow-md shadow-indigo-600/20 transition-all">
           <i data-lucide="lock" class="w-3.5 h-3.5"></i>
-          <span class="hidden sm:inline">그룹 만들기/참여</span>
-          <span class="sm:hidden">그룹</span>
+          <span class="hidden sm:inline">그룹</span>
         </button>
 
         <button onclick="openAddModal()" class="flex items-center gap-1 bg-orange-500 hover:bg-orange-600 active:scale-95 text-white px-3 py-2 rounded-xl text-xs font-bold shadow-md shadow-orange-500/20 transition-all">
           <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
-          <span>식당/메뉴(승인제)</span>
+          <span class="hidden sm:inline">식당/메뉴(+50P)</span>
+          <span class="sm:hidden">등록</span>
         </button>
 
         <button onclick="openAuthModal()" class="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl text-xs font-semibold transition-colors">
@@ -107,28 +166,33 @@
           <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-white">
             11시 30분 출발까지 <span id="timerCountdown" class="text-orange-400 font-mono underline decoration-orange-500/50 underline-offset-8">계산 중...</span>
           </h2>
-          <p id="groupBannerNotice" class="text-xs text-slate-300">식단 등록 시 관리자 승인을 거쳐 50P가 지급되며, 상점에서 특별한 닉네임 커스텀을 구매할 수 있습니다.</p>
+          <p id="groupBannerNotice" class="text-xs text-slate-300">포인트를 모아 전설의 '황금 골드 배지(99,999P)'를 획득하고 포인트 랭킹 1등에 도전하세요!</p>
         </div>
 
         <div class="flex flex-wrap gap-2 w-full md:w-auto">
-          <button onclick="openRouletteModal()" class="flex items-center justify-center gap-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold px-3.5 py-3 rounded-2xl text-xs shadow-lg active:scale-95 transition-all">
-            <i data-lucide="disc" class="w-4 h-4"></i>
-            <span>랜덤 룰렛</span>
-          </button>
-
-          <button onclick="openDutchModal()" class="flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-3 rounded-2xl text-xs shadow-lg active:scale-95 transition-all">
-            <i data-lucide="calculator" class="w-4 h-4"></i>
-            <span>N빵/사다리</span>
+          <button onclick="openRankModal()" class="flex items-center justify-center gap-1.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-slate-950 font-black px-3.5 py-3 rounded-2xl text-xs shadow-lg active:scale-95 transition-all">
+            <i data-lucide="award" class="w-4 h-4"></i>
+            <span>포인트 랭킹</span>
           </button>
 
           <button onclick="openShopModal()" class="flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-amber-300 font-bold px-3.5 py-3 rounded-2xl text-xs shadow-lg active:scale-95 transition-all">
             <i data-lucide="shopping-bag" class="w-4 h-4"></i>
-            <span>포인트 상점</span>
+            <span>상점</span>
+          </button>
+
+          <button onclick="openRouletteModal()" class="flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-white font-bold px-3 py-3 rounded-2xl text-xs shadow-lg active:scale-95 transition-all">
+            <i data-lucide="disc" class="w-4 h-4 text-orange-400"></i>
+            <span>룰렛</span>
+          </button>
+
+          <button onclick="openDutchModal()" class="flex items-center justify-center gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-3 py-3 rounded-2xl text-xs shadow-lg active:scale-95 transition-all">
+            <i data-lucide="calculator" class="w-4 h-4"></i>
+            <span>N빵</span>
           </button>
 
           <button onclick="leaveGroupToLobby()" id="leaveGroupBtn" class="hidden items-center justify-center gap-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 font-bold px-3 py-3 rounded-2xl text-xs transition-all">
             <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-            <span>로비 이동</span>
+            <span>로비</span>
           </button>
         </div>
       </div>
@@ -198,7 +262,47 @@
     </div>
   </div>
 
-  <!-- [포인트 상점 모달 (3번 & 3-1 요구사항)] -->
+  <!-- [포인트 랭킹 모달] -->
+  <div id="rankModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b pb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-lg">
+            🏆
+          </div>
+          <div>
+            <h3 class="font-black text-slate-900 text-base">밥심 실시간 포인트 랭킹</h3>
+            <p class="text-[11px] text-slate-400">문정동 최고의 식단 기여자 & 포인트 부자 순위</p>
+          </div>
+        </div>
+        <button onclick="closeRankModal()" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
+      </div>
+
+      <!-- 내 현재 순위 요약 배너 -->
+      <div class="p-4 bg-gradient-to-r from-amber-500 to-yellow-500 rounded-2xl text-slate-950 flex items-center justify-between shadow-md">
+        <div>
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-amber-950/80">내 랭킹 정보</span>
+          <h4 class="font-black text-base" id="myRankSummary">집계 중...</h4>
+        </div>
+        <div class="text-right">
+          <span class="text-xs font-black bg-white/40 px-2.5 py-1 rounded-xl" id="myRankPointDisplay">0P</span>
+        </div>
+      </div>
+
+      <!-- 상위 랭킹 리스트 -->
+      <div class="space-y-2">
+        <h4 class="text-xs font-black text-slate-700 flex items-center gap-1">
+          <i data-lucide="crown" class="w-3.5 h-3.5 text-amber-500"></i>
+          <span>TOP 10 포인트 부자 전당</span>
+        </h4>
+        <div id="rankListContainer" class="space-y-2 text-xs">
+          <!-- 동적 랭킹 렌더링 -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- [포인트 상점 모달 (인플레이션 배지 라인업)] -->
   <div id="shopModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
@@ -207,81 +311,155 @@
             🪙
           </div>
           <div>
-            <h3 class="font-black text-slate-900 text-base">밥심 포인트 상점</h3>
+            <h3 class="font-black text-slate-900 text-base">밥심 명품 상점</h3>
             <p class="text-[11px] text-slate-400">내 보유 포인트: <strong id="shopCurrentPoints" class="text-amber-600">0P</strong></p>
           </div>
         </div>
         <button onclick="closeShopModal()" class="text-slate-400 hover:text-slate-600 text-xs p-1">✕</button>
       </div>
 
-      <!-- 1. 닉네임 글자 색상 카테고리 -->
+      <!-- 1. 닉네임 글자 색상 -->
       <div class="space-y-2.5">
         <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5">
-          <span>🎨</span> 닉네임 글자 색상 (각 30P)
+          <span>🎨</span> 닉네임 글자 색상 (각 300P)
         </span>
         <div class="grid grid-cols-2 gap-2 text-xs">
-          <button onclick="buyNickColor('#f59e0b', '골드 옐로우')" class="p-3 border rounded-2xl flex items-center justify-between hover:border-amber-400 bg-slate-50 transition-all">
+          <button onclick="buyNickColor('#f59e0b', '골드 옐로우', 300)" class="p-3 border rounded-2xl flex items-center justify-between hover:border-amber-400 bg-slate-50 transition-all">
             <span class="font-extrabold text-[#f59e0b]">골드 옐로우</span>
-            <span class="text-[11px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-md">30P</span>
+            <span class="text-[11px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-md">300P</span>
           </button>
-          <button onclick="buyNickColor('#a855f7', '네온 바이올렛')" class="p-3 border rounded-2xl flex items-center justify-between hover:border-purple-400 bg-slate-50 transition-all">
+          <button onclick="buyNickColor('#a855f7', '네온 바이올렛', 300)" class="p-3 border rounded-2xl flex items-center justify-between hover:border-purple-400 bg-slate-50 transition-all">
             <span class="font-extrabold text-[#a855f7]">네온 바이올렛</span>
-            <span class="text-[11px] bg-purple-100 text-purple-800 font-bold px-2 py-0.5 rounded-md">30P</span>
+            <span class="text-[11px] bg-purple-100 text-purple-800 font-bold px-2 py-0.5 rounded-md">300P</span>
           </button>
-          <button onclick="buyNickColor('#10b981', '에메랄드 그린')" class="p-3 border rounded-2xl flex items-center justify-between hover:border-emerald-400 bg-slate-50 transition-all">
+          <button onclick="buyNickColor('#10b981', '에메랄드 그린', 300)" class="p-3 border rounded-2xl flex items-center justify-between hover:border-emerald-400 bg-slate-50 transition-all">
             <span class="font-extrabold text-[#10b981]">에메랄드 그린</span>
-            <span class="text-[11px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-md">30P</span>
+            <span class="text-[11px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-md">300P</span>
           </button>
-          <button onclick="buyNickColor('#ef4444', '파이어 레드')" class="p-3 border rounded-2xl flex items-center justify-between hover:border-rose-400 bg-slate-50 transition-all">
+          <button onclick="buyNickColor('#ef4444', '파이어 레드', 300)" class="p-3 border rounded-2xl flex items-center justify-between hover:border-rose-400 bg-slate-50 transition-all">
             <span class="font-extrabold text-[#ef4444]">파이어 레드</span>
-            <span class="text-[11px] bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded-md">30P</span>
+            <span class="text-[11px] bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded-md">300P</span>
           </button>
         </div>
       </div>
 
-      <!-- 2. 닉네임 배경 배지 카테고리 -->
-      <div class="space-y-2.5">
-        <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5">
-          <span>✨</span> 닉네임 전용 배경 배지 (각 50P)
+      <!-- 2. 닉네임 전용 배경 배지 티어별 확장 리스트 -->
+      <div class="space-y-3">
+        <span class="text-xs font-extrabold text-slate-800 flex items-center justify-between">
+          <span class="flex items-center gap-1.5">
+            <span>✨</span> 닉네임 전용 배경 배지
+          </span>
+          <span class="text-[10px] text-slate-400 font-normal">상점 구매 시 실시간 적용</span>
         </span>
+
         <div class="space-y-2 text-xs">
-          <div class="p-3 border rounded-2xl flex items-center justify-between bg-slate-50">
+          <!-- [신화 1위] 황금빛 골드 배지 (99,999P) -->
+          <div class="p-3.5 border-2 border-amber-300 rounded-2xl flex items-center justify-between bg-amber-50/50 shadow-xs">
             <div>
-              <span class="nb-gold text-slate-900 text-xs">황금빛 골드 배지</span>
-              <p class="text-[10px] text-slate-400 mt-1">블링블링한 노란 골드 테두리</p>
+              <span class="nb-gold text-xs">👑 황금빛 골드 배지</span>
+              <p class="text-[10px] text-amber-700 font-bold mt-1">서버 최상위 부자의 상징 (오라 발산)</p>
             </div>
-            <button onclick="buyNickBg('nb-gold', '황금빛 골드 배지')" class="bg-slate-900 hover:bg-black text-amber-300 font-bold px-3 py-1.5 rounded-xl text-[11px]">
-              50P 구매
+            <button onclick="buyNickBg('nb-gold', '황금빛 골드 배지', 99999)" class="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-slate-950 font-black px-3.5 py-1.5 rounded-xl text-[11px] shadow-sm">
+              99,999P
             </button>
           </div>
 
-          <div class="p-3 border rounded-2xl flex items-center justify-between bg-slate-50">
+          <!-- [신화 2위] 블랙 VIP 카드 배지 (50,000P) -->
+          <div class="p-3.5 border-2 border-rose-300 rounded-2xl flex items-center justify-between bg-slate-900 text-white shadow-xs">
             <div>
-              <span class="nb-darkvip text-xs">블랙 VIP 카드 배지</span>
-              <p class="text-[10px] text-slate-400 mt-1">중후하고 시크한 다크 플레이트</p>
+              <span class="nb-darkvip text-xs">💳 블랙 VIP 카드 배지</span>
+              <p class="text-[10px] text-slate-400 mt-1">문정 법조타운 최상위 VVIP 전용 블랙 플레이트</p>
             </div>
-            <button onclick="buyNickBg('nb-darkvip', '블랙 VIP 배지')" class="bg-slate-900 hover:bg-black text-white font-bold px-3 py-1.5 rounded-xl text-[11px]">
-              50P 구매
+            <button onclick="buyNickBg('nb-darkvip', '블랙 VIP 카드 배지', 50000)" class="bg-rose-600 hover:bg-rose-700 text-white font-black px-3.5 py-1.5 rounded-xl text-[11px] shadow-sm">
+              50,000P
             </button>
           </div>
 
-          <div class="p-3 border rounded-2xl flex items-center justify-between bg-slate-50">
+          <!-- [전설] 다이아몬드 아이스 배지 (25,000P) -->
+          <div class="p-3 border border-sky-300 rounded-2xl flex items-center justify-between bg-sky-50/60">
             <div>
-              <span class="nb-sunset text-orange-950 text-xs">문정 선셋 그라데이션</span>
-              <p class="text-[10px] text-slate-400 mt-1">따뜻한 오렌지빛 노을 배지</p>
+              <span class="nb-diamond text-xs">💎 다이아몬드 아이스</span>
+              <p class="text-[10px] text-sky-700 mt-1">영롱하고 차가운 블루 크리스탈 빛</p>
             </div>
-            <button onclick="buyNickBg('nb-sunset', '선셋 배지')" class="bg-slate-900 hover:bg-black text-orange-300 font-bold px-3 py-1.5 rounded-xl text-[11px]">
-              50P 구매
+            <button onclick="buyNickBg('nb-diamond', '다이아몬드 아이스', 25000)" class="bg-sky-600 hover:bg-sky-700 text-white font-bold px-3 py-1.5 rounded-xl text-[11px]">
+              25,000P
             </button>
           </div>
 
+          <!-- [전설] 심연의 갤럭시 배지 (10,000P) -->
+          <div class="p-3 border border-purple-300 rounded-2xl flex items-center justify-between bg-purple-50/60">
+            <div>
+              <span class="nb-galaxy text-xs">🌌 심연의 갤럭시</span>
+              <p class="text-[10px] text-purple-700 mt-1">보랏빛 우주와 성운 그라데이션</p>
+            </div>
+            <button onclick="buyNickBg('nb-galaxy', '심연의 갤럭시', 10000)" class="bg-purple-700 hover:bg-purple-800 text-white font-bold px-3 py-1.5 rounded-xl text-[11px]">
+              10,000P
+            </button>
+          </div>
+
+          <!-- [에픽] 사이버펑크 2077 (5,000P) -->
+          <div class="p-3 border rounded-2xl flex items-center justify-between bg-slate-900">
+            <div>
+              <span class="nb-cyberpunk text-xs">⚡ 사이버펑크 2077</span>
+              <p class="text-[10px] text-slate-400 mt-1">형광 사이안 & 핫핑크 글리치 테두리</p>
+            </div>
+            <button onclick="buyNickBg('nb-cyberpunk', '사이버펑크 2077', 5000)" class="bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-black px-3 py-1.5 rounded-xl text-[11px]">
+              5,000P
+            </button>
+          </div>
+
+          <!-- [에픽] 사이버 네온 글로우 (2,500P) -->
           <div class="p-3 border rounded-2xl flex items-center justify-between bg-slate-50">
             <div>
-              <span class="nb-neon text-emerald-400 text-xs">사이버 네온 글로우</span>
-              <p class="text-[10px] text-slate-400 mt-1">초록빛이 감도는 네온 라이트</p>
+              <span class="nb-neon text-xs">🟢 사이버 네온 글로우</span>
+              <p class="text-[10px] text-slate-400 mt-1">초록빛이 번지는 야간 네온 라이트</p>
             </div>
-            <button onclick="buyNickBg('nb-neon', '네온 글로우 배지')" class="bg-slate-900 hover:bg-black text-emerald-300 font-bold px-3 py-1.5 rounded-xl text-[11px]">
-              50P 구매
+            <button onclick="buyNickBg('nb-neon', '사이버 네온 글로우', 2500)" class="bg-slate-900 hover:bg-black text-emerald-300 font-bold px-3 py-1.5 rounded-xl text-[11px]">
+              2,500P
+            </button>
+          </div>
+
+          <!-- [레어] 불타는 밥심 (1,000P) -->
+          <div class="p-3 border rounded-2xl flex items-center justify-between bg-slate-50">
+            <div>
+              <span class="nb-fire text-xs">🔥 불타는 밥심</span>
+              <p class="text-[10px] text-slate-400 mt-1">열정적인 오렌지 플레임</p>
+            </div>
+            <button onclick="buyNickBg('nb-fire', '불타는 밥심', 1000)" class="bg-slate-900 hover:bg-black text-orange-300 font-bold px-3 py-1.5 rounded-xl text-[11px]">
+              1,000P
+            </button>
+          </div>
+
+          <!-- [입문] 문정 선셋 그라데이션 (500P) -->
+          <div class="p-3 border rounded-2xl flex items-center justify-between bg-slate-50">
+            <div>
+              <span class="nb-sunset text-xs">🌅 문정 선셋</span>
+              <p class="text-[10px] text-slate-400 mt-1">퇴근길 따뜻한 노을빛</p>
+            </div>
+            <button onclick="buyNickBg('nb-sunset', '문정 선셋', 500)" class="bg-slate-900 hover:bg-black text-amber-200 font-bold px-3 py-1.5 rounded-xl text-[11px]">
+              500P
+            </button>
+          </div>
+
+          <!-- [입문] 프레시 민트 배지 (300P) -->
+          <div class="p-3 border rounded-2xl flex items-center justify-between bg-slate-50">
+            <div>
+              <span class="nb-mint text-xs">🌿 프레시 민트</span>
+              <p class="text-[10px] text-slate-400 mt-1">상쾌하고 깔끔한 민트 그린</p>
+            </div>
+            <button onclick="buyNickBg('nb-mint', '프레시 민트', 300)" class="bg-slate-900 hover:bg-black text-emerald-200 font-bold px-3 py-1.5 rounded-xl text-[11px]">
+              300P
+            </button>
+          </div>
+
+          <!-- [입문] 은은한 라벤더 (200P) -->
+          <div class="p-3 border rounded-2xl flex items-center justify-between bg-slate-50">
+            <div>
+              <span class="nb-lavender text-xs">🌸 소프트 라벤더</span>
+              <p class="text-[10px] text-slate-400 mt-1">부드러운 파스텔 보랏빛</p>
+            </div>
+            <button onclick="buyNickBg('nb-lavender', '소프트 라벤더', 200)" class="bg-slate-900 hover:bg-black text-purple-200 font-bold px-3 py-1.5 rounded-xl text-[11px]">
+              200P
             </button>
           </div>
         </div>
@@ -289,7 +467,7 @@
 
       <div class="pt-2 border-t flex justify-between items-center text-xs">
         <button onclick="resetCustomStyles()" class="text-slate-400 hover:text-slate-600 underline">
-          기본 스타일로 초기화
+          스타일 초기화
         </button>
         <button onclick="closeShopModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl font-bold">
           상점 닫기
@@ -298,7 +476,7 @@
     </div>
   </div>
 
-  <!-- [관리자 비밀번호 입력 모달 (1-1, 1-2, 1-3 요구사항: 비밀번호 09010)] -->
+  <!-- [관리자 비밀번호 입력 모달 (비밀번호: 09010)] -->
   <div id="adminAuthModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-xs rounded-3xl shadow-2xl p-6 space-y-4">
       <div class="text-center">
@@ -319,7 +497,7 @@
     </div>
   </div>
 
-  <!-- [관리자 전용 대시보드 모달 (2번: 포인트 승인 관리)] -->
+  <!-- [관리자 전용 대시보드 모달] -->
   <div id="adminDashboardModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
@@ -330,7 +508,6 @@
         <button onclick="closeAdminDashboard()" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
       </div>
 
-      <!-- 1. 포인트 승인 대기 리스트 -->
       <div class="space-y-3">
         <div class="flex items-center justify-between">
           <h4 class="font-extrabold text-xs text-slate-800 flex items-center gap-1.5">
@@ -338,25 +515,21 @@
           </h4>
           <span id="pendingRequestCount" class="text-[11px] bg-orange-100 text-orange-700 font-bold px-2 py-0.5 rounded-full">0건 대기 중</span>
         </div>
-
-        <div id="adminPendingListContainer" class="space-y-2 max-h-60 overflow-y-auto">
-          <!-- 동적 리스트 -->
-        </div>
+        <div id="adminPendingListContainer" class="space-y-2 max-h-60 overflow-y-auto"></div>
       </div>
 
-      <!-- 2. 회원 수동 포인트 지급/회수 도구 -->
+      <!-- 회원 포인트 수동 조정 도구 (테스트 및 황금 배지 테스트용 대량 지급 지원) -->
       <div class="p-4 bg-slate-50 border rounded-2xl space-y-3 text-xs">
         <span class="font-bold text-slate-800 block">⚡ 회원 포인트 수동 조정 도구</span>
         <div class="grid grid-cols-3 gap-2">
           <input id="adminTargetNickname" type="text" placeholder="닉네임 (예: 테라타워3년차)" class="border rounded-xl p-2.5 bg-white outline-none" />
-          <input id="adminAmount" type="number" placeholder="포인트 (예: 50)" class="border rounded-xl p-2.5 bg-white outline-none" />
+          <input id="adminAmount" type="number" placeholder="포인트 (예: 100000)" class="border rounded-xl p-2.5 bg-white outline-none" />
           <button onclick="handleManualPointAdjust()" class="bg-slate-900 hover:bg-black text-white font-bold rounded-xl py-2.5">
-            포인트 지급/차감
+            포인트 즉시 반영
           </button>
         </div>
       </div>
 
-      <!-- 3. 투표 전체 리셋 -->
       <div class="p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-center justify-between text-xs">
         <div>
           <span class="font-bold text-rose-900">당일 전체 투표수 강제 초기화</span>
@@ -369,7 +542,7 @@
     </div>
   </div>
 
-  <!-- 식당 및 메뉴 등록 모달 (승인제 안내) -->
+  <!-- 식당 및 메뉴 등록 모달 -->
   <div id="addModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -442,7 +615,7 @@
     </div>
   </div>
 
-  <!-- 기타 모달들 (룰렛, N빵, 그룹, 프로필 등) -->
+  <!-- 기타 모달 (룰렛, N빵, 그룹, 프로필) -->
   <div id="rouletteModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 text-center space-y-5">
       <div class="flex items-center justify-between border-b pb-2">
@@ -476,7 +649,7 @@
       </div>
       <div class="p-4 bg-amber-50 rounded-2xl space-y-2 text-xs">
         <span class="font-bold text-amber-900">☕ 커피 쏠 1명 추첨</span>
-        <input id="ladderParticipants" type="text" placeholder="참여자 쉼표 구분 (예: 김대리, 이과장, 최팀장)" class="w-full border rounded-xl p-2.5 bg-white" />
+        <input id="ladderParticipants" type="text" placeholder="참여자 쉼표 구분" class="w-full border rounded-xl p-2.5 bg-white" />
         <button onclick="runCoffeeLadder()" class="w-full bg-amber-500 text-white font-bold py-2 rounded-xl">추첨하기</button>
         <div id="ladderResultBox" class="hidden text-center p-2.5 bg-white text-amber-900 rounded-xl font-bold border border-amber-300"></div>
       </div>
@@ -546,11 +719,23 @@
     let myNickColor = localStorage.getItem('bapsim_custom_color') || '';
     let myNickBg = localStorage.getItem('bapsim_custom_bg') || 'nb-none';
 
+    // Firebase 유저 포인트 실시간 동기화 (랭킹 집계용)
+    function syncUserPointToCloud() {
+      if (!currentUser.nickname) return;
+      db.ref(`user_points/${currentUser.nickname}`).set({
+        nickname: currentUser.nickname,
+        points: userPoints,
+        badge: myNickBg,
+        updatedAt: Date.now()
+      });
+    }
+
     function updatePointsUI() {
-      document.getElementById('headerPointDisplay').textContent = `${userPoints}P`;
-      document.getElementById('chatPointDisplay').textContent = `보유: ${userPoints}P`;
-      document.getElementById('shopCurrentPoints').textContent = `${userPoints}P`;
+      document.getElementById('headerPointDisplay').textContent = `${userPoints.toLocaleString()}P`;
+      document.getElementById('chatPointDisplay').textContent = `보유: ${userPoints.toLocaleString()}P`;
+      document.getElementById('shopCurrentPoints').textContent = `${userPoints.toLocaleString()}P`;
       localStorage.setItem('bapsim_points', userPoints.toString());
+      syncUserPointToCloud();
     }
     updatePointsUI();
 
@@ -585,9 +770,8 @@
     const todayISO = new Date().toISOString().split('T')[0];
     document.getElementById('formRestDate').value = todayISO;
 
-    // [1-1, 1-2, 1-3 요구사항: 비밀번호 09010 단축키 실행]
+    // [관리자 비밀번호 09010 단축키: Ctrl + Shift + A]
     window.addEventListener('keydown', (e) => {
-      // 일반 사용자는 모르는 단축키: Ctrl + Shift + A (Mac: Cmd + Shift + A)
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
         e.preventDefault();
         openAdminAuthModal();
@@ -605,7 +789,6 @@
 
     function checkAdminPassword() {
       const input = document.getElementById('adminPassInput').value.trim();
-      // 비밀번호 09010 검증
       if (input === '09010') {
         closeAdminAuthModal();
         openAdminDashboard();
@@ -623,7 +806,7 @@
       document.getElementById('adminDashboardModal').classList.add('hidden');
     }
 
-    // [2번 요구사항: 관리자 승인제 포인트 처리]
+    // 관리자 승인제 로직
     function loadPendingPointRequests() {
       db.ref('point_requests').on('value', (snap) => {
         const data = snap.val() || {};
@@ -662,14 +845,12 @@
     function approvePointRequest(reqId, nickname, amount) {
       db.ref(`point_requests/${reqId}/status`).set('approved');
 
-      // 승인 알림 메시지 발송
       db.ref('lobby_messages').push({
         type: 'system',
         text: `🎉 관리자가 [${nickname}] 님의 메뉴 등록 포인트를 승인했습니다! (+${amount}P 지급 완료)`,
         timestamp: Date.now()
       });
 
-      // 신청자가 현재 본인일 경우 즉시 로컬 포인트 적립
       if (currentUser.nickname === nickname) {
         userPoints += amount;
         updatePointsUI();
@@ -687,11 +868,11 @@
     function handleManualPointAdjust() {
       const target = document.getElementById('adminTargetNickname').value.trim();
       const amount = parseInt(document.getElementById('adminAmount').value, 10);
-      if (!target || isNaN(amount)) return alert('닉네임과 포인트 금액을 올바르게 입력하세요.');
+      if (!target || isNaN(amount)) return alert('올바른 값을 입력하세요.');
 
       db.ref('lobby_messages').push({
         type: 'system',
-        text: `⚙️ 관리자가 [${target}] 님에게 포인트 ${amount > 0 ? '+' : ''}${amount}P 를 수동 지급/조정했습니다.`,
+        text: `⚙️ 관리자가 [${target}] 님에게 포인트 ${amount > 0 ? '+' : ''}${amount.toLocaleString()}P 를 조정 지급했습니다.`,
         timestamp: Date.now()
       });
 
@@ -700,24 +881,80 @@
         updatePointsUI();
       }
 
-      alert(`[${target}] 님에게 ${amount}P 조정 알림을 반영했습니다.`);
+      alert(`[${target}] 님에게 ${amount.toLocaleString()}P 조정을 반영했습니다.`);
       document.getElementById('adminTargetNickname').value = '';
       document.getElementById('adminAmount').value = '';
     }
 
     function handleAdminResetAllVotes() {
-      if (!confirm('경고: 전체 로비 및 모든 비밀 그룹의 투표수가 0으로 초기화됩니다. 진행하시겠습니까?')) return;
+      if (!confirm('전체 투표수를 리셋하시겠습니까?')) return;
       db.ref('lobby_votes').remove();
       db.ref('groups').once('value', snap => {
         const groups = snap.val() || {};
-        Object.keys(groups).forEach(gid => {
-          db.ref(`groups/${gid}/votes`).remove();
-        });
+        Object.keys(groups).forEach(gid => db.ref(`groups/${gid}/votes`).remove());
       });
-      alert('전체 투표수가 성공적으로 초기화되었습니다.');
+      alert('초기화되었습니다.');
     }
 
-    // [3번 & 3-1 요구사항: 포인트 상점 기능]
+    // [실시간 포인트 랭킹 시스템]
+    function openRankModal() {
+      renderPointRankings();
+      document.getElementById('rankModal').classList.remove('hidden');
+    }
+    function closeRankModal() {
+      document.getElementById('rankModal').classList.add('hidden');
+    }
+
+    function renderPointRankings() {
+      db.ref('user_points').once('value', (snap) => {
+        const data = snap.val() || {};
+        const userList = Object.values(data);
+        userList.sort((a, b) => (b.points || 0) - (a.points || 0));
+
+        const container = document.getElementById('rankListContainer');
+        container.innerHTML = '';
+
+        let myRankIndex = userList.findIndex(u => u.nickname === currentUser.nickname);
+        if (myRankIndex !== -1) {
+          document.getElementById('myRankSummary').textContent = `${currentUser.nickname} 님은 현재 ${myRankIndex + 1}위입니다!`;
+          document.getElementById('myRankPointDisplay').textContent = `${(userList[myRankIndex].points || 0).toLocaleString()}P`;
+        } else {
+          document.getElementById('myRankSummary').textContent = `${currentUser.nickname} 님 (순위 밖)`;
+          document.getElementById('myRankPointDisplay').textContent = `${userPoints.toLocaleString()}P`;
+        }
+
+        if (userList.length === 0) {
+          container.innerHTML = '<div class="text-center text-slate-400 py-4">아직 등록된 랭커가 없습니다.</div>';
+          return;
+        }
+
+        userList.slice(0, 10).forEach((user, index) => {
+          const isTop3 = index < 3;
+          let rankBadge = `${index + 1}위`;
+          if (index === 0) rankBadge = '🥇 1등';
+          else if (index === 1) rankBadge = '🥈 2등';
+          else if (index === 2) rankBadge = '🥉 3등';
+
+          const item = document.createElement('div');
+          item.className = `p-3 rounded-2xl border flex items-center justify-between transition-all ${isTop3 ? 'bg-amber-50/70 border-amber-200' : 'bg-slate-50 border-slate-200'}`;
+
+          const badgeClass = user.badge || 'nb-none';
+
+          item.innerHTML = `
+            <div class="flex items-center gap-2.5">
+              <span class="font-black text-xs ${index === 0 ? 'text-amber-600 text-sm' : 'text-slate-600'}">${rankBadge}</span>
+              <span class="${badgeClass} text-xs inline-block">${user.nickname}</span>
+            </div>
+            <span class="font-extrabold text-amber-700 bg-white border border-amber-100 px-2.5 py-0.5 rounded-xl shadow-xs">
+              ${(user.points || 0).toLocaleString()}P
+            </span>
+          `;
+          container.appendChild(item);
+        });
+      });
+    }
+
+    // [상점 구매 로직: 인플레이션 적용]
     function openShopModal() {
       updatePointsUI();
       document.getElementById('shopModal').classList.remove('hidden');
@@ -726,30 +963,31 @@
       document.getElementById('shopModal').classList.add('hidden');
     }
 
-    function buyNickColor(colorCode, colorName) {
-      const cost = 30;
-      if (userPoints < cost) return alert(`❌ 포인트가 부족합니다!\n현재: ${userPoints}P (필요: ${cost}P)\n식단을 등록하고 관리자 승인을 받아 포인트를 충전하세요!`);
-
-      if (!confirm(`30P를 사용하여 닉네임 색상을 [${colorName}]으로 변경하시겠습니까?`)) return;
+    function buyNickColor(colorCode, colorName, cost) {
+      if (userPoints < cost) return alert(`❌ 포인트가 부족합니다!\n현재: ${userPoints.toLocaleString()}P (필요: ${cost.toLocaleString()}P)`);
+      if (!confirm(`${cost.toLocaleString()}P를 사용하여 닉네임 색상을 [${colorName}]으로 변경하시겠습니까?`)) return;
 
       userPoints -= cost;
       myNickColor = colorCode;
       localStorage.setItem('bapsim_custom_color', myNickColor);
       updatePointsUI();
-      alert(`🎉 닉네임 색상이 [${colorName}]으로 적용되었습니다! 대화창에서 확인해보세요.`);
+      alert(`🎉 닉네임 색상이 [${colorName}]으로 적용되었습니다!`);
     }
 
-    function buyNickBg(bgClass, bgName) {
-      const cost = 50;
-      if (userPoints < cost) return alert(`❌ 포인트가 부족합니다!\n현재: ${userPoints}P (필요: ${cost}P)\n식단을 등록하고 관리자 승인을 받아 포인트를 충전하세요!`);
+    function buyNickBg(bgClass, bgName, cost) {
+      if (userPoints < cost) {
+        return alert(`❌ 포인트가 부족합니다!\n현재 잔여 포인트: ${userPoints.toLocaleString()}P\n필요 포인트: ${cost.toLocaleString()}P\n\n매일 점심 식단을 등록하고 관리자(09010) 승인을 받아 포인트를 충전하세요!`);
+      }
 
-      if (!confirm(`50P를 사용하여 닉네임 배경 배지를 [${bgName}]으로 변경하시겠습니까?`)) return;
+      if (!confirm(`정말로 ${cost.toLocaleString()}P를 결제하고 [${bgName}]을(를) 장착하시겠습니까?`)) return;
 
       userPoints -= cost;
       myNickBg = bgClass;
       localStorage.setItem('bapsim_custom_bg', myNickBg);
       updatePointsUI();
-      alert(`🎉 [${bgName}] 배지가 장착되었습니다! 대화창에서 확인해보세요.`);
+
+      if (window.confetti) confetti({ particleCount: 100, spread: 70 });
+      alert(`🎉 축하합니다! 전설의 [${bgName}] 배지가 장착되었습니다!\n포인트 랭킹과 채팅방에서 당신의 위엄이 실시간으로 빛납니다.`);
     }
 
     function resetCustomStyles() {
@@ -757,10 +995,11 @@
       myNickBg = 'nb-none';
       localStorage.removeItem('bapsim_custom_color');
       localStorage.removeItem('bapsim_custom_bg');
+      updatePointsUI();
       alert('닉네임 색상 및 배경이 기본값으로 초기화되었습니다.');
     }
 
-    // 식당 저장 (메뉴 등록 시 포인트 승인 큐에 적재)
+    // 식당 저장
     function handleSaveRestaurant(e) {
       e.preventDefault();
       const editId = document.getElementById('editRestId').value;
@@ -787,7 +1026,6 @@
       db.ref(`restaurants/${id}`).set(restData, (err) => {
         if (err) return alert('저장 중 오류 발생');
 
-        // 관리자 승인 큐에 요청 적재
         db.ref('point_requests').push({
           nickname: currentUser.nickname,
           restaurantName: restData.name,
@@ -799,7 +1037,6 @@
 
         alert(`✅ 메뉴가 성공적으로 등록되었습니다!\n관리자(09010) 승인 후 50P가 최종 적립됩니다.`);
 
-        // 채팅방 공지
         const chatPath = currentGroupId === 'lobby' ? 'lobby_messages' : `groups/${currentGroupId}/messages`;
         db.ref(chatPath).push({
           type: 'system',
@@ -989,7 +1226,7 @@
       }
     }
 
-    // 채팅 및 이모티콘 (커스텀 닉네임 색상/배경 실시간 전송)
+    // 채팅 & 이모티콘 (커스텀 닉네임 배지 렌더링)
     function sendSticker(stickerType) {
       if (userPoints < 10) return alert('포인트가 부족합니다! (10P 필요)');
       userPoints -= 10;
@@ -1052,7 +1289,6 @@
           contentHTML = `<div class="px-3.5 py-2 rounded-2xl max-w-[85%] leading-relaxed ${isMe ? 'bg-indigo-600 text-white rounded-tr-none font-medium' : 'bg-white border text-slate-800 rounded-tl-none'}">${msg.text}</div>`;
         }
 
-        // 구매한 닉네임 커스텀 색상 및 배경 배지 렌더링
         const colorStyle = msg.color ? `color: ${msg.color};` : '';
         const bgClass = msg.bg || 'nb-none';
 
@@ -1101,7 +1337,7 @@
     function calcDutchPay() {
       const total = parseInt(document.getElementById('nTotalAmount').value, 10);
       const people = parseInt(document.getElementById('nPeopleCount').value, 10);
-      if (!total || !people) return alert('금액과 인원수를 입력하세요.');
+      if (!total || !people) return alert('금액과 인원수를 올바르게 입력하세요.');
       const per = Math.ceil(total / people);
       const res = document.getElementById('dutchResultBox');
       res.innerHTML = `1인당 <strong>${per.toLocaleString()}원</strong>`;
@@ -1229,6 +1465,7 @@
       currentUser = { nickname: n };
       localStorage.setItem('bapsim_user', JSON.stringify(currentUser));
       document.getElementById('userProfileText').textContent = n;
+      updatePointsUI();
       closeAuthModal();
     }
 
