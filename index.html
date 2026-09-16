@@ -3,1917 +3,456 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>밥심 (Bapsim) - 문정동 한식뷔페 실시간 메뉴 & 팀 투표</title>
-  <meta name="description" content="문정 법조타운 매일 바뀌는 한식뷔페 일일 식단표 비교 및 팀 점심 실시간 투표 서비스">
-
-  <!-- Tailwind CSS CDN -->
+  <title>밥심 (Bapsim) - 문정동 한식뷔페 일일 식단 & 실시간 팀 투표</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Firebase SDKs (Realtime Sync ready) -->
-  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
-
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              50: '#fff7ed',
-              100: '#ffedd5',
-              200: '#fed7aa',
-              500: '#f97316',
-              600: '#ea580c',
-              700: '#c2410c',
-            }
-          },
-          fontFamily: {
-            sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-          }
-        }
-      }
-    }
-  </script>
-
+  <!-- Firebase SDK v8 -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-    body {
-      font-family: 'Pretendard', sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .custom-scrollbar::-webkit-scrollbar {
-      height: 5px;
-      width: 5px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background-color: #cbd5e1;
-      border-radius: 9999px;
-    }
-    @keyframes pulse-glow {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.7; transform: scale(1.05); }
-    }
-    .animate-pulse-subtle {
-      animation: pulse-glow 2s infinite ease-in-out;
-    }
+    body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+    .badge-shimmer { background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%); background-size: 200% 100%; animation: shimmer 2.5s infinite; }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col antialiased selection:bg-orange-100 selection:text-orange-700">
+<body class="bg-slate-50 text-slate-900 min-h-screen pb-24 selection:bg-orange-500 selection:text-white">
 
-  <!-- Top Navigation Header -->
-  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 shadow-xs">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
-      <!-- Logo & Trigger -->
-      <div class="flex items-center gap-2.5 cursor-pointer select-none" onclick="handleLogoMultiClick()" title="로고 5회 클릭 시 시크릿 관리자 모드 진입">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-amber-500 flex items-center justify-center text-white shadow-md shadow-orange-500/20 font-black text-xl tracking-tight relative">
-          <span>밥</span>
-          <span class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white"></span>
+  <!-- 상단 네비게이션 바 -->
+  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div id="logoBadge" class="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center text-white font-extrabold text-xl shadow-md shadow-orange-500/30 cursor-pointer select-none active:scale-95 transition-transform" title="5번 클릭 시 관리자 모드">
+          밥
         </div>
         <div>
-          <div class="flex items-center gap-1.5">
-            <h1 class="text-xl font-extrabold tracking-tight text-slate-900 leading-none">밥심</h1>
-            <span class="text-[10px] font-bold text-brand-600 bg-orange-50 px-1.5 py-0.5 rounded border border-orange-200">문정 법조타운</span>
+          <div class="flex items-center gap-2">
+            <h1 class="font-extrabold text-xl tracking-tight text-slate-900">밥심</h1>
+            <span class="text-xs bg-orange-100 text-orange-700 font-semibold px-2 py-0.5 rounded-full">문정 법조타운</span>
+            <span id="syncStatusBadge" class="text-xs bg-emerald-100 text-emerald-700 font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span id="syncStatusText">Firebase 클라우드 연동됨</span>
+            </span>
           </div>
-          <p class="text-[11px] text-slate-500 font-medium">한식뷔페 실시간 식단 비교 & 팀 투표</p>
+          <p class="text-xs text-slate-500">매일 아침 자동 업데이트되는 한식뷔페 식단 비교 & 실시간 투표</p>
         </div>
       </div>
 
-      <!-- Right Action Controls -->
-      <div class="flex items-center gap-2 sm:gap-3">
-        <!-- Live Sync Status Button -->
-        <button onclick="openSyncConfigModal()" id="sync-status-pill" class="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-800 font-bold transition hover:shadow-xs" title="클릭하여 Firebase 클라우드 DB 연결 (다른 기기 실시간 동기화)">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-          <span id="sync-status-label">실시간 연동 중</span>
-          <i data-lucide="settings-2" class="w-3.5 h-3.5 text-emerald-600"></i>
+      <div class="flex items-center gap-2">
+        <!-- 프로필 / 로그인 버튼 -->
+        <button id="userProfileBtn" onclick="openAuthModal()" class="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors">
+          <i data-lucide="user" class="w-3.5 h-3.5"></i>
+          <span id="userProfileText">로그인/가입</span>
         </button>
 
-        <!-- Admin Quick Shortcut -->
-        <button onclick="toggleAdminView()" class="hidden sm:flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition" title="단축키: Ctrl + Shift + A">
-          <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-brand-600"></i>
+        <!-- 관리자 모드 버튼 -->
+        <button onclick="openAdminModal()" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-900 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition-all">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-orange-400"></i>
           <span>관리자</span>
-          <kbd class="text-[9px] bg-white px-1 py-0.5 rounded text-slate-500 border">Ctrl+Shift+A</kbd>
         </button>
-
-        <!-- Chat Drawer Toggle -->
-        <button onclick="toggleChatDrawer()" class="relative p-2 text-slate-600 hover:text-brand-600 hover:bg-orange-50 rounded-lg transition-colors" title="밥심 톡 (실시간 단톡방)">
-          <i data-lucide="message-circle" class="w-5 h-5"></i>
-          <span id="chat-unread-badge" class="hidden absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
-        </button>
-
-        <!-- Member Auth Header Slot -->
-        <div id="header-auth-container">
-          <!-- Populated by JS -->
-        </div>
       </div>
     </div>
   </header>
 
-  <!-- Active Room Banner -->
-  <div id="active-room-banner" class="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white py-2 px-4 shadow-inner">
-    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm font-medium">
-      <div class="flex items-center gap-2">
-        <span class="bg-black/20 text-white px-2 py-0.5 rounded text-[11px] font-bold">진행 중인 팀 투표</span>
-        <span id="banner-room-title" class="font-bold underline underline-offset-2">문정 테라&엠스테이트 점심원정대</span>
-        <span class="text-xs text-orange-100 hidden sm:inline">(현재 총 참여: <span id="banner-member-count" class="font-bold">0</span>표)</span>
-      </div>
-      <div class="flex items-center gap-3">
-        <div class="flex items-center gap-1.5 bg-black/20 px-2.5 py-1 rounded text-xs tracking-wider">
-          <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-200"></i>
-          <span>투표 마감까지 <b id="countdown-timer" class="font-mono text-sm text-yellow-300">14:32</b></span>
-        </div>
-        <button onclick="scrollToVotingSection()" class="bg-white text-brand-600 hover:bg-orange-50 text-xs font-bold px-2.5 py-1 rounded shadow-xs transition">
-          투표소 이동
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Main Application Content -->
-  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-6 flex-1 w-full space-y-6">
-
-    <!-- Top Date & Filter Bar -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+  <!-- 메인 컨테이너 -->
+  <main class="max-w-6xl mx-auto px-4 pt-6 space-y-6">
+    <!-- 상단 요약 배너 -->
+    <div class="bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl p-6 text-white shadow-lg shadow-orange-500/20 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
       <div>
-        <div class="flex items-center gap-2 text-xs font-semibold text-brand-600 mb-1">
+        <div class="flex items-center gap-2 text-xs font-semibold text-orange-100 mb-1">
           <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
-          <span id="current-today-date">2026.09.16 (수)</span>
-          <span class="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-normal">문정 비즈니스 밸리</span>
+          <span id="currentDateDisplay">오늘의 점심 식단표</span>
+          <span class="bg-white/20 px-2 py-0.5 rounded-md text-[11px]">실시간 투표 진행 중</span>
         </div>
-        <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">문정동 대표 한식뷔페 일일 라인업</h2>
-        <p class="text-xs sm:text-sm text-slate-500 mt-0.5">매일 오전 사장님 칠판 식단표를 인식하여 실시간 다자간 투표를 진행합니다.</p>
+        <h2 class="text-2xl font-black tracking-tight">오늘 문정동 점심, 어디로 갈까요?</h2>
+        <p class="text-xs text-orange-100 mt-1">식당별 메인 요리를 확인하고 팀원들과 투표해 보세요.</p>
       </div>
-
-      <!-- Filters & View Switcher -->
-      <div class="flex flex-wrap items-center gap-2">
-        <div class="relative">
-          <input type="text" id="keyword-filter" oninput="applyFilters()" placeholder="메뉴 검색 (닭강정, 제육...)" class="text-xs bg-slate-50 border border-slate-200 rounded-lg pl-8 pr-3 py-2 w-44 focus:outline-hidden focus:border-brand-500 transition">
-          <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5"></i>
-        </div>
-
-        <button onclick="toggleFilter('meat')" id="filter-meat-btn" class="text-xs px-2.5 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold flex items-center gap-1 transition">
-          <span>🥩 고기류 2종 이상</span>
+      <div class="flex gap-2 w-full md:w-auto">
+        <button onclick="shareVoteRoom()" class="flex-1 md:flex-initial flex items-center justify-center gap-2 bg-white text-orange-600 font-bold px-4 py-2.5 rounded-xl text-xs hover:bg-orange-50 shadow-md transition-all active:scale-95">
+          <i data-lucide="share-2" class="w-4 h-4"></i>
+          투표 링크 복사
         </button>
-
-        <div class="inline-flex p-1 bg-slate-100 rounded-xl border border-slate-200">
-          <button id="btn-view-card" onclick="setViewMode('card')" class="px-3 py-1 text-xs font-bold rounded-lg bg-white shadow-xs text-brand-600 transition flex items-center gap-1">
-            <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
-            <span>카드 뷰</span>
-          </button>
-          <button id="btn-view-table" onclick="setViewMode('table')" class="px-3 py-1 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center gap-1">
-            <i data-lucide="columns-2" class="w-3.5 h-3.5"></i>
-            <span>1:1 비교표</span>
-          </button>
-        </div>
       </div>
     </div>
 
-    <!-- Voting Station Gauge Container -->
-    <section id="voting-status-card" class="bg-white border-2 border-brand-500/30 rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden transition-all">
-      <div class="absolute top-0 right-0 bg-brand-500 text-white font-extrabold text-[10px] px-3 py-1 rounded-bl-xl uppercase tracking-wider flex items-center gap-1">
-        <i data-lucide="flame" class="w-3 h-3"></i> 실시간 점심 투표소
-      </div>
-
-      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-        <div>
-          <div class="flex items-center gap-2">
-            <h3 id="current-room-name-heading" class="text-lg font-bold text-slate-900">문정 테라&엠스테이트 점심원정대</h3>
-            <button onclick="copyRoomLink()" class="text-slate-400 hover:text-brand-600 transition p-1" title="방 링크 복사">
-              <i data-lucide="share-2" class="w-4 h-4"></i>
-            </button>
-          </div>
-          <p class="text-xs text-slate-500 mt-0.5">내가 투표하거나 동료가 투표하면 즉시 다른 모든 화면에 실시간 집계됩니다! (1인 1표)</p>
-        </div>
-
-        <!-- Current Voter Profile -->
-        <div class="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200">
-          <div class="w-7 h-7 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs font-bold" id="my-avatar-icon">나</div>
-          <span class="text-xs font-medium text-slate-500">내 닉네임:</span>
-          <span id="current-voter-label" class="text-xs font-bold text-slate-800">문정직장인</span>
-          <button onclick="promptChangeNickname()" class="text-[11px] bg-slate-200 hover:bg-slate-300 font-semibold px-2 py-0.5 rounded transition">변경</button>
-        </div>
-      </div>
-
-      <!-- Live Poll Bar Gauges -->
-      <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3.5" id="poll-gauge-container">
-        <!-- Rendered dynamically -->
-      </div>
-
-      <!-- Voting Bottom Controls -->
-      <div class="mt-5 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div class="flex items-center gap-2 text-slate-500">
-          <i data-lucide="radio" class="w-3.5 h-3.5 text-emerald-500 shrink-0 animate-pulse"></i>
-          <span>실시간 데이터가 모든 팀원 화면에 즉시 동기화됩니다.</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <button onclick="simulateAddTeammateVote()" class="text-slate-600 hover:bg-slate-100 border border-slate-200 font-medium px-2.5 py-1.5 rounded-lg transition flex items-center gap-1" title="다른 동료가 투표한 상황 테스트">
-            <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
-            <span>동료 가상 투표 +1 (테스트)</span>
-          </button>
-          <button onclick="finalizeAndNotifyLeader()" class="bg-slate-900 hover:bg-black text-white font-bold px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 shadow-xs">
-            <i data-lucide="navigation" class="w-3.5 h-3.5 text-amber-400"></i>
-            <span>1위 식당 확정 & 네이버 지도 길찾기</span>
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Buffet Cards Grid View -->
-    <section id="buffet-cards-view" class="grid grid-cols-1 md:grid-cols-2 gap-5">
-      <!-- Injected via JavaScript -->
-    </section>
-
-    <!-- Buffet 1:1 Side-by-Side Matrix Table -->
-    <section id="buffet-table-view" class="hidden bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
-      <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <i data-lucide="git-compare" class="w-4 h-4 text-brand-600"></i>
-          <h3 class="font-bold text-sm text-slate-800">문정 한식뷔페 라인업 1:1 정밀 대조표</h3>
-        </div>
-        <span class="text-xs text-slate-500">가로 스크롤로 한눈에 비교</span>
-      </div>
-      <div class="overflow-x-auto custom-scrollbar">
-        <table class="w-full text-left text-xs border-collapse min-w-[720px]">
-          <thead id="comparison-table-head">
-            <!-- Populated via JS -->
-          </thead>
-          <tbody id="comparison-table-body" class="divide-y divide-slate-100 text-slate-600">
-            <!-- Populated via JS -->
-          </tbody>
-        </table>
-      </div>
-    </section>
+    <!-- 식당 카드 리스트 그리드 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="restaurantCardsContainer">
+      <!-- 동적 카드 렌더링 영역 -->
+    </div>
   </main>
 
-  <!-- Firebase / Cloud Sync Modal -->
-  <div id="sync-config-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
-      <div class="flex items-center justify-between">
+  <!-- 하단 플로팅 채팅 버튼 & 창 -->
+  <div class="fixed bottom-6 right-6 z-50">
+    <button id="chatToggleBtn" onclick="toggleChatWindow()" class="relative bg-orange-500 hover:bg-orange-600 text-white w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all hover:scale-105 active:scale-95">
+      <i data-lucide="message-square" class="w-6 h-6"></i>
+      <span id="unreadDot" class="absolute top-1 right-1 w-3.5 h-3.5 bg-red-500 border-2 border-white rounded-full hidden"></span>
+    </button>
+
+    <!-- 채팅창 모달 -->
+    <div id="chatWindow" class="hidden absolute bottom-16 right-0 w-80 sm:w-96 h-[460px] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden">
+      <div class="bg-slate-900 text-white p-3.5 flex items-center justify-between">
         <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold">
-            <i data-lucide="database" class="w-4 h-4"></i>
-          </div>
-          <div>
-            <h3 class="text-base font-black text-slate-900">클라우드 실시간 연동 (Firebase)</h3>
-            <p class="text-[11px] text-slate-500">다른 PC 및 모바일 폰과 완전 연동 설정</p>
-          </div>
+          <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+          <span class="font-bold text-sm tracking-tight">밥심 톡 (실시간 전체 채팅)</span>
         </div>
-        <button onclick="closeSyncConfigModal()" class="text-slate-400 hover:text-slate-600 p-1">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
+        <button onclick="toggleChatWindow()" class="text-slate-400 hover:text-white text-xs">닫기</button>
       </div>
 
-      <div class="bg-amber-50 rounded-xl p-3 border border-amber-200 text-xs text-amber-900 space-y-1.5">
-        <div class="font-bold flex items-center gap-1">
-          <i data-lucide="info" class="w-3.5 h-3.5 text-amber-600"></i>
-          <span>실시간 동기화 모드 안내</span>
-        </div>
-        <p class="text-[11px] leading-relaxed text-amber-800">
-          • <b>기본 모드:</b> 별도 설정 없이도 <b>같은 PC에서 창을 2개 띄우거나 새 탭을 열면 0.01초 만에 즉시 연동</b>됩니다.<br>
-          • <b>스마트폰/다른 사람 PC 연동:</b> 무료 Firebase 프로젝트의 <code>firebaseConfig</code> JSON을 붙여넣으시면 전 세계 어디서든 실시간 투표와 채팅이 동기화됩니다!
-        </p>
+      <!-- 메시지 스크롤 영역 -->
+      <div id="chatMessages" class="flex-1 p-3 overflow-y-auto space-y-2.5 text-xs bg-slate-50">
+        <div class="text-center text-slate-400 py-4 text-[11px]">대화에 참여해보세요!</div>
       </div>
 
-      <div>
-        <label class="block text-xs font-bold text-slate-700 mb-1">Firebase Realtime Database Config (선택 사항)</label>
-        <textarea id="firebase-config-input" rows="5" placeholder='{\n  "apiKey": "...",\n  "authDomain": "...",\n  "databaseURL": "https://your-project-rtdb.firebaseio.com",\n  "projectId": "..."\n}' class="w-full text-xs font-mono bg-slate-50 border border-slate-200 rounded-xl p-3 focus:outline-hidden focus:border-brand-500"></textarea>
+      <!-- 빠른 메시지 버튼 바 -->
+      <div class="px-2.5 py-1.5 bg-slate-100 border-t border-slate-200 flex gap-1.5 overflow-x-auto text-[11px]">
+        <button onclick="quickChat('🍗 오늘 닭강정 대박이네요')" class="whitespace-nowrap px-2 py-0.5 bg-white rounded-md border border-slate-200 text-slate-700 hover:bg-slate-50">🍗 닭강정 대박</button>
+        <button onclick="quickChat('🏃‍♂️ 11시 40분에 로비에서 봐요!')" class="whitespace-nowrap px-2 py-0.5 bg-white rounded-md border border-slate-200 text-slate-700 hover:bg-slate-50">🏃‍♂️ 40분 로비</button>
+        <button onclick="quickChat('🪑 자리 잡으러 먼저 갑니다')" class="whitespace-nowrap px-2 py-0.5 bg-white rounded-md border border-slate-200 text-slate-700 hover:bg-slate-50">🪑 자리 선점</button>
       </div>
 
-      <div class="flex items-center justify-end gap-2 pt-2">
-        <button onclick="resetToLocalBroadcast()" class="px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition">
-          다중탭 로컬 모드로 리셋
-        </button>
-        <button onclick="saveFirebaseConfig()" class="px-4 py-2 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-xs transition">
-          Firebase 연결 저장
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Admin Modal (Ctrl+Shift+A or 5 clicks on logo) -->
-  <div id="admin-modal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 hidden">
-    <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
-      <!-- Admin Header -->
-      <div class="p-4 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
-        <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg bg-brand-600 text-white flex items-center justify-center font-bold">
-            <i data-lucide="shield-check" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <h3 class="text-base font-black tracking-tight">밥심 통합 관리자 콘솔</h3>
-              <span class="text-[10px] bg-orange-500/20 text-orange-400 border border-orange-500/30 px-1.5 py-0.2 rounded font-mono">단축키: Ctrl+Shift+A</span>
-            </div>
-            <p class="text-[11px] text-slate-400">문정동 식단 OCR 인식 관리 & 가입자 현황</p>
-          </div>
-        </div>
-        <button onclick="toggleAdminView()" class="text-slate-400 hover:text-white p-1">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <!-- Admin Tab Navigation -->
-      <div class="flex border-b border-slate-200 bg-slate-50 px-4 pt-2 gap-2 text-xs font-bold">
-        <button id="admin-tab-ocr" onclick="switchAdminTab('ocr')" class="px-3 py-2 border-b-2 border-brand-600 text-brand-600 flex items-center gap-1.5 transition">
-          <i data-lucide="scan-text" class="w-4 h-4"></i>
-          <span>인스타 식단표 OCR 등록</span>
-        </button>
-        <button id="admin-tab-users" onclick="switchAdminTab('users')" class="px-3 py-2 border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition">
-          <i data-lucide="users" class="w-4 h-4"></i>
-          <span>가입자 현황 & 소속 빌딩</span>
-        </button>
-        <button id="admin-tab-buffets" onclick="switchAdminTab('buffets')" class="px-3 py-2 border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition">
-          <i data-lucide="store" class="w-4 h-4"></i>
-          <span>한식뷔페 매장 관리</span>
-        </button>
-      </div>
-
-      <!-- Admin Tab Panels -->
-      <div class="p-5 overflow-y-auto flex-1 space-y-6 text-xs text-slate-700 custom-scrollbar">
-
-        <!-- TAB 1: OCR Instagram Photo Extraction -->
-        <div id="admin-panel-ocr" class="space-y-4">
-          <div class="bg-amber-50 rounded-xl p-3 border border-amber-200 text-amber-900 flex items-start gap-2">
-            <i data-lucide="sparkles" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
-            <div>
-              <p class="font-bold">인스타그램 칠판 식단표 자동 인식 (OCR)</p>
-              <p class="text-[11px] text-amber-700 mt-0.5">사장님이 인스타에 올린 식단 사진을 캡처하여 바로 붙여넣기(Ctrl + V) 하거나 이미지를 업로드하세요. 메인 메뉴, 국, 반찬을 자동 정제해 전체 유저에게 실시간 배포합니다.</p>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Left: File upload & OCR scan -->
-            <div class="space-y-3">
-              <div>
-                <label class="block font-bold text-slate-800 mb-1">식단을 업데이트할 식당 선택</label>
-                <select id="ocr-target-buffet" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 font-semibold text-slate-800 focus:outline-hidden focus:border-brand-500">
-                  <!-- Populated in JS -->
-                </select>
-              </div>
-
-              <div>
-                <label class="block font-bold text-slate-800 mb-1">인스타 캡처 사진 업로드 / 복사붙여넣기</label>
-                <div id="ocr-dropzone" class="border-2 border-dashed border-slate-300 hover:border-brand-500 rounded-xl p-5 text-center cursor-pointer transition bg-slate-50 flex flex-col items-center justify-center gap-2 min-h-[150px]" onclick="document.getElementById('ocr-file-input').click()">
-                  <input type="file" id="ocr-file-input" accept="image/*" class="hidden" onchange="handleOcrFileUpload(event)">
-                  <div class="w-10 h-10 rounded-full bg-orange-100 text-brand-600 flex items-center justify-center">
-                    <i data-lucide="image-plus" class="w-5 h-5"></i>
-                  </div>
-                  <div>
-                    <span class="font-bold text-slate-800">사진 클릭 또는 드래그 업로드</span>
-                    <p class="text-[11px] text-slate-500 mt-0.5">어디서든 캡처 후 <kbd class="px-1 bg-white border rounded">Ctrl + V</kbd> 로 붙여넣기 지원</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Uploaded Preview -->
-              <div id="ocr-image-preview-container" class="hidden border border-slate-200 rounded-xl p-2 bg-slate-900">
-                <div class="flex items-center justify-between text-slate-300 text-[11px] mb-1 px-1">
-                  <span>업로드된 식단표 캡처본</span>
-                  <button onclick="clearOcrImage()" class="text-red-400 hover:underline">삭제</button>
-                </div>
-                <img id="ocr-preview-img" src="" alt="식단 원본" class="w-full h-36 object-cover rounded-lg border border-slate-700">
-              </div>
-
-              <button onclick="runSimulatedOcrScan()" id="btn-run-ocr" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-2.5 rounded-xl transition flex items-center justify-center gap-2 shadow-sm">
-                <i data-lucide="cpu" class="w-4 h-4 text-emerald-400"></i>
-                <span>AI OCR 텍스트 자동 판독 실행</span>
-              </button>
-            </div>
-
-            <!-- Right: Parsed Result Inspection & Publish -->
-            <div class="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
-              <div class="flex items-center justify-between">
-                <span class="font-bold text-slate-900 flex items-center gap-1">
-                  <i data-lucide="check-check" class="w-4 h-4 text-brand-600"></i> 인식된 식단 검수 & 실시간 발행
-                </span>
-                <span id="ocr-confidence-tag" class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">준비됨</span>
-              </div>
-
-              <div>
-                <label class="block font-medium text-slate-600 mb-1">메인 요리 3대장 (쉼표로 구분)</label>
-                <input type="text" id="ocr-input-mains" value="유자청 닭강정, 불맛 매콤제육, 칠리 탕수육" class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 font-bold text-brand-600 focus:outline-hidden focus:border-brand-500">
-              </div>
-
-              <div>
-                <label class="block font-medium text-slate-600 mb-1">국 / 찌개</label>
-                <input type="text" id="ocr-input-soup" value="진한 한우 사골 소고기 미역국" class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 font-semibold text-slate-800 focus:outline-hidden focus:border-brand-500">
-              </div>
-
-              <div>
-                <label class="block font-medium text-slate-600 mb-1">밑반찬류 (쉼표로 구분)</label>
-                <input type="text" id="ocr-input-sides" value="계란말이, 얼갈이 겉절이, 어묵채볶음, 청포묵무침" class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 focus:outline-hidden focus:border-brand-500">
-              </div>
-
-              <div>
-                <label class="block font-medium text-slate-600 mb-1">디저트 / 후식</label>
-                <input type="text" id="ocr-input-dessert" value="얼음 숭늉 & 살얼음 식혜" class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 focus:outline-hidden focus:border-brand-500">
-              </div>
-
-              <div class="pt-2">
-                <button onclick="applyOcrMenuToBuffet()" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-black py-2.5 rounded-xl transition shadow-md flex items-center justify-center gap-2">
-                  <i data-lucide="radio" class="w-4 h-4 text-amber-300"></i>
-                  <span>오늘 메뉴 실시간 전체 배포 (모든 유저 화면 동기화)</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- TAB 2: Users Management -->
-        <div id="admin-panel-users" class="hidden space-y-4">
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
-              <span class="text-slate-500 text-[11px] block">전체 등록 회원</span>
-              <span id="stat-total-users" class="text-xl font-black text-slate-900">5명</span>
-            </div>
-            <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
-              <span class="text-slate-500 text-[11px] block">오늘 투표 참여율</span>
-              <span id="stat-active-rate" class="text-xl font-black text-emerald-600">80%</span>
-            </div>
-            <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
-              <span class="text-slate-500 text-[11px] block">최다 가입 빌딩</span>
-              <span class="text-xl font-black text-brand-600">문정 테라타워 1차</span>
-            </div>
-          </div>
-
-          <div class="flex items-center justify-between gap-2">
-            <span class="font-bold text-slate-800">문정동 등록 회원 명단</span>
-            <input type="text" id="user-search-input" oninput="renderUserTable()" placeholder="이름/빌딩 검색..." class="px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs w-48">
-          </div>
-
-          <div class="border border-slate-200 rounded-xl overflow-hidden">
-            <table class="w-full text-left text-xs">
-              <thead class="bg-slate-100 text-slate-700">
-                <tr>
-                  <th class="p-2.5">닉네임</th>
-                  <th class="p-2.5">계정 ID</th>
-                  <th class="p-2.5">근무 빌딩</th>
-                  <th class="p-2.5">가입일</th>
-                  <th class="p-2.5 text-center">실시간 연결</th>
-                </tr>
-              </thead>
-              <tbody id="admin-user-tbody" class="divide-y divide-slate-100">
-                <!-- Injected in JS -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- TAB 3: Buffet Management -->
-        <div id="admin-panel-buffets" class="hidden space-y-4">
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-slate-800">문정동 등록 한식뷔페 리스트</span>
-            <button onclick="openAddNewBuffetPrompt()" class="bg-slate-900 text-white font-bold px-3 py-1.5 rounded-lg flex items-center gap-1">
-              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-              <span>신규 뷔페 등록</span>
-            </button>
-          </div>
-
-          <div class="space-y-2" id="admin-buffet-list-container">
-            <!-- Injected in JS -->
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Admin Footer -->
-      <div class="p-3 bg-slate-100 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
-        <span>단축키 <b class="text-slate-800">Ctrl + Shift + A</b>를 누르면 관리자 모드가 토글됩니다.</span>
-        <button onclick="toggleAdminView()" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold rounded-lg transition">닫기</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Floating Realtime Chat Drawer (밥심 톡) -->
-  <aside id="chat-drawer" class="fixed bottom-4 right-4 z-40 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden transition-all duration-300 transform translate-y-[120%] pointer-events-none opacity-0 max-h-[520px] h-[500px]">
-    <!-- Chat Header -->
-    <div class="p-3.5 bg-gradient-to-r from-slate-900 to-slate-800 text-white flex items-center justify-between shadow-xs">
-      <div class="flex items-center gap-2">
-        <div class="w-7 h-7 rounded-lg bg-brand-600 text-white flex items-center justify-center font-bold">
-          <i data-lucide="messages-square" class="w-4 h-4"></i>
-        </div>
-        <div>
-          <h4 class="font-bold text-xs">밥심 톡 • 문정 직장인 실시간 수다</h4>
-          <span class="text-[10px] text-emerald-400 flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            실시간 연동 채널 접속 중
-          </span>
-        </div>
-      </div>
-      <div class="flex items-center gap-1">
-        <button onclick="clearChatMessages()" class="text-slate-400 hover:text-white p-1" title="채팅 비우기">
-          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-        </button>
-        <button onclick="toggleChatDrawer()" class="text-slate-400 hover:text-white p-1">
-          <i data-lucide="x" class="w-4 h-4"></i>
-        </button>
-      </div>
-    </div>
-
-    <!-- Quick Shout Buttons -->
-    <div class="bg-orange-50/70 p-2 border-b border-orange-100 flex items-center gap-1.5 overflow-x-auto text-[11px] whitespace-nowrap custom-scrollbar">
-      <button onclick="sendQuickChatMessage('🍗 오늘 일루 닭강정 대박이래요!')" class="px-2 py-1 bg-white hover:bg-orange-100 rounded-md border border-orange-200 text-slate-700 font-semibold shadow-xs">🍗 닭강정 대박</button>
-      <button onclick="sendQuickChatMessage('🏃‍♂️ 11시 40분에 로비에서 봐요!')" class="px-2 py-1 bg-white hover:bg-orange-100 rounded-md border border-orange-200 text-slate-700 font-semibold shadow-xs">🏃‍♂️ 40분에 로비</button>
-      <button onclick="sendQuickChatMessage('🪑 제가 자리 먼저 맡아둘게요!')" class="px-2 py-1 bg-white hover:bg-orange-100 rounded-md border border-orange-200 text-slate-700 font-semibold shadow-xs">🪑 자리 선점</button>
-    </div>
-
-    <!-- Chat Messages Scroll Area -->
-    <div id="chat-message-list" class="flex-1 p-3.5 overflow-y-auto space-y-2.5 text-xs custom-scrollbar bg-slate-50/50">
-      <!-- Chat bubbles injected via JS -->
-    </div>
-
-    <!-- Chat Input Box -->
-    <form onsubmit="handleSendChatMessage(event)" class="p-2.5 bg-white border-t border-slate-200 flex items-center gap-2">
-      <input type="text" id="chat-input-text" placeholder="점심 메뉴 이야기 나눠보세요 (실시간 동기화)..." class="flex-1 px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:border-brand-500">
-      <button type="submit" class="w-8 h-8 rounded-xl bg-brand-600 hover:bg-brand-700 text-white flex items-center justify-center shrink-0 shadow-xs transition">
-        <i data-lucide="send" class="w-3.5 h-3.5"></i>
-      </button>
-    </form>
-  </aside>
-
-  <!-- Auth Modal (Signup / Login) -->
-  <div id="auth-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 transform transition-all">
-      <div class="flex items-center justify-between mb-4">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-xl bg-brand-600 text-white flex items-center justify-center font-bold">
-            <i data-lucide="user-check" class="w-4 h-4"></i>
-          </div>
-          <h3 id="auth-modal-title" class="text-base font-black text-slate-900">밥심 간편 로그인</h3>
-        </div>
-        <button onclick="closeAuthModal()" class="text-slate-400 hover:text-slate-600 p-1">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <div class="flex border-b border-slate-200 mb-4 text-xs font-bold">
-        <button id="auth-tab-login" onclick="setAuthTab('login')" class="flex-1 pb-2 border-b-2 border-brand-600 text-brand-600">로그인</button>
-        <button id="auth-tab-signup" onclick="setAuthTab('signup')" class="flex-1 pb-2 border-b-2 border-transparent text-slate-500 hover:text-slate-900">간편 회원가입</button>
-      </div>
-
-      <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-3 text-xs">
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">아이디 (이메일 또는 사원ID)</label>
-          <input type="text" id="auth-input-id" required placeholder="example@company.com" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:border-brand-500 font-medium">
-        </div>
-
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">비밀번호</label>
-          <input type="password" id="auth-input-pw" required placeholder="비밀번호를 입력하세요" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:border-brand-500 font-medium">
-        </div>
-
-        <div id="signup-extra-fields" class="space-y-3 hidden">
-          <div>
-            <label class="block font-bold text-slate-700 mb-1">투표용 닉네임</label>
-            <input type="text" id="auth-input-nickname" placeholder="예: 김선임, 박대리" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:border-brand-500 font-medium">
-          </div>
-
-          <div>
-            <label class="block font-bold text-slate-700 mb-1">근무 중인 문정 빌딩</label>
-            <select id="auth-input-building" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:border-brand-500 font-medium text-slate-700">
-              <option value="테라타워 1차">문정 테라타워 1차</option>
-              <option value="테라타워 2차">문정 테라타워 2차</option>
-              <option value="엠스테이트">엠스테이트 (A/B/C/D동)</option>
-              <option value="H비즈니스파크">H비즈니스파크</option>
-              <option value="문정 SK V1">문정 SK V1 GL메트로시티</option>
-              <option value="대명벨리온">대명벨리온</option>
-              <option value="기타 인근">기타 문정 법조타운</option>
-            </select>
-          </div>
-        </div>
-
-        <button type="submit" id="auth-submit-btn" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-xs transition mt-2">
-          로그인하기
-        </button>
+      <!-- 입력 인풋 폼 -->
+      <form onsubmit="handleSendChat(event)" class="p-2 bg-white border-t border-slate-200 flex gap-1.5">
+        <input id="chatInput" type="text" placeholder="메시지를 입력하세요..." class="flex-1 bg-slate-100 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-orange-500" autocomplete="off" />
+        <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-lg text-xs font-semibold">전송</button>
       </form>
-
-      <div class="mt-4 pt-3 border-t border-slate-100 text-center text-[11px] text-slate-400">
-        문정 직장인 누구나 가입하고 실시간 투표에 참여할 수 있습니다.
-      </div>
     </div>
   </div>
 
-  <!-- Raw Chalkboard Photo Modal -->
-  <div id="modal-raw-photo" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl relative">
-      <div class="p-3 bg-slate-900 text-white flex items-center justify-between">
+  <!-- 회원가입/프로필 모달 -->
+  <div id="authModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 space-y-4">
+      <div class="flex items-center justify-between border-b pb-3">
+        <h3 class="font-extrabold text-slate-800 text-base">간편 프로필 설정</h3>
+        <button onclick="closeAuthModal()" class="text-slate-400 hover:text-slate-600 text-xs">✕</button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="font-bold text-slate-700 block mb-1">닉네임</label>
+          <input id="authNicknameInput" type="text" placeholder="예: 테라타워직장인" class="w-full border border-slate-200 rounded-lg p-2.5 text-xs focus:ring-1 focus:ring-orange-500 outline-none" />
+        </div>
+        <div>
+          <label class="font-bold text-slate-700 block mb-1">소속 건물</label>
+          <select id="authBuildingSelect" class="w-full border border-slate-200 rounded-lg p-2.5 text-xs focus:ring-1 focus:ring-orange-500 outline-none">
+            <option value="테라타워 1차">문정 테라타워 1차</option>
+            <option value="테라타워 2차">문정 테라타워 2차</option>
+            <option value="엠스테이트">문정 엠스테이트</option>
+            <option value="H비즈니스파크">문정 H비즈니스파크</option>
+            <option value="SK V1 GL메트로시티">SK V1 GL메트로시티</option>
+            <option value="대명벨리온">문정 대명벨리온</option>
+            <option value="기타">기타 / 인근</option>
+          </select>
+        </div>
+      </div>
+      <button onclick="saveUserProfile()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 rounded-xl text-xs transition-colors">
+        설정 완료 및 시작하기
+      </button>
+    </div>
+  </div>
+
+  <!-- 관리자 모달 -->
+  <div id="adminModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl p-6 space-y-4 max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between border-b pb-3">
         <div class="flex items-center gap-2">
-          <i data-lucide="camera" class="w-4 h-4 text-amber-400"></i>
-          <span id="raw-photo-title" class="text-xs font-bold">식당 칠판 식단 원본 사진</span>
+          <i data-lucide="shield" class="w-5 h-5 text-orange-500"></i>
+          <h3 class="font-extrabold text-slate-800 text-base">밥심 관리자 대시보드</h3>
         </div>
-        <button onclick="closeRawPhotoModal()" class="text-slate-300 hover:text-white p-1">
-          <i data-lucide="x" class="w-4 h-4"></i>
-        </button>
+        <button onclick="closeAdminModal()" class="text-slate-400 hover:text-slate-600 text-xs">✕</button>
       </div>
-      <div class="p-4 bg-slate-950 flex flex-col items-center">
-        <div class="w-full aspect-4/3 bg-slate-900 border-4 border-amber-950 rounded-lg p-5 flex flex-col justify-between font-mono text-emerald-300 relative shadow-inner">
-          <div class="text-center border-b border-emerald-800/80 pb-2">
-            <span class="text-xs text-emerald-400 font-sans font-bold" id="board-date-header">★ 오늘의 점심 특선 칠판 사진 ★</span>
+
+      <div class="flex-1 overflow-y-auto space-y-4 text-xs">
+        <!-- 투표 리셋 -->
+        <div class="p-4 bg-slate-50 border rounded-xl flex items-center justify-between">
+          <div>
+            <p class="font-bold text-slate-800">투표 현황 초기화</p>
+            <p class="text-slate-500 text-[11px]">오늘 투표된 표수를 0으로 리셋합니다.</p>
           </div>
-          <div class="space-y-2 text-sm text-amber-100" id="board-content-list">
-            <!-- Blackboard lines -->
-          </div>
-          <div class="text-[11px] text-slate-400 text-right italic">
-            매장 입구 블랙보드/인스타 직촬 (OCR 파싱 완료)
-          </div>
+          <button onclick="resetVotes()" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg font-bold">투표 초기화</button>
         </div>
-        <p class="text-xs text-slate-400 mt-3 text-center">텍스트 추출 정확도 <span class="text-emerald-400 font-bold">99.4%</span></p>
+
+        <!-- 메뉴 수동 수정 / 등록 -->
+        <div class="p-4 bg-slate-50 border rounded-xl space-y-3">
+          <p class="font-bold text-slate-800">오늘의 식단 수동 업데이트</p>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-slate-600 mb-1">식당 선택</label>
+              <select id="adminRestaurantSelect" class="w-full border rounded-lg p-2 bg-white">
+                <option value="illu">일루퓨전 한식뷔페</option>
+                <option value="mstate">엠스테이트 푸드스토리</option>
+                <option value="miso">테라타워 미소한식</option>
+                <option value="daon">H비즈니스 다온푸드</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-slate-600 mb-1">메인 요리 (쉼표로 구분)</label>
+              <input id="adminMainMenus" type="text" placeholder="예: 유자청 닭강정, 제육볶음, 돈까스" class="w-full border rounded-lg p-2 bg-white" />
+            </div>
+          </div>
+          <button onclick="updateRestaurantMenu()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 rounded-lg">식단 즉시 반영하기</button>
+        </div>
       </div>
     </div>
-  </div>
-
-  <!-- Global Toast Notification Box -->
-  <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-xl flex items-center gap-2.5 transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none">
-    <i data-lucide="check-circle" class="w-4 h-4 text-brand-500"></i>
-    <span id="toast-message">알림</span>
   </div>
 
   <script>
-    /* =========================================================================
-     * REALTIME ENGINE SETUP (BroadcastChannel + Firebase Realtime DB)
-     * ========================================================================= */
-    const BROADCAST_CHANNEL_NAME = 'bapsim_live_bus';
-    let broadcastBus = null;
-    try {
-      if ('BroadcastChannel' in window) {
-        broadcastBus = new BroadcastChannel(BROADCAST_CHANNEL_NAME);
-      }
-    } catch (e) {
-      console.warn('BroadcastChannel unsupported in this environment:', e);
-    }
-
-    let firebaseDb = null;
-    let isFirebaseActive = false;
-
-    // Seed Data
-    const DEFAULT_BUFFETS = [
-      {
-        id: 'illu',
-        name: '일루퓨전한식뷔페',
-        building: '테라타워2 지하 1층 G112호',
-        price: '9,500원',
-        couponPrice: '10장 89,000원',
-        rating: 4.8,
-        reviews: 294,
-        updatedAt: '10:35 AM',
-        source: '인스타그램 @illu_food',
-        mains: ['직화 제육볶음', '크리스피 순살 닭강정', '매콤 해물 오징어떡볶이'],
-        sides: ['새송이 버섯볶음', '얼갈이 겉절이', '어묵채 볶음', '치커리 사과 샐러드'],
-        soup: '얼큰 소고기 무국 & 시래기 된장국',
-        dessert: '식혜 & 살얼음 숭늉, 토스트',
-        hasMeatDouble: true,
-        tags: ['치킨성지', '제육인기', '생맥주무한(저녁)'],
-        votes: 4,
-        voters: ['김팀장', '이지은', '박개발', '최인턴']
-      },
-      {
-        id: 'mstate',
-        name: '엠스테이트 푸드스토리',
-        building: '엠스테이트 B동 지하 1층 B104호',
-        price: '9,000원',
-        couponPrice: '10장 85,000원',
-        rating: 4.6,
-        reviews: 198,
-        updatedAt: '10:41 AM',
-        source: '카카오채널 소식',
-        mains: ['동파육식 돼지고기 수육', '바삭 광동식 탕수육', '훈제오리 부추구이'],
-        sides: ['무말랭이 무침', '상추 쌈채소 & 쌈장', '도토리묵 야채무침', '연근조림'],
-        soup: '가마솥 나가사키 짬뽕국',
-        dessert: '시원한 매실차 & 믹스커피',
-        hasMeatDouble: true,
-        tags: ['수육데이', '가성비최고', '좌석넓음'],
-        votes: 3,
-        voters: ['정과장', '한대리', '문정직장인']
-      },
-      {
-        id: 'miso',
-        name: '테라타워 미소한식뷔페',
-        building: '테라타워1 B동 지하 1층 118호',
-        price: '9,000원',
-        couponPrice: '10장 85,000원',
-        rating: 4.7,
-        reviews: 165,
-        updatedAt: '10:28 AM',
-        source: '네이버 플레이스 소식',
-        mains: ['안동 찜닭', '수제 돈까스 & 브라운소스', '비빔 막국수'],
-        sides: ['단호박 샐러드', '궁채나물 들깨볶음', '포기김치', '고추장아찌'],
-        soup: '깊은맛 맑은 콩나물 황태국',
-        dessert: '오미자 주스, 누룽지 숭늉',
-        hasMeatDouble: true,
-        tags: ['돈까스맛집', '찜닭푸짐', '반찬정갈'],
-        votes: 2,
-        voters: ['송디자이너', '강기획']
-      },
-      {
-        id: 'daon',
-        name: 'H비즈니스파크 다온푸드',
-        building: 'H비즈니스파크 D동 로비층',
-        price: '9,500원',
-        couponPrice: '10장 90,000원',
-        rating: 4.5,
-        reviews: 114,
-        updatedAt: '10:48 AM',
-        source: '네이버 밴드 공지',
-        mains: ['매콤 춘천 닭갈비', '생선가스 & 타르타르', '궁중 잡채'],
-        sides: ['깻잎지', '마카로니 콘샐러드', '열무물김치', '청경채 굴소스볶음'],
-        soup: '얼큰 순두부찌개',
-        dessert: '냉보리차, 식혜',
-        hasMeatDouble: false,
-        tags: ['닭갈비추천', '동선쾌적', '혼밥석완비'],
-        votes: 1,
-        voters: ['윤연구원']
-      }
-    ];
-
-    const DEFAULT_USERS = [
-      { id: 'admin@bapsim.kr', nickname: '관리자', building: '테라타워 1차', joinedAt: '2026.09.01', role: 'admin' },
-      { id: 'kim@terra.co.kr', nickname: '김팀장', building: '테라타워 2차', joinedAt: '2026.09.10', role: 'user' },
-      { id: 'lee@mstate.dev', nickname: '이지은', building: '엠스테이트', joinedAt: '2026.09.12', role: 'user' },
-      { id: 'park@skv1.kr', nickname: '박개발', building: '문정 SK V1', joinedAt: '2026.09.14', role: 'user' },
-      { id: 'worker@munjeong.com', nickname: '문정직장인', building: '테라타워 1차', joinedAt: '2026.09.15', role: 'user' }
-    ];
-
-    const DEFAULT_CHAT = [
-      { id: 1, sender: '김팀장', building: '테라타워 2차', text: '오늘 일루 닭강정이랑 수육 중에 고민되네요 ㅋㅋ', time: '11:15', isBot: false },
-      { id: 2, sender: '이지은', building: '엠스테이트', text: '엠스테이트 동파육 수육 방금 나왔는데 줄 아직 짧아요!', time: '11:18', isBot: false },
-      { id: 3, sender: '밥심봇', building: '시스템', text: '🔔 박개발님이 [일루퓨전한식뷔페]에 투표하셨습니다!', time: '11:20', isBot: true },
-      { id: 4, sender: '박개발', building: '문정 SK V1', text: '닭강정은 못 참죠~ 투표 완료했습니다.', time: '11:21', isBot: false }
-    ];
-
-    // Local in-memory state
-    let BUFFET_DATA = JSON.parse(localStorage.getItem('bapsim_buffets')) || DEFAULT_BUFFETS;
-    let USER_LIST = JSON.parse(localStorage.getItem('bapsim_users')) || DEFAULT_USERS;
-    let CHAT_MESSAGES = JSON.parse(localStorage.getItem('bapsim_chat')) || DEFAULT_CHAT;
-
-    const uniqueSessionId = 'user_' + Math.random().toString(36).substring(2, 7);
-    let currentUser = JSON.parse(localStorage.getItem('bapsim_current_user')) || {
-      id: `${uniqueSessionId}@munjeong.kr`,
-      nickname: `문정직장인_${uniqueSessionId.substring(5)}`,
-      building: '테라타워 1차',
-      role: 'user'
+    // 1. Firebase 실시간 DB 초기화 (제공해주신 프로젝트 키 연결)
+    const firebaseConfig = {
+      apiKey: "AIzaSyDYTK4MRGsxXwZ_jzN7qlaFzrVhMVKgWxw",
+      authDomain: "babsim-a3556.firebaseapp.com",
+      databaseURL: "https://babsim-a3556-default-rtdb.firebaseio.com",
+      projectId: "babsim-a3556",
+      storageBucket: "babsim-a3556.firebasestorage.app",
+      messagingSenderId: "791532866408",
+      appId: "1:791532866408:web:891ef952af5e62386864dd",
+      measurementId: "G-67HDKHR6WX"
     };
 
-    let currentRoom = {
-      name: '문정 테라&엠스테이트 점심원정대',
-      deadline: '11:45',
-      myVote: 'mstate'
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // 기본 식당 데이터
+    let restaurants = {
+      illu: { id: "illu", name: "일루퓨전 한식뷔페", building: "테라타워 2차 지하 1층", price: "9,000원", mains: ["유자청 닭강정", "생삼겹 수육", "오징어초무침"], soup: "얼큰 소고기 뭇국", votes: 0 },
+      mstate: { id: "mstate", name: "엠스테이트 푸드스토리", building: "엠스테이트 지하 1층", price: "8,500원", mains: ["바삭 수제돈가스", "고추장제육", "탕수육"], soup: "진한 차돌된장찌개", votes: 0 },
+      miso: { id: "miso", name: "테라타워 미소한식", building: "테라타워 1차 지하 1층", price: "8,500원", mains: ["간장 소불고기", "해물순두부", "계란말이"], soup: "맑은 황태해장국", votes: 0 },
+      daon: { id: "daon", name: "H비즈니스 다온푸드", building: "H비즈니스파크 B동 B1", price: "8,000원", mains: ["춘천 닭갈비", "오리불고기", "비빔만두"], soup: "칼칼 콩나물김칫국", votes: 0 }
     };
 
-    let activeFilter = 'all';
-    let currentSearchTerm = '';
-    let currentViewMode = 'card';
-    let authTabMode = 'login';
-    let logoClickCount = 0;
-    let logoClickTimer = null;
+    let currentUser = JSON.param || JSON.parse(localStorage.getItem('bapsim_user') || '{"nickname":"익명 문정러","building":"테라타워"}');
+    let myVotedId = localStorage.getItem('bapsim_my_vote');
 
-    /* =========================================================================
-     * Realtime Engine Listeners & Sockets
-     * ========================================================================= */
-    function initRealtimeEngine() {
-      const savedConfig = localStorage.getItem('bapsim_firebase_config');
-      if (savedConfig) {
-        try {
-          const config = JSON.parse(savedConfig);
-          if (config && (config.databaseURL || config.apiKey)) {
-            if (!firebase.apps.length) {
-              firebase.initializeApp(config);
-            }
-            firebaseDb = firebase.database();
-            isFirebaseActive = true;
-            updateSyncIndicatorUI('firebase');
-            setupFirebaseListeners();
-            return;
-          }
-        } catch (err) {
-          console.error('Firebase config parse error:', err);
-        }
-      }
+    // 2. 날짜 표시
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
+    document.getElementById('currentDateDisplay').textContent = dateStr;
 
-      updateSyncIndicatorUI('broadcast');
-      setupBroadcastListeners();
-    }
-
-    function updateSyncIndicatorUI(type) {
-      const label = document.getElementById('sync-status-label');
-      const pill = document.getElementById('sync-status-pill');
-      if (type === 'firebase') {
-        label.textContent = '실시간 클라우드 DB 연동됨 (전세계)';
-        pill.className = 'flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-full border border-emerald-300 bg-emerald-100 text-emerald-900 font-bold transition hover:shadow-xs';
+    // 3. Firebase 실시간 리스너 (투표 & 식단)
+    db.ref('restaurants').on('value', (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        restaurants = data;
       } else {
-        label.textContent = '실시간 연동 중 (다중 브라우저 탭)';
-        pill.className = 'flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-full border border-blue-200 bg-blue-50 text-blue-800 font-bold transition hover:shadow-xs';
+        db.ref('restaurants').set(restaurants);
       }
-    }
+      renderCards();
+    });
 
-    function setupBroadcastListeners() {
-      if (broadcastBus) {
-        broadcastBus.onmessage = (event) => {
-          handleIncomingRealtimeEvent(event.data);
-        };
-      }
-      window.addEventListener('storage', (e) => {
-        if (e.key === 'bapsim_sync_signal' && e.newValue) {
-          try {
-            const data = JSON.parse(e.newValue);
-            handleIncomingRealtimeEvent(data);
-          } catch(err){}
-        }
-      });
-    }
+    // 4. Firebase 실시간 리스너 (채팅)
+    db.ref('messages').limitToLast(50).on('child_added', (snapshot) => {
+      const msg = snapshot.val();
+      appendChatMessage(msg);
+    });
 
-    function setupFirebaseListeners() {
-      if (!firebaseDb) return;
-      
-      firebaseDb.ref('bapsim/buffets').on('value', (snapshot) => {
-        const val = snapshot.val();
-        if (val && Array.isArray(val) && val.length > 0) {
-          BUFFET_DATA = val;
-          localStorage.setItem('bapsim_buffets', JSON.stringify(BUFFET_DATA));
-          renderCards();
-          renderPollGauges();
-          renderComparisonTable();
-          if (document.getElementById('admin-modal') && !document.getElementById('admin-modal').classList.contains('hidden')) {
-            renderAdminBuffetList();
-          }
-        }
-      });
-
-      firebaseDb.ref('bapsim/chats').limitToLast(60).on('value', (snapshot) => {
-        const val = snapshot.val();
-        if (val) {
-          CHAT_MESSAGES = Object.values(val);
-          localStorage.setItem('bapsim_chat', JSON.stringify(CHAT_MESSAGES));
-          renderChatMessages();
-          const drawer = document.getElementById('chat-drawer');
-          if (drawer && drawer.classList.contains('pointer-events-none')) {
-            document.getElementById('chat-unread-badge').classList.remove('hidden');
-          }
-        }
-      });
-
-      firebaseDb.ref('bapsim/users').on('value', (snapshot) => {
-        const val = snapshot.val();
-        if (val) {
-          USER_LIST = Object.values(val);
-          localStorage.setItem('bapsim_users', JSON.stringify(USER_LIST));
-          renderUserTable();
-        }
-      });
-    }
-
-    function broadcastEvent(type, payload) {
-      const envelope = { type, payload, senderSession: uniqueSessionId, timestamp: Date.now() };
-
-      if (broadcastBus) {
-        broadcastBus.postMessage(envelope);
-      }
-      try {
-        localStorage.setItem('bapsim_sync_signal', JSON.stringify(envelope));
-      } catch (e){}
-
-      if (isFirebaseActive && firebaseDb) {
-        if (type === 'VOTE_UPDATE' || type === 'MENU_UPDATE') {
-          firebaseDb.ref('bapsim/buffets').set(BUFFET_DATA);
-        } else if (type === 'CHAT_MESSAGE') {
-          firebaseDb.ref('bapsim/chats').push(payload);
-        } else if (type === 'USER_JOIN') {
-          firebaseDb.ref('bapsim/users/' + payload.id.replace(/[.#$[\]]/g, '_')).set(payload);
-        }
-      }
-    }
-
-    function handleIncomingRealtimeEvent(envelope) {
-      if (!envelope || envelope.senderSession === uniqueSessionId) return;
-
-      if (envelope.type === 'VOTE_UPDATE' || envelope.type === 'MENU_UPDATE') {
-        BUFFET_DATA = envelope.payload;
-        localStorage.setItem('bapsim_buffets', JSON.stringify(BUFFET_DATA));
-        renderCards();
-        renderPollGauges();
-        renderComparisonTable();
-        if (envelope.type === 'VOTE_UPDATE') {
-          showToast('⚡ 다른 팀원의 실시간 투표가 화면에 즉시 반영되었습니다!');
-        } else {
-          showToast('📢 오늘의 식단표가 실시간으로 갱신되었습니다!');
-        }
-      } else if (envelope.type === 'CHAT_MESSAGE') {
-        CHAT_MESSAGES.push(envelope.payload);
-        localStorage.setItem('bapsim_chat', JSON.stringify(CHAT_MESSAGES));
-        renderChatMessages();
-        
-        const drawer = document.getElementById('chat-drawer');
-        if (drawer && drawer.classList.contains('pointer-events-none')) {
-          document.getElementById('chat-unread-badge').classList.remove('hidden');
-        }
-        showToast(`💬 ${envelope.payload.sender}: ${envelope.payload.text.substring(0, 20)}...`);
-      } else if (envelope.type === 'USER_JOIN') {
-        const exists = USER_LIST.find(u => u.id === envelope.payload.id);
-        if (!exists) {
-          USER_LIST.push(envelope.payload);
-          localStorage.setItem('bapsim_users', JSON.stringify(USER_LIST));
-          renderUserTable();
-        }
-      }
-    }
-
-    /* =========================================================================
-     * UI Renderers
-     * ========================================================================= */
+    // 5. 카드 렌더링
     function renderCards() {
-      const container = document.getElementById('buffet-cards-view');
+      const container = document.getElementById('restaurantCardsContainer');
       container.innerHTML = '';
 
-      const filtered = BUFFET_DATA.filter(item => {
-        if (activeFilter === 'meat' && !item.hasMeatDouble) return false;
-        if (currentSearchTerm.trim() !== '') {
-          const term = currentSearchTerm.toLowerCase();
-          const matchMain = item.mains.some(m => m.toLowerCase().includes(term));
-          const matchSides = item.sides.some(s => s.toLowerCase().includes(term));
-          const matchSoup = item.soup.toLowerCase().includes(term);
-          const matchName = item.name.toLowerCase().includes(term);
-          return matchMain || matchSides || matchSoup || matchName;
+      let totalVotes = 0;
+      let maxVote = -1;
+      let topId = null;
+
+      Object.values(restaurants).forEach(r => {
+        totalVotes += (r.votes || 0);
+        if ((r.votes || 0) > maxVote && (r.votes || 0) > 0) {
+          maxVote = r.votes;
+          topId = r.id;
         }
-        return true;
       });
 
-      if (filtered.length === 0) {
-        container.innerHTML = `
-          <div class="col-span-full text-center py-16 bg-white rounded-2xl border border-slate-200">
-            <i data-lucide="search-x" class="w-10 h-10 text-slate-300 mx-auto mb-2"></i>
-            <p class="text-slate-500 text-sm font-medium">검색 조건에 일치하는 뷔페 메뉴가 없습니다.</p>
-            <button onclick="resetFilters()" class="mt-3 text-xs text-brand-600 font-bold hover:underline">필터 초기화</button>
-          </div>
-        `;
-        lucide.createIcons();
-        return;
-      }
-
-      const sorted = [...filtered].sort((a, b) => b.votes - a.votes);
-      const maxVotes = Math.max(...BUFFET_DATA.map(i => i.votes));
-
-      sorted.forEach(item => {
-        const isLeading = item.votes === maxVotes && maxVotes > 0;
-        const isMyPick = currentRoom.myVote === item.id;
+      Object.values(restaurants).forEach(r => {
+        const isVoted = myVotedId === r.id;
+        const isTop = topId === r.id;
+        const percent = totalVotes > 0 ? Math.round(((r.votes || 0) / totalVotes) * 100) : 0;
 
         const card = document.createElement('div');
-        card.className = `bg-white rounded-2xl border ${isMyPick ? 'border-brand-500 ring-2 ring-brand-500/20 shadow-md' : 'border-slate-200 hover:border-slate-300 shadow-xs'} p-5 flex flex-col justify-between relative transition-all duration-200`;
+        card.className = `bg-white rounded-2xl p-5 border-2 transition-all flex flex-col justify-between shadow-sm hover:shadow-md ${isVoted ? 'border-orange-500 ring-2 ring-orange-100' : 'border-slate-100'}`;
 
         card.innerHTML = `
-          ${isLeading ? `
-            <div class="absolute -top-3 left-6 bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-black text-[11px] px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1">
-              <i data-lucide="crown" class="w-3.5 h-3.5 fill-current"></i> 현재 실시간 1위 식당
-            </div>` : ''}
-
           <div>
-            <div class="flex items-start justify-between gap-2 mb-3">
+            <div class="flex items-start justify-between gap-2 mb-2">
               <div>
-                <div class="flex items-center gap-1.5 flex-wrap">
-                  <h4 class="text-lg font-black text-slate-900">${item.name}</h4>
-                  <span class="text-[11px] font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 flex items-center gap-0.5">
-                    <i data-lucide="star" class="w-3 h-3 fill-amber-500 text-amber-500"></i> ${item.rating}
-                  </span>
-                </div>
-                <div class="flex items-center gap-1 text-slate-500 text-xs mt-1">
-                  <i data-lucide="map-pin" class="w-3 h-3 text-slate-400"></i>
-                  <span>${item.building}</span>
-                </div>
+                <span class="text-[10px] font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-md">${r.building}</span>
+                <h3 class="font-extrabold text-slate-900 text-base mt-1 flex items-center gap-1.5">
+                  ${r.name}
+                  ${isTop ? '<span class="text-xs bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">👑 1위</span>' : ''}
+                </h3>
               </div>
-              <div class="text-right">
-                <div class="text-base font-extrabold text-slate-900">${item.price}</div>
-                <div class="text-[10px] text-slate-400">${item.couponPrice}</div>
-              </div>
+              <span class="text-xs font-bold text-slate-600">${r.price}</span>
             </div>
 
-            <!-- Main Highlighting Badges -->
-            <div class="mb-4">
-              <div class="flex items-center justify-between mb-1.5">
-                <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">오늘의 메인 3대장</span>
-                <span class="text-[10px] text-slate-400 font-mono">${item.updatedAt}</span>
-              </div>
+            <!-- 메인 메뉴 -->
+            <div class="mt-3 space-y-1.5">
+              <span class="text-[11px] font-semibold text-slate-400 block">오늘의 3대 메인</span>
               <div class="flex flex-wrap gap-1.5">
-                ${item.mains.map((m, idx) => `
-                  <span class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl font-extrabold text-xs ${
-                    idx === 0 
-                      ? 'bg-orange-500 text-white shadow-xs shadow-orange-500/30' 
-                      : 'bg-orange-50 text-brand-700 border border-orange-200/80 font-bold'
-                  }">
-                    ${idx === 0 ? '<i data-lucide="flame" class="w-3.5 h-3.5"></i>' : ''}
-                    ${m}
-                  </span>
-                `).join('')}
+                ${r.mains.map(m => `<span class="bg-slate-100 text-slate-800 px-2 py-1 rounded-md text-xs font-bold">${m}</span>`).join('')}
               </div>
             </div>
 
-            <!-- Soup & Sides -->
-            <div class="bg-slate-50 rounded-xl p-3 text-xs space-y-2 mb-4 border border-slate-100">
-              <div class="flex items-start gap-2">
-                <span class="font-bold text-slate-700 shrink-0 flex items-center gap-1">
-                  <i data-lucide="soup" class="w-3.5 h-3.5 text-amber-600"></i> 국/찌개:
-                </span>
-                <span class="text-slate-800 font-semibold">${item.soup}</span>
-              </div>
-              <div class="flex items-start gap-2">
-                <span class="font-bold text-slate-700 shrink-0 flex items-center gap-1">
-                  <i data-lucide="salad" class="w-3.5 h-3.5 text-emerald-600"></i> 반찬류:
-                </span>
-                <span class="text-slate-600">${item.sides.join(' · ')}</span>
-              </div>
-              <div class="flex items-start gap-2">
-                <span class="font-bold text-slate-700 shrink-0 flex items-center gap-1">
-                  <i data-lucide="sparkle" class="w-3.5 h-3.5 text-blue-500"></i> 후식:
-                </span>
-                <span class="text-slate-600">${item.dessert}</span>
-              </div>
-            </div>
-
-            <div class="flex items-center justify-between gap-2 text-xs mb-3">
-              <div class="flex items-center gap-1 flex-wrap">
-                ${item.tags.map(t => `<span class="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">#${t}</span>`).join('')}
-              </div>
-              <button onclick="openRawPhotoModal('${item.id}')" class="text-slate-500 hover:text-brand-600 flex items-center gap-1 text-[11px] font-semibold underline underline-offset-2">
-                <i data-lucide="camera" class="w-3 h-3"></i> 칠판사진
-              </button>
+            <!-- 국 -->
+            <div class="mt-3 text-xs text-slate-600 flex items-center gap-1.5">
+              <span class="text-orange-500 font-bold">국/찌개:</span>
+              <span>${r.soup}</span>
             </div>
           </div>
 
-          <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
-            <div class="flex items-center gap-1.5">
-              <div class="flex -space-x-1.5 overflow-hidden">
-                ${item.voters.map((v) => `
-                  <div class="inline-block h-6 w-6 rounded-full bg-slate-200 border-2 border-white text-[10px] font-bold text-slate-700 flex items-center justify-center" title="${v}">
-                    ${v[0]}
-                  </div>
-                `).join('')}
-              </div>
-              <span class="text-xs font-bold text-slate-700">${item.votes}표</span>
+          <!-- 투표 영역 -->
+          <div class="mt-5 pt-4 border-t border-slate-100">
+            <div class="flex items-center justify-between text-xs font-bold mb-1.5">
+              <span class="text-slate-500">${r.votes || 0}표 (${percent}%)</span>
             </div>
-
-            <button onclick="castVote('${item.id}')" class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
-              isMyPick 
-                ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs' 
-                : 'bg-brand-600 hover:bg-brand-700 text-white shadow-sm'
-            }">
-              <i data-lucide="${isMyPick ? 'check-circle-2' : 'thumbs-up'}" class="w-3.5 h-3.5"></i>
-              <span>${isMyPick ? '내 투표 취소' : '여기로 투표'}</span>
+            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-3">
+              <div class="bg-orange-500 h-full rounded-full transition-all duration-500" style="width: ${percent}%"></div>
+            </div>
+            <button onclick="castVote('${r.id}')" class="w-full py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 ${isVoted ? 'bg-orange-500 text-white shadow-md shadow-orange-500/30' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">
+              <i data-lucide="${isVoted ? 'check' : 'thumbs-up'}" class="w-3.5 h-3.5"></i>
+              <span>${isVoted ? '투표 완료' : '이곳으로 투표'}</span>
             </button>
           </div>
         `;
-
         container.appendChild(card);
       });
 
       lucide.createIcons();
     }
 
-    function renderPollGauges() {
-      const container = document.getElementById('poll-gauge-container');
-      container.innerHTML = '';
-
-      const totalVotes = BUFFET_DATA.reduce((acc, cur) => acc + cur.votes, 0);
-
-      BUFFET_DATA.forEach(item => {
-        const percent = totalVotes === 0 ? 0 : Math.round((item.votes / totalVotes) * 100);
-        const isMyPick = currentRoom.myVote === item.id;
-
-        const row = document.createElement('div');
-        row.className = `p-3 rounded-xl border ${isMyPick ? 'border-brand-300 bg-orange-50/40' : 'border-slate-100 bg-slate-50'} transition`;
-
-        row.innerHTML = `
-          <div class="flex items-center justify-between text-xs font-bold mb-1.5">
-            <div class="flex items-center gap-1.5">
-              <span class="text-slate-900">${item.name}</span>
-              ${isMyPick ? '<span class="text-[10px] bg-brand-500 text-white px-1.5 py-0.2 rounded font-black">내 픽</span>' : ''}
-            </div>
-            <div class="text-slate-600">
-              <span>${item.votes}표</span>
-              <span class="text-slate-400 font-normal">(${percent}%)</span>
-            </div>
-          </div>
-          <div class="w-full bg-slate-200/80 rounded-full h-2.5 overflow-hidden">
-            <div class="h-2.5 rounded-full ${isMyPick ? 'bg-brand-500' : 'bg-slate-700'} transition-all duration-500" style="width: ${percent}%"></div>
-          </div>
-          <div class="mt-2 flex items-center justify-between text-[11px] text-slate-500">
-            <span class="truncate max-w-[200px]">참여자: ${item.voters.join(', ') || '아직 없음'}</span>
-            <button onclick="castVote('${item.id}')" class="text-xs font-bold text-brand-600 hover:text-brand-700 shrink-0">
-              ${isMyPick ? '투표 취소' : '투표하기'}
-            </button>
-          </div>
-        `;
-        container.appendChild(row);
-      });
-
-      document.getElementById('banner-member-count').textContent = totalVotes;
-      lucide.createIcons();
-    }
-
-    function renderComparisonTable() {
-      const thead = document.getElementById('comparison-table-head');
-      const tbody = document.getElementById('comparison-table-body');
-
-      thead.innerHTML = `
-        <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
-          <th class="p-3 w-28 font-bold">비교 항목</th>
-          ${BUFFET_DATA.map(d => `<th class="p-3 font-bold text-slate-900 border-l border-slate-200">${d.name}</th>`).join('')}
-        </tr>
-      `;
-
-      tbody.innerHTML = `
-        <tr>
-          <td class="p-3 font-bold bg-slate-50 text-slate-700">오늘의 메인 1</td>
-          ${BUFFET_DATA.map(d => `<td class="p-3 border-l border-slate-200 font-bold text-orange-600">${d.mains[0] || '-'}</td>`).join('')}
-        </tr>
-        <tr>
-          <td class="p-3 font-bold bg-slate-50 text-slate-700">오늘의 메인 2</td>
-          ${BUFFET_DATA.map(d => `<td class="p-3 border-l border-slate-200 font-bold text-slate-800">${d.mains[1] || '-'}</td>`).join('')}
-        </tr>
-        <tr>
-          <td class="p-3 font-bold bg-slate-50 text-slate-700">오늘의 메인 3</td>
-          ${BUFFET_DATA.map(d => `<td class="p-3 border-l border-slate-200 font-medium text-slate-700">${d.mains[2] || '-'}</td>`).join('')}
-        </tr>
-        <tr>
-          <td class="p-3 font-bold bg-slate-50 text-slate-700">국 / 찌개</td>
-          ${BUFFET_DATA.map(d => `<td class="p-3 border-l border-slate-200 text-slate-700">${d.soup}</td>`).join('')}
-        </tr>
-        <tr>
-          <td class="p-3 font-bold bg-slate-50 text-slate-700">밑반찬류</td>
-          ${BUFFET_DATA.map(d => `<td class="p-3 border-l border-slate-200 text-slate-500">${d.sides.join(', ')}</td>`).join('')}
-        </tr>
-        <tr>
-          <td class="p-3 font-bold bg-slate-50 text-slate-700">식사 가격</td>
-          ${BUFFET_DATA.map(d => `<td class="p-3 border-l border-slate-200 font-bold text-slate-900">${d.price} <span class="text-[10px] text-slate-400 block">${d.couponPrice}</span></td>`).join('')}
-        </tr>
-        <tr>
-          <td class="p-3 font-bold bg-slate-50 text-slate-700">위치</td>
-          ${BUFFET_DATA.map(d => `<td class="p-3 border-l border-slate-200 text-slate-600 text-[11px]">${d.building}</td>`).join('')}
-        </tr>
-        <tr>
-          <td class="p-3 font-bold bg-slate-50 text-slate-700">실시간 투표</td>
-          ${BUFFET_DATA.map(d => `
-            <td class="p-3 border-l border-slate-200">
-              <button onclick="castVote('${d.id}')" class="px-3 py-1 bg-brand-50 border border-brand-200 text-brand-700 font-bold rounded-lg hover:bg-brand-100 transition text-xs">
-                ${d.votes}표 (투표)
-              </button>
-            </td>
-          `).join('')}
-        </tr>
-      `;
-    }
-
-    function castVote(buffetId) {
-      const voterName = currentUser ? currentUser.nickname : '문정직장인';
-
-      BUFFET_DATA.forEach(item => {
-        const idx = item.voters.indexOf(voterName);
-        if (idx !== -1) {
-          item.voters.splice(idx, 1);
-          item.votes = Math.max(0, item.votes - 1);
+    // 6. 투표 실행
+    function castVote(id) {
+      if (myVotedId === id) {
+        db.ref(`restaurants/${id}/votes`).transaction(v => Math.max(0, (v || 1) - 1));
+        myVotedId = null;
+        localStorage.removeItem('bapsim_my_vote');
+      } else {
+        if (myVotedId && restaurants[myVotedId]) {
+          db.ref(`restaurants/${myVotedId}/votes`).transaction(v => Math.max(0, (v || 1) - 1));
         }
-      });
+        db.ref(`restaurants/${id}/votes`).transaction(v => (v || 0) + 1);
+        myVotedId = id;
+        localStorage.setItem('bapsim_my_vote', id);
 
-      if (currentRoom.myVote === buffetId) {
-        currentRoom.myVote = null;
-        showToast(`'${voterName}' 님의 투표가 취소되었습니다.`);
-      } else {
-        currentRoom.myVote = buffetId;
-        const target = BUFFET_DATA.find(b => b.id === buffetId);
-        if (target) {
-          target.voters.push(voterName);
-          target.votes += 1;
-          showToast(`'${target.name}'에 투표 완료! 🍚`);
-          
-          addChatMessage({
-            sender: '밥심봇',
-            building: '시스템',
-            text: `🔔 ${voterName}님이 [${target.name}]에 실시간 투표하셨습니다!`,
-            isBot: true
-          });
-        }
-      }
-
-      saveBuffetsToStorage();
-      broadcastEvent('VOTE_UPDATE', BUFFET_DATA);
-      renderCards();
-      renderPollGauges();
-      renderComparisonTable();
-    }
-
-    function simulateAddTeammateVote() {
-      const mockNames = ['이과장', '최수석', '박선임', '정인턴', '한연구원', '서디자이너'];
-      const randomName = mockNames[Math.floor(Math.random() * mockNames.length)] + Math.floor(Math.random() * 90 + 10);
-      const randomBuffet = BUFFET_DATA[Math.floor(Math.random() * BUFFET_DATA.length)];
-
-      randomBuffet.voters.push(randomName);
-      randomBuffet.votes += 1;
-
-      showToast(`동료 '${randomName}' 님이 '${randomBuffet.name}'에 투표했습니다!`);
-
-      addChatMessage({
-        sender: '밥심봇',
-        building: '시스템',
-        text: `🔔 동료 ${randomName}님이 [${randomBuffet.name}]에 투표했습니다!`,
-        isBot: true
-      });
-
-      saveBuffetsToStorage();
-      broadcastEvent('VOTE_UPDATE', BUFFET_DATA);
-      renderCards();
-      renderPollGauges();
-      renderComparisonTable();
-    }
-
-    function finalizeAndNotifyLeader() {
-      const maxVotes = Math.max(...BUFFET_DATA.map(i => i.votes));
-      const winners = BUFFET_DATA.filter(i => i.votes === maxVotes);
-      const winner = winners[0];
-
-      showToast(`🎉 오늘 점심은 [${winner.name}]! (득표수: ${winner.votes}표)`);
-
-      addChatMessage({
-        sender: '밥심봇',
-        building: '시스템',
-        text: `🏆 점심 투표 1위 확정: [${winner.name}] (${winner.building})! 모두 출발하세요 🍱`,
-        isBot: true
-      });
-
-      setTimeout(() => {
-        window.open(`https://map.naver.com/v5/search/${encodeURIComponent('문정동 ' + winner.name)}`, '_blank');
-      }, 500);
-    }
-
-    function saveBuffetsToStorage() {
-      localStorage.setItem('bapsim_buffets', JSON.stringify(BUFFET_DATA));
-    }
-
-    function renderAuthHeader() {
-      const container = document.getElementById('header-auth-container');
-      if (currentUser) {
-        container.innerHTML = `
-          <div class="flex items-center gap-2">
-            <div class="bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl px-2.5 py-1.5 flex items-center gap-2 cursor-pointer transition" onclick="openAuthModal('profile')">
-              <div class="w-6 h-6 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-xs">
-                ${currentUser.nickname[0]}
-              </div>
-              <div class="text-left hidden sm:block">
-                <div class="text-xs font-bold text-slate-800 leading-none">${currentUser.nickname}</div>
-                <div class="text-[10px] text-slate-500 leading-tight">${currentUser.building}</div>
-              </div>
-            </div>
-            <button onclick="logoutUser()" class="p-1.5 text-slate-400 hover:text-red-500 transition" title="로그아웃">
-              <i data-lucide="log-out" class="w-4 h-4"></i>
-            </button>
-          </div>
-        `;
-        document.getElementById('my-avatar-icon').textContent = currentUser.nickname[0];
-        document.getElementById('current-voter-label').textContent = currentUser.nickname;
-      } else {
-        container.innerHTML = `
-          <button onclick="openAuthModal('login')" class="flex items-center gap-1.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm transition">
-            <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
-            <span>로그인/가입</span>
-          </button>
-        `;
-      }
-      lucide.createIcons();
-    }
-
-    function openAuthModal(mode = 'login') {
-      const modal = document.getElementById('auth-modal');
-      modal.classList.remove('hidden');
-      setAuthTab(mode === 'signup' ? 'signup' : 'login');
-    }
-
-    function closeAuthModal() {
-      document.getElementById('auth-modal').classList.add('hidden');
-    }
-
-    function setAuthTab(tab) {
-      authTabMode = tab;
-      const tabLogin = document.getElementById('auth-tab-login');
-      const tabSignup = document.getElementById('auth-tab-signup');
-      const extraFields = document.getElementById('signup-extra-fields');
-      const submitBtn = document.getElementById('auth-submit-btn');
-      const modalTitle = document.getElementById('auth-modal-title');
-
-      if (tab === 'login') {
-        tabLogin.className = 'flex-1 pb-2 border-b-2 border-brand-600 text-brand-600 font-bold';
-        tabSignup.className = 'flex-1 pb-2 border-b-2 border-transparent text-slate-500 hover:text-slate-900 font-bold';
-        extraFields.classList.add('hidden');
-        submitBtn.textContent = '로그인하기';
-        modalTitle.textContent = '밥심 간편 로그인';
-      } else {
-        tabSignup.className = 'flex-1 pb-2 border-b-2 border-brand-600 text-brand-600 font-bold';
-        tabLogin.className = 'flex-1 pb-2 border-b-2 border-transparent text-slate-500 hover:text-slate-900 font-bold';
-        extraFields.classList.remove('hidden');
-        submitBtn.textContent = '3초 간편 회원가입 완료';
-        modalTitle.textContent = '밥심 신규 회원가입';
+        // 채팅방 자동 알림 전송
+        db.ref('messages').push({
+          type: 'system',
+          text: `🔔 ${currentUser.nickname}님이 [${restaurants[id].name}]에 투표하셨습니다!`,
+          timestamp: Date.now()
+        });
       }
     }
 
-    function handleAuthSubmit(e) {
+    // 7. 채팅 전송
+    function handleSendChat(e) {
       e.preventDefault();
-      const id = document.getElementById('auth-input-id').value.trim();
-
-      if (authTabMode === 'login') {
-        const existing = USER_LIST.find(u => u.id === id);
-        if (existing) {
-          currentUser = existing;
-        } else {
-          currentUser = {
-            id: id,
-            nickname: id.split('@')[0],
-            building: '문정 테라타워 1차',
-            joinedAt: '2026.09.16',
-            role: id.includes('admin') ? 'admin' : 'user'
-          };
-          USER_LIST.push(currentUser);
-          localStorage.setItem('bapsim_users', JSON.stringify(USER_LIST));
-          broadcastEvent('USER_JOIN', currentUser);
-        }
-        showToast(`${currentUser.nickname}님 환영합니다!`);
-      } else {
-        const nickname = document.getElementById('auth-input-nickname').value.trim() || id.split('@')[0];
-        const building = document.getElementById('auth-input-building').value;
-
-        currentUser = {
-          id: id,
-          nickname: nickname,
-          building: building,
-          joinedAt: '2026.09.16',
-          role: id.includes('admin') ? 'admin' : 'user'
-        };
-
-        USER_LIST.push(currentUser);
-        localStorage.setItem('bapsim_users', JSON.stringify(USER_LIST));
-        broadcastEvent('USER_JOIN', currentUser);
-        showToast(`가입이 완료되었습니다! 환영합니다, ${nickname}님 🎉`);
-      }
-
-      localStorage.setItem('bapsim_current_user', JSON.stringify(currentUser));
-      closeAuthModal();
-      renderAuthHeader();
-      renderUserTable();
-    }
-
-    function logoutUser() {
-      currentUser = null;
-      localStorage.removeItem('bapsim_current_user');
-      renderAuthHeader();
-      showToast('로그아웃 되었습니다.');
-    }
-
-    function promptChangeNickname() {
-      const newName = prompt('변경할 닉네임을 입력하세요:', currentUser ? currentUser.nickname : '문정직장인');
-      if (newName && newName.trim() !== '') {
-        if (!currentUser) {
-          currentUser = { id: `${uniqueSessionId}@munjeong.kr`, nickname: newName.trim(), building: '문정 테라타워', role: 'user' };
-        } else {
-          currentUser.nickname = newName.trim();
-        }
-        localStorage.setItem('bapsim_current_user', JSON.stringify(currentUser));
-        renderAuthHeader();
-        showToast(`닉네임이 '${newName.trim()}'(으)로 변경되었습니다.`);
-      }
-    }
-
-    window.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
-        e.preventDefault();
-        toggleAdminView();
-      }
-    });
-
-    function handleLogoMultiClick() {
-      logoClickCount++;
-      clearTimeout(logoClickTimer);
-      logoClickTimer = setTimeout(() => {
-        logoClickCount = 0;
-      }, 3000);
-
-      if (logoClickCount >= 5) {
-        logoClickCount = 0;
-        showToast('🔑 시크릿 관리자 콘솔을 엽니다.');
-        toggleAdminView();
-      }
-    }
-
-    function toggleAdminView() {
-      const modal = document.getElementById('admin-modal');
-      const isHidden = modal.classList.contains('hidden');
-      if (isHidden) {
-        modal.classList.remove('hidden');
-        populateAdminData();
-      } else {
-        modal.classList.add('hidden');
-      }
-      lucide.createIcons();
-    }
-
-    function switchAdminTab(tab) {
-      ['ocr', 'users', 'buffets'].forEach(t => {
-        const btn = document.getElementById(`admin-tab-${t}`);
-        const panel = document.getElementById(`admin-panel-${t}`);
-        if (t === tab) {
-          btn.className = 'px-3 py-2 border-b-2 border-brand-600 text-brand-600 flex items-center gap-1.5 transition font-bold';
-          panel.classList.remove('hidden');
-        } else {
-          btn.className = 'px-3 py-2 border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition font-bold';
-          panel.classList.add('hidden');
-        }
-      });
-      lucide.createIcons();
-    }
-
-    function populateAdminData() {
-      const select = document.getElementById('ocr-target-buffet');
-      select.innerHTML = BUFFET_DATA.map(b => `<option value="${b.id}">${b.name} (${b.building})</option>`).join('');
-      document.getElementById('stat-total-users').textContent = `${USER_LIST.length}명`;
-      renderUserTable();
-      renderAdminBuffetList();
-    }
-
-    function renderUserTable() {
-      const tbody = document.getElementById('admin-user-tbody');
-      const query = (document.getElementById('user-search-input')?.value || '').toLowerCase();
-
-      const filtered = USER_LIST.filter(u => 
-        u.nickname.toLowerCase().includes(query) || 
-        u.id.toLowerCase().includes(query) || 
-        u.building.toLowerCase().includes(query)
-      );
-
-      tbody.innerHTML = filtered.map(u => `
-        <tr class="hover:bg-slate-50 transition">
-          <td class="p-2.5 font-bold text-slate-900 flex items-center gap-1.5">
-            <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px]">${u.nickname[0]}</span>
-            <span>${u.nickname}</span>
-            ${u.role === 'admin' ? '<span class="bg-red-100 text-red-700 text-[9px] px-1 rounded font-mono">ADMIN</span>' : ''}
-          </td>
-          <td class="p-2.5 text-slate-500 font-mono">${u.id}</td>
-          <td class="p-2.5 text-slate-700">${u.building}</td>
-          <td class="p-2.5 text-slate-400">${u.joinedAt || '2026.09.16'}</td>
-          <td class="p-2.5 text-center">
-            <span class="inline-block w-2 h-2 rounded-full bg-emerald-500" title="실시간 온라인"></span>
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    function renderAdminBuffetList() {
-      const container = document.getElementById('admin-buffet-list-container');
-      container.innerHTML = BUFFET_DATA.map((b) => `
-        <div class="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-white hover:border-slate-300 transition">
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="font-bold text-slate-900 text-sm">${b.name}</span>
-              <span class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.2 rounded font-mono">${b.price}</span>
-            </div>
-            <p class="text-[11px] text-slate-500 mt-0.5">${b.building} • 최근 업데이트: ${b.updatedAt}</p>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <button onclick="selectBuffetForOcr('${b.id}')" class="px-2.5 py-1 text-[11px] font-bold bg-orange-50 text-brand-600 border border-orange-200 rounded-lg hover:bg-orange-100 transition">
-              식단 수정(OCR)
-            </button>
-            <button onclick="resetBuffetVotes('${b.id}')" class="px-2.5 py-1 text-[11px] font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-100 transition">
-              표 초기화
-            </button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function selectBuffetForOcr(buffetId) {
-      switchAdminTab('ocr');
-      document.getElementById('ocr-target-buffet').value = buffetId;
-      showToast(`'${BUFFET_DATA.find(b=>b.id===buffetId)?.name}' 식단 편집 모드로 전환했습니다.`);
-    }
-
-    function resetBuffetVotes(buffetId) {
-      const b = BUFFET_DATA.find(item => item.id === buffetId);
-      if (b) {
-        b.votes = 0;
-        b.voters = [];
-        saveBuffetsToStorage();
-        broadcastEvent('VOTE_UPDATE', BUFFET_DATA);
-        renderCards();
-        renderPollGauges();
-        renderComparisonTable();
-        showToast(`'${b.name}' 투표 수가 0표로 초기화되었습니다.`);
-      }
-    }
-
-    window.addEventListener('paste', (e) => {
-      const adminModal = document.getElementById('admin-modal');
-      if (adminModal.classList.contains('hidden')) return;
-
-      const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-      for (let item of items) {
-        if (item.type.indexOf('image') !== -1) {
-          const file = item.getAsFile();
-          processUploadedImageFile(file);
-          showToast('📋 클립보드에서 식단표 캡처 이미지를 감지했습니다!');
-          break;
-        }
-      }
-    });
-
-    function handleOcrFileUpload(e) {
-      const file = e.target.files[0];
-      if (file) {
-        processUploadedImageFile(file);
-      }
-    }
-
-    function processUploadedImageFile(file) {
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        document.getElementById('ocr-preview-img').src = evt.target.result;
-        document.getElementById('ocr-image-preview-container').classList.remove('hidden');
-        showToast('이미지 업로드 완료. AI OCR 텍스트 자동 판독을 실행하세요.');
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function clearOcrImage() {
-      document.getElementById('ocr-preview-img').src = '';
-      document.getElementById('ocr-image-preview-container').classList.add('hidden');
-      document.getElementById('ocr-file-input').value = '';
-    }
-
-    const OCR_SAMPLE_PRESETS = [
-      {
-        mains: '유자청 닭강정, 불맛 매콤제육, 칠리 탕수육',
-        soup: '진한 한우 사골 소고기 미역국',
-        sides: '계란말이, 얼갈이 겉절이, 어묵채볶음, 청포묵무침',
-        dessert: '얼음 숭늉 & 살얼음 식혜'
-      },
-      {
-        mains: '동파육 보쌈수육, 수제 소시지 야채볶음, 비빔막국수',
-        soup: '시원한 나가사키 해물 짬뽕탕',
-        sides: '보쌈김치, 무말랭이, 쌈무, 알배추 쌈채소',
-        dessert: '시원한 청포도 주스 & 믹스커피'
-      },
-      {
-        mains: '수제 등심 돈까스, 춘천 닭갈비, 궁중 잡채',
-        soup: '얼큰 칼칼 김치 콩나물국',
-        sides: '단호박 콘샐러드, 열무김치, 깻잎장아찌, 깍두기',
-        dessert: '살얼음 수정과, 구수한 누룽지'
-      }
-    ];
-
-    function runSimulatedOcrScan() {
-      const btn = document.getElementById('btn-run-ocr');
-      btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin text-amber-300"></i><span>인스타 칠판 텍스트 OCR 분석 중...</span>`;
-      lucide.createIcons();
-
-      setTimeout(() => {
-        const sample = OCR_SAMPLE_PRESETS[Math.floor(Math.random() * OCR_SAMPLE_PRESETS.length)];
-        document.getElementById('ocr-input-mains').value = sample.mains;
-        document.getElementById('ocr-input-soup').value = sample.soup;
-        document.getElementById('ocr-input-sides').value = sample.sides;
-        document.getElementById('ocr-input-dessert').value = sample.dessert;
-
-        document.getElementById('ocr-confidence-tag').textContent = '인식 성공률 99.4%';
-        document.getElementById('ocr-confidence-tag').className = 'text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded animate-pulse';
-
-        btn.innerHTML = `<i data-lucide="check" class="w-4 h-4 text-emerald-400"></i><span>OCR 판독 완료 (수정 후 즉시 반영 가능)</span>`;
-        lucide.createIcons();
-        showToast('칠판 사진 글자 추출 완료! 식단 확인 후 [실시간 배포]를 누르세요.');
-      }, 850);
-    }
-
-    function applyOcrMenuToBuffet() {
-      const buffetId = document.getElementById('ocr-target-buffet').value;
-      const target = BUFFET_DATA.find(b => b.id === buffetId);
-      if (!target) return;
-
-      const mainsStr = document.getElementById('ocr-input-mains').value;
-      const soupStr = document.getElementById('ocr-input-soup').value;
-      const sidesStr = document.getElementById('ocr-input-sides').value;
-      const dessertStr = document.getElementById('ocr-input-dessert').value;
-
-      target.mains = mainsStr.split(',').map(s => s.trim()).filter(Boolean);
-      target.soup = soupStr.trim();
-      target.sides = sidesStr.split(',').map(s => s.trim()).filter(Boolean);
-      target.dessert = dessertStr.trim();
-
-      const now = new Date();
-      target.updatedAt = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')} (실시간 반영)`;
-
-      saveBuffetsToStorage();
-      broadcastEvent('MENU_UPDATE', BUFFET_DATA);
-      renderCards();
-      renderComparisonTable();
-      renderAdminBuffetList();
-
-      addChatMessage({
-        sender: '관리자',
-        building: '문정 관리팀',
-        text: `📢 [${target.name}] 오늘의 인스타 칠판 식단이 최신으로 갱신되었습니다! (메인: ${target.mains.join(', ')})`,
-        isBot: false
-      });
-
-      showToast(`'${target.name}' 식단이 전체 유저 화면에 실시간 배포되었습니다! ✨`);
-    }
-
-    function openAddNewBuffetPrompt() {
-      const name = prompt('새로 추가할 문정동 한식뷔페 이름을 입력하세요:');
-      if (!name) return;
-      const building = prompt('식당 위치 및 호수를 입력하세요:') || '문정 법조타운';
-
-      const newId = 'buffet_' + Date.now();
-      const newBuffet = {
-        id: newId,
-        name: name.trim(),
-        building: building.trim(),
-        price: '9,000원',
-        couponPrice: '10장 85,000원',
-        rating: 4.5,
-        reviews: 1,
-        updatedAt: '방금 전 등록',
-        source: '관리자 수기 등록',
-        mains: ['오늘의 고기 메인', '특선 볶음 요리', '별미 튀김'],
-        sides: ['계절 나물', '포기김치', '도토리묵', '샐러드'],
-        soup: '얼큰 된장찌개',
-        dessert: '구수한 숭늉',
-        hasMeatDouble: true,
-        tags: ['신규등록', '문정맛집'],
-        votes: 0,
-        voters: []
-      };
-
-      BUFFET_DATA.push(newBuffet);
-      saveBuffetsToStorage();
-      broadcastEvent('MENU_UPDATE', BUFFET_DATA);
-      renderCards();
-      renderPollGauges();
-      renderComparisonTable();
-      populateAdminData();
-      showToast(`신규 한식뷔페 '${name}' 이(가) 등록되었습니다!`);
-    }
-
-    function renderChatMessages() {
-      const list = document.getElementById('chat-message-list');
-      list.innerHTML = '';
-
-      CHAT_MESSAGES.forEach(msg => {
-        const item = document.createElement('div');
-        if (msg.isBot) {
-          item.className = 'p-2 bg-amber-50 rounded-xl border border-amber-200 text-amber-900 text-[11px] font-medium flex items-center gap-1.5 shadow-xs';
-          item.innerHTML = `<i data-lucide="bot" class="w-3.5 h-3.5 text-brand-600 shrink-0"></i><span>${msg.text}</span>`;
-        } else {
-          const isMe = currentUser && currentUser.nickname === msg.sender;
-          item.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'}`;
-          item.innerHTML = `
-            <div class="flex items-center gap-1.5 text-[10px] text-slate-400 mb-0.5 px-1">
-              <span class="font-bold text-slate-700">${msg.sender}</span>
-              <span>(${msg.building})</span>
-              <span>${msg.time}</span>
-            </div>
-            <div class="px-3 py-2 rounded-2xl max-w-[85%] break-words ${
-              isMe 
-                ? 'bg-brand-600 text-white rounded-br-xs' 
-                : 'bg-white text-slate-800 border border-slate-200 rounded-bl-xs shadow-xs'
-            }">
-              ${msg.text}
-            </div>
-          `;
-        }
-        list.appendChild(item);
-      });
-
-      list.scrollTop = list.scrollHeight;
-      lucide.createIcons();
-    }
-
-    function toggleChatDrawer() {
-      const drawer = document.getElementById('chat-drawer');
-      const isClosed = drawer.classList.contains('pointer-events-none');
-
-      if (isClosed) {
-        drawer.classList.remove('pointer-events-none', 'opacity-0', 'translate-y-[120%]');
-        drawer.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
-        document.getElementById('chat-unread-badge').classList.add('hidden');
-        renderChatMessages();
-      } else {
-        drawer.classList.add('pointer-events-none', 'opacity-0', 'translate-y-[120%]');
-        drawer.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
-      }
-    }
-
-    function addChatMessage(msg) {
-      const now = new Date();
-      const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
-      const newMsg = {
-        id: Date.now(),
-        time: timeStr,
-        ...msg
-      };
-      CHAT_MESSAGES.push(newMsg);
-      localStorage.setItem('bapsim_chat', JSON.stringify(CHAT_MESSAGES));
-      broadcastEvent('CHAT_MESSAGE', newMsg);
-      renderChatMessages();
-    }
-
-    function handleSendChatMessage(e) {
-      e.preventDefault();
-      const input = document.getElementById('chat-input-text');
+      const input = document.getElementById('chatInput');
       const text = input.value.trim();
       if (!text) return;
 
-      const senderName = currentUser ? currentUser.nickname : '문정직장인';
-      const buildingName = currentUser ? currentUser.building : '테라타워';
-
-      addChatMessage({
-        sender: senderName,
-        building: buildingName,
+      db.ref('messages').push({
+        nickname: currentUser.nickname,
+        building: currentUser.building,
         text: text,
-        isBot: false
+        timestamp: Date.now()
       });
 
       input.value = '';
     }
 
-    function sendQuickChatMessage(text) {
-      const senderName = currentUser ? currentUser.nickname : '문정직장인';
-      const buildingName = currentUser ? currentUser.building : '테라타워';
-      addChatMessage({
-        sender: senderName,
-        building: buildingName,
-        text: text,
-        isBot: false
+    function quickChat(msg) {
+      db.ref('messages').push({
+        nickname: currentUser.nickname,
+        building: currentUser.building,
+        text: msg,
+        timestamp: Date.now()
       });
     }
 
-    function clearChatMessages() {
-      CHAT_MESSAGES = [];
-      localStorage.removeItem('bapsim_chat');
-      renderChatMessages();
-      showToast('채팅 기록을 비웠습니다.');
-    }
+    function appendChatMessage(msg) {
+      const container = document.getElementById('chatMessages');
+      const div = document.createElement('div');
 
-    function openSyncConfigModal() {
-      const modal = document.getElementById('sync-config-modal');
-      const savedConfig = localStorage.getItem('bapsim_firebase_config') || '';
-      document.getElementById('firebase-config-input').value = savedConfig;
-      modal.classList.remove('hidden');
-      lucide.createIcons();
-    }
-
-    function closeSyncConfigModal() {
-      document.getElementById('sync-config-modal').classList.add('hidden');
-    }
-
-    function saveFirebaseConfig() {
-      const raw = document.getElementById('firebase-config-input').value.trim();
-      if (!raw) {
-        resetToLocalBroadcast();
-        return;
-      }
-      try {
-        const parsed = JSON.parse(raw);
-        localStorage.setItem('bapsim_firebase_config', JSON.stringify(parsed, null, 2));
-        showToast('Firebase 설정이 저장되었습니다. 동기화를 재시작합니다.');
-        closeSyncConfigModal();
-        setTimeout(() => location.reload(), 600);
-      } catch (e) {
-        showToast('올바른 JSON 형식의 Firebase Config를 입력해주세요.');
-      }
-    }
-
-    function resetToLocalBroadcast() {
-      localStorage.removeItem('bapsim_firebase_config');
-      showToast('다중 탭 로컬 연동 모드로 복원되었습니다.');
-      closeSyncConfigModal();
-      setTimeout(() => location.reload(), 500);
-    }
-
-    function setViewMode(mode) {
-      currentViewMode = mode;
-      const cardContainer = document.getElementById('buffet-cards-view');
-      const tableContainer = document.getElementById('buffet-table-view');
-      const btnCard = document.getElementById('btn-view-card');
-      const btnTable = document.getElementById('btn-view-table');
-
-      if (mode === 'card') {
-        cardContainer.classList.remove('hidden');
-        tableContainer.classList.add('hidden');
-        btnCard.className = 'px-3 py-1 text-xs font-bold rounded-lg bg-white shadow-xs text-brand-600 transition flex items-center gap-1';
-        btnTable.className = 'px-3 py-1 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center gap-1';
+      if (msg.type === 'system') {
+        div.className = "text-center text-[10px] text-orange-600 bg-orange-50/80 rounded-md py-1 my-1 font-semibold";
+        div.textContent = msg.text;
       } else {
-        cardContainer.classList.add('hidden');
-        tableContainer.classList.remove('hidden');
-        btnTable.className = 'px-3 py-1 text-xs font-bold rounded-lg bg-white shadow-xs text-brand-600 transition flex items-center gap-1';
-        btnCard.className = 'px-3 py-1 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center gap-1';
-        renderComparisonTable();
+        const isMe = msg.nickname === currentUser.nickname;
+        div.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'}`;
+        div.innerHTML = `
+          <span class="text-[10px] text-slate-400 mb-0.5">${msg.nickname} · ${msg.building || '문정'}</span>
+          <div class="px-3 py-1.5 rounded-xl max-w-[80%] ${isMe ? 'bg-orange-500 text-white rounded-tr-none' : 'bg-white border text-slate-800 rounded-tl-none'}">
+            ${msg.text}
+          </div>
+        `;
       }
-      lucide.createIcons();
+
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
     }
 
-    function toggleFilter(type) {
-      const btn = document.getElementById('filter-meat-btn');
-      if (activeFilter === type) {
-        activeFilter = 'all';
-        btn.classList.remove('bg-orange-50', 'border-brand-500', 'text-brand-600');
-        btn.classList.add('bg-white', 'text-slate-700');
-      } else {
-        activeFilter = type;
-        btn.classList.add('bg-orange-50', 'border-brand-500', 'text-brand-600');
-        btn.classList.remove('bg-white', 'text-slate-700');
+    // 8. 모달 및 팝업 컨트롤
+    function toggleChatWindow() {
+      const w = document.getElementById('chatWindow');
+      w.classList.toggle('hidden');
+    }
+    function openAuthModal() { document.getElementById('authModal').classList.remove('hidden'); }
+    function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
+    function openAdminModal() { document.getElementById('adminModal').classList.remove('hidden'); }
+    function closeAdminModal() { document.getElementById('adminModal').classList.add('hidden'); }
+
+    function saveUserProfile() {
+      const nick = document.getElementById('authNicknameInput').value.trim() || "문정러";
+      const bld = document.getElementById('authBuildingSelect').value;
+      currentUser = { nickname: nick, building: bld };
+      localStorage.setItem('bapsim_user', JSON.stringify(currentUser));
+      document.getElementById('userProfileText').textContent = `${nick} (${bld})`;
+      closeAuthModal();
+    }
+
+    function resetVotes() {
+      if (!confirm("전체 식당의 투표수를 0으로 초기화하시겠습니까?")) return;
+      Object.keys(restaurants).forEach(k => {
+        db.ref(`restaurants/${k}/votes`).set(0);
+      });
+      alert("투표수가 리셋되었습니다.");
+    }
+
+    function updateRestaurantMenu() {
+      const id = document.getElementById('adminRestaurantSelect').value;
+      const mainsRaw = document.getElementById('adminMainMenus').value.trim();
+      if (!mainsRaw) return alert("메뉴를 입력해주세요.");
+
+      const mains = mainsRaw.split(',').map(s => s.trim()).filter(Boolean);
+      db.ref(`restaurants/${id}/mains`).set(mains);
+      alert("오늘의 식단이 클라우드에 성공적으로 반영되었습니다!");
+      closeAdminModal();
+    }
+
+    function shareVoteRoom() {
+      navigator.clipboard.writeText(window.location.href);
+      alert("투표 링크가 복사되었습니다! 단톡방에 공유해보세요.");
+    }
+
+    // 로고 5회 클릭 시 관리자 열기
+    let clickCount = 0;
+    document.getElementById('logoBadge').addEventListener('click', () => {
+      clickCount++;
+      if (clickCount >= 5) {
+        clickCount = 0;
+        openAdminModal();
       }
-      renderCards();
-    }
-
-    function applyFilters() {
-      currentSearchTerm = document.getElementById('keyword-filter').value;
-      renderCards();
-    }
-
-    function resetFilters() {
-      currentSearchTerm = '';
-      activeFilter = 'all';
-      document.getElementById('keyword-filter').value = '';
-      const btn = document.getElementById('filter-meat-btn');
-      btn.classList.remove('bg-orange-50', 'border-brand-500', 'text-brand-600');
-      btn.classList.add('bg-white', 'text-slate-700');
-      renderCards();
-    }
-
-    function openRawPhotoModal(buffetId) {
-      const buffet = BUFFET_DATA.find(b => b.id === buffetId);
-      if (!buffet) return;
-
-      document.getElementById('raw-photo-title').textContent = `${buffet.name} 식단표 원문`;
-      document.getElementById('board-content-list').innerHTML = `
-        <div class="font-bold text-yellow-200">[ 메 인 요 리 ]</div>
-        ${buffet.mains.map(m => `<div>▶ ${m}</div>`).join('')}
-        <div class="mt-2 font-bold text-emerald-300">[ 국 및 탕 ]</div>
-        <div>▶ ${buffet.soup}</div>
-        <div class="mt-2 font-bold text-cyan-200">[ 계절 반찬 ]</div>
-        <div>▶ ${buffet.sides.join('  ·  ')}</div>
-      `;
-      document.getElementById('modal-raw-photo').classList.remove('hidden');
-      lucide.createIcons();
-    }
-
-    function closeRawPhotoModal() {
-      document.getElementById('modal-raw-photo').classList.add('hidden');
-    }
-
-    function copyRoomLink() {
-      const dummyUrl = window.location.href.split('#')[0];
-      const tempInput = document.createElement('input');
-      tempInput.value = dummyUrl;
-      document.body.appendChild(tempInput);
-      tempInput.select();
-      document.execCommand('copy');
-      document.body.removeChild(tempInput);
-      showToast('투표방 링크가 복사되었습니다! 팀원들에게 공유하세요 📋');
-    }
-
-    function scrollToVotingSection() {
-      document.getElementById('voting-status-card').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function showToast(msg) {
-      const toast = document.getElementById('toast');
-      document.getElementById('toast-message').textContent = msg;
-      toast.classList.remove('opacity-0', 'translate-y-20', 'pointer-events-none');
-      toast.classList.add('opacity-100', 'translate-y-0');
-
-      setTimeout(() => {
-        toast.classList.remove('opacity-100', 'translate-y-0');
-        toast.classList.add('opacity-0', 'translate-y-20', 'pointer-events-none');
-      }, 2600);
-    }
-
-    // Countdown Timer Loop
-    let remainingSeconds = 14 * 60 + 32;
-    setInterval(() => {
-      if (remainingSeconds > 0) {
-        remainingSeconds--;
-        const m = Math.floor(remainingSeconds / 60);
-        const s = remainingSeconds % 60;
-        document.getElementById('countdown-timer').textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-      } else {
-        document.getElementById('countdown-timer').textContent = '마감됨';
-      }
-    }, 1000);
-
-    // Bootstrap app
-    window.addEventListener('DOMContentLoaded', () => {
-      const now = new Date();
-      const days = ['일', '월', '화', '수', '목', '금', '토'];
-      const dateStr = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} (${days[now.getDay()]})`;
-      document.getElementById('current-today-date').textContent = dateStr;
-
-      initRealtimeEngine();
-      renderAuthHeader();
-      renderCards();
-      renderPollGauges();
-      renderComparisonTable();
-      renderChatMessages();
-      lucide.createIcons();
     });
+
+    // 단축키 Ctrl + Shift + A
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+        e.preventDefault();
+        openAdminModal();
+      }
+    });
+
+    if (currentUser.nickname !== "익명 문정러") {
+      document.getElementById('userProfileText').textContent = `${currentUser.nickname} (${currentUser.building})`;
+    }
+
+    lucide.createIcons();
   </script>
 </body>
 </html>
