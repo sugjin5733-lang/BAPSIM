@@ -34,10 +34,9 @@
       align-items: center; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.25));
     }
 
-    /* 닉네임 배경 배지 스타일 */
+    /* 닉네임 배경 배지 */
     .nb-none { background: transparent; padding: 0; }
     
-    /* 신화 티어 */
     .nb-cosmic {
       background: linear-gradient(90deg, #ff007f, #7928ca, #0070f3, #00dfd8, #ff007f);
       background-size: 300% 300%;
@@ -129,7 +128,7 @@
 
   <!-- 슬림 상단 헤더 -->
   <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
-    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
       <div class="flex items-center gap-2.5 min-w-0 flex-1">
         <div class="w-9 h-9 shrink-0 rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center text-white font-black text-lg shadow-md shadow-orange-500/20 tracking-tighter">
           밥
@@ -171,7 +170,7 @@
   </header>
 
   <!-- 메인 영역 -->
-  <main class="max-w-6xl mx-auto px-4 pt-6 space-y-6">
+  <main class="max-w-7xl mx-auto px-4 pt-6 space-y-6">
 
     <!-- 배너 & 툴바 -->
     <div class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 rounded-3xl p-6 sm:p-7 text-white shadow-xl shadow-slate-900/10 space-y-5">
@@ -215,11 +214,6 @@
             <span>명품 상점</span>
           </button>
 
-          <button onclick="openRankModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-3 py-2 rounded-xl text-xs shadow-md transition-all">
-            <i data-lucide="award" class="w-3.5 h-3.5"></i>
-            <span>부자 랭킹</span>
-          </button>
-
           <button onclick="openRouletteModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-3 py-2 rounded-xl text-xs border border-slate-700 transition-all">
             <i data-lucide="disc" class="w-3.5 h-3.5 text-orange-400"></i>
             <span>룰렛</span>
@@ -235,19 +229,86 @@
       <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
     </div>
 
-    <!-- 식당 카드 그리드 섹션 -->
-    <div>
-      <div class="flex items-center justify-between mb-4">
-        <div class="flex items-center gap-2">
-          <h3 class="font-extrabold text-slate-800 text-lg">문정동 한식뷔페 라인업</h3>
-          <span id="restaurantCountBadge" class="text-xs bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded-md">0곳</span>
-        </div>
-        <p class="text-xs text-slate-500">스프레드시트 식단이 자동으로 반영됩니다.</p>
-      </div>
+    <!-- 3단 반응형 레이아웃: [좌측 공지사항] + [중앙 식당 라인업] + [우측 부자랭킹] -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="restaurantCardsContainer">
-        <!-- 동적 카드 렌더링 -->
-      </div>
+      <!-- 1. [좌측] 관리자 실시간 공지사항 배너 (LG화면 3컬럼 차지) -->
+      <aside class="lg:col-span-3 space-y-4">
+        <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-xs sticky top-20">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
+            <div class="flex items-center gap-2">
+              <span class="p-1.5 bg-rose-50 text-rose-600 rounded-xl">
+                <i data-lucide="megaphone" class="w-4 h-4"></i>
+              </span>
+              <div>
+                <h3 class="font-extrabold text-slate-900 text-sm">밥심 공지사항</h3>
+                <p class="text-[10px] text-slate-400">관리자 실시간 전파</p>
+              </div>
+            </div>
+            <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+          </div>
+
+          <!-- 실시간 공지 본문 내용 -->
+          <div id="noticeContentDisplay" class="text-xs text-slate-700 leading-relaxed font-medium bg-slate-50 border border-slate-100 p-3.5 rounded-2xl whitespace-pre-line min-h-[90px]">
+            등록된 공지사항을 불러오는 중입니다...
+          </div>
+
+          <div class="mt-3 flex items-center justify-between text-[10px] text-slate-400 px-1">
+            <span id="noticeDateDisplay">최근 업데이트: 오늘</span>
+            <span class="font-bold text-slate-500">운영팀 알림</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- 2. [중앙] 문정동 한식뷔페 식당 카드 리스트 (LG화면 6컬럼 차지) -->
+      <section class="lg:col-span-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <h3 class="font-extrabold text-slate-800 text-lg">문정동 한식뷔페 라인업</h3>
+            <span id="restaurantCountBadge" class="text-xs bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded-md">0곳</span>
+          </div>
+          <p class="text-xs text-slate-500">실시간 투표 진행 중</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="restaurantCardsContainer">
+          <!-- 동적 카드 렌더링 -->
+        </div>
+      </section>
+
+      <!-- 3. [우측] 상시 노출 포인트 부자랭킹 배너 (LG화면 3컬럼 차지) -->
+      <aside class="lg:col-span-3 space-y-4">
+        <div class="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-xs sticky top-20">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
+            <div class="flex items-center gap-2">
+              <span class="p-1.5 bg-amber-50 text-amber-600 rounded-xl">
+                <i data-lucide="crown" class="w-4 h-4"></i>
+              </span>
+              <div>
+                <h3 class="font-extrabold text-slate-900 text-sm">실시간 부자 랭킹</h3>
+                <p class="text-[10px] text-slate-400">명예의 전당 TOP 5</p>
+              </div>
+            </div>
+            <button onclick="openRankModal()" class="text-[11px] text-indigo-600 hover:text-indigo-800 font-bold">
+              전체보기
+            </button>
+          </div>
+
+          <!-- 내 랭킹 간이 표시 -->
+          <div class="p-3 bg-gradient-to-r from-amber-500 to-yellow-500 rounded-2xl text-slate-950 flex items-center justify-between mb-3 shadow-xs">
+            <div class="min-w-0">
+              <span class="text-[9px] font-black uppercase text-amber-950/80 block">MY RANK</span>
+              <span id="sideMyRankText" class="text-xs font-black truncate block">집계 중...</span>
+            </div>
+            <span id="sideMyPointText" class="text-xs font-black bg-white/40 px-2 py-0.5 rounded-lg shrink-0">0P</span>
+          </div>
+
+          <!-- 랭커 TOP 5 리스트 -->
+          <div id="sideRankListContainer" class="space-y-2 text-xs">
+            <div class="text-center text-slate-400 py-4 text-xs">랭킹 데이터를 집계 중입니다...</div>
+          </div>
+        </div>
+      </aside>
+
     </div>
   </main>
 
@@ -324,7 +385,7 @@
     </div>
   </div>
 
-  <!-- 랭킹 모달 -->
+  <!-- 전체 랭킹 모달 -->
   <div id="rankModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
@@ -349,14 +410,14 @@
       <div class="space-y-2">
         <h4 class="text-xs font-black text-slate-700 flex items-center gap-1">
           <i data-lucide="crown" class="w-3.5 h-3.5 text-amber-500"></i>
-          <span>TOP 10 포인트 부자 전당</span>
+          <span>전체 포인트 랭킹 순위표</span>
         </h4>
         <div id="rankListContainer" class="space-y-2 text-xs"></div>
       </div>
     </div>
   </div>
 
-  <!-- [명품 상점 모달 (아이템 대폭 추가)] -->
+  <!-- 상점 모달 -->
   <div id="shopModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
@@ -370,7 +431,6 @@
         <button onclick="closeShopModal()" class="text-slate-400 hover:text-slate-600 text-xs p-1">✕</button>
       </div>
 
-      <!-- 장착 현황 미리보기 -->
       <div class="p-3.5 bg-slate-50 border rounded-2xl flex items-center justify-between text-xs">
         <div>
           <span class="text-[10px] text-slate-400 block mb-0.5">내 닉네임 미리보기</span>
@@ -383,19 +443,16 @@
         <button onclick="unequipAll()" class="text-[11px] bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-2.5 py-1 rounded-lg">전체 해제</button>
       </div>
 
-      <!-- 1. 닉네임 칭호 심볼 -->
       <div class="space-y-2.5">
         <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><span>✨</span> 닉네임 칭호 심볼 (각 150P)</span>
         <div class="grid grid-cols-2 gap-2 text-xs" id="shopSymbolList"></div>
       </div>
 
-      <!-- 2. 글자 색상 -->
       <div class="space-y-2.5">
         <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><span>🎨</span> 닉네임 글자 색상 (각 300P)</span>
         <div class="grid grid-cols-2 gap-2 text-xs" id="shopColorList"></div>
       </div>
 
-      <!-- 3. 배경 배지 -->
       <div class="space-y-3">
         <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><span>🏷️</span> 닉네임 명품 배지</span>
         <div class="space-y-2 text-xs" id="shopBadgeList"></div>
@@ -407,7 +464,7 @@
     </div>
   </div>
 
-  <!-- [관리자 비밀번호 입력 모달 (09010)] -->
+  <!-- 관리자 모달 (09010) -->
   <div id="adminAuthModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-xs rounded-3xl shadow-2xl p-6 space-y-4">
       <div class="text-center">
@@ -425,7 +482,7 @@
     </div>
   </div>
 
-  <!-- [관리자 전용 대시보드: 회원 명단 관리 & 포인트 전체 초기화 탑재] -->
+  <!-- [관리자 대시보드: 실시간 공지사항 작성 기능 탑재] -->
   <div id="adminDashboardModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
@@ -436,7 +493,22 @@
         <button onclick="closeAdminDashboard()" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
       </div>
 
-      <!-- 1. 포인트 승인 대기 목록 -->
+      <!-- [신규 기능] 실시간 좌측 공지사항 편집기 -->
+      <div class="p-4 bg-indigo-50/70 border border-indigo-100 rounded-2xl space-y-2.5 text-xs">
+        <div class="flex items-center justify-between">
+          <span class="font-bold text-indigo-900 flex items-center gap-1.5">
+            <i data-lucide="megaphone" class="w-4 h-4 text-indigo-600"></i>
+            좌측 상시 공지사항 편집 (전체 실시간 전파)
+          </span>
+          <span class="text-[10px] text-indigo-600 font-bold">즉시 반영</span>
+        </div>
+        <textarea id="adminNoticeTextarea" rows="3" placeholder="사용자들에게 전달할 공지사항을 입력하세요..." class="w-full border border-indigo-200 rounded-xl p-3 bg-white outline-none focus:ring-1 focus:ring-indigo-500 font-medium"></textarea>
+        <button onclick="handleSaveNotice()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl transition-colors">
+          공지사항 즉시 전파하기
+        </button>
+      </div>
+
+      <!-- 포인트 승인 대기 목록 -->
       <div class="space-y-3">
         <div class="flex items-center justify-between">
           <h4 class="font-extrabold text-xs text-slate-800">📋 메뉴 등록 포인트 승인 대기 목록</h4>
@@ -445,21 +517,18 @@
         <div id="adminPendingListContainer" class="space-y-2 max-h-44 overflow-y-auto"></div>
       </div>
 
-      <!-- 2. 회원 명단 관리 및 개별 포인트 즉시 지급/회수 -->
+      <!-- 전체 회원 명단 및 포인트 관리 -->
       <div class="space-y-3">
         <div class="flex items-center justify-between">
           <h4 class="font-extrabold text-xs text-slate-800 flex items-center gap-1.5">
             <i data-lucide="users" class="w-3.5 h-3.5 text-indigo-600"></i>
             전체 회원 명단 및 포인트 관리 (<span id="adminTotalUserCount">0명</span>)
           </h4>
-          <span class="text-[10px] text-slate-400">포인트 즉시 수정 및 계정 삭제 지원</span>
         </div>
-        <div id="adminUserListContainer" class="space-y-2 max-h-52 overflow-y-auto border rounded-2xl p-2 bg-slate-50 text-xs">
-          <!-- 회원 목록 동적 렌더링 -->
-        </div>
+        <div id="adminUserListContainer" class="space-y-2 max-h-48 overflow-y-auto border rounded-2xl p-2 bg-slate-50 text-xs"></div>
       </div>
 
-      <!-- 3. 회원 포인트 수동 빠른 조정 도구 -->
+      <!-- 회원 포인트 수동 조정 도구 -->
       <div class="p-4 bg-slate-50 border rounded-2xl space-y-2.5 text-xs">
         <span class="font-bold text-slate-800 block">⚡ 특정 회원 포인트 수동 조정</span>
         <div class="grid grid-cols-3 gap-2">
@@ -469,7 +538,7 @@
         </div>
       </div>
 
-      <!-- 4. 위험 관리 구역 (전체 포인트 초기화 / 투표 리셋) -->
+      <!-- 위험 관리 구역 -->
       <div class="p-4 bg-rose-50 border border-rose-200 rounded-2xl space-y-3 text-xs">
         <span class="font-black text-rose-900 block">🚨 위험 관리 구역</span>
         
@@ -496,7 +565,7 @@
     </div>
   </div>
 
-  <!-- 식당 등록/수정 모달 -->
+  <!-- [식당 등록/수정 모달 (건물/위치 필드 완전 삭제)] -->
   <div id="addModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -508,45 +577,48 @@
       </div>
       <form id="restaurantForm" onsubmit="handleSaveRestaurant(event)" class="space-y-3 text-xs">
         <input type="hidden" id="editRestId" value="" />
+        
         <div>
           <label class="font-bold text-slate-700 block mb-1">식당 이름 *</label>
-          <input id="formRestName" type="text" required class="w-full border rounded-xl p-2.5 bg-slate-50 font-bold" />
+          <input id="formRestName" type="text" placeholder="예: 일루" required class="w-full border rounded-xl p-2.5 bg-slate-50 font-bold" />
         </div>
+
         <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="font-bold text-slate-700 block mb-1">위치/건물 *</label>
-            <input id="formRestBuilding" type="text" required class="w-full border rounded-xl p-2.5 bg-slate-50" />
-          </div>
           <div>
             <label class="font-bold text-slate-700 block mb-1">가격</label>
             <input id="formRestPrice" type="text" placeholder="9,500원" class="w-full border rounded-xl p-2.5 bg-slate-50" />
           </div>
+          <div>
+            <label class="font-bold text-slate-700 block mb-1">식단 기준 날짜 *</label>
+            <input id="formRestDate" type="date" required class="w-full border rounded-xl p-2.5 bg-slate-50" />
+          </div>
         </div>
+
         <div>
           <label class="font-bold text-slate-700 block mb-1">네이버 지도 URL</label>
           <input id="formRestMapUrl" type="url" placeholder="https://naver.me/..." class="w-full border rounded-xl p-2.5 bg-slate-50" />
         </div>
-        <div>
-          <label class="font-bold text-slate-700 block mb-1">식단 기준 날짜 *</label>
-          <input id="formRestDate" type="date" required class="w-full border rounded-xl p-2.5 bg-slate-50" />
-        </div>
+
         <div>
           <label class="font-bold text-slate-700 block mb-1">핵심 메인 요리 (쉼표 구분) *</label>
-          <input id="formRestMains" type="text" required class="w-full border rounded-xl p-2.5 bg-slate-50" />
+          <input id="formRestMains" type="text" placeholder="예: 돼지고기 김치찜, 닭강정, 찰순대" required class="w-full border rounded-xl p-2.5 bg-slate-50" />
         </div>
+
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="font-bold text-slate-700 block mb-1">국 / 찌개</label>
-            <input id="formRestSoup" type="text" class="w-full border rounded-xl p-2.5 bg-slate-50" />
+            <input id="formRestSoup" type="text" placeholder="예: 소고기 무국" class="w-full border rounded-xl p-2.5 bg-slate-50" />
           </div>
           <div>
             <label class="font-bold text-slate-700 block mb-1">후식 / 무료 서비스</label>
-            <input id="formRestDessert" type="text" class="w-full border rounded-xl p-2.5 bg-slate-50" />
+            <input id="formRestDessert" type="text" placeholder="예: 한강라면, 매실차" class="w-full border rounded-xl p-2.5 bg-slate-50" />
           </div>
         </div>
+
         <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl text-xs shadow-md mt-2">
           식단 저장하기
         </button>
+
         <div id="deleteActionWrapper" class="pt-2 border-t border-slate-100 hidden">
           <button type="button" onclick="handleDeleteCurrentRestaurant()" class="w-full bg-rose-50 text-rose-600 font-bold py-2 rounded-xl text-xs">
             이 식당 완전히 삭제하기
@@ -616,7 +688,7 @@
   </div>
 
   <div id="groupJoinModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-xs rounded-3xl shadow-2xl p-6 space-y-4 text-xs">
+    <div class="bg-white w-full max-w-xs rounded-3xl shadow-2xl p-6 space-y-3 text-xs">
       <div class="flex items-center justify-between border-b pb-2.5">
         <h3 class="font-extrabold text-slate-900 text-sm truncate pr-2" id="joinModalGroupName">그룹 입장</h3>
         <button onclick="closeGroupJoinModal()" class="text-slate-400 hover:text-slate-600 text-sm font-bold p-1">✕</button>
@@ -638,7 +710,7 @@
     </div>
   </div>
 
-  <!-- [프로필 모달 (닉네임 중복 체크 적용)] -->
+  <!-- 프로필 모달 -->
   <div id="authModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-xs rounded-3xl shadow-2xl p-6 space-y-4 text-xs">
       <div class="flex items-center justify-between border-b pb-2">
@@ -687,6 +759,44 @@
     let myNickBg = localStorage.getItem('bapsim_custom_bg') || 'nb-none';
     let myNickSymbol = localStorage.getItem('bapsim_custom_symbol') || '';
     let myInventory = JSON.parse(localStorage.getItem('bapsim_inventory') || '{"colors":[], "bgs":["nb-none"], "symbols":[]}');
+
+    // ★ 2. [좌측] 관리자 실시간 공지사항 연동 엔진
+    function initNoticeListener() {
+      db.ref('site_notice').on('value', (snap) => {
+        const notice = snap.val();
+        const contentEl = document.getElementById('noticeContentDisplay');
+        const dateEl = document.getElementById('noticeDateDisplay');
+        const adminTextarea = document.getElementById('adminNoticeTextarea');
+
+        if (notice && notice.text) {
+          contentEl.textContent = notice.text;
+          dateEl.textContent = `최근 업데이트: ${notice.date || '오늘'}`;
+          if (adminTextarea) adminTextarea.value = notice.text;
+        } else {
+          contentEl.textContent = "📢 [공지] 오늘 점심 투표가 시작되었습니다! 11시 30분 마감 전까지 투표를 마쳐주세요.";
+          dateEl.textContent = "최근 업데이트: 오늘";
+          if (adminTextarea) adminTextarea.value = "📢 [공지] 오늘 점심 투표가 시작되었습니다! 11시 30분 마감 전까지 투표를 마쳐주세요.";
+        }
+      });
+    }
+    initNoticeListener();
+
+    function handleSaveNotice() {
+      const text = document.getElementById('adminNoticeTextarea').value.trim();
+      if (!text) return alert("공지 내용을 입력하세요.");
+
+      const now = new Date();
+      const dateStr = `${now.getMonth() + 1}월 ${now.getDate()}일 ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+      db.ref('site_notice').set({
+        text: text,
+        date: dateStr,
+        updatedBy: currentUser.nickname
+      }, (err) => {
+        if (err) return alert("공지 저장 실패: " + err.message);
+        alert("✅ 공지사항이 전체 화면에 실시간으로 전파되었습니다!");
+      });
+    }
 
     // ★ 구글 스프레드시트 ➔ Firebase Realtime DB 동기화
     async function syncFromGoogleSheet(isManual = false) {
@@ -762,7 +872,7 @@
       return { text: parsed, isToday: isToday, iso: parsed };
     }
 
-    // [명품 상점 메타데이터: 다채로운 아이템 대폭 추가]
+    // 상점 메타데이터
     const SHOP_DATA = {
       symbols: [
         { id: "sym_star", name: "★ 별빛 칭호 ★", char: "★", cost: 150 },
@@ -1047,7 +1157,6 @@
       renderShopUI();
     }
 
-    // [관리자 모드: 회원 포인트 수동 조정]
     function handleManualPointAdjust() {
       const target = document.getElementById('adminTargetNickname').value.trim();
       const amount = parseInt(document.getElementById('adminAmount').value, 10);
@@ -1075,7 +1184,6 @@
       });
     }
 
-    // [관리자 모드: 모든 회원 포인트 전체 일괄 초기화 (0P)]
     function handleAdminResetAllPoints() {
       const confirmCode = prompt("경고: 모든 회원의 보유 포인트가 '0P'로 초기화됩니다!\n정말 진행하시려면 화면에 '초기화'를 입력하세요.");
       if (confirmCode !== "초기화") return alert("초기화가 취소되었습니다.");
@@ -1089,7 +1197,6 @@
 
         db.ref().update(updates, (err) => {
           if (err) return alert("초기화 실패: " + err.message);
-
           userPoints = 0;
           localStorage.setItem('bapsim_points', '0');
           updatePointsUI(false);
@@ -1099,13 +1206,11 @@
             text: `🚨 관리자에 의해 전체 회원의 보유 포인트가 0P로 초기화되었습니다.`,
             timestamp: Date.now()
           });
-
           alert("모든 회원의 포인트가 0P로 일괄 초기화되었습니다.");
         });
       });
     }
 
-    // [관리자 모드: 전체 회원 명단 및 개별 관리 렌더링]
     function renderAdminUserList() {
       db.ref('user_points').on('value', (snap) => {
         const users = snap.val() || {};
@@ -1168,14 +1273,12 @@
       });
     }
 
-    // [닉네임 중복 방지 비동기 검증 및 저장]
     async function saveUserProfile() {
       const input = document.getElementById('authNicknameInput').value.trim();
       const saveBtn = document.getElementById('saveUserBtn');
       if (!input) return alert('닉네임을 입력해주세요.');
       if (!isValidNickname(input)) return alert('⚠️ 닉네임에는 특수문자를 사용할 수 없습니다! (한글, 영문, 숫자만)');
 
-      // 기존 본인 닉네임과 동일한 경우 그냥 닫기
       if (input === currentUser.nickname) {
         closeAuthModal();
         return;
@@ -1185,7 +1288,6 @@
       saveBtn.textContent = "중복 확인 중...";
 
       try {
-        // Firebase DB에서 해당 닉네임이 이미 존재하는지 단건 조회
         const snap = await db.ref(`user_points/${input}`).once('value');
         if (snap.exists()) {
           alert(`❌ 이미 다른 사용자가 사용 중인 닉네임입니다!\n다른 닉네임을 입력해 주세요.`);
@@ -1194,13 +1296,11 @@
           return;
         }
 
-        // 기존 닉네임 데이터가 있다면 새 닉네임으로 이전 후 구 닉네임 삭제
         const oldNick = currentUser.nickname;
         currentUser = { nickname: input };
         localStorage.setItem('bapsim_user', JSON.stringify(currentUser));
         document.getElementById('userProfileText').textContent = input;
 
-        // 새 닉네임 노드 생성
         await db.ref(`user_points/${input}`).set({
           nickname: input,
           points: userPoints,
@@ -1210,7 +1310,6 @@
           updatedAt: Date.now()
         });
 
-        // 기존 노드 정리
         if (oldNick && oldNick !== "문정러") {
           db.ref(`user_points/${oldNick}`).remove();
         }
@@ -1220,7 +1319,7 @@
         closeAuthModal();
         alert(`🎉 닉네임이 [${input}] 으로 성공적으로 변경되었습니다!`);
       } catch (err) {
-        alert("닉네임 변경 중 오류가 발생했습니다: " + err.message);
+        alert("닉네임 변경 중 오류 발생: " + err.message);
       } finally {
         saveBtn.disabled = false;
         saveBtn.textContent = "저장하기";
@@ -1345,52 +1444,98 @@
     function openRankModal() { renderPointRankings(); document.getElementById('rankModal').classList.remove('hidden'); }
     function closeRankModal() { document.getElementById('rankModal').classList.add('hidden'); }
 
+    // ★ 3. [우측] 상시 노출 부자 랭킹 실시간 렌더링
     function renderPointRankings() {
-      db.ref('user_points').once('value', (snap) => {
+      db.ref('user_points').on('value', (snap) => {
         const data = snap.val() || {};
         const userList = Object.values(data);
         userList.sort((a, b) => (b.points || 0) - (a.points || 0));
 
-        const container = document.getElementById('rankListContainer');
-        container.innerHTML = '';
+        // 우측 상시 사이드바 랭킹 렌더링 (TOP 5)
+        const sideContainer = document.getElementById('sideRankListContainer');
+        const sideRankEl = document.getElementById('sideMyRankText');
+        const sidePointEl = document.getElementById('sideMyPointText');
 
         let myRankIndex = userList.findIndex(u => u.nickname === currentUser.nickname);
         if (myRankIndex !== -1) {
-          document.getElementById('myRankSummary').textContent = `${currentUser.nickname} 님은 현재 ${myRankIndex + 1}위입니다!`;
-          document.getElementById('myRankPointDisplay').textContent = `${(userList[myRankIndex].points || 0).toLocaleString()}P`;
+          sideRankEl.textContent = `${myRankIndex + 1}위 (${currentUser.nickname})`;
+          sidePointEl.textContent = `${(userList[myRankIndex].points || 0).toLocaleString()}P`;
         } else {
-          document.getElementById('myRankSummary').textContent = `${currentUser.nickname} 님 (순위 밖)`;
-          document.getElementById('myRankPointDisplay').textContent = `${userPoints.toLocaleString()}P`;
+          sideRankEl.textContent = `${currentUser.nickname} (순위밖)`;
+          sidePointEl.textContent = `${userPoints.toLocaleString()}P`;
         }
 
-        userList.slice(0, 10).forEach((user, index) => {
-          let rankBadge = `${index + 1}위`;
-          if (index === 0) rankBadge = '🥇 1등';
-          else if (index === 1) rankBadge = '🥈 2등';
-          else if (index === 2) rankBadge = '🥉 3등';
+        if (sideContainer) {
+          sideContainer.innerHTML = '';
+          if (userList.length === 0) {
+            sideContainer.innerHTML = '<div class="text-center text-slate-400 py-3 text-xs">랭킹 데이터가 없습니다.</div>';
+          } else {
+            userList.slice(0, 5).forEach((user, index) => {
+              let medal = `${index + 1}위`;
+              if (index === 0) medal = '🥇';
+              else if (index === 1) medal = '🥈';
+              else if (index === 2) medal = '🥉';
 
-          const item = document.createElement('div');
-          item.className = `p-3 rounded-2xl border flex items-center justify-between transition-all ${index < 3 ? 'bg-amber-50/70 border-amber-200' : 'bg-slate-50 border-slate-200'}`;
-          const badgeClass = user.badge || 'nb-none';
-          const sym = user.symbol ? `${user.symbol} ` : '';
-          const colorStyle = user.color ? `color: ${user.color};` : '';
+              const item = document.createElement('div');
+              item.className = `p-2 rounded-xl border flex items-center justify-between transition-all ${index < 3 ? 'bg-amber-50/70 border-amber-200' : 'bg-slate-50 border-slate-200'}`;
+              const badgeClass = user.badge || 'nb-none';
+              const sym = user.symbol ? `${user.symbol} ` : '';
+              const colorStyle = user.color ? `color: ${user.color} !important;` : '';
 
-          item.innerHTML = `
-            <div class="flex items-center gap-2">
-              <span class="font-black text-xs ${index === 0 ? 'text-amber-600 text-sm' : 'text-slate-600'}">${rankBadge}</span>
-              <span class="${badgeClass} text-xs inline-block" style="${colorStyle}">
-                ${sym}${user.nickname}${user.symbol ? ` ${user.symbol}` : ''}
+              item.innerHTML = `
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <span class="font-black text-xs shrink-0">${medal}</span>
+                  <span class="${badgeClass} text-xs inline-block truncate" style="${colorStyle}">
+                    ${sym}${user.nickname}
+                  </span>
+                </div>
+                <span class="font-bold text-amber-700 bg-white border border-amber-100 px-2 py-0.5 rounded-md shadow-2xs shrink-0 text-[11px]">
+                  ${(user.points || 0).toLocaleString()}P
+                </span>
+              `;
+              sideContainer.appendChild(item);
+            });
+          }
+        }
+
+        // 전체 모달 랭킹 렌더링
+        const modalContainer = document.getElementById('rankListContainer');
+        if (modalContainer) {
+          modalContainer.innerHTML = '';
+          document.getElementById('myRankSummary').textContent = myRankIndex !== -1 ? `${currentUser.nickname} 님은 현재 ${myRankIndex + 1}위입니다!` : `${currentUser.nickname} 님 (순위 밖)`;
+          document.getElementById('myRankPointDisplay').textContent = `${userPoints.toLocaleString()}P`;
+
+          userList.forEach((user, index) => {
+            let rankBadge = `${index + 1}위`;
+            if (index === 0) rankBadge = '🥇 1등';
+            else if (index === 1) rankBadge = '🥈 2등';
+            else if (index === 2) rankBadge = '🥉 3등';
+
+            const item = document.createElement('div');
+            item.className = `p-3 rounded-2xl border flex items-center justify-between transition-all ${index < 3 ? 'bg-amber-50/70 border-amber-200' : 'bg-slate-50 border-slate-200'}`;
+            const badgeClass = user.badge || 'nb-none';
+            const sym = user.symbol ? `${user.symbol} ` : '';
+            const colorStyle = user.color ? `color: ${user.color} !important;` : '';
+
+            item.innerHTML = `
+              <div class="flex items-center gap-2">
+                <span class="font-black text-xs ${index === 0 ? 'text-amber-600 text-sm' : 'text-slate-600'}">${rankBadge}</span>
+                <span class="${badgeClass} text-xs inline-block" style="${colorStyle}">
+                  ${sym}${user.nickname}${user.symbol ? ` ${user.symbol}` : ''}
+                </span>
+              </div>
+              <span class="font-extrabold text-amber-700 bg-white border border-amber-100 px-2.5 py-0.5 rounded-xl shadow-xs">
+                ${(user.points || 0).toLocaleString()}P
               </span>
-            </div>
-            <span class="font-extrabold text-amber-700 bg-white border border-amber-100 px-2.5 py-0.5 rounded-xl shadow-xs">
-              ${(user.points || 0).toLocaleString()}P
-            </span>
-          `;
-          container.appendChild(item);
-        });
+            `;
+            modalContainer.appendChild(item);
+          });
+        }
       });
     }
+    renderPointRankings();
 
+    // 식당 저장 (건물 필드 제외)
     function handleSaveRestaurant(e) {
       e.preventDefault();
       const editId = document.getElementById('editRestId').value;
@@ -1400,7 +1545,6 @@
       const restData = {
         id: id,
         name: document.getElementById('formRestName').value.trim(),
-        building: document.getElementById('formRestBuilding').value.trim(),
         price: document.getElementById('formRestPrice').value.trim() || '8,500원',
         mapUrl: document.getElementById('formRestMapUrl').value.trim() || '',
         menuDate: document.getElementById('formRestDate').value,
@@ -1462,12 +1606,13 @@
     function attachChatListener() {
       if (chatRef) chatRef.off();
       const c = document.getElementById('chatMessages');
-      c.innerHTML = '';
+      if (c) c.innerHTML = '';
       const chatPath = currentGroupId === 'lobby' ? 'lobby_messages' : `groups/${currentGroupId}/messages`;
       chatRef = db.ref(chatPath).limitToLast(50);
       chatRef.on('child_added', snap => appendChatMessage(snap.val()));
     }
 
+    // ★ 1. 카드 렌더링: 식당명 위 건물/위치 배지 완전 제거
     function renderCards() {
       const container = document.getElementById('restaurantCardsContainer');
       container.innerHTML = '';
@@ -1508,12 +1653,10 @@
 
         card.innerHTML = `
           <div>
+            <!-- 상단 헤더: 건물 배지 삭제, 날짜 배지 & 가격/지도만 단정하게 표시 -->
             <div class="flex items-start justify-between gap-2 mb-3">
               <div class="min-w-0">
                 <div class="flex items-center gap-1.5 flex-wrap mb-1">
-                  <span class="text-[11px] font-bold text-orange-700 bg-orange-50 px-2 py-0.5 rounded-lg border border-orange-200/70 truncate max-w-[130px]">
-                    ${r.building}
-                  </span>
                   <span class="text-[10px] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1 ${dateInfo.isToday ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500'}">
                     <i data-lucide="calendar" class="w-3 h-3"></i>
                     ${dateInfo.text}
@@ -1532,6 +1675,7 @@
               </div>
             </div>
 
+            <!-- 핵심 메인 메뉴 -->
             <div class="mt-4 space-y-2">
               <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">오늘의 메인 메뉴</span>
               ${isSuspended 
@@ -1546,6 +1690,7 @@
               }
             </div>
 
+            <!-- 국 & 후식/서비스 -->
             <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs">
               <div class="flex items-center">
                 <span class="shrink-0 text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 px-1.5 py-0.5 rounded-md mr-2">국/탕</span>
@@ -1697,7 +1842,7 @@
           clearInterval(timer);
           const chosen = list[Math.floor(Math.random() * list.length)];
           slot.textContent = chosen.name;
-          document.getElementById('rouletteSubText').textContent = `🎉 [${chosen.building}] 낙점!`;
+          document.getElementById('rouletteSubText').textContent = `🎉 [${chosen.name}] 낙점!`;
           if (window.confetti) confetti({ particleCount: 60 });
         }
       }, 70);
@@ -1799,6 +1944,7 @@
       document.getElementById('addModal').classList.remove('hidden');
     }
 
+    // 수정 창에서 건물 필드 제외 처리
     function openEditModal(id) {
       const r = restaurants[id];
       if (!r) return;
@@ -1808,7 +1954,6 @@
       document.getElementById('modalTitle').textContent = `[${r.name}] 식당 정보 수정`;
       document.getElementById('editRestId').value = r.id;
       document.getElementById('formRestName').value = r.name;
-      document.getElementById('formRestBuilding').value = r.building;
       document.getElementById('formRestPrice').value = r.price || '';
       document.getElementById('formRestMapUrl').value = r.mapUrl || '';
       
