@@ -34,9 +34,10 @@
       align-items: center; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.25));
     }
 
-    /* 닉네임 배경 배지 커스텀 프리셋 */
+    /* 닉네임 배경 배지 스타일 */
     .nb-none { background: transparent; padding: 0; }
     
+    /* 신화 티어 */
     .nb-cosmic {
       background: linear-gradient(90deg, #ff007f, #7928ca, #0070f3, #00dfd8, #ff007f);
       background-size: 300% 300%;
@@ -52,6 +53,14 @@
       100% { background-position: 0% 50%; }
     }
 
+    .nb-universe {
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #e0e7ff !important;
+      border: 1.5px solid #818cf8;
+      box-shadow: 0 0 14px rgba(129, 140, 248, 0.6);
+      padding: 2px 8px; border-radius: 8px; font-weight: 900;
+    }
+
     .nb-gold { 
       background: linear-gradient(135deg, #fffbeb 0%, #fef08a 30%, #facc15 70%, #ca8a04 100%); 
       color: #713f12 !important; border: 1.5px solid #eab308; 
@@ -63,6 +72,13 @@
       color: #f43f5e !important; border: 1.5px solid #e11d48; 
       box-shadow: 0 0 10px rgba(225, 29, 72, 0.4); 
       padding: 2px 8px; border-radius: 8px; font-weight: 900; 
+    }
+    .nb-aurora {
+      background: linear-gradient(135deg, #059669, #10b981, #06b6d4);
+      color: #ecfdf5 !important;
+      border: 1.5px solid #34d399;
+      box-shadow: 0 0 10px rgba(52, 211, 153, 0.6);
+      padding: 2px 8px; border-radius: 8px; font-weight: 900;
     }
     .nb-diamond { 
       background: linear-gradient(135deg, #ecfeff 0%, #a5f3fc 50%, #38bdf8 100%); 
@@ -103,6 +119,10 @@
       background: #f5f3ff; color: #5b21b6 !important; border: 1px solid #8b5cf6;
       padding: 2px 7px; border-radius: 7px; font-weight: 800;
     }
+    .nb-cherry {
+      background: #fff1f2; color: #be123c !important; border: 1px solid #fb7185;
+      padding: 2px 7px; border-radius: 7px; font-weight: 800;
+    }
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white">
@@ -126,7 +146,6 @@
       </div>
 
       <div class="flex items-center gap-2 shrink-0">
-        <!-- 구글 시트 새로고침 수동 버튼 -->
         <button onclick="syncFromGoogleSheet(true)" class="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/80 text-emerald-700 px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all" title="스프레드시트 실시간 동기화">
           <i data-lucide="refresh-cw" id="sheetSyncIcon" class="w-3.5 h-3.5"></i>
           <span class="hidden md:inline">시트 동기화</span>
@@ -223,7 +242,7 @@
           <h3 class="font-extrabold text-slate-800 text-lg">문정동 한식뷔페 라인업</h3>
           <span id="restaurantCountBadge" class="text-xs bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded-md">0곳</span>
         </div>
-        <p class="text-xs text-slate-500">스프레드시트 식단이 자동으로 깔끔하게 정돈됩니다.</p>
+        <p class="text-xs text-slate-500">스프레드시트 식단이 자동으로 반영됩니다.</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="restaurantCardsContainer">
@@ -337,7 +356,7 @@
     </div>
   </div>
 
-  <!-- 상점 모달 -->
+  <!-- [명품 상점 모달 (아이템 대폭 추가)] -->
   <div id="shopModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
@@ -350,6 +369,8 @@
         </div>
         <button onclick="closeShopModal()" class="text-slate-400 hover:text-slate-600 text-xs p-1">✕</button>
       </div>
+
+      <!-- 장착 현황 미리보기 -->
       <div class="p-3.5 bg-slate-50 border rounded-2xl flex items-center justify-between text-xs">
         <div>
           <span class="text-[10px] text-slate-400 block mb-0.5">내 닉네임 미리보기</span>
@@ -361,25 +382,32 @@
         </div>
         <button onclick="unequipAll()" class="text-[11px] bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-2.5 py-1 rounded-lg">전체 해제</button>
       </div>
+
+      <!-- 1. 닉네임 칭호 심볼 -->
       <div class="space-y-2.5">
         <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><span>✨</span> 닉네임 칭호 심볼 (각 150P)</span>
         <div class="grid grid-cols-2 gap-2 text-xs" id="shopSymbolList"></div>
       </div>
+
+      <!-- 2. 글자 색상 -->
       <div class="space-y-2.5">
         <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><span>🎨</span> 닉네임 글자 색상 (각 300P)</span>
         <div class="grid grid-cols-2 gap-2 text-xs" id="shopColorList"></div>
       </div>
+
+      <!-- 3. 배경 배지 -->
       <div class="space-y-3">
-        <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><span>🏷️</span> 닉네임 배경 배지</span>
+        <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><span>🏷️</span> 닉네임 명품 배지</span>
         <div class="space-y-2 text-xs" id="shopBadgeList"></div>
       </div>
+
       <div class="pt-2 border-t flex justify-end">
         <button onclick="closeShopModal()" class="bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-bold">닫기</button>
       </div>
     </div>
   </div>
 
-  <!-- 관리자 모달 (09010) -->
+  <!-- [관리자 비밀번호 입력 모달 (09010)] -->
   <div id="adminAuthModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-xs rounded-3xl shadow-2xl p-6 space-y-4">
       <div class="text-center">
@@ -397,38 +425,78 @@
     </div>
   </div>
 
+  <!-- [관리자 전용 대시보드: 회원 명단 관리 & 포인트 전체 초기화 탑재] -->
   <div id="adminDashboardModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
-        <h3 class="font-black text-slate-900 text-lg">밥심 총괄 관리자 대시보드</h3>
+        <h3 class="font-black text-slate-900 text-lg flex items-center gap-2">
+          <i data-lucide="shield-check" class="w-5 h-5 text-indigo-600"></i>
+          밥심 총괄 관리자 대시보드
+        </h3>
         <button onclick="closeAdminDashboard()" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
       </div>
+
+      <!-- 1. 포인트 승인 대기 목록 -->
       <div class="space-y-3">
         <div class="flex items-center justify-between">
           <h4 class="font-extrabold text-xs text-slate-800">📋 메뉴 등록 포인트 승인 대기 목록</h4>
           <span id="pendingRequestCount" class="text-[11px] bg-orange-100 text-orange-700 font-bold px-2 py-0.5 rounded-full">0건 대기</span>
         </div>
-        <div id="adminPendingListContainer" class="space-y-2 max-h-60 overflow-y-auto"></div>
+        <div id="adminPendingListContainer" class="space-y-2 max-h-44 overflow-y-auto"></div>
       </div>
-      <div class="p-4 bg-slate-50 border rounded-2xl space-y-3 text-xs">
-        <span class="font-bold text-slate-800 block">⚡ 회원 포인트 수동 조정 도구</span>
+
+      <!-- 2. 회원 명단 관리 및 개별 포인트 즉시 지급/회수 -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <h4 class="font-extrabold text-xs text-slate-800 flex items-center gap-1.5">
+            <i data-lucide="users" class="w-3.5 h-3.5 text-indigo-600"></i>
+            전체 회원 명단 및 포인트 관리 (<span id="adminTotalUserCount">0명</span>)
+          </h4>
+          <span class="text-[10px] text-slate-400">포인트 즉시 수정 및 계정 삭제 지원</span>
+        </div>
+        <div id="adminUserListContainer" class="space-y-2 max-h-52 overflow-y-auto border rounded-2xl p-2 bg-slate-50 text-xs">
+          <!-- 회원 목록 동적 렌더링 -->
+        </div>
+      </div>
+
+      <!-- 3. 회원 포인트 수동 빠른 조정 도구 -->
+      <div class="p-4 bg-slate-50 border rounded-2xl space-y-2.5 text-xs">
+        <span class="font-bold text-slate-800 block">⚡ 특정 회원 포인트 수동 조정</span>
         <div class="grid grid-cols-3 gap-2">
           <input id="adminTargetNickname" type="text" placeholder="닉네임" class="border rounded-xl p-2.5 bg-white outline-none" />
-          <input id="adminAmount" type="number" placeholder="포인트" class="border rounded-xl p-2.5 bg-white outline-none" />
-          <button onclick="handleManualPointAdjust()" class="bg-slate-900 text-white font-bold rounded-xl py-2.5">즉시 반영</button>
+          <input id="adminAmount" type="number" placeholder="포인트 (예: 1000)" class="border rounded-xl p-2.5 bg-white outline-none" />
+          <button onclick="handleManualPointAdjust()" class="bg-slate-900 hover:bg-black text-white font-bold rounded-xl py-2.5">즉시 반영</button>
         </div>
       </div>
-      <div class="p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-center justify-between text-xs">
-        <div>
-          <span class="font-bold text-rose-900">당일 전체 투표수 강제 초기화</span>
-          <p class="text-[11px] text-rose-600 mt-0.5">로비 및 모든 비밀 그룹의 투표수를 0으로 리셋합니다.</p>
+
+      <!-- 4. 위험 관리 구역 (전체 포인트 초기화 / 투표 리셋) -->
+      <div class="p-4 bg-rose-50 border border-rose-200 rounded-2xl space-y-3 text-xs">
+        <span class="font-black text-rose-900 block">🚨 위험 관리 구역</span>
+        
+        <div class="flex items-center justify-between border-b border-rose-200/60 pb-2.5">
+          <div>
+            <span class="font-bold text-rose-800">모든 회원 포인트 전체 일괄 초기화 (0P)</span>
+            <p class="text-[11px] text-rose-600 mt-0.5">등록된 모든 사용자의 보유 포인트를 0P로 리셋합니다.</p>
+          </div>
+          <button onclick="handleAdminResetAllPoints()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-2 rounded-xl shrink-0">
+            포인트 전체 초기화
+          </button>
         </div>
-        <button onclick="handleAdminResetAllVotes()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3.5 py-2 rounded-xl">전체 리셋</button>
+
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="font-bold text-rose-800">당일 전체 투표수 강제 초기화</span>
+            <p class="text-[11px] text-rose-600 mt-0.5">로비 및 모든 비밀 그룹의 투표수를 0으로 리셋합니다.</p>
+          </div>
+          <button onclick="handleAdminResetAllVotes()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold px-3 py-2 rounded-xl shrink-0">
+            투표수 전체 리셋
+          </button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- 식당 등록/수정 모달 (2번: 시트 식당 삭제 방지 적용) -->
+  <!-- 식당 등록/수정 모달 -->
   <div id="addModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -479,8 +547,6 @@
         <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl text-xs shadow-md mt-2">
           식단 저장하기
         </button>
-
-        <!-- 2번 요구사항: 구글 시트 식당은 삭제 버튼 아예 숨김 -->
         <div id="deleteActionWrapper" class="pt-2 border-t border-slate-100 hidden">
           <button type="button" onclick="handleDeleteCurrentRestaurant()" class="w-full bg-rose-50 text-rose-600 font-bold py-2 rounded-xl text-xs">
             이 식당 완전히 삭제하기
@@ -493,7 +559,7 @@
     </div>
   </div>
 
-  <!-- 룰렛, N빵, 그룹, 프로필 모달 -->
+  <!-- 룰렛, N빵, 그룹 모달 -->
   <div id="rouletteModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 text-center space-y-4">
       <div class="flex items-center justify-between border-b pb-2">
@@ -550,13 +616,29 @@
   </div>
 
   <div id="groupJoinModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-xs rounded-3xl shadow-2xl p-6 space-y-3 text-xs">
-      <h3 class="font-extrabold text-slate-900 text-sm" id="joinModalGroupName">그룹 입장</h3>
-      <input id="joinGroupPassInput" type="password" placeholder="비밀번호" class="w-full border rounded-xl p-2.5 outline-none" />
-      <button onclick="submitJoinGroup()" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-xl">입장하기</button>
+    <div class="bg-white w-full max-w-xs rounded-3xl shadow-2xl p-6 space-y-4 text-xs">
+      <div class="flex items-center justify-between border-b pb-2.5">
+        <h3 class="font-extrabold text-slate-900 text-sm truncate pr-2" id="joinModalGroupName">그룹 입장</h3>
+        <button onclick="closeGroupJoinModal()" class="text-slate-400 hover:text-slate-600 text-sm font-bold p-1">✕</button>
+      </div>
+      <div class="space-y-1.5">
+        <label class="font-bold text-slate-600 block">비밀번호 입력</label>
+        <input id="joinGroupPassInput" type="password" placeholder="비밀번호를 입력하세요" 
+               onkeydown="if(event.key==='Enter') submitJoinGroup()"
+               class="w-full border border-slate-200 rounded-xl p-2.5 outline-none focus:border-indigo-500 font-bold" />
+      </div>
+      <div class="flex gap-2 pt-1">
+        <button onclick="closeGroupJoinModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-2.5 rounded-xl transition-colors">
+          취소
+        </button>
+        <button onclick="submitJoinGroup()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl shadow-sm transition-colors">
+          입장하기
+        </button>
+      </div>
     </div>
   </div>
 
+  <!-- [프로필 모달 (닉네임 중복 체크 적용)] -->
   <div id="authModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-xs rounded-3xl shadow-2xl p-6 space-y-4 text-xs">
       <div class="flex items-center justify-between border-b pb-2">
@@ -564,16 +646,17 @@
         <button onclick="closeAuthModal()" class="text-slate-400">✕</button>
       </div>
       <div>
-        <label class="block font-bold text-slate-700 mb-1">닉네임 (한글, 영문, 숫자만)</label>
-        <input id="authNicknameInput" type="text" class="w-full border rounded-xl p-2.5 font-bold" />
+        <label class="block font-bold text-slate-700 mb-1">닉네임 (한글, 영문, 숫자만 / 중복 불가)</label>
+        <input id="authNicknameInput" type="text" placeholder="예: 테라타워직장인" class="w-full border rounded-xl p-2.5 font-bold outline-none focus:border-indigo-500" />
+        <p class="text-[10px] text-slate-400 mt-1">※ 이미 사용 중인 닉네임은 사용할 수 없습니다.</p>
       </div>
-      <button onclick="saveUserProfile()" class="w-full bg-slate-900 text-white font-bold py-2.5 rounded-xl">저장하기</button>
+      <button id="saveUserBtn" onclick="saveUserProfile()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-2.5 rounded-xl transition-colors">저장하기</button>
     </div>
   </div>
 
   <script>
     // =========================================================================
-    // ★ [연동 완료] 구글 스프레드시트 Apps Script 웹 앱 URL ★
+    // ★ 구글 스프레드시트 Apps Script 웹 앱 URL ★
     // =========================================================================
     const GOOGLE_SHEET_API_URL = "https://script.google.com/macros/s/AKfycbxzRrg_ZZrdJGs6ps4ZRdgaNv3XG8g_CQT0376hbhV_oJt0AYe40Smkcl_0gIfwJM6WIQ/exec";
 
@@ -605,7 +688,7 @@
     let myNickSymbol = localStorage.getItem('bapsim_custom_symbol') || '';
     let myInventory = JSON.parse(localStorage.getItem('bapsim_inventory') || '{"colors":[], "bgs":["nb-none"], "symbols":[]}');
 
-    // ★ 구글 스프레드시트 ➔ Firebase Realtime DB 동기화 엔진 (정제 로직 강화)
+    // ★ 구글 스프레드시트 ➔ Firebase Realtime DB 동기화
     async function syncFromGoogleSheet(isManual = false) {
       if (!GOOGLE_SHEET_API_URL || GOOGLE_SHEET_API_URL.includes("여기에")) {
         if (isManual) alert("Google Sheet API URL이 설정되지 않았습니다.");
@@ -623,7 +706,6 @@
           for (const key of Object.keys(sheetData)) {
             const rest = sheetData[key];
 
-            // 1번 해결: 날짜를 YYYY-MM-DD 형태로 정제하여 저장
             let cleanDate = rest.menuDate || "";
             if (cleanDate.includes("GMT") || cleanDate.length > 12) {
               const dObj = new Date(cleanDate);
@@ -636,15 +718,12 @@
             }
             rest.menuDate = cleanDate;
 
-            // 가격 형태 정제 (예: 9500 -> 9,500원)
             if (rest.price && !String(rest.price).includes("원") && !String(rest.price).includes("₩")) {
               const numPrice = parseInt(rest.price, 10);
               if (!isNaN(numPrice)) rest.price = `${numPrice.toLocaleString()}원`;
             }
 
-            // 시트 연동 식당 플래그 부여 (2번 해결)
             rest.fromSheet = true;
-
             await db.ref(`restaurants/${rest.id}`).update(rest);
           }
           if (isManual) alert("✅ 구글 스프레드시트 식단이 성공적으로 동기화되었습니다!");
@@ -657,11 +736,9 @@
       }
     }
 
-    // 접속 시 즉시 동기화 실행 & 3분마다 자동 최신화
     syncFromGoogleSheet(false);
     setInterval(() => syncFromGoogleSheet(false), 1000 * 60 * 3);
 
-    // 날짜 텍스트 깔끔 포맷 함수 (예: 2026-09-17 -> 9/17(오늘) 또는 9/17)
     function formatPrettyDate(dateRaw) {
       if (!dateRaw) return "날짜미지정";
       const now = new Date();
@@ -685,7 +762,7 @@
       return { text: parsed, isToday: isToday, iso: parsed };
     }
 
-    // 상점 메타데이터
+    // [명품 상점 메타데이터: 다채로운 아이템 대폭 추가]
     const SHOP_DATA = {
       symbols: [
         { id: "sym_star", name: "★ 별빛 칭호 ★", char: "★", cost: 150 },
@@ -693,7 +770,11 @@
         { id: "sym_fire", name: "🔥 불꽃 칭호 🔥", char: "🔥", cost: 150 },
         { id: "sym_sparkle", name: "✨ 반짝 칭호 ✨", char: "✨", cost: 150 },
         { id: "sym_cross", name: "⚔️ 검객 칭호 ⚔️", char: "⚔️", cost: 150 },
-        { id: "sym_heart", name: "💖 러블리 칭호 💖", char: "💖", cost: 150 }
+        { id: "sym_heart", name: "💖 러블리 칭호 💖", char: "💖", cost: 150 },
+        { id: "sym_thunder", name: "⚡ 번개 칭호 ⚡", char: "⚡", cost: 150 },
+        { id: "sym_skull", name: "💀 해골 칭호 💀", char: "💀", cost: 150 },
+        { id: "sym_gem", name: "💎 보석 칭호 💎", char: "💎", cost: 150 },
+        { id: "sym_target", name: "🎯 명사수 칭호 🎯", char: "🎯", cost: 150 }
       ],
       colors: [
         { id: "col_gold", name: "골드 옐로우", hex: "#f59e0b", cost: 300 },
@@ -701,17 +782,22 @@
         { id: "col_emerald", name: "에메랄드 그린", hex: "#10b981", cost: 300 },
         { id: "col_red", name: "파이어 레드", hex: "#ef4444", cost: 300 },
         { id: "col_cyan", name: "사이버 사이안", hex: "#06b6d4", cost: 300 },
-        { id: "col_rose", name: "핫핑크 로즈", hex: "#f43f5e", cost: 300 }
+        { id: "col_rose", name: "핫핑크 로즈", hex: "#f43f5e", cost: 300 },
+        { id: "col_blue", name: "일렉트릭 블루", hex: "#2563eb", cost: 300 },
+        { id: "col_dark", name: "다크 나이트", hex: "#0f172a", cost: 300 }
       ],
       bgs: [
         { id: "nb-cosmic", name: "🌌 코스믹 레인보우 (태초 신화)", class: "nb-cosmic", cost: 999999, desc: "찬란하게 빛나는 무지개 홀로그램 오라" },
+        { id: "nb-universe", name: "🪐 다크 유니버스 (신화)", class: "nb-universe", cost: 500000, desc: "심오하고 묵직한 심우주 네이비 오라" },
         { id: "nb-gold", name: "👑 황금빛 골드 배지", class: "nb-gold", cost: 99999, desc: "서버 최상위 부자의 상징" },
         { id: "nb-darkvip", name: "💳 블랙 VIP 카드 배지", class: "nb-darkvip", cost: 50000, desc: "문정 VVIP 전용 블랙 플레이트" },
+        { id: "nb-aurora", name: "🌠 에메랄드 오로라 배지", class: "nb-aurora", cost: 35000, desc: "북극광처럼 일렁이는 청록빛 섬광" },
         { id: "nb-diamond", name: "💎 다이아몬드 아이스", class: "nb-diamond", cost: 25000, desc: "차가운 블루 크리스탈 발광" },
         { id: "nb-galaxy", name: "🌌 심연의 갤럭시", class: "nb-galaxy", cost: 10000, desc: "보랏빛 우주와 성운 그라데이션" },
         { id: "nb-cyberpunk", name: "⚡ 사이버펑크 2077", class: "nb-cyberpunk", cost: 5000, desc: "사이안 & 핫핑크 글리치 테두리" },
         { id: "nb-neon", name: "🟢 사이버 네온 글로우", class: "nb-neon", cost: 2500, desc: "초록빛 야간 네온 라이트" },
         { id: "nb-fire", name: "🔥 불타는 밥심", class: "nb-fire", cost: 1000, desc: "열정적인 오렌지 플레임" },
+        { id: "nb-cherry", name: "🍒 체리 블라썸", class: "nb-cherry", cost: 800, desc: "화사하고 산뜻한 핑크빛 플레이트" },
         { id: "nb-sunset", name: "🌅 문정 선셋", class: "nb-sunset", cost: 500, desc: "퇴근길 따뜻한 노을빛" },
         { id: "nb-mint", name: "🌿 프레시 민트", class: "nb-mint", cost: 300, desc: "상쾌하고 깔끔한 민트 그린" },
         { id: "nb-lavender", name: "🌸 소프트 라벤더", class: "nb-lavender", cost: 200, desc: "부드러운 파스텔 보랏빛" }
@@ -778,7 +864,7 @@
       return /^[가-힣a-zA-Z0-9]+$/.test(nickname);
     }
 
-    // 미니게임 로직
+    // 미니게임
     let gameInterval = null;
     let gameTimeLeft = 10.0;
     let gameClicks = 0;
@@ -894,7 +980,7 @@
         const isOwned = myInventory.bgs.includes(bg.class);
         const isEquipped = myNickBg === bg.class;
         const card = document.createElement('div');
-        card.className = `p-3.5 border rounded-2xl flex items-center justify-between transition-all ${bg.class === 'nb-cosmic' ? 'border-2 border-fuchsia-400 bg-slate-900 text-white shadow-lg' : 'bg-slate-50'}`;
+        card.className = `p-3.5 border rounded-2xl flex items-center justify-between transition-all ${bg.class.includes('cosmic') || bg.class.includes('universe') ? 'border-2 border-indigo-400 bg-slate-900 text-white shadow-lg' : 'bg-slate-50'}`;
         card.innerHTML = `
           <div>
             <span class="${bg.class} text-xs inline-block">${bg.name}</span>
@@ -961,6 +1047,7 @@
       renderShopUI();
     }
 
+    // [관리자 모드: 회원 포인트 수동 조정]
     function handleManualPointAdjust() {
       const target = document.getElementById('adminTargetNickname').value.trim();
       const amount = parseInt(document.getElementById('adminAmount').value, 10);
@@ -988,17 +1075,156 @@
       });
     }
 
-    function saveUserProfile() {
-      const input = document.getElementById('authNicknameInput').value.trim();
-      if (!input) return alert('닉네임을 입력해주세요.');
-      if (!isValidNickname(input)) return alert('⚠️ 닉네임에는 특수문자를 사용할 수 없습니다!');
+    // [관리자 모드: 모든 회원 포인트 전체 일괄 초기화 (0P)]
+    function handleAdminResetAllPoints() {
+      const confirmCode = prompt("경고: 모든 회원의 보유 포인트가 '0P'로 초기화됩니다!\n정말 진행하시려면 화면에 '초기화'를 입력하세요.");
+      if (confirmCode !== "초기화") return alert("초기화가 취소되었습니다.");
 
-      currentUser = { nickname: input };
-      localStorage.setItem('bapsim_user', JSON.stringify(currentUser));
-      document.getElementById('userProfileText').textContent = input;
-      attachUserPointListener();
-      updatePointsUI();
-      closeAuthModal();
+      db.ref('user_points').once('value', (snap) => {
+        const users = snap.val() || {};
+        const updates = {};
+        Object.keys(users).forEach(nick => {
+          updates[`user_points/${nick}/points`] = 0;
+        });
+
+        db.ref().update(updates, (err) => {
+          if (err) return alert("초기화 실패: " + err.message);
+
+          userPoints = 0;
+          localStorage.setItem('bapsim_points', '0');
+          updatePointsUI(false);
+
+          db.ref('lobby_messages').push({
+            type: 'system',
+            text: `🚨 관리자에 의해 전체 회원의 보유 포인트가 0P로 초기화되었습니다.`,
+            timestamp: Date.now()
+          });
+
+          alert("모든 회원의 포인트가 0P로 일괄 초기화되었습니다.");
+        });
+      });
+    }
+
+    // [관리자 모드: 전체 회원 명단 및 개별 관리 렌더링]
+    function renderAdminUserList() {
+      db.ref('user_points').on('value', (snap) => {
+        const users = snap.val() || {};
+        const container = document.getElementById('adminUserListContainer');
+        const list = Object.values(users);
+        document.getElementById('adminTotalUserCount').textContent = `${list.length}명`;
+        container.innerHTML = '';
+
+        if (list.length === 0) {
+          container.innerHTML = '<div class="text-center text-slate-400 py-3">등록된 회원이 없습니다.</div>';
+          return;
+        }
+
+        list.sort((a, b) => (b.points || 0) - (a.points || 0));
+
+        list.forEach(u => {
+          const item = document.createElement('div');
+          item.className = "p-2 bg-white border rounded-xl flex items-center justify-between";
+          item.innerHTML = `
+            <div class="flex items-center gap-1.5 min-w-0">
+              <span class="font-bold text-slate-800 truncate">${u.nickname}</span>
+              <span class="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.2 rounded font-black shrink-0">
+                ${(u.points || 0).toLocaleString()}P
+              </span>
+            </div>
+            <div class="flex items-center gap-1 shrink-0">
+              <button onclick="adminQuickSetPoint('${u.nickname}')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-2 py-1 rounded-lg text-[10px]">
+                수정
+              </button>
+              <button onclick="adminDeleteUser('${u.nickname}')" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-2 py-1 rounded-lg text-[10px]">
+                삭제
+              </button>
+            </div>
+          `;
+          container.appendChild(item);
+        });
+      });
+    }
+
+    function adminQuickSetPoint(nick) {
+      const val = prompt(`[${nick}] 회원의 새 포인트 값을 입력하세요:`);
+      if (val === null) return;
+      const num = parseInt(val, 10);
+      if (isNaN(num)) return alert("숫자만 입력 가능합니다.");
+
+      db.ref(`user_points/${nick}/points`).set(num, (err) => {
+        if (err) return alert("오류: " + err.message);
+        if (currentUser.nickname === nick) {
+          userPoints = num;
+          updatePointsUI(false);
+        }
+        alert(`[${nick}] 님의 포인트가 ${num.toLocaleString()}P 로 변경되었습니다.`);
+      });
+    }
+
+    function adminDeleteUser(nick) {
+      if (!confirm(`정말로 회원 [${nick}] 계정 데이터를 완전히 삭제하시겠습니까?`)) return;
+      db.ref(`user_points/${nick}`).remove(() => {
+        alert(`[${nick}] 회원이 삭제되었습니다.`);
+      });
+    }
+
+    // [닉네임 중복 방지 비동기 검증 및 저장]
+    async function saveUserProfile() {
+      const input = document.getElementById('authNicknameInput').value.trim();
+      const saveBtn = document.getElementById('saveUserBtn');
+      if (!input) return alert('닉네임을 입력해주세요.');
+      if (!isValidNickname(input)) return alert('⚠️ 닉네임에는 특수문자를 사용할 수 없습니다! (한글, 영문, 숫자만)');
+
+      // 기존 본인 닉네임과 동일한 경우 그냥 닫기
+      if (input === currentUser.nickname) {
+        closeAuthModal();
+        return;
+      }
+
+      saveBtn.disabled = true;
+      saveBtn.textContent = "중복 확인 중...";
+
+      try {
+        // Firebase DB에서 해당 닉네임이 이미 존재하는지 단건 조회
+        const snap = await db.ref(`user_points/${input}`).once('value');
+        if (snap.exists()) {
+          alert(`❌ 이미 다른 사용자가 사용 중인 닉네임입니다!\n다른 닉네임을 입력해 주세요.`);
+          saveBtn.disabled = false;
+          saveBtn.textContent = "저장하기";
+          return;
+        }
+
+        // 기존 닉네임 데이터가 있다면 새 닉네임으로 이전 후 구 닉네임 삭제
+        const oldNick = currentUser.nickname;
+        currentUser = { nickname: input };
+        localStorage.setItem('bapsim_user', JSON.stringify(currentUser));
+        document.getElementById('userProfileText').textContent = input;
+
+        // 새 닉네임 노드 생성
+        await db.ref(`user_points/${input}`).set({
+          nickname: input,
+          points: userPoints,
+          badge: myNickBg,
+          color: myNickColor,
+          symbol: myNickSymbol,
+          updatedAt: Date.now()
+        });
+
+        // 기존 노드 정리
+        if (oldNick && oldNick !== "문정러") {
+          db.ref(`user_points/${oldNick}`).remove();
+        }
+
+        attachUserPointListener();
+        updatePointsUI();
+        closeAuthModal();
+        alert(`🎉 닉네임이 [${input}] 으로 성공적으로 변경되었습니다!`);
+      } catch (err) {
+        alert("닉네임 변경 중 오류가 발생했습니다: " + err.message);
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "저장하기";
+      }
     }
 
     function updateCountdown() {
@@ -1056,6 +1282,7 @@
     function openAdminDashboard() {
       document.getElementById('adminDashboardModal').classList.remove('hidden');
       loadPendingPointRequests();
+      renderAdminUserList();
     }
     function closeAdminDashboard() { document.getElementById('adminDashboardModal').classList.add('hidden'); }
 
@@ -1112,7 +1339,7 @@
         const groups = snap.val() || {};
         Object.keys(groups).forEach(gid => db.ref(`groups/${gid}/votes`).remove());
       });
-      alert('리셋 완료');
+      alert('투표 리셋 완료');
     }
 
     function openRankModal() { renderPointRankings(); document.getElementById('rankModal').classList.remove('hidden'); }
@@ -1241,7 +1468,6 @@
       chatRef.on('child_added', snap => appendChatMessage(snap.val()));
     }
 
-    // 1번 해결: 카드의 식단, 날짜, 가격을 직관적이고 미려하게 렌더링
     function renderCards() {
       const container = document.getElementById('restaurantCardsContainer');
       container.innerHTML = '';
@@ -1267,17 +1493,14 @@
         const isTop = topId === r.id;
         const percent = totalVotes > 0 ? Math.round((votesCount / totalVotes) * 100) : 0;
         
-        // 날짜 포맷팅 (Thu Sep 17 ... 등 긴 영문 문자열을 9/17 (오늘)로 압축)
         const dateInfo = formatPrettyDate(r.menuDate);
         const mapUrl = r.mapUrl || `https://map.naver.com/p/search/${encodeURIComponent('문정동 ' + r.name)}`;
 
-        // 가격 형식 보정 (예: 9500 -> 9,500원)
         let displayPrice = r.price || "가격미정";
         if (!displayPrice.includes("원") && !displayPrice.includes("₩") && !isNaN(parseInt(displayPrice, 10))) {
           displayPrice = parseInt(displayPrice, 10).toLocaleString() + "원";
         }
 
-        // '메뉴 ㅈ망' 등 특수 상태 감지
         const isSuspended = (r.mains || []).some(m => String(m).includes("ㅈ망") || String(m).includes("휴무") || String(m).includes("미운영"));
 
         const card = document.createElement('div');
@@ -1285,7 +1508,6 @@
 
         card.innerHTML = `
           <div>
-            <!-- 상단 헤더 (건물, 날짜 뱃지 & 가격, 지도) -->
             <div class="flex items-start justify-between gap-2 mb-3">
               <div class="min-w-0">
                 <div class="flex items-center gap-1.5 flex-wrap mb-1">
@@ -1310,7 +1532,6 @@
               </div>
             </div>
 
-            <!-- 핵심 메인 반찬 목록 -->
             <div class="mt-4 space-y-2">
               <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">오늘의 메인 메뉴</span>
               ${isSuspended 
@@ -1325,7 +1546,6 @@
               }
             </div>
 
-            <!-- 국 & 후식/무료 정보 한눈에 보기 -->
             <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs">
               <div class="flex items-center">
                 <span class="shrink-0 text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 px-1.5 py-0.5 rounded-md mr-2">국/탕</span>
@@ -1338,7 +1558,6 @@
             </div>
           </div>
 
-          <!-- 하단 투표 게이지 & 버튼 -->
           <div class="mt-5 pt-4 border-t border-slate-100">
             <div class="flex items-center justify-between text-xs font-bold mb-1.5">
               <span class="text-slate-500">${votesCount}표 (${percent}%)</span>
@@ -1580,7 +1799,6 @@
       document.getElementById('addModal').classList.remove('hidden');
     }
 
-    // 2번 해결: 시트 연동 식당은 '삭제 버튼' 숨김 및 안내 문구 노출
     function openEditModal(id) {
       const r = restaurants[id];
       if (!r) return;
@@ -1594,7 +1812,6 @@
       document.getElementById('formRestPrice').value = r.price || '';
       document.getElementById('formRestMapUrl').value = r.mapUrl || '';
       
-      // 날짜 필드 기본값 세팅
       const dateInfo = formatPrettyDate(r.menuDate);
       document.getElementById('formRestDate').value = (dateInfo.iso && dateInfo.iso.includes('-')) ? dateInfo.iso : new Date().toISOString().split('T')[0];
       
@@ -1620,7 +1837,6 @@
       const editId = document.getElementById('editRestId').value;
       if (!editId) return;
 
-      // 2번 안전장치: 시트 식당인 경우 함수 레벨에서도 삭제 차단
       if (editId.startsWith('sheet_rest_') || (restaurants[editId] && restaurants[editId].fromSheet)) {
         return alert('구글 스프레드시트 연동 식당은 삭제할 수 없습니다.');
       }
