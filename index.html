@@ -17,7 +17,7 @@
     .scrollbar-hide::-webkit-scrollbar { display: none; }
     .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-    /* 이모티콘 3종 기본 */
+    /* 이모티콘 3종 */
     .sticker-agree {
       font-family: 'Gaegu', cursive; font-size: 1.45rem; color: #2563eb; background: #eff6ff;
       border: 2px dashed #60a5fa; padding: 3px 12px; border-radius: 9999px; display: inline-flex;
@@ -33,8 +33,6 @@
       border: 1px solid #9ca3af; padding: 3px 12px; border-radius: 6px; display: inline-flex;
       align-items: center; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.25));
     }
-
-    /* 4. 관리자 전용 특수 이모티콘 3종 */
     .sticker-admin-exec {
       font-family: 'Black Han Sans', sans-serif; font-size: 1.4rem; color: #ffffff; background: #b91c1c;
       border: 2px solid #f87171; box-shadow: 0 0 12px rgba(220, 38, 38, 0.7); padding: 4px 14px; border-radius: 8px;
@@ -50,116 +48,80 @@
 
     /* 닉네임 배경 배지 스타일 */
     .nb-none { background: transparent; padding: 0; }
-    
-    /* 4. 관리자 전용 절대 권한자 배지 */
     .nb-admin {
       background: linear-gradient(135deg, #450a0a 0%, #dc2626 50%, #991b1b 100%);
-      color: #fef08a !important;
-      border: 1.5px solid #facc15;
+      color: #fef08a !important; border: 1.5px solid #facc15;
       box-shadow: 0 0 14px rgba(239, 68, 68, 0.8), inset 0 0 6px #fde047;
       padding: 2px 9px; border-radius: 8px; font-weight: 900; letter-spacing: -0.02em;
     }
-
-    /* 신화 티어 애니메이션 배지 */
     .nb-cosmic {
       background: linear-gradient(90deg, #ff007f, #7928ca, #0070f3, #00dfd8, #ff007f);
-      background-size: 300% 300%;
-      animation: rainbowGlow 4s ease infinite;
-      color: #ffffff !important;
-      border: 1.5px solid #ffffff;
+      background-size: 300% 300%; animation: rainbowGlow 4s ease infinite;
+      color: #ffffff !important; border: 1.5px solid #ffffff;
       box-shadow: 0 0 16px rgba(255, 0, 128, 0.7), 0 0 25px rgba(0, 223, 216, 0.5);
-      padding: 2px 9px; border-radius: 8px; font-weight: 900; letter-spacing: -0.02em;
+      padding: 2px 9px; border-radius: 8px; font-weight: 900;
     }
-    @keyframes rainbowGlow {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
+    @keyframes rainbowGlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
     .nb-solar {
       background: linear-gradient(90deg, #ff4500, #ff8c00, #ffd700, #ff4500);
-      background-size: 250% 250%;
-      animation: solarFlare 3s ease infinite;
-      color: #ffffff !important;
-      border: 1.5px solid #fff7ed;
+      background-size: 250% 250%; animation: solarFlare 3s ease infinite;
+      color: #ffffff !important; border: 1.5px solid #fff7ed;
       box-shadow: 0 0 18px rgba(255, 69, 0, 0.8), 0 0 26px rgba(255, 215, 0, 0.6);
       padding: 2px 9px; border-radius: 8px; font-weight: 900;
     }
-    @keyframes solarFlare {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
+    @keyframes solarFlare { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
     .nb-blackhole {
       background: radial-gradient(circle, #3b0764 0%, #09090b 80%, #000000 100%);
-      color: #f3e8ff !important;
-      border: 1.5px solid #a855f7;
+      color: #f3e8ff !important; border: 1.5px solid #a855f7;
       box-shadow: 0 0 15px rgba(168, 85, 247, 0.7), inset 0 0 8px #c084fc;
       padding: 2px 9px; border-radius: 8px; font-weight: 900;
     }
-
     .nb-matrix {
-      background: #022c22;
-      color: #34d399 !important;
-      border: 1.5px solid #10b981;
+      background: #022c22; color: #34d399 !important; border: 1.5px solid #10b981;
       box-shadow: 0 0 14px rgba(16, 185, 129, 0.75), inset 0 0 6px #059669;
-      font-family: monospace;
-      padding: 2px 8px; border-radius: 6px; font-weight: 900; letter-spacing: 0.05em;
+      font-family: monospace; padding: 2px 8px; border-radius: 6px; font-weight: 900; letter-spacing: 0.05em;
     }
-
     .nb-universe {
-      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-      color: #e0e7ff !important;
-      border: 1.5px solid #818cf8;
-      box-shadow: 0 0 14px rgba(129, 140, 248, 0.6);
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #e0e7ff !important;
+      border: 1.5px solid #818cf8; box-shadow: 0 0 14px rgba(129, 140, 248, 0.6);
       padding: 2px 8px; border-radius: 8px; font-weight: 900;
     }
     .nb-gold { 
       background: linear-gradient(135deg, #fffbeb 0%, #fef08a 30%, #facc15 70%, #ca8a04 100%); 
-      color: #713f12 !important; border: 1.5px solid #eab308; 
-      box-shadow: 0 0 12px rgba(234, 179, 8, 0.6), inset 0 0 4px #ffffff; 
+      color: #713f12 !important; border: 1.5px solid #eab308; box-shadow: 0 0 12px rgba(234, 179, 8, 0.6);
       padding: 2px 8px; border-radius: 8px; font-weight: 900;
     }
     .nb-darkvip { 
-      background: linear-gradient(135deg, #18181b 0%, #09090b 100%); 
-      color: #f43f5e !important; border: 1.5px solid #e11d48; 
-      box-shadow: 0 0 10px rgba(225, 29, 72, 0.4); 
+      background: linear-gradient(135deg, #18181b 0%, #09090b 100%); color: #f43f5e !important;
+      border: 1.5px solid #e11d48; box-shadow: 0 0 10px rgba(225, 29, 72, 0.4);
       padding: 2px 8px; border-radius: 8px; font-weight: 900; 
     }
     .nb-aurora {
-      background: linear-gradient(135deg, #059669, #10b981, #06b6d4);
-      color: #ecfdf5 !important;
-      border: 1.5px solid #34d399;
-      box-shadow: 0 0 10px rgba(52, 211, 153, 0.6);
+      background: linear-gradient(135deg, #059669, #10b981, #06b6d4); color: #ecfdf5 !important;
+      border: 1.5px solid #34d399; box-shadow: 0 0 10px rgba(52, 211, 153, 0.6);
       padding: 2px 8px; border-radius: 8px; font-weight: 900;
     }
     .nb-diamond { 
-      background: linear-gradient(135deg, #ecfeff 0%, #a5f3fc 50%, #38bdf8 100%); 
-      color: #0369a1 !important; border: 1.5px solid #0284c7; 
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.5); 
+      background: linear-gradient(135deg, #ecfeff 0%, #a5f3fc 50%, #38bdf8 100%); color: #0369a1 !important;
+      border: 1.5px solid #0284c7; box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
       padding: 2px 8px; border-radius: 8px; font-weight: 900; 
     }
     .nb-galaxy {
-      background: linear-gradient(135deg, #312e81 0%, #4c1d95 50%, #831843 100%);
-      color: #fdf4ff !important; border: 1.5px solid #c084fc;
-      box-shadow: 0 0 8px rgba(192, 132, 252, 0.5);
+      background: linear-gradient(135deg, #312e81 0%, #4c1d95 50%, #831843 100%); color: #fdf4ff !important;
+      border: 1.5px solid #c084fc; box-shadow: 0 0 8px rgba(192, 132, 252, 0.5);
       padding: 2px 8px; border-radius: 8px; font-weight: 800;
     }
     .nb-cyberpunk {
       background: #050505; color: #f43f5e !important; border: 1.5px solid #06b6d4;
-      box-shadow: 2px 2px 0px #06b6d4, -1px -1px 0px #f43f5e;
-      padding: 2px 8px; border-radius: 4px; font-weight: 900;
+      box-shadow: 2px 2px 0px #06b6d4; padding: 2px 8px; border-radius: 4px; font-weight: 900;
     }
     .nb-neon { 
       background: #09090b; color: #4ade80 !important; border: 1.5px solid #22c55e; 
-      box-shadow: 0 0 8px rgba(34, 197, 94, 0.45); 
-      padding: 2px 8px; border-radius: 8px; font-weight: 800; 
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.45); padding: 2px 8px; border-radius: 8px; font-weight: 800; 
     }
     .nb-fire {
-      background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%);
-      color: #c2410c !important; border: 1.5px solid #ea580c;
-      padding: 2px 8px; border-radius: 8px; font-weight: 800;
+      background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%); color: #c2410c !important;
+      border: 1.5px solid #ea580c; padding: 2px 8px; border-radius: 8px; font-weight: 800;
     }
     .nb-cherry {
       background: #fff1f2; color: #be123c !important; border: 1.5px solid #fb7185;
@@ -169,26 +131,18 @@
       background: linear-gradient(135deg, #fef3c7, #fed7aa); color: #9a3412 !important;
       border: 1px solid #fb923c; padding: 2px 7px; border-radius: 7px; font-weight: 800; 
     }
-    .nb-mint {
-      background: #ecfdf5; color: #065f46 !important; border: 1px solid #10b981;
-      padding: 2px 7px; border-radius: 7px; font-weight: 800;
-    }
-    .nb-lavender {
-      background: #f5f3ff; color: #5b21b6 !important; border: 1px solid #8b5cf6;
-      padding: 2px 7px; border-radius: 7px; font-weight: 800;
-    }
+    .nb-mint { background: #ecfdf5; color: #065f46 !important; border: 1px solid #10b981; padding: 2px 7px; border-radius: 7px; font-weight: 800; }
+    .nb-lavender { background: #f5f3ff; color: #5b21b6 !important; border: 1px solid #8b5cf6; padding: 2px 7px; border-radius: 7px; font-weight: 800; }
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white relative">
 
-  <!-- [좌측 날개 배너] 공지사항 + 실시간 접속자 명단 -->
+  <!-- [좌측 날개 배너] -->
   <aside class="hidden 2xl:block fixed left-4 top-20 z-30 w-64 space-y-4">
     <div class="bg-white/95 backdrop-blur-md rounded-3xl p-4 border border-slate-200 shadow-xl space-y-3">
       <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
         <div class="flex items-center gap-2">
-          <span class="p-1.5 bg-rose-50 text-rose-600 rounded-xl">
-            <i data-lucide="megaphone" class="w-4 h-4"></i>
-          </span>
+          <span class="p-1.5 bg-rose-50 text-rose-600 rounded-xl"><i data-lucide="megaphone" class="w-4 h-4"></i></span>
           <div>
             <h3 class="font-extrabold text-slate-900 text-xs">밥심 공지사항</h3>
             <p class="text-[9px] text-slate-400">관리자 실시간 전파</p>
@@ -196,56 +150,44 @@
         </div>
         <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
       </div>
-
       <div id="noticeContentDisplay" class="text-xs text-slate-700 leading-relaxed font-medium bg-slate-50 border border-slate-100 p-3 rounded-2xl whitespace-pre-line min-h-[70px]">
         공지사항을 불러오는 중입니다...
       </div>
-
       <div class="flex items-center justify-between text-[10px] text-slate-400 pt-1 px-1">
         <span id="noticeDateDisplay">최근 업데이트: 오늘</span>
         <span class="font-bold text-slate-500">운영팀 알림</span>
       </div>
     </div>
 
-    <!-- 실시간 접속자 명단 -->
     <div class="bg-white/95 backdrop-blur-md rounded-3xl p-4 border border-slate-200 shadow-xl space-y-2.5">
       <div class="flex items-center justify-between border-b border-slate-100 pb-2">
         <div class="flex items-center gap-2">
-          <span class="p-1.5 bg-emerald-50 text-emerald-600 rounded-xl">
-            <i data-lucide="radio" class="w-4 h-4"></i>
-          </span>
+          <span class="p-1.5 bg-emerald-50 text-emerald-600 rounded-xl"><i data-lucide="radio" class="w-4 h-4"></i></span>
           <div>
             <h3 class="font-extrabold text-slate-900 text-xs">실시간 접속자</h3>
             <p class="text-[9px] text-slate-400">현재 밥심 이용 중</p>
           </div>
         </div>
-        <span id="onlineCountBadge" class="text-[10px] font-black bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
-          0명 접속 중
-        </span>
+        <span id="onlineCountBadge" class="text-[10px] font-black bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">0명 접속 중</span>
       </div>
-
       <div id="onlineUserListContainer" class="space-y-1.5 max-h-44 overflow-y-auto text-xs pr-1">
         <div class="text-center text-slate-400 py-3 text-[11px]">접속자를 확인하는 중...</div>
       </div>
     </div>
   </aside>
 
-  <!-- [우측 날개 배너] 실시간 부자 랭킹 -->
+  <!-- [우측 날개 배너] -->
   <aside class="hidden 2xl:block fixed right-4 top-20 z-30 w-64">
     <div class="bg-white/95 backdrop-blur-md rounded-3xl p-4 border border-slate-200 shadow-xl space-y-3">
       <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
         <div class="flex items-center gap-2">
-          <span class="p-1.5 bg-amber-50 text-amber-600 rounded-xl">
-            <i data-lucide="crown" class="w-4 h-4"></i>
-          </span>
+          <span class="p-1.5 bg-amber-50 text-amber-600 rounded-xl"><i data-lucide="crown" class="w-4 h-4"></i></span>
           <div>
             <h3 class="font-extrabold text-slate-900 text-xs">실시간 부자 랭킹</h3>
             <p class="text-[9px] text-slate-400">TOP 5 명예의 전당</p>
           </div>
         </div>
-        <button onclick="openRankModal()" class="text-[11px] text-indigo-600 hover:text-indigo-800 font-bold">
-          전체보기
-        </button>
+        <button onclick="openRankModal()" class="text-[11px] text-indigo-600 hover:text-indigo-800 font-bold">전체보기</button>
       </div>
 
       <div class="p-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 rounded-2xl text-slate-950 flex items-center justify-between shadow-xs">
@@ -281,7 +223,7 @@
       </div>
 
       <div class="flex items-center gap-2 shrink-0">
-        <button onclick="syncFromGoogleSheet(true)" class="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/80 text-emerald-700 px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all" title="스프레드시트 실시간 동기화">
+        <button onclick="syncFromGoogleSheet(true)" class="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/80 text-emerald-700 px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all">
           <i data-lucide="refresh-cw" id="sheetSyncIcon" class="w-3.5 h-3.5"></i>
           <span class="hidden md:inline">시트 동기화</span>
         </button>
@@ -361,6 +303,12 @@
           <button onclick="openRouletteModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-3 py-2 rounded-xl text-xs border border-slate-700 transition-all">
             <i data-lucide="disc" class="w-3.5 h-3.5 text-orange-400"></i>
             <span>룰렛</span>
+          </button>
+
+          <!-- 2. 신규 사다리타기 전용 버튼 -->
+          <button onclick="openLadderModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-teal-700 hover:bg-teal-800 text-teal-100 font-bold px-3 py-2 rounded-xl text-xs shadow-md transition-all">
+            <i data-lucide="git-merge" class="w-3.5 h-3.5 text-teal-300"></i>
+            <span>사다리타기</span>
           </button>
 
           <button onclick="openDutchModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-3 py-2 rounded-xl text-xs border border-slate-700 transition-all">
@@ -479,8 +427,60 @@
   </main>
 
   <!-- ==========================================
-       [4. 포인트 획득 게임 아케이드 모달]
+       [사다리타기 미니게임 모달]
        ========================================== -->
+  <div id="ladderGameModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b pb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center font-bold">
+            <i data-lucide="git-merge" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="font-black text-slate-900 text-base">밥심 실시간 사다리타기</h3>
+            <p class="text-[11px] text-slate-400">참여자를 입력하고 사다리를 타서 점심/커피를 결정하세요!</p>
+          </div>
+        </div>
+        <button onclick="closeLadderModal()" class="text-slate-400 hover:text-slate-600 text-xs">✕</button>
+      </div>
+
+      <!-- 입력 설정 바 -->
+      <div class="space-y-2.5 text-xs">
+        <div>
+          <label class="font-bold text-slate-700 block mb-1">1. 참여자 이름 (쉼표로 구분, 2~6명 권장)</label>
+          <input id="ladderInputNames" type="text" placeholder="예: 김대리, 이과장, 박팀장, 최사원" class="w-full border rounded-xl p-2.5 font-bold outline-none focus:border-teal-500 bg-slate-50" />
+        </div>
+        <div>
+          <label class="font-bold text-slate-700 block mb-1">2. 결과 항목 (쉼표로 구분, 참여자 수와 동일하게)</label>
+          <input id="ladderInputResults" type="text" placeholder="예: 당첨(커피쏘기), 통과, 통과, 통과 (또는 식당명들)" class="w-full border rounded-xl p-2.5 font-bold outline-none focus:border-teal-500 bg-slate-50" />
+        </div>
+        <div class="flex gap-2">
+          <button onclick="autoFillLadderWithRestaurants()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-xl text-[11px] transition-colors">
+            🍽️ 오늘 식당들로 자동 채우기
+          </button>
+          <button onclick="buildLadderCanvas()" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded-xl text-[11px] transition-colors shadow-sm">
+            🪜 사다리 생성하기
+          </button>
+        </div>
+      </div>
+
+      <!-- 사다리 시각화 캔버스 -->
+      <div class="relative bg-slate-900 rounded-2xl p-2 flex flex-col items-center justify-center border-2 border-teal-500 overflow-hidden min-h-[260px]">
+        <canvas id="ladderCanvas" width="440" height="240" class="max-w-full"></canvas>
+      </div>
+
+      <!-- 결과 발표 텍스트 & 시작 버튼 -->
+      <div id="ladderResultAnnounce" class="p-3 bg-teal-50 text-teal-900 rounded-xl font-bold text-xs text-center min-h-[42px] flex items-center justify-center">
+        사다리를 생성한 후 [사다리 타기 시작!]을 눌러주세요.
+      </div>
+
+      <button id="startLadderBtn" onclick="runLadderAnimation()" disabled class="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-black py-3 rounded-xl text-xs shadow-md transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+        사다리 타기 시작! (결과 추첨)
+      </button>
+    </div>
+  </div>
+
+  <!-- [포인트 획득 게임 아케이드 모달] -->
   <div id="miniGameModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
@@ -490,28 +490,32 @@
           </div>
           <div>
             <h3 class="font-black text-slate-900 text-base">밥심 포인트 게임장</h3>
-            <p class="text-[11px] text-slate-400">게임을 즐기고 포인트를 무료로 획득하세요!</p>
+            <p class="text-[11px] text-slate-400">포인트를 베팅하거나 채굴하세요!</p>
           </div>
         </div>
         <button onclick="closeMiniGameModal()" class="text-slate-400 hover:text-slate-600 text-xs">✕</button>
       </div>
 
-      <div class="flex bg-slate-100 p-1 rounded-2xl gap-1 text-xs font-bold">
-        <button onclick="switchGameTab('clicker')" id="tabBtn_clicker" class="flex-1 py-2 rounded-xl bg-white shadow-xs text-slate-900 transition-all font-black">
+      <!-- 게임 탭 버튼 (괄호 제거 및 정돈) -->
+      <div class="grid grid-cols-4 bg-slate-100 p-1 rounded-2xl gap-1 text-[11px] font-bold">
+        <button onclick="switchGameTab('clicker')" id="tabBtn_clicker" class="py-2 rounded-xl bg-white shadow-xs text-slate-900 transition-all font-black text-center">
           🍚 밥알 광클
         </button>
-        <button onclick="switchGameTab('slot')" id="tabBtn_slot" class="flex-1 py-2 rounded-xl text-slate-500 hover:text-slate-800 transition-all">
-          🎰 행운의 슬롯 (도박)
+        <button onclick="switchGameTab('slot')" id="tabBtn_slot" class="py-2 rounded-xl text-slate-500 hover:text-slate-800 transition-all text-center">
+          🎰 행운의 슬롯
         </button>
-        <button onclick="switchGameTab('typing')" id="tabBtn_typing" class="flex-1 py-2 rounded-xl text-slate-500 hover:text-slate-800 transition-all">
-          🥢 쌀알 타자 (노력)
+        <button onclick="switchGameTab('coin')" id="tabBtn_coin" class="py-2 rounded-xl text-slate-500 hover:text-slate-800 transition-all text-center">
+          🪙 동전 던지기
+        </button>
+        <button onclick="switchGameTab('dice')" id="tabBtn_dice" class="py-2 rounded-xl text-slate-500 hover:text-slate-800 transition-all text-center">
+          🎲 주사위 홀짝
         </button>
       </div>
 
-      <!-- 1. 밥알 광클 (2번 수정: 1클릭 = 2P로 변경) -->
+      <!-- 1. 밥알 광클 (1클릭 = 2P) -->
       <div id="gameView_clicker" class="space-y-4 text-center">
         <div class="p-3 bg-emerald-50 rounded-2xl border border-emerald-100 text-xs text-emerald-800">
-          <strong>제한시간 10초 동안 밥그릇을 마구 클릭하세요!</strong> (1클릭 = 2P)
+          <strong>제한시간 10초 동안 밥그릇을 마구 클릭하세요!</strong> (1클릭당 2P 적립)
         </div>
         <div class="flex items-center justify-around font-black text-sm text-slate-700">
           <div>남은 시간: <span id="gameTimer" class="text-rose-500 font-mono text-lg">10.0</span>초</div>
@@ -527,11 +531,11 @@
         </button>
       </div>
 
-      <!-- 2. 행운의 슬롯머신 -->
+      <!-- 2. 행운의 슬롯머신 (50P + 연속 뽑기) -->
       <div id="gameView_slot" class="hidden space-y-4 text-center">
         <div class="p-3 bg-indigo-50 rounded-2xl border border-indigo-100 text-xs text-indigo-800">
-          <strong>100P를 베팅하여 슬롯을 돌립니다!</strong><br/>
-          3개 일치: 1,000P (대박!) | 2개 일치: 200P
+          <strong>1회당 50P 베팅!</strong><br/>
+          3개 일치: <strong>500P (10배 대박)</strong> | 2개 일치: <strong>100P (2배)</strong>
         </div>
         <div class="py-5 bg-slate-900 rounded-2xl border-2 border-indigo-500 flex items-center justify-center gap-4 text-4xl shadow-inner">
           <div id="slot1" class="w-14 h-14 bg-slate-800 rounded-xl flex items-center justify-center border border-slate-700">🍚</div>
@@ -539,28 +543,58 @@
           <div id="slot3" class="w-14 h-14 bg-slate-800 rounded-xl flex items-center justify-center border border-slate-700">🥩</div>
         </div>
         <div id="slotResultText" class="text-xs font-bold text-slate-500 h-5">행운의 버튼을 눌러보세요!</div>
-        <button id="slotSpinBtn" onclick="spinSlotMachine()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl text-xs shadow-md transition-all">
-          100P 베팅하고 슬롯 돌리기!
-        </button>
+        
+        <div class="grid grid-cols-3 gap-2">
+          <button id="slotSpinBtn" onclick="spinSlotMachine(1)" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-all">
+            1회 (50P)
+          </button>
+          <button id="slotSpin10Btn" onclick="spinSlotMachine(10)" class="bg-indigo-700 hover:bg-indigo-800 text-amber-300 font-bold py-2.5 rounded-xl text-xs shadow-md transition-all">
+            10회 (500P)
+          </button>
+          <button id="slotSpin100Btn" onclick="spinSlotMachine(100)" class="bg-slate-900 hover:bg-black text-rose-400 font-bold py-2.5 rounded-xl text-xs shadow-md transition-all border border-indigo-500/40">
+            100회 (5,000P)
+          </button>
+        </div>
       </div>
 
-      <!-- 3. 쌀알 가마니 타자 -->
-      <div id="gameView_typing" class="hidden space-y-4 text-center">
+      <!-- 3. 동전 던지기 -->
+      <div id="gameView_coin" class="hidden space-y-4 text-center">
         <div class="p-3 bg-amber-50 rounded-2xl border border-amber-100 text-xs text-amber-800">
-          <strong>제시되는 점심 단어를 정확하게 입력하세요!</strong> (단어당 50P)
+          <strong>앞면 vs 뒷면 50% 확률 승부!</strong><br/>
+          성공 시 2배(100P) 지급! 실패 시 50P 차감
         </div>
-        <div class="py-4 bg-slate-900 rounded-2xl text-white space-y-1">
-          <span class="text-[10px] text-amber-400 font-bold uppercase tracking-wider">Target Word</span>
-          <div id="typingWordTarget" class="text-xl font-black tracking-widest text-amber-300">준비 완료</div>
+        <div class="py-5 bg-slate-900 rounded-2xl border-2 border-amber-500 flex items-center justify-center text-5xl shadow-inner">
+          <span id="coinDisplay" class="animate-pulse">🪙</span>
         </div>
-        <input id="typingInput" type="text" placeholder="단어를 따라 입력하고 엔터..." disabled onkeydown="if(event.key==='Enter') checkTypingWord()" class="w-full border border-slate-300 rounded-xl p-3 text-center text-sm font-bold outline-none focus:border-amber-500" />
-        <div class="flex items-center justify-between text-xs text-slate-500 px-1 font-bold">
-          <span>제한시간: <span id="typingTimer" class="text-rose-500 font-mono">15</span>초</span>
-          <span>완료한 단어: <span id="typingScore" class="text-emerald-600 font-mono">0</span>개</span>
+        <div id="coinResultText" class="text-xs font-bold text-slate-500 h-5">앞면 또는 뒷면을 선택하세요!</div>
+        <div class="grid grid-cols-2 gap-3">
+          <button onclick="playCoinFlip('front')" class="bg-amber-500 hover:bg-amber-600 text-white font-black py-3 rounded-xl text-xs shadow-md">
+            앞면 선택 (50P)
+          </button>
+          <button onclick="playCoinFlip('back')" class="bg-orange-600 hover:bg-orange-700 text-white font-black py-3 rounded-xl text-xs shadow-md">
+            뒷면 선택 (50P)
+          </button>
         </div>
-        <button id="typingStartBtn" onclick="startTypingGame()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl text-xs shadow-md">
-          타이핑 게임 시작!
-        </button>
+      </div>
+
+      <!-- 4. 주사위 홀짝 -->
+      <div id="gameView_dice" class="hidden space-y-4 text-center">
+        <div class="p-3 bg-purple-50 rounded-2xl border border-purple-100 text-xs text-purple-800">
+          <strong>주사위 숫자의 홀 / 짝을 맞추세요!</strong><br/>
+          베팅 100P ➔ 적중 시 200P (2배) 지급!
+        </div>
+        <div class="py-5 bg-slate-900 rounded-2xl border-2 border-purple-500 flex items-center justify-center text-5xl shadow-inner">
+          <span id="diceDisplay">🎲</span>
+        </div>
+        <div id="diceResultText" class="text-xs font-bold text-slate-500 h-5">홀수 또는 짝수를 선택하세요!</div>
+        <div class="grid grid-cols-2 gap-3">
+          <button onclick="playDiceBet('odd')" class="bg-purple-600 hover:bg-purple-700 text-white font-black py-3 rounded-xl text-xs shadow-md">
+            홀수 (1, 3, 5) 베팅
+          </button>
+          <button onclick="playDiceBet('even')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-xl text-xs shadow-md">
+            짝수 (2, 4, 6) 베팅
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -597,7 +631,7 @@
     </div>
   </div>
 
-  <!-- [1. 명품 상점 모달: 안 열리던 문제 완전 해결] -->
+  <!-- 상점 모달 -->
   <div id="shopModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
@@ -611,7 +645,6 @@
         <button onclick="closeShopModal()" class="text-slate-400 hover:text-slate-600 text-xs p-1">✕</button>
       </div>
 
-      <!-- 장착 현황 미리보기 -->
       <div class="p-3.5 bg-slate-50 border rounded-2xl flex items-center justify-between text-xs">
         <div>
           <span class="text-[10px] text-slate-400 block mb-0.5">내 닉네임 미리보기</span>
@@ -624,19 +657,16 @@
         <button onclick="unequipAll()" class="text-[11px] bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-2.5 py-1 rounded-lg">전체 해제</button>
       </div>
 
-      <!-- 1. 닉네임 칭호 심볼 -->
       <div class="space-y-2.5">
         <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><span>✨</span> 닉네임 칭호 심볼 (각 150P)</span>
         <div class="grid grid-cols-2 gap-2 text-xs" id="shopSymbolList"></div>
       </div>
 
-      <!-- 2. 글자 색상 -->
       <div class="space-y-2.5">
         <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><span>🎨</span> 닉네임 글자 색상 (각 300P)</span>
         <div class="grid grid-cols-2 gap-2 text-xs" id="shopColorList"></div>
       </div>
 
-      <!-- 3. 배경 배지 -->
       <div class="space-y-3">
         <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><span>🏷️</span> 닉네임 명품 배지</span>
         <div class="space-y-2 text-xs" id="shopBadgeList"></div>
@@ -648,7 +678,7 @@
     </div>
   </div>
 
-  <!-- 관리자 인증 모달 (09010) -->
+  <!-- 관리자 인증 모달 -->
   <div id="adminAuthModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-xs rounded-3xl shadow-2xl p-6 space-y-4">
       <div class="text-center">
@@ -666,7 +696,7 @@
     </div>
   </div>
 
-  <!-- [3. 관리자 대시보드 (아이템 몰수/선물 & 4. 전용 배지/이모티콘)] -->
+  <!-- 관리자 대시보드 -->
   <div id="adminDashboardModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
@@ -677,7 +707,6 @@
         <button onclick="closeAdminDashboard()" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
       </div>
 
-      <!-- 4. 관리자 전용 특수 권한 툴바 (전용 배지/색상 장착 & 전용 이모티콘 즉시 전파) -->
       <div class="p-4 bg-gradient-to-r from-red-950 to-slate-900 text-white rounded-2xl space-y-3 text-xs border border-red-800">
         <div class="flex items-center justify-between">
           <span class="font-black text-amber-300 flex items-center gap-1.5">
@@ -691,18 +720,17 @@
             👑 내 계정에 관리자 전용 배지 & 색상 장착
           </button>
           <button onclick="adminSendSpecialSticker('sticker_admin_exec')" class="bg-slate-800 hover:bg-slate-700 text-red-300 border border-red-500/50 font-bold px-3 py-1.5 rounded-xl">
-            ⚡ 처벌 집행 이모티콘 전송
+            ⚡ 처벌 집행 이모티콘
           </button>
           <button onclick="adminSendSpecialSticker('sticker_admin_ok')" class="bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/50 font-bold px-3 py-1.5 rounded-xl">
-            🛡️ 관리자 승인 이모티콘 전송
+            🛡️ 관리자 승인 이모티콘
           </button>
           <button onclick="adminSendSpecialSticker('sticker_admin_warn')" class="bg-slate-800 hover:bg-slate-700 text-yellow-300 border border-yellow-500/50 font-bold px-3 py-1.5 rounded-xl">
-            ⚠️ 운영 경고 이모티콘 전송
+            ⚠️ 운영 경고 이모티콘
           </button>
         </div>
       </div>
 
-      <!-- 공지사항 편집기 -->
       <div class="p-4 bg-indigo-50/70 border border-indigo-100 rounded-2xl space-y-2.5 text-xs">
         <div class="flex items-center justify-between">
           <span class="font-bold text-indigo-900 flex items-center gap-1.5">
@@ -717,7 +745,6 @@
         </button>
       </div>
 
-      <!-- 개설된 비밀 그룹 관리 및 삭제 -->
       <div class="space-y-3">
         <div class="flex items-center justify-between">
           <h4 class="font-extrabold text-xs text-slate-800 flex items-center gap-1.5">
@@ -728,7 +755,6 @@
         <div id="adminGroupListContainer" class="space-y-2 max-h-36 overflow-y-auto border rounded-2xl p-2 bg-slate-50 text-xs"></div>
       </div>
 
-      <!-- 포인트 승인 대기 목록 -->
       <div class="space-y-3">
         <div class="flex items-center justify-between">
           <h4 class="font-extrabold text-xs text-slate-800">📋 메뉴 등록 포인트 승인 대기 목록</h4>
@@ -737,7 +763,6 @@
         <div id="adminPendingListContainer" class="space-y-2 max-h-36 overflow-y-auto"></div>
       </div>
 
-      <!-- 3. 전체 회원 명단 및 아이템 몰수/선물 도구 -->
       <div class="space-y-3">
         <div class="flex items-center justify-between">
           <h4 class="font-extrabold text-xs text-slate-800 flex items-center gap-1.5">
@@ -748,10 +773,8 @@
         <div id="adminUserListContainer" class="space-y-2 max-h-48 overflow-y-auto border rounded-2xl p-2 bg-slate-50 text-xs"></div>
       </div>
 
-      <!-- 위험 관리 구역 -->
       <div class="p-4 bg-rose-50 border border-rose-200 rounded-2xl space-y-3 text-xs">
         <span class="font-black text-rose-900 block">🚨 위험 관리 구역</span>
-        
         <div class="flex items-center justify-between border-b border-rose-200/60 pb-2.5">
           <div>
             <span class="font-bold text-rose-800">모든 회원 포인트 전체 일괄 초기화 (0P)</span>
@@ -761,7 +784,6 @@
             포인트 전체 초기화
           </button>
         </div>
-
         <div class="flex items-center justify-between">
           <div>
             <span class="font-bold text-rose-800">당일 전체 투표수 강제 초기화</span>
@@ -787,12 +809,10 @@
       </div>
       <form id="restaurantForm" onsubmit="handleSaveRestaurant(event)" class="space-y-3 text-xs">
         <input type="hidden" id="editRestId" value="" />
-        
         <div>
           <label class="font-bold text-slate-700 block mb-1">식당 이름 *</label>
           <input id="formRestName" type="text" placeholder="예: 일루" required class="w-full border rounded-xl p-2.5 bg-slate-50 font-bold" />
         </div>
-
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="font-bold text-slate-700 block mb-1">가격</label>
@@ -803,17 +823,14 @@
             <input id="formRestDate" type="date" required class="w-full border rounded-xl p-2.5 bg-slate-50" />
           </div>
         </div>
-
         <div>
           <label class="font-bold text-slate-700 block mb-1">네이버 지도 URL</label>
           <input id="formRestMapUrl" type="url" placeholder="https://naver.me/..." class="w-full border rounded-xl p-2.5 bg-slate-50" />
         </div>
-
         <div>
           <label class="font-bold text-slate-700 block mb-1">핵심 메인 요리 (쉼표 구분) *</label>
           <input id="formRestMains" type="text" placeholder="예: 돼지고기 김치찜, 닭강정, 찰순대" required class="w-full border rounded-xl p-2.5 bg-slate-50" />
         </div>
-
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="font-bold text-slate-700 block mb-1">국 / 찌개</label>
@@ -824,11 +841,9 @@
             <input id="formRestDessert" type="text" placeholder="예: 한강라면, 매실차" class="w-full border rounded-xl p-2.5 bg-slate-50" />
           </div>
         </div>
-
         <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl text-xs shadow-md mt-2">
           식단 저장하기
         </button>
-
         <div id="deleteActionWrapper" class="pt-2 border-t border-slate-100 hidden">
           <button type="button" onclick="handleDeleteCurrentRestaurant()" class="w-full bg-rose-50 text-rose-600 font-bold py-2 rounded-xl text-xs">
             이 식당 완전히 삭제하기
@@ -1013,7 +1028,6 @@
     let myNickBg = localStorage.getItem('bapsim_custom_bg') || 'nb-none';
     let myNickSymbol = localStorage.getItem('bapsim_custom_symbol') || '';
 
-    // 1번 해결: myInventory 구조 안전성 확보
     let rawInv = {};
     try { rawInv = JSON.parse(localStorage.getItem('bapsim_inventory') || '{}'); } catch(e) {}
     let myInventory = {
@@ -1035,13 +1049,6 @@
 
     const SLOT_ITEMS = ["🍚", "🍗", "🥩", "🍕", "🍜", "👑", "💎"];
     let isSlotSpinning = false;
-
-    const TYPING_WORDS = ["한식뷔페", "제육볶음", "닭강정", "소고기무국", "사골우거지", "한강라면", "매실차", "돈까스", "겉절이김치", "문정법조타운", "테라타워", "데일리밥상", "점심특선"];
-    let typingInterval = null;
-    let typingTimeLeft = 15;
-    let typingScore = 0;
-    let currentTargetWord = "";
-    let isTypingActive = false;
 
     // 상점 상품 메타데이터
     const SHOP_DATA = {
@@ -1100,17 +1107,17 @@
       else isMenuExpanded = !isMenuExpanded;
 
       if (isMenuExpanded) {
-        wrapper.classList.remove('hidden');
-        btnText.textContent = "식단표 접기";
-        btnIcon.classList.add('rotate-180');
+        if (wrapper) wrapper.classList.remove('hidden');
+        if (btnText) btnText.textContent = "식단표 접기";
+        if (btnIcon) btnIcon.classList.add('rotate-180');
         if (forceOpen) {
           const section = document.getElementById('restaurantSection');
           if (section) section.scrollIntoView({ behavior: 'smooth' });
         }
       } else {
-        wrapper.classList.add('hidden');
-        btnText.textContent = "식단표 펼쳐보기";
-        btnIcon.classList.remove('rotate-180');
+        if (wrapper) wrapper.classList.add('hidden');
+        if (btnText) btnText.textContent = "식단표 펼쳐보기";
+        if (btnIcon) btnIcon.classList.remove('rotate-180');
       }
     }
 
@@ -1311,7 +1318,6 @@
             updatePointsUI(false);
           }
         }
-        // 관리자가 강제로 장착/몰수했을 때 실시간 동기화
         if (val) {
           if (val.badge && val.badge !== myNickBg) {
             myNickBg = val.badge;
@@ -1333,9 +1339,14 @@
     }
 
     function updatePointsUI(shouldPushToCloud = true) {
-      document.getElementById('headerPointDisplay').textContent = `${userPoints.toLocaleString()}P`;
-      document.getElementById('chatPointDisplay').textContent = `보유: ${userPoints.toLocaleString()}P`;
-      document.getElementById('shopCurrentPoints').textContent = `${userPoints.toLocaleString()}P`;
+      const headerPoint = document.getElementById('headerPointDisplay');
+      const chatPoint = document.getElementById('chatPointDisplay');
+      const shopPoint = document.getElementById('shopCurrentPoints');
+
+      if (headerPoint) headerPoint.textContent = `${userPoints.toLocaleString()}P`;
+      if (chatPoint) chatPoint.textContent = `보유: ${userPoints.toLocaleString()}P`;
+      if (shopPoint) shopPoint.textContent = `${userPoints.toLocaleString()}P`;
+
       localStorage.setItem('bapsim_points', userPoints.toString());
       localStorage.setItem('bapsim_inventory', JSON.stringify(myInventory));
       localStorage.setItem('bapsim_custom_color', myNickColor);
@@ -1365,15 +1376,19 @@
     }
 
     // ==========================================
-    // 6. 게임 아케이드 (광클 2P / 슬롯머신 / 타자)
+    // 6. 게임 아케이드 (광클 2P / 슬롯 50P / 동전 / 주사위)
     // ==========================================
     function switchGameTab(tabName) {
-      ['clicker', 'slot', 'typing'].forEach(t => {
-        document.getElementById(`gameView_${t}`).classList.add('hidden');
-        document.getElementById(`tabBtn_${t}`).className = "flex-1 py-2 rounded-xl text-slate-500 hover:text-slate-800 transition-all";
+      ['clicker', 'slot', 'coin', 'dice'].forEach(t => {
+        const view = document.getElementById(`gameView_${t}`);
+        const tab = document.getElementById(`tabBtn_${t}`);
+        if (view) view.classList.add('hidden');
+        if (tab) tab.className = "py-2 rounded-xl text-slate-500 hover:text-slate-800 transition-all text-center";
       });
-      document.getElementById(`gameView_${tabName}`).classList.remove('hidden');
-      document.getElementById(`tabBtn_${tabName}`).className = "flex-1 py-2 rounded-xl bg-white shadow-xs text-slate-900 transition-all font-black";
+      const curView = document.getElementById(`gameView_${tabName}`);
+      const curTab = document.getElementById(`tabBtn_${tabName}`);
+      if (curView) curView.classList.remove('hidden');
+      if (curTab) curTab.className = "py-2 rounded-xl bg-white shadow-xs text-slate-900 transition-all font-black text-center";
     }
 
     function openMiniGameModal() { 
@@ -1383,7 +1398,6 @@
     }
     function closeMiniGameModal() { 
       if (isGameRunning) clearInterval(gameInterval); 
-      if (typingInterval) clearInterval(typingInterval);
       document.getElementById('miniGameModal').classList.add('hidden'); 
     }
 
@@ -1425,14 +1439,13 @@
       document.getElementById('gameScore').textContent = gameClicks;
     }
 
-    // 2번 해결: 1클릭 = 2P로 변경
     function finishMiniGame() {
       isGameRunning = false;
       document.getElementById('gameClickBtn').disabled = true;
       document.getElementById('gameStartBtn').disabled = false;
       document.getElementById('gameStartBtn').textContent = "다시 플레이하기";
 
-      const earned = gameClicks * 2;
+      const earned = gameClicks * 2; // 1클릭 = 2P
       userPoints += earned;
       updatePointsUI();
 
@@ -1440,118 +1453,149 @@
       alert(`🍚 미니게임 종료!\n총 클릭 수: ${gameClicks}회\n🎉 +${earned.toLocaleString()}P 적립 완료! (1클릭당 2P)`);
     }
 
-    function spinSlotMachine() {
+    // 슬롯머신 (50P + 연속 돌리기)
+    function spinSlotMachine(times = 1) {
       if (isSlotSpinning) return;
-      if (userPoints < 100) return alert("❌ 베팅할 포인트가 부족합니다! (최소 100P 필요)");
+      const totalCost = 50 * times;
+      if (userPoints < totalCost) {
+        return alert(`❌ 베팅할 포인트가 부족합니다!\n필요 포인트: ${totalCost.toLocaleString()}P (현재: ${userPoints.toLocaleString()}P)`);
+      }
 
-      userPoints -= 100;
+      userPoints -= totalCost;
       updatePointsUI();
-      isSlotSpinning = true;
 
-      const slot1 = document.getElementById('slot1');
-      const slot2 = document.getElementById('slot2');
-      const slot3 = document.getElementById('slot3');
       const resultText = document.getElementById('slotResultText');
       const spinBtn = document.getElementById('slotSpinBtn');
 
-      spinBtn.disabled = true;
-      resultText.textContent = "슬롯 회전 중... 과연 잭팟은?!";
+      if (times === 1) {
+        isSlotSpinning = true;
+        spinBtn.disabled = true;
+        resultText.textContent = "슬롯 회전 중... 과연 잭팟은?!";
 
-      let counter = 0;
-      const spinTimer = setInterval(() => {
-        slot1.textContent = SLOT_ITEMS[Math.floor(Math.random() * SLOT_ITEMS.length)];
-        slot2.textContent = SLOT_ITEMS[Math.floor(Math.random() * SLOT_ITEMS.length)];
-        slot3.textContent = SLOT_ITEMS[Math.floor(Math.random() * SLOT_ITEMS.length)];
-        counter++;
+        const slot1 = document.getElementById('slot1');
+        const slot2 = document.getElementById('slot2');
+        const slot3 = document.getElementById('slot3');
 
-        if (counter >= 25) {
-          clearInterval(spinTimer);
-          isSlotSpinning = false;
-          spinBtn.disabled = false;
+        let counter = 0;
+        const spinTimer = setInterval(() => {
+          slot1.textContent = SLOT_ITEMS[Math.floor(Math.random() * SLOT_ITEMS.length)];
+          slot2.textContent = SLOT_ITEMS[Math.floor(Math.random() * SLOT_ITEMS.length)];
+          slot3.textContent = SLOT_ITEMS[Math.floor(Math.random() * SLOT_ITEMS.length)];
+          counter++;
 
-          const res1 = slot1.textContent;
-          const res2 = slot2.textContent;
-          const res3 = slot3.textContent;
+          if (counter >= 20) {
+            clearInterval(spinTimer);
+            isSlotSpinning = false;
+            spinBtn.disabled = false;
 
-          if (res1 === res2 && res2 === res3) {
-            userPoints += 1000;
-            updatePointsUI();
-            if (window.confetti) confetti({ particleCount: 150, spread: 80 });
-            resultText.innerHTML = `<span class="text-amber-500 font-black">🎉 트리플 잭팟 달성!! (+1,000P 획득)</span>`;
-          } else if (res1 === res2 || res2 === res3 || res1 === res3) {
-            userPoints += 200;
-            updatePointsUI();
-            resultText.innerHTML = `<span class="text-indigo-600 font-black">👍 2개 일치! (+200P 획득)</span>`;
-          } else {
-            resultText.innerHTML = `<span class="text-slate-400">아쉽네요! 다음 기회에... (-100P)</span>`;
+            const r1 = slot1.textContent;
+            const r2 = slot2.textContent;
+            const r3 = slot3.textContent;
+
+            if (r1 === r2 && r2 === r3) {
+              userPoints += 500;
+              updatePointsUI();
+              if (window.confetti) confetti({ particleCount: 120 });
+              resultText.innerHTML = `<span class="text-amber-500 font-black">🎉 트리플 잭팟 달성!! (+500P 획득)</span>`;
+            } else if (r1 === r2 || r2 === r3 || r1 === r3) {
+              userPoints += 100;
+              updatePointsUI();
+              resultText.innerHTML = `<span class="text-indigo-600 font-black">👍 2개 일치! (+100P 획득)</span>`;
+            } else {
+              resultText.innerHTML = `<span class="text-slate-400">아쉽네요! 다음 기회에... (-50P)</span>`;
+            }
+          }
+        }, 60);
+      } else {
+        let triples = 0;
+        let doubles = 0;
+        let totalWon = 0;
+
+        for (let i = 0; i < times; i++) {
+          const r1 = SLOT_ITEMS[Math.floor(Math.random() * SLOT_ITEMS.length)];
+          const r2 = SLOT_ITEMS[Math.floor(Math.random() * SLOT_ITEMS.length)];
+          const r3 = SLOT_ITEMS[Math.floor(Math.random() * SLOT_ITEMS.length)];
+
+          if (r1 === r2 && r2 === r3) {
+            triples++;
+            totalWon += 500;
+          } else if (r1 === r2 || r2 === r3 || r1 === r3) {
+            doubles++;
+            totalWon += 100;
           }
         }
-      }, 60);
-    }
 
-    function startTypingGame() {
-      if (typingInterval) clearInterval(typingInterval);
-      isTypingActive = true;
-      typingTimeLeft = 15;
-      typingScore = 0;
+        userPoints += totalWon;
+        updatePointsUI();
 
-      document.getElementById('typingScore').textContent = "0";
-      document.getElementById('typingTimer').textContent = "15";
-      document.getElementById('typingInput').disabled = false;
-      document.getElementById('typingInput').value = "";
-      document.getElementById('typingInput').focus();
-      document.getElementById('typingStartBtn').disabled = true;
-      document.getElementById('typingStartBtn').textContent = "타자 진행 중...";
+        const net = totalWon - totalCost;
+        if (triples > 0 && window.confetti) confetti({ particleCount: 150 });
 
-      nextTypingWord();
-
-      typingInterval = setInterval(() => {
-        typingTimeLeft--;
-        document.getElementById('typingTimer').textContent = typingTimeLeft;
-
-        if (typingTimeLeft <= 0) {
-          clearInterval(typingInterval);
-          finishTypingGame();
-        }
-      }, 1000);
-    }
-
-    function nextTypingWord() {
-      currentTargetWord = TYPING_WORDS[Math.floor(Math.random() * TYPING_WORDS.length)];
-      document.getElementById('typingWordTarget').textContent = currentTargetWord;
-    }
-
-    function checkTypingWord() {
-      if (!isTypingActive) return;
-      const input = document.getElementById('typingInput');
-      if (input.value.trim() === currentTargetWord) {
-        typingScore++;
-        document.getElementById('typingScore').textContent = typingScore;
-        input.value = "";
-        nextTypingWord();
+        resultText.innerHTML = `
+          <span class="${net >= 0 ? 'text-amber-500' : 'text-rose-500'} font-bold">
+            ${times}회 정산: 트리플 ${triples}회 | 더블 ${doubles}회 (순수익: ${net >= 0 ? '+' : ''}${net.toLocaleString()}P)
+          </span>
+        `;
       }
     }
 
-    function finishTypingGame() {
-      isTypingActive = false;
-      document.getElementById('typingInput').disabled = true;
-      document.getElementById('typingStartBtn').disabled = false;
-      document.getElementById('typingStartBtn').textContent = "다시 도전하기";
-      document.getElementById('typingWordTarget').textContent = "게임 종료";
-
-      const earned = typingScore * 50;
-      userPoints += earned;
+    function playCoinFlip(userChoice) {
+      if (userPoints < 50) return alert("❌ 베팅할 포인트가 부족합니다! (50P 필요)");
+      userPoints -= 50;
       updatePointsUI();
 
-      if (window.confetti) confetti({ particleCount: 70 });
-      alert(`🥢 타자 챌린지 종료!\n성공한 단어: ${typingScore}개\n🎉 +${earned.toLocaleString()}P 적립 완료!`);
+      const coinEl = document.getElementById('coinDisplay');
+      const resultEl = document.getElementById('coinResultText');
+      resultEl.textContent = "동전이 공중에서 회전 중...";
+
+      setTimeout(() => {
+        const isFront = Math.random() < 0.5;
+        const outcome = isFront ? 'front' : 'back';
+        coinEl.textContent = isFront ? "🪙" : "🔘";
+
+        if (userChoice === outcome) {
+          userPoints += 100;
+          updatePointsUI();
+          if (window.confetti) confetti({ particleCount: 60 });
+          resultEl.innerHTML = `<span class="text-amber-500 font-black">🎉 예측 적중! (${isFront ? '앞면' : '뒷면'}) +100P 획득!</span>`;
+        } else {
+          resultEl.innerHTML = `<span class="text-rose-500 font-bold">빗나갔습니다! (${isFront ? '앞면' : '뒷면'}) -50P</span>`;
+        }
+      }, 400);
+    }
+
+    const DICE_ICONS = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+    function playDiceBet(userChoice) {
+      if (userPoints < 100) return alert("❌ 베팅할 포인트가 부족합니다! (100P 필요)");
+      userPoints -= 100;
+      updatePointsUI();
+
+      const diceEl = document.getElementById('diceDisplay');
+      const resultEl = document.getElementById('diceResultText');
+      resultEl.textContent = "주사위를 굴리는 중...";
+
+      setTimeout(() => {
+        const roll = Math.floor(Math.random() * 6) + 1;
+        diceEl.textContent = DICE_ICONS[roll - 1];
+
+        const isOdd = (roll % 2 !== 0);
+        const actualOutcome = isOdd ? 'odd' : 'even';
+
+        if (userChoice === actualOutcome) {
+          userPoints += 200;
+          updatePointsUI();
+          if (window.confetti) confetti({ particleCount: 80 });
+          resultEl.innerHTML = `<span class="text-amber-500 font-black">🎉 적중! [${roll} (${isOdd ? '홀' : '짝'})] +200P 획득!</span>`;
+        } else {
+          resultEl.innerHTML = `<span class="text-rose-500 font-bold">낙첨! [${roll} (${isOdd ? '홀' : '짝'})] -100P</span>`;
+        }
+      }, 400);
     }
 
     // ==========================================
     // 7. 상점 UI 렌더링 & 구매/장착 로직
     // ==========================================
     function renderShopUI() {
-      // 1. 심볼 렌더링 (6번 수정: 중복 없이 양옆 1개씩 단정하게)
       const symContainer = document.getElementById('shopSymbolList');
       if (symContainer) {
         symContainer.innerHTML = '';
@@ -1578,7 +1622,6 @@
         });
       }
 
-      // 2. 색상 렌더링
       const colContainer = document.getElementById('shopColorList');
       if (colContainer) {
         colContainer.innerHTML = '';
@@ -1605,7 +1648,6 @@
         });
       }
 
-      // 3. 배지 렌더링 (신규 배지들 포함)
       const bgContainer = document.getElementById('shopBadgeList');
       if (bgContainer) {
         bgContainer.innerHTML = '';
@@ -1633,7 +1675,6 @@
       }
     }
 
-    // 1번 해결: 명품상점 모달 안전 오픈
     function openShopModal() { 
       try {
         renderShopUI(); 
@@ -1694,9 +1735,8 @@
     }
 
     // ==========================================
-    // 8. 관리자 모드: 아이템 몰수/선물 & 특수 권한
+    // 8. 관리자 모드
     // ==========================================
-    // 4번: 관리자 본인 전용 배지/색상 장착
     function adminEquipSelf() {
       myNickBg = 'nb-admin';
       myNickColor = '#ff0055';
@@ -1705,7 +1745,6 @@
       alert("👑 [관리자 전용] 절대 권한자 배지, 네온 루비 닉네임, 왕관 칭호가 즉시 장착되었습니다!");
     }
 
-    // 4번: 관리자 전용 특수 이모티콘 발송
     function adminSendSpecialSticker(stickerType) {
       const chatPath = currentGroupId === 'lobby' ? 'lobby_messages' : `groups/${currentGroupId}/messages`;
       db.ref(chatPath).push({
@@ -1778,7 +1817,8 @@
         const groups = snap.val() || {};
         const container = document.getElementById('adminGroupListContainer');
         const list = Object.values(groups);
-        document.getElementById('adminGroupCount').textContent = `${list.length}개`;
+        const cntEl = document.getElementById('adminGroupCount');
+        if (cntEl) cntEl.textContent = `${list.length}개`;
         if (!container) return;
         container.innerHTML = '';
 
@@ -1816,13 +1856,13 @@
       });
     }
 
-    // 3번: 회원 아이템 몰수 / 선물 메뉴 렌더링
     function renderAdminUserList() {
       db.ref('user_points').on('value', (snap) => {
         const users = snap.val() || {};
         const container = document.getElementById('adminUserListContainer');
         const list = Object.values(users);
-        document.getElementById('adminTotalUserCount').textContent = `${list.length}명`;
+        const cntEl = document.getElementById('adminTotalUserCount');
+        if (cntEl) cntEl.textContent = `${list.length}명`;
         if (!container) return;
         container.innerHTML = '';
 
@@ -1860,7 +1900,6 @@
       });
     }
 
-    // 3번: 회원 아이템 몰수 및 선물 프롬프트
     function adminManageUserItems(nick) {
       const choice = prompt(`[${nick}] 회원의 아이템 관리\n1: 모든 착용 아이템 몰수(기본화)\n2: 태초 신화 코스믹 배지 선물\n3: 태양의 겁화 솔라 배지 선물\n4: 원하는 배지 클래스명 직접 장착\n\n번호를 입력하세요:`);
       if (!choice) return;
@@ -1975,15 +2014,17 @@
       const diff = target.getTime() - now.getTime();
       const timerEl = document.getElementById('timerCountdown');
 
-      if (diff > 0) {
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-        timerEl.textContent = `${hours > 0 ? hours + '시간 ' : ''}${minutes}분 ${seconds < 10 ? '0' : ''}${seconds}초 남음`;
-        timerEl.className = "text-orange-400 font-mono underline decoration-orange-500/50 underline-offset-8 font-extrabold";
-      } else {
-        timerEl.textContent = "점심 투표 마감! 식사 맛있게 하세요 🍚";
-        timerEl.className = "text-emerald-400 font-bold";
+      if (timerEl) {
+        if (diff > 0) {
+          const hours = Math.floor(diff / (1000 * 60 * 60));
+          const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+          timerEl.textContent = `${hours > 0 ? hours + '시간 ' : ''}${minutes}분 ${seconds < 10 ? '0' : ''}${seconds}초 남음`;
+          timerEl.className = "text-orange-400 font-mono underline decoration-orange-500/50 underline-offset-8 font-extrabold";
+        } else {
+          timerEl.textContent = "점심 투표 마감! 식사 맛있게 하세요 🍚";
+          timerEl.className = "text-emerald-400 font-bold";
+        }
       }
     }
 
@@ -2023,7 +2064,8 @@
         const data = snap.val() || {};
         const container = document.getElementById('adminPendingListContainer');
         const list = Object.entries(data).filter(([k, v]) => v.status === 'pending');
-        document.getElementById('pendingRequestCount').textContent = `${list.length}건 대기 중`;
+        const countEl = document.getElementById('pendingRequestCount');
+        if (countEl) countEl.textContent = `${list.length}건 대기 중`;
         if (!container) return;
         container.innerHTML = '';
 
@@ -2078,9 +2120,7 @@
     function openRankModal() { renderPointRankings(); document.getElementById('rankModal').classList.remove('hidden'); }
     function closeRankModal() { document.getElementById('rankModal').classList.add('hidden'); }
 
-    // ==========================================
-    // 9. 실시간 부자 랭킹 (우측 배너 및 모달)
-    // ==========================================
+    // 실시간 부자 랭킹 (우측 배너 및 모달)
     function renderPointRankings() {
       db.ref('user_points').on('value', (snap) => {
         const data = snap.val() || {};
@@ -2092,12 +2132,14 @@
         const sidePointEl = document.getElementById('sideMyPointText');
 
         let myRankIndex = userList.findIndex(u => u.nickname === currentUser.nickname);
-        if (myRankIndex !== -1) {
-          sideRankEl.textContent = `${myRankIndex + 1}위 (${currentUser.nickname})`;
-          sidePointEl.textContent = `${(userList[myRankIndex].points || 0).toLocaleString()}P`;
-        } else {
-          sideRankEl.textContent = `${currentUser.nickname} (순위밖)`;
-          sidePointEl.textContent = `${userPoints.toLocaleString()}P`;
+        if (sideRankEl && sidePointEl) {
+          if (myRankIndex !== -1) {
+            sideRankEl.textContent = `${myRankIndex + 1}위 (${currentUser.nickname})`;
+            sidePointEl.textContent = `${(userList[myRankIndex].points || 0).toLocaleString()}P`;
+          } else {
+            sideRankEl.textContent = `${currentUser.nickname} (순위밖)`;
+            sidePointEl.textContent = `${userPoints.toLocaleString()}P`;
+          }
         }
 
         if (sideContainer) {
@@ -2137,8 +2179,10 @@
         const modalContainer = document.getElementById('rankListContainer');
         if (modalContainer) {
           modalContainer.innerHTML = '';
-          document.getElementById('myRankSummary').textContent = myRankIndex !== -1 ? `${currentUser.nickname} 님은 현재 ${myRankIndex + 1}위입니다!` : `${currentUser.nickname} 님 (순위 밖)`;
-          document.getElementById('myRankPointDisplay').textContent = `${userPoints.toLocaleString()}P`;
+          const summaryEl = document.getElementById('myRankSummary');
+          const myPointEl = document.getElementById('myRankPointDisplay');
+          if (summaryEl) summaryEl.textContent = myRankIndex !== -1 ? `${currentUser.nickname} 님은 현재 ${myRankIndex + 1}위입니다!` : `${currentUser.nickname} 님 (순위 밖)`;
+          if (myPointEl) myPointEl.textContent = `${userPoints.toLocaleString()}P`;
 
           userList.forEach((user, index) => {
             let rankBadge = `${index + 1}위`;
@@ -2203,21 +2247,26 @@
       });
     }
 
-    // ==========================================
-    // 10. 로비/그룹 뷰 전환 업데이트
-    // ==========================================
+    // 로비/그룹 뷰 전환 업데이트
     function updateGroupUI() {
       myVotedId = localStorage.getItem(`bapsim_my_vote_${currentGroupId}`);
       const isLobby = (currentGroupId === 'lobby');
 
-      document.getElementById('currentGroupNameText').textContent = currentGroupName;
-      document.getElementById('currentGroupBadge').className = isLobby
-        ? "inline-flex items-center gap-1 text-[11px] bg-slate-100 text-slate-700 border border-slate-200 font-bold px-2.5 py-1 rounded-xl max-w-[140px] sm:max-w-[240px] md:max-w-[340px]"
-        : "inline-flex items-center gap-1 text-[11px] bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold px-2.5 py-1 rounded-xl max-w-[140px] sm:max-w-[240px] md:max-w-[340px]";
+      const nameText = document.getElementById('currentGroupNameText');
+      const badgeBtn = document.getElementById('currentGroupBadge');
+      if (nameText) nameText.textContent = currentGroupName;
+      if (badgeBtn) {
+        badgeBtn.className = isLobby
+          ? "inline-flex items-center gap-1 text-[11px] bg-slate-100 text-slate-700 border border-slate-200 font-bold px-2.5 py-1 rounded-xl max-w-[140px] sm:max-w-[240px] md:max-w-[340px]"
+          : "inline-flex items-center gap-1 text-[11px] bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold px-2.5 py-1 rounded-xl max-w-[140px] sm:max-w-[240px] md:max-w-[340px]";
+      }
 
-      document.getElementById('groupStatusIndicator').textContent = isLobby ? "🏢 전체 공개 로비" : `🔒 비밀 그룹 [${currentGroupName}]`;
-      document.getElementById('leaveGroupWrapper').style.display = isLobby ? 'none' : 'block';
-      document.getElementById('chatHeaderTitle').textContent = isLobby ? "전체 로비 톡" : `🔒 ${currentGroupName} 비밀 톡`;
+      const statusInd = document.getElementById('groupStatusIndicator');
+      const leaveWrapper = document.getElementById('leaveGroupWrapper');
+      const chatHeader = document.getElementById('chatHeaderTitle');
+      if (statusInd) statusInd.textContent = isLobby ? "🏢 전체 공개 로비" : `🔒 비밀 그룹 [${currentGroupName}]`;
+      if (leaveWrapper) leaveWrapper.style.display = isLobby ? 'none' : 'block';
+      if (chatHeader) chatHeader.textContent = isLobby ? "전체 로비 톡" : `🔒 ${currentGroupName} 비밀 톡`;
 
       const heroSection = document.getElementById('lobbyHeroSection');
       if (heroSection) heroSection.style.display = isLobby ? 'block' : 'none';
@@ -2229,19 +2278,19 @@
       const cardsWrapper = document.getElementById('cardsWrapper');
 
       if (isLobby) {
-        mainTitle.textContent = "오늘의 한식뷔페 식단표";
-        subTitle.textContent = "투표는 상단 '비밀 그룹 찾기 & 만들기'를 통해 그룹에 입장한 뒤 진행할 수 있습니다.";
+        if (mainTitle) mainTitle.textContent = "오늘의 한식뷔페 식단표";
+        if (subTitle) subTitle.textContent = "투표는 상단 '비밀 그룹 찾기 & 만들기'를 통해 그룹에 입장한 뒤 진행할 수 있습니다.";
         if (activeBadge) activeBadge.classList.add('hidden');
         if (accordionBtn) accordionBtn.classList.remove('hidden');
-        if (!isMenuExpanded) {
+        if (!isMenuExpanded && cardsWrapper) {
           cardsWrapper.classList.add('hidden');
         }
       } else {
-        mainTitle.textContent = `[${currentGroupName}] 점심 투표소`;
-        subTitle.textContent = "현재 그룹원들의 실시간 투표 집계 현황입니다. 원하는 식당에 소중한 한 표를 던지세요!";
+        if (mainTitle) mainTitle.textContent = `[${currentGroupName}] 점심 투표소`;
+        if (subTitle) subTitle.textContent = "현재 그룹원들의 실시간 투표 집계 현황입니다. 원하는 식당에 소중한 한 표를 던지세요!";
         if (activeBadge) activeBadge.classList.remove('hidden');
         if (accordionBtn) accordionBtn.classList.add('hidden');
-        cardsWrapper.classList.remove('hidden');
+        if (cardsWrapper) cardsWrapper.classList.remove('hidden');
       }
 
       attachVotesListener();
@@ -2249,9 +2298,7 @@
       renderCards();
     }
 
-    // ==========================================
-    // 11. 데이터베이스 리스너
-    // ==========================================
+    // 데이터베이스 리스너
     db.ref('groups').on('value', snap => { allGroups = snap.val() || {}; renderGroupList(); });
     db.ref('restaurants').on('value', snap => { 
       restaurants = snap.val() || {}; 
@@ -2277,15 +2324,14 @@
       chatRef.on('child_added', snap => appendChatMessage(snap.val()));
     }
 
-    // ==========================================
     // 12. 카드 렌더링
-    // ==========================================
     function renderCards() {
       const container = document.getElementById('restaurantCardsContainer');
       if (!container) return;
       container.innerHTML = '';
       const list = Object.values(restaurants || {});
-      document.getElementById('restaurantCountBadge').textContent = `${list.length}곳`;
+      const badge = document.getElementById('restaurantCountBadge');
+      if (badge) badge.textContent = `${list.length}곳`;
 
       const isLobby = (currentGroupId === 'lobby');
       let totalVotes = 0;
@@ -2305,8 +2351,8 @@
 
       list.forEach(r => {
         const votesCount = groupVotesData[r.id] || 0;
-        const isVoted = myVotedId === r.id;
-        const isTop = topId === r.id;
+        const isVoted = (myVotedId === r.id);
+        const isTop = (topId === r.id);
         const percent = totalVotes > 0 ? Math.round((votesCount / totalVotes) * 100) : 0;
         
         const dateInfo = formatPrettyDate(r.menuDate);
@@ -2349,9 +2395,9 @@
               <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-3">
                 <div class="bg-gradient-to-r from-orange-500 to-amber-500 h-full rounded-full transition-all duration-500" style="width: ${percent}%"></div>
               </div>
-              <button onclick="castVote('${r.id}')" class="w-full py-2.5 rounded-2xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 ${isVoted ? 'bg-orange-500 text-white shadow-md' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">
+              <button onclick="castVote('${r.id}')" class="w-full py-2.5 rounded-2xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 ${isVoted ? 'bg-orange-500 text-white shadow-md hover:bg-orange-600' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">
                 <i data-lucide="${isVoted ? 'check' : 'thumbs-up'}" class="w-3.5 h-3.5"></i>
-                <span>${isVoted ? '투표 완료됨' : '여기로 투표'}</span>
+                <span>${isVoted ? '투표 완료됨 (다시 눌러 취소)' : '여기로 투표'}</span>
               </button>
             </div>
           `;
@@ -2414,6 +2460,7 @@
       lucide.createIcons();
     }
 
+    // 투표 토글 및 취소 완전 복원
     function castVote(id) {
       if (currentGroupId === 'lobby') {
         openGroupListModal();
@@ -2424,11 +2471,16 @@
       const chatPath = `groups/${currentGroupId}/messages`;
 
       if (myVotedId === id) {
+        // 취소: 표 -1
         db.ref(`${votePath}/${id}`).transaction(v => Math.max(0, (v || 1) - 1));
         myVotedId = null;
         localStorage.removeItem(`bapsim_my_vote_${currentGroupId}`);
       } else {
-        if (myVotedId) db.ref(`${votePath}/${myVotedId}`).transaction(v => Math.max(0, (v || 1) - 1));
+        // 기존 투표 변경 시 이전 표 -1
+        if (myVotedId) {
+          db.ref(`${votePath}/${myVotedId}`).transaction(v => Math.max(0, (v || 1) - 1));
+        }
+        // 신규 투표: 표 +1
         db.ref(`${votePath}/${id}`).transaction(v => (v || 0) + 1);
         myVotedId = id;
         localStorage.setItem(`bapsim_my_vote_${currentGroupId}`, id);
@@ -2439,88 +2491,72 @@
           timestamp: Date.now()
         });
       }
+      renderCards();
     }
 
-    function sendSticker(stickerType) {
-      if (userPoints < 10) return alert('포인트 부족');
-      userPoints -= 10;
-      updatePointsUI();
-      const chatPath = currentGroupId === 'lobby' ? 'lobby_messages' : `groups/${currentGroupId}/messages`;
-      db.ref(chatPath).push({
-        nickname: currentUser.nickname,
-        sticker: stickerType,
-        color: myNickColor,
-        bg: myNickBg,
-        symbol: myNickSymbol,
-        timestamp: Date.now()
-      });
+    function enterGroup(gid, gname) {
+      currentGroupId = gid;
+      currentGroupName = gname;
+      localStorage.setItem('bapsim_current_group_id', gid);
+      localStorage.setItem('bapsim_current_group_name', gname);
+      updateGroupUI();
     }
 
-    function handleSendChat(e) {
-      e.preventDefault();
-      const input = document.getElementById('chatInput');
-      const text = input.value.trim();
-      if (!text) return;
-      const chatPath = currentGroupId === 'lobby' ? 'lobby_messages' : `groups/${currentGroupId}/messages`;
-      db.ref(chatPath).push({
-        nickname: currentUser.nickname,
-        text: text,
-        color: myNickColor,
-        bg: myNickBg,
-        symbol: myNickSymbol,
-        timestamp: Date.now()
-      });
-      input.value = '';
+    function leaveGroupToLobby() {
+      enterGroup('lobby', '전체 공개 로비');
     }
 
-    function quickChat(txt) {
-      const chatPath = currentGroupId === 'lobby' ? 'lobby_messages' : `groups/${currentGroupId}/messages`;
-      db.ref(chatPath).push({
-        nickname: currentUser.nickname,
-        text: txt,
-        color: myNickColor,
-        bg: myNickBg,
-        symbol: myNickSymbol,
-        timestamp: Date.now()
-      });
-    }
-
-    function appendChatMessage(msg) {
-      const container = document.getElementById('chatMessages');
-      const div = document.createElement('div');
-
-      if (msg.type === 'system') {
-        div.className = "text-center text-[10px] text-indigo-600 bg-indigo-50/90 rounded-lg py-1 px-2 my-1 font-semibold";
-        div.textContent = msg.text;
-      } else {
-        const isMe = (msg.nickname === currentUser.nickname || msg.nickname === `[관리자] ${currentUser.nickname}`);
-        div.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'}`;
-
-        let contentHTML = '';
-        if (msg.sticker === 'sticker_agree') contentHTML = `<div class="sticker-agree">찬성! 👍</div>`;
-        else if (msg.sticker === 'sticker_reject') contentHTML = `<div class="sticker-reject">탈락 ❌</div>`;
-        else if (msg.sticker === 'sticker_dismiss') contentHTML = `<div class="sticker-dismiss">반려 ⚡</div>`;
-        else if (msg.sticker === 'sticker_admin_exec') contentHTML = `<div class="sticker-admin-exec">⚡ 처벌 집행 ⚡</div>`;
-        else if (msg.sticker === 'sticker_admin_ok') contentHTML = `<div class="sticker-admin-ok">🛡️ 관리자 승인 🛡️</div>`;
-        else if (msg.sticker === 'sticker_admin_warn') contentHTML = `<div class="sticker-admin-warn">⚠️ 운영 경고 ⚠️</div>`;
-        else contentHTML = `<div class="px-3.5 py-2 rounded-2xl max-w-[85%] ${isMe ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white border text-slate-800 rounded-tl-none'}">${msg.text}</div>`;
-
-        const colorStyle = msg.color ? `color: ${msg.color} !important;` : '';
-        const bgClass = msg.bg || 'nb-none';
-        const sym = msg.symbol ? `<span class="mr-0.5">${msg.symbol}</span>` : '';
-        const symEnd = msg.symbol ? `<span class="ml-0.5">${msg.symbol}</span>` : '';
-
-        div.innerHTML = `
-          <div class="mb-0.5">
-            <span class="${bgClass} text-[10px] inline-block font-extrabold" style="${colorStyle}">
-              ${sym}${msg.nickname}${symEnd}
-            </span>
-          </div>
-          ${contentHTML}
-        `;
+    function promptJoinGroup(gid) {
+      targetJoinGroupId = gid;
+      const g = allGroups[gid];
+      if (g) {
+        document.getElementById('joinModalGroupName').textContent = `[${g.name}] 입장`;
+        document.getElementById('groupJoinModal').classList.remove('hidden');
       }
-      container.appendChild(div);
-      container.scrollTop = container.scrollHeight;
+    }
+
+    function submitJoinGroup() {
+      const pass = document.getElementById('joinGroupPassInput').value.trim();
+      const g = allGroups[targetJoinGroupId];
+      if (g && g.password === pass) {
+        enterGroup(g.id, g.name);
+        closeGroupJoinModal();
+        closeGroupModal();
+      } else {
+        alert('비밀번호가 일치하지 않습니다.');
+      }
+    }
+
+    function openGroupListModal() { document.getElementById('groupModal').classList.remove('hidden'); }
+    function closeGroupModal() { document.getElementById('groupModal').classList.add('hidden'); }
+    function closeGroupJoinModal() { document.getElementById('groupJoinModal').classList.add('hidden'); }
+
+    function handleCreateGroup(e) {
+      e.preventDefault();
+      const groupName = document.getElementById('createGroupName').value.trim();
+      const password = document.getElementById('createGroupPass').value.trim();
+      const gid = 'grp_' + Date.now();
+      db.ref(`groups/${gid}`).set({ id: gid, name: groupName, password: password, leader: currentUser.nickname }, () => {
+        enterGroup(gid, groupName);
+        closeGroupModal();
+      });
+    }
+
+    function renderGroupList() {
+      const listEl = document.getElementById('groupListContainer');
+      const groups = Object.values(allGroups || {});
+      if (!listEl) return;
+      listEl.innerHTML = '';
+      groups.forEach(g => {
+        const isCurrent = (currentGroupId === g.id);
+        const item = document.createElement('div');
+        item.className = "p-3 rounded-2xl border flex items-center justify-between text-xs";
+        item.innerHTML = `
+          <div class="font-bold truncate max-w-[200px]">${g.name}</div>
+          <div>${isCurrent ? '<span class="text-indigo-600 font-bold">참여중</span>' : `<button onclick="promptJoinGroup('${g.id}')" class="bg-indigo-600 text-white px-2.5 py-1 rounded-lg font-bold">입장</button>`}</div>
+        `;
+        listEl.appendChild(item);
+      });
     }
 
     function openRouletteModal() { document.getElementById('rouletteSlotText').textContent = "???"; document.getElementById('rouletteModal').classList.remove('hidden'); }
@@ -2569,135 +2605,172 @@
       if (window.confetti) confetti({ particleCount: 50 });
     }
 
-    function openGroupListModal() { document.getElementById('groupModal').classList.remove('hidden'); }
-    function closeGroupModal() { document.getElementById('groupModal').classList.add('hidden'); }
-    function closeGroupJoinModal() { document.getElementById('groupJoinModal').classList.add('hidden'); }
+    // ==========================================
+    // 시각적 사다리타기 게임 엔진 (Canvas Ghost Leg)
+    // ==========================================
+    let ladderData = { lines: 4, rungs: [], names: [], results: [] };
 
-    function handleCreateGroup(e) {
-      e.preventDefault();
-      const groupName = document.getElementById('createGroupName').value.trim();
-      const password = document.getElementById('createGroupPass').value.trim();
-      const gid = 'grp_' + Date.now();
-      db.ref(`groups/${gid}`).set({ id: gid, name: groupName, password: password, leader: currentUser.nickname }, () => {
-        enterGroup(gid, groupName);
-        closeGroupModal();
-      });
-    }
-
-    function renderGroupList() {
-      const listEl = document.getElementById('groupListContainer');
-      const groups = Object.values(allGroups || {});
-      listEl.innerHTML = '';
-      groups.forEach(g => {
-        const isCurrent = (currentGroupId === g.id);
-        const item = document.createElement('div');
-        item.className = "p-3 rounded-2xl border flex items-center justify-between text-xs";
-        item.innerHTML = `
-          <div class="font-bold truncate max-w-[200px]">${g.name}</div>
-          <div>${isCurrent ? '<span class="text-indigo-600 font-bold">참여중</span>' : `<button onclick="promptJoinGroup('${g.id}')" class="bg-indigo-600 text-white px-2.5 py-1 rounded-lg font-bold">입장</button>`}</div>
-        `;
-        listEl.appendChild(item);
-      });
-    }
-
-    function promptJoinGroup(gid) {
-      targetJoinGroupId = gid;
-      document.getElementById('joinModalGroupName').textContent = `[${allGroups[gid].name}] 입장`;
-      document.getElementById('groupJoinModal').classList.remove('hidden');
-    }
-
-    function submitJoinGroup() {
-      const pass = document.getElementById('joinGroupPassInput').value.trim();
-      const g = allGroups[targetJoinGroupId];
-      if (g && g.password === pass) {
-        enterGroup(g.id, g.name);
-        closeGroupJoinModal();
-        closeGroupModal();
+    function openLadderModal() {
+      document.getElementById('ladderGameModal').classList.remove('hidden');
+      const inputNames = document.getElementById('ladderInputNames');
+      if (inputNames && inputNames.value.trim() === '') {
+        autoFillLadderWithRestaurants();
       } else {
-        alert('비밀번호 불일치');
+        buildLadderCanvas();
       }
     }
 
-    function enterGroup(gid, gname) {
-      currentGroupId = gid;
-      currentGroupName = gname;
-      localStorage.setItem('bapsim_current_group_id', gid);
-      localStorage.setItem('bapsim_current_group_name', gname);
-      updateGroupUI();
+    function closeLadderModal() {
+      document.getElementById('ladderGameModal').classList.add('hidden');
     }
 
-    function leaveGroupToLobby() {
-      enterGroup('lobby', '전체 공개 로비');
-    }
-
-    function openAddModal() {
-      document.getElementById('modalTitle').textContent = "새 한식뷔페 등록";
-      document.getElementById('editRestId').value = "";
-      document.getElementById('deleteActionWrapper').classList.add('hidden');
-      document.getElementById('sheetRestNotice').classList.add('hidden');
-      document.getElementById('restaurantForm').reset();
-      document.getElementById('formRestDate').value = new Date().toISOString().split('T')[0];
-      document.getElementById('addModal').classList.remove('hidden');
-    }
-
-    function openEditModal(id) {
-      const r = restaurants[id];
-      if (!r) return;
-
-      const isFromSheet = (id.startsWith('sheet_rest_') || r.fromSheet === true);
-
-      document.getElementById('modalTitle').textContent = `[${r.name}] 식당 정보 수정`;
-      document.getElementById('editRestId').value = r.id;
-      document.getElementById('formRestName').value = r.name;
-      document.getElementById('formRestPrice').value = r.price || '';
-      document.getElementById('formRestMapUrl').value = r.mapUrl || '';
-      
-      const dateInfo = formatPrettyDate(r.menuDate);
-      document.getElementById('formRestDate').value = (dateInfo.iso && dateInfo.iso.includes('-')) ? dateInfo.iso : new Date().toISOString().split('T')[0];
-      
-      document.getElementById('formRestMains').value = (r.mains || []).join(', ');
-      document.getElementById('formRestSoup').value = (r.soup === '-' ? '' : r.soup) || '';
-      document.getElementById('formRestDessert').value = (r.dessert === '-' ? '' : r.dessert) || '';
-
-      if (isFromSheet) {
-        document.getElementById('deleteActionWrapper').classList.add('hidden');
-        document.getElementById('sheetRestNotice').classList.remove('hidden');
+    function autoFillLadderWithRestaurants() {
+      const restNames = Object.values(restaurants || {}).map(r => r.name).slice(0, 4);
+      if (restNames.length >= 2) {
+        document.getElementById('ladderInputNames').value = "나, 동료1, 동료2, 동료3".split(',').slice(0, restNames.length).join(', ');
+        document.getElementById('ladderInputResults').value = restNames.join(', ');
       } else {
-        document.getElementById('deleteActionWrapper').classList.remove('hidden');
-        document.getElementById('sheetRestNotice').classList.add('hidden');
+        document.getElementById('ladderInputNames').value = "김대리, 이과장, 박팀장, 최사원";
+        document.getElementById('ladderInputResults').value = "당첨(커피쏘기), 통과, 통과, 통과";
+      }
+      buildLadderCanvas();
+    }
+
+    function buildLadderCanvas() {
+      const nameInput = document.getElementById('ladderInputNames').value.trim();
+      const resInput = document.getElementById('ladderInputResults').value.trim();
+
+      const names = nameInput ? nameInput.split(',').map(s => s.trim()).filter(Boolean) : [];
+      const results = resInput ? resInput.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+      if (names.length < 2) return alert("참여자를 최소 2명 이상 입력하세요.");
+      if (names.length !== results.length) {
+        return alert(`참여자 수(${names.length}명)와 결과 항목 수(${results.length}개)가 일치해야 합니다.`);
       }
 
-      document.getElementById('addModal').classList.remove('hidden');
-      lucide.createIcons();
-    }
+      ladderData.names = names;
+      ladderData.results = results;
+      ladderData.lines = names.length;
 
-    function closeAddModal() { document.getElementById('addModal').classList.add('hidden'); }
+      const rungCountPerGap = 3 + Math.floor(Math.random() * 3);
+      ladderData.rungs = [];
 
-    function handleDeleteCurrentRestaurant() {
-      const editId = document.getElementById('editRestId').value;
-      if (!editId) return;
-
-      if (editId.startsWith('sheet_rest_') || (restaurants[editId] && restaurants[editId].fromSheet)) {
-        return alert('구글 스프레드시트 연동 식당은 삭제할 수 없습니다.');
+      for (let i = 0; i < ladderData.lines - 1; i++) {
+        for (let j = 0; j < rungCountPerGap; j++) {
+          const yPos = 40 + Math.floor(Math.random() * 150);
+          ladderData.rungs.push({ from: i, to: i + 1, y: yPos });
+        }
       }
 
-      if (!confirm('정말 이 식당을 완전히 삭제하시겠습니까?')) return;
-      db.ref(`restaurants/${editId}`).remove(() => closeAddModal());
+      drawLadder(null);
+      document.getElementById('startLadderBtn').disabled = false;
+      document.getElementById('ladderResultAnnounce').textContent = "사다리 준비 완료! [사다리 타기 시작!]을 눌러 추첨하세요.";
     }
 
-    function openAuthModal() {
-      document.getElementById('authNicknameInput').value = currentUser.nickname;
-      document.getElementById('authModal').classList.remove('hidden');
-    }
-    function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
+    function drawLadder(activePath) {
+      const canvas = document.getElementById('ladderCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    function toggleChatWindow() { document.getElementById('chatWindow').classList.toggle('hidden'); }
+      const count = ladderData.lines;
+      const gap = (canvas.width - 60) / (count - 1);
+      const topY = 35;
+      const botY = 205;
+
+      ctx.textAlign = "center";
+      ctx.font = "bold 12px Pretendard, sans-serif";
+
+      for (let i = 0; i < count; i++) {
+        const x = 30 + i * gap;
+
+        ctx.strokeStyle = "#475569";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(x, topY);
+        ctx.lineTo(x, botY);
+        ctx.stroke();
+
+        ctx.fillStyle = "#38bdf8";
+        ctx.fillText(ladderData.names[i] || '', x, topY - 12);
+
+        ctx.fillStyle = "#facc15";
+        ctx.fillText(ladderData.results[i] || '', x, botY + 20);
+      }
+
+      ctx.strokeStyle = "#94a3b8";
+      ctx.lineWidth = 2;
+      ladderData.rungs.forEach(rung => {
+        const x1 = 30 + rung.from * gap;
+        const x2 = 30 + rung.to * gap;
+        ctx.beginPath();
+        ctx.moveTo(x1, rung.y);
+        ctx.lineTo(x2, rung.y);
+        ctx.stroke();
+      });
+
+      if (activePath && activePath.length > 1) {
+        ctx.strokeStyle = "#f43f5e";
+        ctx.lineWidth = 5;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(activePath[0].x, activePath[0].y);
+        for (let p = 1; p < activePath.length; p++) {
+          ctx.lineTo(activePath[p].x, activePath[p].y);
+        }
+        ctx.stroke();
+      }
+    }
+
+    function runLadderAnimation() {
+      const startBtn = document.getElementById('startLadderBtn');
+      startBtn.disabled = true;
+
+      const canvas = document.getElementById('ladderCanvas');
+      const gap = (canvas.width - 60) / (ladderData.lines - 1);
+      const sortedRungs = [...ladderData.rungs].sort((a, b) => a.y - b.y);
+
+      let curCol = 0;
+      let curY = 35;
+      const pathPoints = [{ x: 30, y: curY }];
+
+      sortedRungs.forEach(rung => {
+        if (rung.from === curCol && rung.y > curY) {
+          pathPoints.push({ x: 30 + curCol * gap, y: rung.y });
+          curCol = rung.to;
+          pathPoints.push({ x: 30 + curCol * gap, y: rung.y });
+          curY = rung.y;
+        } else if (rung.to === curCol && rung.y > curY) {
+          pathPoints.push({ x: 30 + curCol * gap, y: rung.y });
+          curCol = rung.from;
+          pathPoints.push({ x: 30 + curCol * gap, y: rung.y });
+          curY = rung.y;
+        }
+      });
+      pathPoints.push({ x: 30 + curCol * gap, y: 205 });
+
+      let step = 0;
+      const animTimer = setInterval(() => {
+        step++;
+        drawLadder(pathPoints.slice(0, step));
+        if (step >= pathPoints.length) {
+          clearInterval(animTimer);
+          const finalResult = ladderData.results[curCol];
+          document.getElementById('ladderResultAnnounce').innerHTML = `
+            🎉 [${ladderData.names[0]}] 님의 결과: <strong class="text-rose-600 underline text-sm ml-1">${finalResult}</strong>
+          `;
+          if (window.confetti) confetti({ particleCount: 70 });
+          startBtn.disabled = false;
+        }
+      }, 120);
+    }
 
     // ==========================================
-    // 앱 초기화 구동
+    // 앱 초기화 및 구동
     // ==========================================
     if (currentUser.nickname && currentUser.nickname !== "문정러") {
-      document.getElementById('userProfileText').textContent = currentUser.nickname;
+      const pText = document.getElementById('userProfileText');
+      if (pText) pText.textContent = currentUser.nickname;
     }
 
     setInterval(updateCountdown, 1000);
