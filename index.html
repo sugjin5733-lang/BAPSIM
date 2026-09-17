@@ -587,58 +587,9 @@
     </div>
   </div>
 
-  <!-- [사다리타기 미니게임 모달] -->
-  <div id="ladderGameModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-      <div class="flex items-center justify-between border-b pb-3">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center font-bold">
-            <i data-lucide="git-merge" class="w-4 h-4"></i>
-          </div>
-          <div>
-            <h3 class="font-black text-slate-900 text-base">밥심 실시간 사다리타기</h3>
-            <p class="text-[11px] text-slate-400">참여자를 입력하고 사다리를 타서 점심/커피를 결정하세요!</p>
-          </div>
-        </div>
-        <button onclick="closeLadderModal()" class="text-slate-400 hover:text-slate-600 text-xs">✕</button>
-      </div>
-
-      <div class="space-y-2.5 text-xs">
-        <div>
-          <label class="font-bold text-slate-700 block mb-1">1. 참여자 이름 (쉼표 구분, 2~6명)</label>
-          <input id="ladderInputNames" type="text" placeholder="예: 김대리, 이과장, 박팀장, 최사원" class="w-full border rounded-xl p-2.5 font-bold outline-none focus:border-teal-500 bg-slate-50" />
-        </div>
-        <div>
-          <label class="font-bold text-slate-700 block mb-1">2. 결과 항목 (쉼표 구분, 참여자 수와 동일하게)</label>
-          <input id="ladderInputResults" type="text" placeholder="예: 당첨(커피쏘기), 통과, 통과, 통과" class="w-full border rounded-xl p-2.5 font-bold outline-none focus:border-teal-500 bg-slate-50" />
-        </div>
-        <div class="flex gap-2">
-          <button onclick="autoFillLadderWithRestaurants()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-xl text-[11px] transition-colors">
-            🍽️ 오늘 식당들로 자동 채우기
-          </button>
-          <button onclick="buildLadderCanvas()" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded-xl text-[11px] transition-colors shadow-sm">
-            🪜 사다리 생성하기
-          </button>
-        </div>
-      </div>
-
-      <div class="relative bg-slate-900 rounded-2xl p-2 flex flex-col items-center justify-center border-2 border-teal-500 overflow-hidden min-h-[260px]">
-        <canvas id="ladderCanvas" width="440" height="240" class="max-w-full"></canvas>
-      </div>
-
-      <div id="ladderResultAnnounce" class="p-3 bg-teal-50 text-teal-900 rounded-xl font-bold text-xs text-center min-h-[42px] flex items-center justify-center">
-        사다리를 생성한 후 [사다리 타기 시작!]을 눌러주세요.
-      </div>
-
-      <button id="startLadderBtn" onclick="runLadderAnimation()" disabled class="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-black py-3 rounded-xl text-xs shadow-md transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-        사다리 타기 시작! (결과 추첨)
-      </button>
-    </div>
-  </div>
-
-  <!-- [포인트 게임 아케이드 모달] (노력형 3종 + 마이너스 가드) -->
+  <!-- [포인트 게임 아케이드 모달] (탭 2분할 리팩토링 & 10회/100회 슬롯 모션 지원) -->
   <div id="miniGameModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+    <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
         <div class="flex items-center gap-2">
           <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
@@ -652,26 +603,37 @@
         <button onclick="closeMiniGameModal()" class="text-slate-400 hover:text-slate-600 text-xs">✕</button>
       </div>
 
-      <!-- 게임 6종 탭 메뉴 -->
-      <div class="grid grid-cols-3 sm:grid-cols-6 bg-slate-100 p-1 rounded-2xl gap-1 text-[10px] sm:text-[11px] font-bold">
-        <button onclick="switchGameTab('clicker')" id="tabBtn_clicker" class="py-2 rounded-xl bg-white shadow-xs text-slate-900 transition-all font-black text-center">
-          🍚 밥알광클
-        </button>
-        <button onclick="switchGameTab('speed')" id="tabBtn_speed" class="py-2 rounded-xl text-slate-500 hover:text-slate-800 transition-all text-center">
-          ⚡ 스피드
-        </button>
-        <button onclick="switchGameTab('memory')" id="tabBtn_memory" class="py-2 rounded-xl text-slate-500 hover:text-slate-800 transition-all text-center">
-          🧠 식단암기
-        </button>
-        <button onclick="switchGameTab('slot')" id="tabBtn_slot" class="py-2 rounded-xl text-slate-500 hover:text-slate-800 transition-all text-center">
-          🎰 슬롯머신
-        </button>
-        <button onclick="switchGameTab('coin')" id="tabBtn_coin" class="py-2 rounded-xl text-slate-500 hover:text-slate-800 transition-all text-center">
-          🪙 동전던지기
-        </button>
-        <button onclick="switchGameTab('dice')" id="tabBtn_dice" class="py-2 rounded-xl text-slate-500 hover:text-slate-800 transition-all text-center">
-          🎲 주사위홀짝
-        </button>
+      <!-- 정돈된 2단 카테고리 탭 구조 -->
+      <div class="space-y-2 text-xs">
+        <div>
+          <span class="text-[10px] font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md inline-block mb-1">🛠️ 노력형 포인트 채굴 (부채 상환 가능)</span>
+          <div class="grid grid-cols-3 bg-slate-100 p-1 rounded-2xl gap-1 font-bold">
+            <button onclick="switchGameTab('clicker')" id="tabBtn_clicker" class="py-2 rounded-xl bg-white shadow-xs text-slate-900 transition-all font-black text-center whitespace-nowrap">
+              🍚 밥알광클
+            </button>
+            <button onclick="switchGameTab('speed')" id="tabBtn_speed" class="py-2 rounded-xl text-slate-500 hover:text-slate-800 transition-all text-center whitespace-nowrap">
+              ⚡ 5초 스피드
+            </button>
+            <button onclick="switchGameTab('memory')" id="tabBtn_memory" class="py-2 rounded-xl text-slate-500 hover:text-slate-800 transition-all text-center whitespace-nowrap">
+              🧠 식단 암기
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <span class="text-[10px] font-extrabold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md inline-block mb-1">🎲 행운 베팅존 (음수 시 이용 불가)</span>
+          <div class="grid grid-cols-3 bg-slate-100 p-1 rounded-2xl gap-1 font-bold">
+            <button onclick="switchGameTab('slot')" id="tabBtn_slot" class="py-2 rounded-xl text-slate-500 hover:text-slate-800 transition-all text-center whitespace-nowrap">
+              🎰 슬롯머신
+            </button>
+            <button onclick="switchGameTab('coin')" id="tabBtn_coin" class="py-2 rounded-xl text-slate-500 hover:text-slate-800 transition-all text-center whitespace-nowrap">
+              🪙 동전 던지기
+            </button>
+            <button onclick="switchGameTab('dice')" id="tabBtn_dice" class="py-2 rounded-xl text-slate-500 hover:text-slate-800 transition-all text-center whitespace-nowrap">
+              🎲 주사위 홀짝
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- 1. 노력형 1: 밥알 광클 -->
@@ -734,7 +696,7 @@
         </button>
       </div>
 
-      <!-- 4. 행운의 슬롯머신 (음수 불가) -->
+      <!-- 4. 행운의 슬롯머신 (음수 불가 / 10회·100회 초고속 릴 모션 탑재) -->
       <div id="gameView_slot" class="hidden space-y-4 text-center">
         <div class="p-3 bg-indigo-50 rounded-2xl border border-indigo-100 text-xs text-indigo-800 leading-relaxed">
           <strong>1회당 50P 베팅!</strong> (3개 일치 500P / 2개 일치 100P)<br/>
@@ -745,16 +707,16 @@
           <div id="slot2" class="w-14 h-14 bg-slate-800 rounded-xl flex items-center justify-center border border-slate-700">🍗</div>
           <div id="slot3" class="w-14 h-14 bg-slate-800 rounded-xl flex items-center justify-center border border-slate-700">🥩</div>
         </div>
-        <div id="slotResultText" class="text-xs font-bold text-slate-500 h-5">행운의 버튼을 눌러보세요!</div>
+        <div id="slotResultText" class="text-xs font-bold text-slate-500 h-5 flex items-center justify-center">행운의 버튼을 눌러보세요!</div>
         
         <div class="grid grid-cols-3 gap-2">
-          <button id="slotSpinBtn" onclick="spinSlotMachine(1)" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-all">
+          <button id="slotSpinBtn" onclick="spinSlotMachine(1)" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-all disabled:opacity-50">
             1회 (50P)
           </button>
-          <button onclick="spinSlotMachine(10)" class="bg-indigo-700 hover:bg-indigo-800 text-amber-300 font-bold py-2.5 rounded-xl text-xs shadow-md transition-all">
+          <button id="slotSpin10Btn" onclick="spinSlotMachine(10)" class="bg-indigo-700 hover:bg-indigo-800 text-amber-300 font-bold py-2.5 rounded-xl text-xs shadow-md transition-all disabled:opacity-50">
             10회 (500P)
           </button>
-          <button onclick="spinSlotMachine(100)" class="bg-slate-900 hover:bg-black text-rose-400 font-bold py-2.5 rounded-xl text-xs shadow-md transition-all border border-indigo-500/40">
+          <button id="slotSpin100Btn" onclick="spinSlotMachine(100)" class="bg-slate-900 hover:bg-black text-rose-400 font-bold py-2.5 rounded-xl text-xs shadow-md transition-all border border-indigo-500/40 disabled:opacity-50">
             100회 (5,000P)
           </button>
         </div>
@@ -1550,30 +1512,6 @@
       return false;
     }
 
-    function switchGameTab(tabName) {
-      ['clicker', 'speed', 'memory', 'slot', 'coin', 'dice'].forEach(t => {
-        const view = document.getElementById(`gameView_${t}`);
-        const tab = document.getElementById(`tabBtn_${t}`);
-        if (view) view.classList.add('hidden');
-        if (tab) tab.className = "py-2 rounded-xl text-slate-500 hover:text-slate-800 transition-all text-center";
-      });
-      const curView = document.getElementById(`gameView_${tabName}`);
-      const curTab = document.getElementById(`tabBtn_${tabName}`);
-      if (curView) curView.classList.remove('hidden');
-      if (curTab) curTab.className = "py-2 rounded-xl bg-white shadow-xs text-slate-900 transition-all font-black text-center";
-    }
-
-    function openMiniGameModal() { 
-      resetMiniGameState(); 
-      switchGameTab('clicker');
-      document.getElementById('miniGameModal').classList.remove('hidden'); 
-    }
-    function closeMiniGameModal() { 
-      if (isGameRunning) clearInterval(gameInterval); 
-      if (isSpeedRunning) clearInterval(speedInterval);
-      document.getElementById('miniGameModal').classList.add('hidden'); 
-    }
-
     // 2-7 노력형 1: 밥알 광클
     function resetMiniGameState() {
       if (gameInterval) clearInterval(gameInterval);
@@ -1697,53 +1635,143 @@
       }
     }
 
-    // 비-노력형 베팅 게임 (음수 페널티 차단)
+    // 슬롯머신 (1회, 10회, 100회 모두 초고속 릴 모션 탑재)
     function spinSlotMachine(times = 1) {
       if (checkNegativePenalty('슬롯머신')) return;
+      if (isSlotSpinning) return;
+
       const totalCost = 50 * times;
-      if (userPoints < totalCost) return alert(`베팅할 포인트가 부족합니다. (필요: ${totalCost}P)`);
+      if (userPoints < totalCost) {
+        return alert(`❌ 베팅할 포인트가 부족합니다!\n필요 포인트: ${totalCost.toLocaleString()}P (현재 잔고: ${userPoints.toLocaleString()}P)`);
+      }
+
       userPoints -= totalCost;
       updatePointsUI();
 
-      const resultText = document.getElementById('slotResultText');
-      if (times === 1) {
-        isSlotSpinning = true;
-        const slot1 = document.getElementById('slot1');
-        const slot2 = document.getElementById('slot2');
-        const slot3 = document.getElementById('slot3');
-        const isMega = Math.random() < 0.0000001; // 2-1: 0.00001%
+      isSlotSpinning = true;
+      setSlotButtonsDisabled(true);
 
-        let cnt = 0;
-        const timer = setInterval(() => {
+      const slot1 = document.getElementById('slot1');
+      const slot2 = document.getElementById('slot2');
+      const slot3 = document.getElementById('slot3');
+      const resultText = document.getElementById('slotResultText');
+
+      resultText.className = "text-xs font-bold text-indigo-600 animate-pulse h-5 flex items-center justify-center";
+      resultText.textContent = times === 1 ? "슬롯 회전 중... 과연 잭팟은?!" : `${times}연속 고속 회전 추첨 진행 중...`;
+
+      // 1회 단발성 회전 모션
+      if (times === 1) {
+        const isMega = Math.random() < 0.0000001; // 0.00001%
+        let counter = 0;
+        const spinTimer = setInterval(() => {
           slot1.textContent = SLOT_ITEMS[Math.floor(Math.random() * SLOT_ITEMS.length)];
           slot2.textContent = SLOT_ITEMS[Math.floor(Math.random() * SLOT_ITEMS.length)];
           slot3.textContent = SLOT_ITEMS[Math.floor(Math.random() * SLOT_ITEMS.length)];
-          cnt++;
-          if (cnt >= 18) {
-            clearInterval(timer);
+          counter++;
+
+          if (counter >= 18) {
+            clearInterval(spinTimer);
             isSlotSpinning = false;
+            setSlotButtonsDisabled(false);
+
             if (isMega) {
               slot1.textContent = "💎"; slot2.textContent = "💎"; slot3.textContent = "💎";
               userPoints += 50000;
               updatePointsUI();
               if (window.confetti) confetti({ particleCount: 300 });
-              resultText.innerHTML = `<span class="text-rose-500 font-black">🌟 0.00001% 초특급 잭팟! +50,000P!! 🌟</span>`;
+              resultText.className = "text-xs font-black text-rose-500 h-5 flex items-center justify-center animate-bounce";
+              resultText.innerHTML = `🌟 0.00001% 초특급 잭팟! +50,000P 획득!! 🌟`;
               return;
             }
-            if (slot1.textContent === slot2.textContent && slot2.textContent === slot3.textContent) {
+
+            const r1 = slot1.textContent;
+            const r2 = slot2.textContent;
+            const r3 = slot3.textContent;
+
+            if (r1 === r2 && r2 === r3) {
               userPoints += 500;
               updatePointsUI();
-              resultText.innerHTML = `<span class="text-amber-500 font-black">🎉 트리플 잭팟! (+500P)</span>`;
-            } else if (slot1.textContent === slot2.textContent || slot2.textContent === slot3.textContent) {
+              if (window.confetti) confetti({ particleCount: 120 });
+              resultText.className = "text-xs font-black text-amber-500 h-5 flex items-center justify-center";
+              resultText.innerHTML = `🎉 트리플 잭팟! (+500P 획득)`;
+            } else if (r1 === r2 || r2 === r3 || r1 === r3) {
               userPoints += 100;
               updatePointsUI();
-              resultText.innerHTML = `<span class="text-indigo-600 font-bold">👍 2개 일치! (+100P)</span>`;
+              resultText.className = "text-xs font-bold text-indigo-600 h-5 flex items-center justify-center";
+              resultText.innerHTML = `👍 2개 일치! (+100P 획득)`;
             } else {
-              resultText.innerHTML = `<span class="text-slate-400">아쉽네요! (-50P)</span>`;
+              resultText.className = "text-xs font-bold text-slate-400 h-5 flex items-center justify-center";
+              resultText.innerHTML = `아쉽네요! 다음 기회에... (-50P)`;
             }
           }
-        }, 60);
+        }, 55);
+
+      } else {
+        // 10회 및 100회: 고속 블러 릴 모션 연출
+        let fastCounter = 0;
+        const fastTimer = setInterval(() => {
+          slot1.textContent = SLOT_ITEMS[Math.floor(Math.random() * SLOT_ITEMS.length)];
+          slot2.textContent = SLOT_ITEMS[Math.floor(Math.random() * SLOT_ITEMS.length)];
+          slot3.textContent = SLOT_ITEMS[Math.floor(Math.random() * SLOT_ITEMS.length)];
+          fastCounter++;
+
+          if (fastCounter >= 22) {
+            clearInterval(fastTimer);
+            isSlotSpinning = false;
+            setSlotButtonsDisabled(false);
+
+            let triples = 0;
+            let doubles = 0;
+            let megas = 0;
+            let totalWon = 0;
+
+            for (let i = 0; i < times; i++) {
+              if (Math.random() < 0.0000001) {
+                megas++;
+                totalWon += 50000;
+                continue;
+              }
+              const c1 = SLOT_ITEMS[Math.floor(Math.random() * SLOT_ITEMS.length)];
+              const c2 = SLOT_ITEMS[Math.floor(Math.random() * SLOT_ITEMS.length)];
+              const c3 = SLOT_ITEMS[Math.floor(Math.random() * SLOT_ITEMS.length)];
+
+              if (c1 === c2 && c2 === c3) {
+                triples++;
+                totalWon += 500;
+              } else if (c1 === c2 || c2 === c3 || c1 === c3) {
+                doubles++;
+                totalWon += 100;
+              }
+            }
+
+            userPoints += totalWon;
+            updatePointsUI();
+
+            const net = totalWon - totalCost;
+            if (megas > 0) {
+              slot1.textContent = "💎"; slot2.textContent = "💎"; slot3.textContent = "💎";
+              if (window.confetti) confetti({ particleCount: 350 });
+            } else if (triples > 0) {
+              slot1.textContent = "👑"; slot2.textContent = "👑"; slot3.textContent = "👑";
+              if (window.confetti) confetti({ particleCount: 150 });
+            }
+
+            resultText.className = `text-xs font-bold h-5 flex items-center justify-center ${net >= 0 ? 'text-amber-500' : 'text-rose-500'}`;
+            resultText.innerHTML = `
+              [${times}회 정산] ${megas > 0 ? `💎초특급 ${megas}회! ` : ''}트리플 ${triples}회 · 더블 ${doubles}회 (순수익: ${net >= 0 ? '+' : ''}${net.toLocaleString()}P)
+            `;
+          }
+        }, 40);
       }
+    }
+
+    function setSlotButtonsDisabled(disabled) {
+      const btn1 = document.getElementById('slotSpinBtn');
+      const btn10 = document.getElementById('slotSpin10Btn');
+      const btn100 = document.getElementById('slotSpin100Btn');
+      if (btn1) btn1.disabled = disabled;
+      if (btn10) btn10.disabled = disabled;
+      if (btn100) btn100.disabled = disabled;
     }
 
     function playCoinFlip(userChoice) {
@@ -2204,7 +2232,7 @@
       }
     }
 
-    // 리스너 연결
+    // Firebase 리스너 연결
     db.ref('restaurants').on('value', snap => { restaurants = snap.val() || {}; renderCards(); });
     db.ref('lobby_votes').on('value', snap => { groupVotesData = snap.val() || {}; renderCards(); });
 
@@ -2215,7 +2243,7 @@
     updatePointsUI();
     renderPointRankings();
     setInterval(updateCountdown, 1000);
-    setInterval(monitorAutoLoanRepayment, 1000); // 1시간 자동 상환 감시
+    setInterval(monitorAutoLoanRepayment, 1000); // 1시간 자동 상환 모니터링
     syncFromGoogleSheet();
     lucide.createIcons();
   </script>
