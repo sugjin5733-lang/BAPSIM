@@ -277,6 +277,7 @@
         </div>
       </div>
 
+      <!-- 배너 하단 유틸리티 툴바 (사다리타기 추가) -->
       <div class="pt-4 border-t border-slate-700/60 flex flex-wrap items-center justify-between gap-2.5">
         <span class="text-xs font-bold text-slate-400 hidden sm:inline-flex items-center gap-1.5">
           <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
@@ -302,6 +303,12 @@
           <button onclick="openRouletteModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-3 py-2 rounded-xl text-xs border border-slate-700 transition-all">
             <i data-lucide="disc" class="w-3.5 h-3.5 text-orange-400"></i>
             <span>룰렛</span>
+          </button>
+
+          <!-- 2. 신규 사다리타기 전용 버튼 -->
+          <button onclick="openLadderModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-teal-700 hover:bg-teal-800 text-teal-100 font-bold px-3 py-2 rounded-xl text-xs shadow-md transition-all">
+            <i data-lucide="git-merge" class="w-3.5 h-3.5 text-teal-300"></i>
+            <span>사다리타기</span>
           </button>
 
           <button onclick="openDutchModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-3 py-2 rounded-xl text-xs border border-slate-700 transition-all">
@@ -419,7 +426,61 @@
     </section>
   </main>
 
-  <!-- 포인트 획득 게임 아케이드 모달 -->
+  <!-- ==========================================
+       [2. 시각적 사다리타기 미니게임 모달]
+       ========================================== -->
+  <div id="ladderGameModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b pb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center font-bold">
+            <i data-lucide="git-merge" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="font-black text-slate-900 text-base">밥심 실시간 사다리타기</h3>
+            <p class="text-[11px] text-slate-400">참여자를 입력하고 사다리를 타서 점심/커피를 결정하세요!</p>
+          </div>
+        </div>
+        <button onclick="closeLadderModal()" class="text-slate-400 hover:text-slate-600 text-xs">✕</button>
+      </div>
+
+      <!-- 입력 설정 바 -->
+      <div class="space-y-2.5 text-xs">
+        <div>
+          <label class="font-bold text-slate-700 block mb-1">1. 참여자 이름 (쉼표로 구분, 2~6명 권장)</label>
+          <input id="ladderInputNames" type="text" placeholder="예: 김대리, 이과장, 박팀장, 최사원" class="w-full border rounded-xl p-2.5 font-bold outline-none focus:border-teal-500 bg-slate-50" />
+        </div>
+        <div>
+          <label class="font-bold text-slate-700 block mb-1">2. 결과 항목 (쉼표로 구분, 참여자 수와 동일하게)</label>
+          <input id="ladderInputResults" type="text" placeholder="예: 당첨(커피쏘기), 통과, 통과, 통과 (또는 식당명들)" class="w-full border rounded-xl p-2.5 font-bold outline-none focus:border-teal-500 bg-slate-50" />
+        </div>
+        <div class="flex gap-2">
+          <button onclick="autoFillLadderWithRestaurants()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-xl text-[11px] transition-colors">
+            🍽️ 오늘 식당들로 자동 채우기
+          </button>
+          <button onclick="buildLadderCanvas()" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded-xl text-[11px] transition-colors shadow-sm">
+            🪜 사다리 생성하기
+          </button>
+        </div>
+      </div>
+
+      <!-- 사다리 시각화 캔버스 -->
+      <div class="relative bg-slate-900 rounded-2xl p-2 flex flex-col items-center justify-center border-2 border-teal-500 overflow-hidden min-h-[260px]">
+        <canvas id="ladderCanvas" width="440" height="240" class="max-w-full"></canvas>
+      </div>
+
+      <!-- 결과 발표 텍스트 & 시작 버튼 -->
+      <div id="ladderResultAnnounce" class="p-3 bg-teal-50 text-teal-900 rounded-xl font-bold text-xs text-center min-h-[42px] flex items-center justify-center">
+        사다리를 생성한 후 [사다리 타기 시작!]을 눌러주세요.
+      </div>
+
+      <button id="startLadderBtn" onclick="runLadderAnimation()" disabled class="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-black py-3 rounded-xl text-xs shadow-md transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+        사다리 타기 시작! (결과 추첨)
+      </button>
+    </div>
+  </div>
+
+  <!-- [포인트 획득 게임 아케이드 모달] -->
   <div id="miniGameModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
@@ -435,6 +496,7 @@
         <button onclick="closeMiniGameModal()" class="text-slate-400 hover:text-slate-600 text-xs">✕</button>
       </div>
 
+      <!-- 게임 탭 버튼 -->
       <div class="grid grid-cols-4 bg-slate-100 p-1 rounded-2xl gap-1 text-[11px] font-bold">
         <button onclick="switchGameTab('clicker')" id="tabBtn_clicker" class="py-2 rounded-xl bg-white shadow-xs text-slate-900 transition-all font-black text-center">
           🍚 밥알 광클
@@ -873,6 +935,7 @@
     </div>
   </div>
 
+  <!-- 프로필 모달 -->
   <div id="authModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-xs rounded-3xl shadow-2xl p-6 space-y-4 text-xs">
       <div class="flex items-center justify-between border-b pb-2">
@@ -934,447 +997,179 @@
 
   <script>
     // ==========================================
-    // Core Functions & Actions
+    // 2. 신규 시각적 사다리타기 게임 엔진 (Ghost Leg)
     // ==========================================
-    function openAddModal() {
-      document.getElementById('modalTitle').textContent = "새 한식뷔페 등록";
-      document.getElementById('editRestId').value = "";
-      document.getElementById('deleteActionWrapper').classList.add('hidden');
-      document.getElementById('sheetRestNotice').classList.add('hidden');
-      document.getElementById('restaurantForm').reset();
-      document.getElementById('formRestDate').value = new Date().toISOString().split('T')[0];
-      document.getElementById('addModal').classList.remove('hidden');
-    }
+    let ladderData = { lines: 4, rungs: [], names: [], results: [] };
 
-    function openEditModal(id) {
-      const r = restaurants[id];
-      if (!r) return;
-
-      const isFromSheet = (id.startsWith('sheet_rest_') || r.fromSheet === true);
-
-      document.getElementById('modalTitle').textContent = `[${r.name}] 식당 정보 수정`;
-      document.getElementById('editRestId').value = r.id;
-      document.getElementById('formRestName').value = r.name;
-      document.getElementById('formRestPrice').value = r.price || '';
-      document.getElementById('formRestMapUrl').value = r.mapUrl || '';
-      
-      const dateInfo = formatPrettyDate(r.menuDate);
-      document.getElementById('formRestDate').value = (dateInfo.iso && dateInfo.iso.includes('-')) ? dateInfo.iso : new Date().toISOString().split('T')[0];
-      
-      document.getElementById('formRestMains').value = (r.mains || []).join(', ');
-      document.getElementById('formRestSoup').value = (r.soup === '-' ? '' : r.soup) || '';
-      document.getElementById('formRestDessert').value = (r.dessert === '-' ? '' : r.dessert) || '';
-
-      if (isFromSheet) {
-        document.getElementById('deleteActionWrapper').classList.add('hidden');
-        document.getElementById('sheetRestNotice').classList.remove('hidden');
+    function openLadderModal() {
+      document.getElementById('ladderGameModal').classList.remove('hidden');
+      if (document.getElementById('ladderInputNames').value.trim() === '') {
+        autoFillLadderWithRestaurants();
       } else {
-        document.getElementById('deleteActionWrapper').classList.remove('hidden');
-        document.getElementById('sheetRestNotice').classList.add('hidden');
+        buildLadderCanvas();
       }
-
-      document.getElementById('addModal').classList.remove('hidden');
-      lucide.createIcons();
     }
 
-    function closeAddModal() { document.getElementById('addModal').classList.add('hidden'); }
-
-    function handleDeleteCurrentRestaurant() {
-      const editId = document.getElementById('editRestId').value;
-      if (!editId) return;
-
-      if (editId.startsWith('sheet_rest_') || (restaurants[editId] && restaurants[editId].fromSheet)) {
-        return alert('구글 스프레드시트 연동 식당은 삭제할 수 없습니다.');
-      }
-
-      if (!confirm('정말 이 식당을 완전히 삭제하시겠습니까?')) return;
-      db.ref(`restaurants/${editId}`).remove(() => closeAddModal());
+    function closeLadderModal() {
+      document.getElementById('ladderGameModal').classList.add('hidden');
     }
 
-    function openAuthModal() {
-      document.getElementById('authNicknameInput').value = currentUser.nickname;
-      document.getElementById('authModal').classList.remove('hidden');
-    }
-    function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
-
-    function toggleChatWindow() { document.getElementById('chatWindow').classList.toggle('hidden'); }
-
-    // ==========================================
-    // 채팅 관련 핵심 함수 복원 (누락 방지)
-    // ==========================================
-    function sendSticker(stickerType) {
-      if (userPoints < 10) return alert('포인트가 부족합니다! (10P 필요)');
-      userPoints -= 10;
-      updatePointsUI();
-      const chatPath = currentGroupId === 'lobby' ? 'lobby_messages' : `groups/${currentGroupId}/messages`;
-      db.ref(chatPath).push({
-        nickname: currentUser.nickname,
-        sticker: stickerType,
-        color: myNickColor,
-        bg: myNickBg,
-        symbol: myNickSymbol,
-        timestamp: Date.now()
-      });
-    }
-
-    function handleSendChat(e) {
-      e.preventDefault();
-      const input = document.getElementById('chatInput');
-      const text = input.value.trim();
-      if (!text) return;
-      const chatPath = currentGroupId === 'lobby' ? 'lobby_messages' : `groups/${currentGroupId}/messages`;
-      db.ref(chatPath).push({
-        nickname: currentUser.nickname,
-        text: text,
-        color: myNickColor,
-        bg: myNickBg,
-        symbol: myNickSymbol,
-        timestamp: Date.now()
-      });
-      input.value = '';
-    }
-
-    function quickChat(txt) {
-      const chatPath = currentGroupId === 'lobby' ? 'lobby_messages' : `groups/${currentGroupId}/messages`;
-      db.ref(chatPath).push({
-        nickname: currentUser.nickname,
-        text: txt,
-        color: myNickColor,
-        bg: myNickBg,
-        symbol: myNickSymbol,
-        timestamp: Date.now()
-      });
-    }
-
-    function appendChatMessage(msg) {
-      const container = document.getElementById('chatMessages');
-      if (!container) return;
-      const div = document.createElement('div');
-
-      if (msg.type === 'system') {
-        div.className = "text-center text-[10px] text-indigo-600 bg-indigo-50/90 rounded-lg py-1 px-2 my-1 font-semibold";
-        div.textContent = msg.text;
+    function autoFillLadderWithRestaurants() {
+      const restNames = Object.values(restaurants || {}).map(r => r.name).slice(0, 4);
+      if (restNames.length >= 2) {
+        document.getElementById('ladderInputNames').value = "나, 동료1, 동료2, 동료3".split(',').slice(0, restNames.length).join(', ');
+        document.getElementById('ladderInputResults').value = restNames.join(', ');
       } else {
-        const isMe = (msg.nickname === currentUser.nickname || msg.nickname === `[관리자] ${currentUser.nickname}`);
-        div.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'}`;
-
-        let contentHTML = '';
-        if (msg.sticker === 'sticker_agree') contentHTML = `<div class="sticker-agree">찬성! 👍</div>`;
-        else if (msg.sticker === 'sticker_reject') contentHTML = `<div class="sticker-reject">탈락 ❌</div>`;
-        else if (msg.sticker === 'sticker_dismiss') contentHTML = `<div class="sticker-dismiss">반려 ⚡</div>`;
-        else if (msg.sticker === 'sticker_admin_exec') contentHTML = `<div class="sticker-admin-exec">⚡ 처벌 집행 ⚡</div>`;
-        else if (msg.sticker === 'sticker_admin_ok') contentHTML = `<div class="sticker-admin-ok">🛡️ 관리자 승인 🛡️</div>`;
-        else if (msg.sticker === 'sticker_admin_warn') contentHTML = `<div class="sticker-admin-warn">⚠️ 운영 경고 ⚠️</div>`;
-        else contentHTML = `<div class="px-3.5 py-2 rounded-2xl max-w-[85%] leading-relaxed ${isMe ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white border text-slate-800 rounded-tl-none'}">${msg.text}</div>`;
-
-        const colorStyle = msg.color ? `color: ${msg.color} !important;` : '';
-        const bgClass = msg.bg || 'nb-none';
-        const sym = msg.symbol ? `<span class="mr-0.5">${msg.symbol}</span>` : '';
-        const symEnd = msg.symbol ? `<span class="ml-0.5">${msg.symbol}</span>` : '';
-
-        div.innerHTML = `
-          <div class="mb-0.5">
-            <span class="${bgClass} text-[10px] inline-block font-extrabold" style="${colorStyle}">
-              ${sym}${msg.nickname}${symEnd}
-            </span>
-          </div>
-          ${contentHTML}
-        `;
+        document.getElementById('ladderInputNames').value = "김대리, 이과장, 박팀장, 최사원";
+        document.getElementById('ladderInputResults').value = "당첨(커피쏘기), 통과, 통과, 통과";
       }
-      container.appendChild(div);
-      container.scrollTop = container.scrollHeight;
+      buildLadderCanvas();
     }
 
-    // ==========================================
-    // 슬롯머신 & 게임 로직
-    // ==========================================
-    function spinSlotMachine(times = 1) {
-      if (isSlotSpinning) return;
-      const totalCost = 50 * times;
-      if (userPoints < totalCost) {
-        return alert(`❌ 베팅할 포인트가 부족합니다!\n필요 포인트: ${totalCost.toLocaleString()}P (현재: ${userPoints.toLocaleString()}P)`);
+    function buildLadderCanvas() {
+      const nameInput = document.getElementById('ladderInputNames').value.trim();
+      const resInput = document.getElementById('ladderInputResults').value.trim();
+
+      const names = nameInput ? nameInput.split(',').map(s => s.trim()).filter(Boolean) : [];
+      const results = resInput ? resInput.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+      if (names.length < 2) return alert("참여자를 최소 2명 이상 입력하세요.");
+      if (names.length !== results.length) {
+        return alert(`참여자 수(${names.length}명)와 결과 항목 수(${results.length}개)가 일치해야 합니다.`);
       }
 
-      userPoints -= totalCost;
-      updatePointsUI();
+      ladderData.names = names;
+      ladderData.results = results;
+      ladderData.lines = names.length;
 
-      const resultText = document.getElementById('slotResultText');
-      const spinBtn = document.getElementById('slotSpinBtn');
+      // 가로 다리(사다리 가로줄) 랜덤 생성
+      const rungCountPerGap = 3 + Math.floor(Math.random() * 3);
+      ladderData.rungs = [];
 
-      if (times === 1) {
-        isSlotSpinning = true;
-        spinBtn.disabled = true;
-        resultText.textContent = "슬롯 회전 중... 과연 잭팟은?!";
-
-        const slot1 = document.getElementById('slot1');
-        const slot2 = document.getElementById('slot2');
-        const slot3 = document.getElementById('slot3');
-
-        let counter = 0;
-        const spinTimer = setInterval(() => {
-          slot1.textContent = SLOT_ITEMS[Math.floor(Math.random() * SLOT_ITEMS.length)];
-          slot2.textContent = SLOT_ITEMS[Math.floor(Math.random() * SLOT_ITEMS.length)];
-          slot3.textContent = SLOT_ITEMS[Math.floor(Math.random() * SLOT_ITEMS.length)];
-          counter++;
-
-          if (counter >= 20) {
-            clearInterval(spinTimer);
-            isSlotSpinning = false;
-            spinBtn.disabled = false;
-
-            const r1 = slot1.textContent;
-            const r2 = slot2.textContent;
-            const r3 = slot3.textContent;
-
-            if (r1 === r2 && r2 === r3) {
-              userPoints += 500;
-              updatePointsUI();
-              if (window.confetti) confetti({ particleCount: 120 });
-              resultText.innerHTML = `<span class="text-amber-500 font-black">🎉 트리플 잭팟 달성!! (+500P 획득)</span>`;
-            } else if (r1 === r2 || r2 === r3 || r1 === r3) {
-              userPoints += 100;
-              updatePointsUI();
-              resultText.innerHTML = `<span class="text-indigo-600 font-black">👍 2개 일치! (+100P 획득)</span>`;
-            } else {
-              resultText.innerHTML = `<span class="text-slate-400">아쉽네요! 다음 기회에... (-50P)</span>`;
-            }
-          }
-        }, 60);
-      } else {
-        let triples = 0;
-        let doubles = 0;
-        let totalWon = 0;
-
-        for (let i = 0; i < times; i++) {
-          const r1 = SLOT_ITEMS[Math.floor(Math.random() * SLOT_ITEMS.length)];
-          const r2 = SLOT_ITEMS[Math.floor(Math.random() * SLOT_ITEMS.length)];
-          const r3 = SLOT_ITEMS[Math.floor(Math.random() * SLOT_ITEMS.length)];
-
-          if (r1 === r2 && r2 === r3) {
-            triples++;
-            totalWon += 500;
-          } else if (r1 === r2 || r2 === r3 || r1 === r3) {
-            doubles++;
-            totalWon += 100;
-          }
+      for (let i = 0; i < ladderData.lines - 1; i++) {
+        for (let j = 0; j < rungCountPerGap; j++) {
+          const yPos = 40 + Math.floor(Math.random() * 150);
+          ladderData.rungs.push({ from: i, to: i + 1, y: yPos });
         }
-
-        userPoints += totalWon;
-        updatePointsUI();
-
-        const net = totalWon - totalCost;
-        if (triples > 0 && window.confetti) confetti({ particleCount: 150 });
-
-        resultText.innerHTML = `
-          <span class="${net >= 0 ? 'text-amber-500' : 'text-rose-500'} font-bold">
-            ${times}회 정산: 트리플 ${triples}회 | 더블 ${doubles}회 (순수익: ${net >= 0 ? '+' : ''}${net.toLocaleString()}P)
-          </span>
-        `;
-      }
-    }
-
-    function playCoinFlip(userChoice) {
-      if (userPoints < 50) return alert("❌ 베팅할 포인트가 부족합니다! (50P 필요)");
-      userPoints -= 50;
-      updatePointsUI();
-
-      const coinEl = document.getElementById('coinDisplay');
-      const resultEl = document.getElementById('coinResultText');
-      resultEl.textContent = "동전이 공중에서 회전 중...";
-
-      setTimeout(() => {
-        const isFront = Math.random() < 0.5;
-        const outcome = isFront ? 'front' : 'back';
-        coinEl.textContent = isFront ? "🪙" : "🔘";
-
-        if (userChoice === outcome) {
-          userPoints += 100;
-          updatePointsUI();
-          if (window.confetti) confetti({ particleCount: 60 });
-          resultEl.innerHTML = `<span class="text-amber-500 font-black">🎉 예측 적중! (${isFront ? '앞면' : '뒷면'}) +100P 획득!</span>`;
-        } else {
-          resultEl.innerHTML = `<span class="text-rose-500 font-bold">빗나갔습니다! (${isFront ? '앞면' : '뒷면'}) -50P</span>`;
-        }
-      }, 400);
-    }
-
-    const DICE_ICONS = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
-    function playDiceBet(userChoice) {
-      if (userPoints < 100) return alert("❌ 베팅할 포인트가 부족합니다! (100P 필요)");
-      userPoints -= 100;
-      updatePointsUI();
-
-      const diceEl = document.getElementById('diceDisplay');
-      const resultEl = document.getElementById('diceResultText');
-      resultEl.textContent = "주사위를 굴리는 중...";
-
-      setTimeout(() => {
-        const roll = Math.floor(Math.random() * 6) + 1;
-        diceEl.textContent = DICE_ICONS[roll - 1];
-
-        const isOdd = (roll % 2 !== 0);
-        const actualOutcome = isOdd ? 'odd' : 'even';
-
-        if (userChoice === actualOutcome) {
-          userPoints += 200;
-          updatePointsUI();
-          if (window.confetti) confetti({ particleCount: 80 });
-          resultEl.innerHTML = `<span class="text-amber-500 font-black">🎉 적중! [${roll} (${isOdd ? '홀' : '짝'})] +200P 획득!</span>`;
-        } else {
-          resultEl.innerHTML = `<span class="text-rose-500 font-bold">낙첨! [${roll} (${isOdd ? '홀' : '짝'})] -100P</span>`;
-        }
-      }, 400);
-    }
-
-    // ==========================================
-    // 투표 토글 / 취소 로직
-    // ==========================================
-    function castVote(id) {
-      if (currentGroupId === 'lobby') {
-        openGroupListModal();
-        return;
       }
 
-      const votePath = `groups/${currentGroupId}/votes`;
-      const chatPath = `groups/${currentGroupId}/messages`;
+      drawLadder(null);
+      document.getElementById('startLadderBtn').disabled = false;
+      document.getElementById('ladderResultAnnounce').textContent = "사다리 준비 완료! [사다리 타기 시작!]을 눌러 추첨하세요.";
+    }
 
-      if (myVotedId === id) {
-        db.ref(`${votePath}/${id}`).transaction(v => Math.max(0, (v || 1) - 1));
-        myVotedId = null;
-        localStorage.removeItem(`bapsim_my_vote_${currentGroupId}`);
-      } else {
-        if (myVotedId) {
-          db.ref(`${votePath}/${myVotedId}`).transaction(v => Math.max(0, (v || 1) - 1));
-        }
-        db.ref(`${votePath}/${id}`).transaction(v => (v || 0) + 1);
-        myVotedId = id;
-        localStorage.setItem(`bapsim_my_vote_${currentGroupId}`, id);
+    function drawLadder(activePath) {
+      const canvas = document.getElementById('ladderCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        db.ref(chatPath).push({
-          type: 'system',
-          text: `🔔 ${currentUser.nickname}님이 [${restaurants[id]?.name || '식당'}]에 투표하셨습니다!`,
-          timestamp: Date.now()
-        });
+      const count = ladderData.lines;
+      const gap = (canvas.width - 60) / (count - 1);
+      const topY = 35;
+      const botY = 205;
+
+      // 상단 이름 & 하단 결과 출력
+      ctx.textAlign = "center";
+      ctx.font = "bold 12px Pretendard, sans-serif";
+
+      for (let i = 0; i < count; i++) {
+        const x = 30 + i * gap;
+
+        // 세로선
+        ctx.strokeStyle = "#475569";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(x, topY);
+        ctx.lineTo(x, botY);
+        ctx.stroke();
+
+        // 상단 참여자 텍스트
+        ctx.fillStyle = "#38bdf8";
+        ctx.fillText(ladderData.names[i] || '', x, topY - 12);
+
+        // 하단 결과 텍스트
+        ctx.fillStyle = "#facc15";
+        ctx.fillText(ladderData.results[i] || '', x, botY + 20);
       }
-      renderCards();
-    }
 
-    function enterGroup(gid, gname) {
-      currentGroupId = gid;
-      currentGroupName = gname;
-      localStorage.setItem('bapsim_current_group_id', gid);
-      localStorage.setItem('bapsim_current_group_name', gname);
-      updateGroupUI();
-    }
-
-    function leaveGroupToLobby() {
-      enterGroup('lobby', '전체 공개 로비');
-    }
-
-    function promptJoinGroup(gid) {
-      targetJoinGroupId = gid;
-      const g = allGroups[gid];
-      if (g) {
-        document.getElementById('joinModalGroupName').textContent = `[${g.name}] 입장`;
-        document.getElementById('groupJoinModal').classList.remove('hidden');
-      }
-    }
-
-    function submitJoinGroup() {
-      const pass = document.getElementById('joinGroupPassInput').value.trim();
-      const g = allGroups[targetJoinGroupId];
-      if (g && g.password === pass) {
-        enterGroup(g.id, g.name);
-        closeGroupJoinModal();
-        closeGroupModal();
-      } else {
-        alert('비밀번호가 일치하지 않습니다.');
-      }
-    }
-
-    function openGroupListModal() { document.getElementById('groupModal').classList.remove('hidden'); }
-    function closeGroupModal() { document.getElementById('groupModal').classList.add('hidden'); }
-    function closeGroupJoinModal() { document.getElementById('groupJoinModal').classList.add('hidden'); }
-
-    function handleCreateGroup(e) {
-      e.preventDefault();
-      const groupName = document.getElementById('createGroupName').value.trim();
-      const password = document.getElementById('createGroupPass').value.trim();
-      const gid = 'grp_' + Date.now();
-      db.ref(`groups/${gid}`).set({ id: gid, name: groupName, password: password, leader: currentUser.nickname }, () => {
-        enterGroup(gid, groupName);
-        closeGroupModal();
+      // 가로 사다리줄 그리기
+      ctx.strokeStyle = "#94a3b8";
+      ctx.lineWidth = 2;
+      ladderData.rungs.forEach(rung => {
+        const x1 = 30 + rung.from * gap;
+        const x2 = 30 + rung.to * gap;
+        ctx.beginPath();
+        ctx.moveTo(x1, rung.y);
+        ctx.lineTo(x2, rung.y);
+        ctx.stroke();
       });
-    }
 
-    function renderGroupList() {
-      const listEl = document.getElementById('groupListContainer');
-      const groups = Object.values(allGroups || {});
-      if (!listEl) return;
-      listEl.innerHTML = '';
-      groups.forEach(g => {
-        const isCurrent = (currentGroupId === g.id);
-        const item = document.createElement('div');
-        item.className = "p-3 rounded-2xl border flex items-center justify-between text-xs";
-        item.innerHTML = `
-          <div class="font-bold truncate max-w-[200px]">${g.name}</div>
-          <div>${isCurrent ? '<span class="text-indigo-600 font-bold">참여중</span>' : `<button onclick="promptJoinGroup('${g.id}')" class="bg-indigo-600 text-white px-2.5 py-1 rounded-lg font-bold">입장</button>`}</div>
-        `;
-        listEl.appendChild(item);
-      });
-    }
-
-    function openRouletteModal() { document.getElementById('rouletteSlotText').textContent = "???"; document.getElementById('rouletteModal').classList.remove('hidden'); }
-    function closeRouletteModal() { document.getElementById('rouletteModal').classList.add('hidden'); }
-
-    function spinRoulette() {
-      const list = Object.values(restaurants || {});
-      if (list.length === 0) return alert('등록된 식당이 없습니다.');
-      const slot = document.getElementById('rouletteSlotText');
-      let count = 0;
-      const timer = setInterval(() => {
-        slot.textContent = list[Math.floor(Math.random() * list.length)].name;
-        count++;
-        if (count >= 20) {
-          clearInterval(timer);
-          const chosen = list[Math.floor(Math.random() * list.length)];
-          slot.textContent = chosen.name;
-          document.getElementById('rouletteSubText').textContent = `🎉 [${chosen.name}] 낙점!`;
-          if (window.confetti) confetti({ particleCount: 60 });
+      // 추첨 경로 하이라이트 애니메이션
+      if (activePath && activePath.length > 1) {
+        ctx.strokeStyle = "#f43f5e";
+        ctx.lineWidth = 5;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(activePath[0].x, activePath[0].y);
+        for (let p = 1; p < activePath.length; p++) {
+          ctx.lineTo(activePath[p].x, activePath[p].y);
         }
-      }, 70);
+        ctx.stroke();
+      }
     }
 
-    function openDutchModal() { document.getElementById('dutchModal').classList.remove('hidden'); }
-    function closeDutchModal() { document.getElementById('dutchModal').classList.add('hidden'); }
+    function runLadderAnimation() {
+      const startBtn = document.getElementById('startLadderBtn');
+      startBtn.disabled = true;
 
-    function calcDutchPay() {
-      const total = parseInt(document.getElementById('nTotalAmount').value, 10);
-      const people = parseInt(document.getElementById('nPeopleCount').value, 10);
-      if (!total || !people) return alert('금액과 인원수를 올바르게 입력하세요.');
-      const per = Math.ceil(total / people);
-      const res = document.getElementById('dutchResultBox');
-      res.innerHTML = `1인당 <strong>${per.toLocaleString()}원</strong>`;
-      res.classList.remove('hidden');
-    }
+      const canvas = document.getElementById('ladderCanvas');
+      const gap = (canvas.width - 60) / (ladderData.lines - 1);
+      const sortedRungs = [...ladderData.rungs].sort((a, b) => a.y - b.y);
 
-    function runCoffeeLadder() {
-      const raw = document.getElementById('ladderParticipants').value.trim();
-      if (!raw) return alert('참여자 이름을 입력하세요.');
-      const names = raw.split(',').map(s => s.trim()).filter(Boolean);
-      if (names.length < 2) return alert('2명 이상 입력하세요.');
-      const picked = names[Math.floor(Math.random() * names.length)];
-      const res = document.getElementById('ladderResultBox');
-      res.innerHTML = `☕ 당첨: <strong>${picked}</strong> 님!`;
-      res.classList.remove('hidden');
-      if (window.confetti) confetti({ particleCount: 50 });
+      // 1번 참여자(예: '나' 또는 첫 번째 사람)의 경로 추적
+      let curCol = 0;
+      let curY = 35;
+      const pathPoints = [{ x: 30, y: curY }];
+
+      sortedRungs.forEach(rung => {
+        if (rung.from === curCol && rung.y > curY) {
+          pathPoints.push({ x: 30 + curCol * gap, y: rung.y });
+          curCol = rung.to;
+          pathPoints.push({ x: 30 + curCol * gap, y: rung.y });
+          curY = rung.y;
+        } else if (rung.to === curCol && rung.y > curY) {
+          pathPoints.push({ x: 30 + curCol * gap, y: rung.y });
+          curCol = rung.from;
+          pathPoints.push({ x: 30 + curCol * gap, y: rung.y });
+          curY = rung.y;
+        }
+      });
+      pathPoints.push({ x: 30 + curCol * gap, y: 205 });
+
+      // 애니메이션 드로잉
+      let step = 0;
+      const animTimer = setInterval(() => {
+        step++;
+        drawLadder(pathPoints.slice(0, step));
+        if (step >= pathPoints.length) {
+          clearInterval(animTimer);
+          const finalResult = ladderData.results[curCol];
+          document.getElementById('ladderResultAnnounce').innerHTML = `
+            🎉 [${ladderData.names[0]}] 님의 결과: <strong class="text-rose-600 underline text-sm ml-1">${finalResult}</strong>
+          `;
+          if (window.confetti) confetti({ particleCount: 70 });
+          startBtn.disabled = false;
+        }
+      }, 120);
     }
 
     // ==========================================
-    // 앱 초기화 및 구동
+    // 앱 초기화 및 시작
     // ==========================================
     if (currentUser.nickname && currentUser.nickname !== "문정러") {
-      document.getElementById('userProfileText').textContent = currentUser.nickname;
+      const pText = document.getElementById('userProfileText');
+      if (pText) pText.textContent = currentUser.nickname;
     }
 
     setInterval(updateCountdown, 1000);
