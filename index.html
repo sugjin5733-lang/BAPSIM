@@ -17,6 +17,7 @@
     .scrollbar-hide::-webkit-scrollbar { display: none; }
     .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
+    /* 이모티콘 3종 + 관리자 스티커 */
     .sticker-agree {
       font-family: 'Gaegu', cursive; font-size: 1.45rem; color: #2563eb; background: #eff6ff;
       border: 2px dashed #60a5fa; padding: 3px 12px; border-radius: 9999px; display: inline-flex;
@@ -45,10 +46,14 @@
       border: 2px solid #f59e0b; box-shadow: 0 0 12px rgba(245, 158, 11, 0.6); padding: 4px 14px; border-radius: 8px;
     }
 
+    /* 닉네임 배경 배지 스타일 */
     .nb-none { background: transparent; padding: 0; }
+
+    /* [관리자 전용 배지] 타오르는 다크레드 펄스 + 골드 글리터 애니메이션 */
     .nb-admin {
       background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 50%, #991b1b 100%);
-      color: #ffffff !important; border: 2px solid #facc15;
+      color: #ffffff !important;
+      border: 2px solid #facc15;
       box-shadow: 0 0 16px rgba(239, 68, 68, 0.9), inset 0 0 8px #fde047;
       animation: adminPulseGlow 1.8s infinite alternate ease-in-out;
       padding: 2px 9px; border-radius: 8px; font-weight: 900; letter-spacing: -0.02em;
@@ -57,6 +62,8 @@
       0% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.7), inset 0 0 4px #fde047; }
       100% { box-shadow: 0 0 25px rgba(239, 68, 68, 1), 0 0 12px #f87171, inset 0 0 12px #fde047; }
     }
+
+    /* [50만P 이상 신화급] 애니메이션 */
     .nb-cosmic {
       background: linear-gradient(90deg, #ff007f, #7928ca, #0070f3, #00dfd8, #ff007f);
       background-size: 300% 300%;
@@ -66,6 +73,7 @@
     }
     @keyframes cosmicShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
     @keyframes cosmicGlow { 0% { box-shadow: 0 0 12px rgba(255, 0, 128, 0.8), 0 0 20px rgba(0, 223, 216, 0.5); } 100% { box-shadow: 0 0 24px rgba(255, 0, 128, 1), 0 0 32px rgba(121, 40, 202, 0.8); } }
+
     .nb-solar {
       background: linear-gradient(90deg, #ff4500, #ff8c00, #ffd700, #ff4500);
       background-size: 250% 250%;
@@ -75,6 +83,7 @@
     }
     @keyframes solarFlare { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
     @keyframes solarPulse { 0% { box-shadow: 0 0 14px rgba(255, 69, 0, 0.8); } 100% { box-shadow: 0 0 28px rgba(255, 69, 0, 1), 0 0 18px rgba(255, 215, 0, 0.9); } }
+
     .nb-blackhole {
       background: radial-gradient(circle, #581c87 0%, #0f051d 60%, #000000 100%);
       color: #f3e8ff !important; border: 1.5px solid #c084fc;
@@ -82,10 +91,11 @@
       padding: 2px 9px; border-radius: 8px; font-weight: 900;
     }
     @keyframes blackholePulse {
-      0% { box-shadow: 0 0 12px rgba(192, 132, 252, 0.6), inset 0 0 6px #a855f7; transform: scale(1); }
-      50% { box-shadow: 0 0 24px rgba(168, 85, 247, 0.9), inset 0 0 14px #e9d5ff; transform: scale(1.02); }
-      100% { box-shadow: 0 0 12px rgba(192, 132, 252, 0.6), inset 0 0 6px #a855f7; transform: scale(1); }
+      0% { box-shadow: 0 0 12px rgba(192, 132, 252, 0.6), inset 0 0 6px #a855f7; }
+      50% { box-shadow: 0 0 24px rgba(168, 85, 247, 0.9), inset 0 0 14px #e9d5ff; }
+      100% { box-shadow: 0 0 12px rgba(192, 132, 252, 0.6), inset 0 0 6px #a855f7; }
     }
+
     .nb-matrix {
       background: linear-gradient(180deg, #022c22 0%, #064e3b 50%, #022c22 100%);
       background-size: 100% 200%;
@@ -94,10 +104,11 @@
       font-family: monospace; padding: 2px 8px; border-radius: 6px; font-weight: 900; letter-spacing: 0.05em;
     }
     @keyframes matrixScan {
-      0% { background-position: 0% 0%; box-shadow: 0 0 10px rgba(16, 185, 129, 0.7); }
-      50% { box-shadow: 0 0 20px rgba(52, 211, 153, 0.9); }
-      100% { background-position: 0% 200%; box-shadow: 0 0 10px rgba(16, 185, 129, 0.7); }
+      0% { background-position: 0% 0%; }
+      50% { background-position: 0% 100%; box-shadow: 0 0 20px rgba(52, 211, 153, 0.9); }
+      100% { background-position: 0% 200%; }
     }
+
     .nb-universe {
       background: linear-gradient(135deg, #020617, #1e1b4b, #3b0764, #020617);
       background-size: 300% 300%;
@@ -106,10 +117,12 @@
       padding: 2px 8px; border-radius: 8px; font-weight: 900;
     }
     @keyframes universeWarp {
-      0% { background-position: 0% 50%; box-shadow: 0 0 12px rgba(139, 92, 246, 0.6); }
+      0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; box-shadow: 0 0 24px rgba(167, 139, 250, 0.9); }
-      100% { background-position: 0% 50%; box-shadow: 0 0 12px rgba(139, 92, 246, 0.6); }
+      100% { background-position: 0% 50%; }
     }
+
+    /* [10만P 이상] 골드 배지 - 럭셔리 골드 쉬머 반사광 */
     .nb-gold { 
       background: linear-gradient(110deg, #b45309 0%, #fef08a 30%, #facc15 50%, #ca8a04 70%, #b45309 100%); 
       background-size: 200% auto;
@@ -120,13 +133,14 @@
     @keyframes goldShimmer {
       to { background-position: 200% center; box-shadow: 0 0 16px rgba(234, 179, 8, 0.8); }
     }
-    .nb-darkvip { background: linear-gradient(135deg, #18181b 0%, #09090b 100%); color: #f43f5e !important; border: 1.5px solid #e11d48; box-shadow: 0 0 10px rgba(225, 29, 72, 0.4); padding: 2px 8px; border-radius: 8px; font-weight: 900; }
-    .nb-aurora { background: linear-gradient(135deg, #059669, #10b981, #06b6d4); color: #ecfdf5 !important; border: 1.5px solid #34d399; box-shadow: 0 0 10px rgba(52, 211, 153, 0.6); padding: 2px 8px; border-radius: 8px; font-weight: 900; }
-    .nb-diamond { background: linear-gradient(135deg, #ecfeff 0%, #a5f3fc 50%, #38bdf8 100%); color: #0369a1 !important; border: 1.5px solid #0284c7; box-shadow: 0 0 10px rgba(56, 189, 248, 0.5); padding: 2px 8px; border-radius: 8px; font-weight: 900; }
-    .nb-galaxy { background: linear-gradient(135deg, #312e81 0%, #4c1d95 50%, #831843 100%); color: #fdf4ff !important; border: 1.5px solid #c084fc; box-shadow: 0 0 8px rgba(192, 132, 252, 0.5); padding: 2px 8px; border-radius: 8px; font-weight: 800; }
-    .nb-cyberpunk { background: #050505; color: #f43f5e !important; border: 1.5px solid #06b6d4; box-shadow: 2px 2px 0px #06b6d4; padding: 2px 8px; border-radius: 4px; font-weight: 900; }
-    .nb-neon { background: #09090b; color: #4ade80 !important; border: 1.5px solid #22c55e; box-shadow: 0 0 8px rgba(34, 197, 94, 0.45); padding: 2px 8px; border-radius: 8px; font-weight: 800; }
-    .nb-fire { background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%); color: #c2410c !important; border: 1.5px solid #ea580c; padding: 2px 8px; border-radius: 8px; font-weight: 800; }
+
+    .nb-darkvip { background: linear-gradient(135deg, #18181b 0%, #09090b 100%); color: #f43f5e !important; border: 1.5px solid #e11d48; padding: 2px 8px; border-radius: 8px; font-weight: 900; }
+    .nb-aurora { background: linear-gradient(135deg, #059669, #10b981, #06b6d4); color: #ecfdf5 !important; border: 1.5px solid #34d399; padding: 2px 8px; border-radius: 8px; font-weight: 900; }
+    .nb-diamond { background: linear-gradient(135deg, #ecfeff 0%, #a5f3fc 50%, #38bdf8 100%); color: #0369a1 !important; border: 1.5px solid #0284c7; padding: 2px 8px; border-radius: 8px; font-weight: 900; }
+    .nb-galaxy { background: linear-gradient(135deg, #312e81 0%, #4c1d95 50%, #831843 100%); color: #fdf4ff !important; border: 1.5px solid #c084fc; padding: 2px 8px; border-radius: 8px; font-weight: 800; }
+    .nb-cyberpunk { background: #050505; color: #f43f5e !important; border: 1.5px solid #06b6d4; padding: 2px 8px; border-radius: 4px; font-weight: 900; }
+    .nb-neon { background: #09090b; color: #4ade80 !important; border: 1.5px solid #22c55e; padding: 2px 8px; border-radius: 8px; font-weight: 800; }
+    .nb-fire { background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%); color: #c2410c !important; border: 1.5px solid #ea580c; padding: 2px 8px; border-radius: 8px; font-weight: 800; }
     .nb-cherry { background: #fff1f2; color: #be123c !important; border: 1.5px solid #fb7185; padding: 2px 7px; border-radius: 7px; font-weight: 800; }
     .nb-sunset { background: linear-gradient(135deg, #fef3c7, #fed7aa); color: #9a3412 !important; border: 1px solid #fb923c; padding: 2px 7px; border-radius: 7px; font-weight: 800; }
     .nb-mint { background: #ecfdf5; color: #065f46 !important; border: 1px solid #10b981; padding: 2px 7px; border-radius: 7px; font-weight: 800; }
@@ -174,15 +188,15 @@
     </div>
   </aside>
 
-  <!-- 우측 날개 배너 -->
+  <!-- 우측 날개 배너 (순자산 랭킹) -->
   <aside class="hidden 2xl:block fixed right-4 top-20 z-30 w-64">
     <div class="bg-white/95 backdrop-blur-md rounded-3xl p-4 border border-slate-200 shadow-xl space-y-3">
       <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
         <div class="flex items-center gap-2">
           <span class="p-1.5 bg-amber-50 text-amber-600 rounded-xl"><i data-lucide="crown" class="w-4 h-4"></i></span>
           <div>
-            <h3 class="font-extrabold text-slate-900 text-xs">실시간 부자 랭킹</h3>
-            <p class="text-[9px] text-slate-400">TOP 5 순자산 명예의 전당</p>
+            <h3 class="font-extrabold text-slate-900 text-xs">실시간 순자산 랭킹</h3>
+            <p class="text-[9px] text-slate-400">TOP 5 명예의 전당 (대출 제외)</p>
           </div>
         </div>
         <button onclick="openRankModal()" class="text-[11px] text-indigo-600 hover:text-indigo-800 font-bold">전체보기</button>
@@ -190,7 +204,7 @@
 
       <div class="p-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 rounded-2xl text-slate-950 flex items-center justify-between shadow-xs">
         <div class="min-w-0">
-          <span class="text-[9px] font-black uppercase text-amber-950/80 block">MY RANK</span>
+          <span class="text-[9px] font-black uppercase text-amber-950/80 block">MY NET WORTH</span>
           <span id="sideMyRankText" class="text-xs font-black truncate block">집계 중...</span>
         </div>
         <span id="sideMyPointText" class="text-xs font-black bg-white/40 px-2 py-0.5 rounded-lg shrink-0">0P</span>
@@ -221,10 +235,9 @@
       </div>
 
       <div class="flex items-center gap-2 shrink-0">
-        <!-- 중앙은행 바로가기 -->
-        <button onclick="openBankModal()" class="flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 px-2.5 py-1.5 rounded-xl text-xs font-black transition-colors">
+        <button onclick="openBankModal()" class="flex items-center gap-1 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all">
           <i data-lucide="landmark" class="w-3.5 h-3.5"></i>
-          <span class="hidden sm:inline">밥심은행</span>
+          <span class="hidden sm:inline">포인트 은행</span>
         </button>
 
         <button onclick="syncFromGoogleSheet(true)" class="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/80 text-emerald-700 px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all">
@@ -232,7 +245,7 @@
           <span class="hidden md:inline">시트 동기화</span>
         </button>
 
-        <button onclick="openShopModal()" class="flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200/80 px-2.5 py-1.5 rounded-xl text-xs font-black transition-colors" id="headerPointBtn">
+        <button onclick="openShopModal()" class="flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200/80 px-2.5 py-1.5 rounded-xl text-xs font-black text-amber-700 transition-colors">
           <span>🪙</span>
           <span id="headerPointDisplay">0P</span>
         </button>
@@ -269,7 +282,7 @@
             <span id="timerCountdown" class="text-orange-400 font-mono underline decoration-orange-500/50 underline-offset-8">계산 중...</span>
           </h2>
           <p id="groupBannerNotice" class="text-xs text-slate-300 truncate max-w-2xl">
-            전체 유저 대상 인기투표에 참여하고, 밥심은행에서 예금/대출/투자를 시작해보세요!
+            전체 인기투표에 참여하고, 밥심 포인트 은행에서 예금·대출·투자를 시작하세요!
           </p>
         </div>
 
@@ -291,7 +304,7 @@
         <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <button onclick="openBankModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-2 rounded-xl text-xs shadow-md transition-all">
             <i data-lucide="landmark" class="w-3.5 h-3.5"></i>
-            <span>밥심은행</span>
+            <span>포인트 은행</span>
           </button>
 
           <button onclick="openMiniGameModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-2 rounded-xl text-xs shadow-md transition-all">
@@ -325,63 +338,83 @@
           </button>
         </div>
       </div>
-      <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
     </div>
 
-    <!-- 로비 2대 핵심 유도 카드 -->
+    <!-- [1-1] 메인 로비 3대 진입 카드: 그룹찾기 / 식단확인 / 포인트 은행 -->
     <section id="lobbyHeroSection" class="space-y-4">
       <div class="text-center space-y-1 py-1">
         <span class="text-xs font-extrabold text-indigo-600 bg-indigo-50 border border-indigo-200/80 px-3 py-1 rounded-full uppercase tracking-wider">
-          BAPSIM FINANCIAL & DINING
+          WELCOME TO BAPSIM
         </span>
         <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-          오늘 점심 투표와 금융 플랜
+          오늘 점심, 어떻게 시작하시겠어요?
         </h2>
         <p class="text-xs sm:text-sm text-slate-500 font-medium">
-          로비에서 바로 식단 인기투표에 참여하거나, 팀원들만의 독립 비밀 그룹을 만드세요.
+          비밀 그룹 투표, 오늘의 식단표 확인, 그리고 포인트 은행 금융 플랜을 이용해보세요.
         </p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-1">
-        <div onclick="openGroupListModal()" class="group cursor-pointer bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-3xl p-7 text-white shadow-xl shadow-indigo-600/20 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl relative overflow-hidden flex flex-col justify-between min-h-[190px]">
-          <div class="space-y-2 relative z-10">
-            <div class="w-11 h-11 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center text-white border border-white/20 shadow-sm">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 pt-1">
+        <!-- 1. 그룹 찾기 & 만들기 -->
+        <div onclick="openGroupListModal()" class="group cursor-pointer bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-3xl p-6 text-white shadow-xl shadow-indigo-600/20 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl flex flex-col justify-between min-h-[210px]">
+          <div class="space-y-2">
+            <div class="w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center text-white border border-white/20">
               <i data-lucide="lock" class="w-5 h-5 text-indigo-200"></i>
             </div>
-            <h3 class="text-xl sm:text-2xl font-black tracking-tight mt-2">비밀 그룹 찾기 & 만들기</h3>
-            <p class="text-xs text-indigo-100/90 leading-relaxed max-w-sm">
-              우리 팀만의 비밀번호 투표방을 개설해 독립 투표와 프라이빗 채팅을 시작하세요!
+            <h3 class="text-lg sm:text-xl font-black tracking-tight mt-2">비밀 그룹 찾기 & 만들기</h3>
+            <p class="text-xs text-indigo-100/90 leading-relaxed">
+              비밀번호가 걸린 독립 투표방을 만들어 팀원끼리만 프라이빗하게 결정하세요!
             </p>
           </div>
-          <div class="relative z-10 pt-4 flex items-center justify-between">
-            <span class="text-xs font-bold text-indigo-200 group-hover:underline">그룹 생성 / 입장하기</span>
-            <div class="w-8 h-8 rounded-full bg-white text-indigo-700 flex items-center justify-center font-bold shadow-md group-hover:scale-110 transition-transform">
-              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          <div class="pt-4 flex items-center justify-between border-t border-indigo-500/40">
+            <span class="text-xs font-bold text-indigo-200 group-hover:underline">그룹 참여 / 생성</span>
+            <div class="w-7 h-7 rounded-full bg-white text-indigo-700 flex items-center justify-center font-bold shadow group-hover:scale-110 transition-transform">
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
             </div>
           </div>
         </div>
 
-        <div onclick="openBankModal()" class="group cursor-pointer bg-gradient-to-br from-blue-600 to-cyan-700 rounded-3xl p-7 text-white shadow-xl shadow-blue-600/20 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl relative overflow-hidden flex flex-col justify-between min-h-[190px]">
-          <div class="space-y-2 relative z-10">
-            <div class="w-11 h-11 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center text-white border border-white/20 shadow-sm">
-              <i data-lucide="landmark" class="w-5 h-5 text-cyan-200"></i>
+        <!-- 2. 식단표 확인 & 전체 인기투표 -->
+        <div onclick="toggleMenuAccordion(true)" class="group cursor-pointer bg-gradient-to-br from-orange-500 to-amber-500 rounded-3xl p-6 text-white shadow-xl shadow-orange-500/20 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl flex flex-col justify-between min-h-[210px]">
+          <div class="space-y-2">
+            <div class="w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center text-white border border-white/20">
+              <i data-lucide="utensils" class="w-5 h-5 text-amber-200"></i>
             </div>
-            <h3 class="text-xl sm:text-2xl font-black tracking-tight mt-2">밥심 중앙은행 금융센터</h3>
-            <p class="text-xs text-blue-100/90 leading-relaxed max-w-sm">
-              포인트 예금, 1만P 당일 대출, 그리고 인기투표 1~3위 식당 투자 배당금을 받으세요!
+            <h3 class="text-lg sm:text-xl font-black tracking-tight mt-2">오늘의 식단표 확인</h3>
+            <p class="text-xs text-orange-100/90 leading-relaxed">
+              문정동 한식뷔페 실시간 메인 반찬을 훑어보고 전체 인기투표에 1표를 던지세요!
             </p>
           </div>
-          <div class="relative z-10 pt-4 flex items-center justify-between">
-            <span class="text-xs font-bold text-cyan-200 group-hover:underline">은행 창구 열기</span>
-            <div class="w-8 h-8 rounded-full bg-white text-blue-700 flex items-center justify-center font-bold shadow-md group-hover:scale-110 transition-transform">
-              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          <div class="pt-4 flex items-center justify-between border-t border-orange-400/40">
+            <span id="heroMenuToggleText" class="text-xs font-bold text-orange-100 group-hover:underline">식단표 펼쳐보기</span>
+            <div class="w-7 h-7 rounded-full bg-white text-orange-600 flex items-center justify-center font-bold shadow group-hover:scale-110 transition-transform">
+              <i data-lucide="chevron-down" id="heroMenuToggleIcon" class="w-3.5 h-3.5"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. 포인트 은행 -->
+        <div onclick="openBankModal()" class="group cursor-pointer bg-gradient-to-br from-blue-600 to-cyan-700 rounded-3xl p-6 text-white shadow-xl shadow-blue-600/20 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl flex flex-col justify-between min-h-[210px]">
+          <div class="space-y-2">
+            <div class="w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center text-white border border-white/20">
+              <i data-lucide="landmark" class="w-5 h-5 text-cyan-200"></i>
+            </div>
+            <h3 class="text-lg sm:text-xl font-black tracking-tight mt-2">밥심 포인트 은행</h3>
+            <p class="text-xs text-blue-100/90 leading-relaxed">
+              안전 예금, 당일 1만P 긴급 대출, 인기투표 연동 식당 펀드 투자를 즐겨보세요!
+            </p>
+          </div>
+          <div class="pt-4 flex items-center justify-between border-t border-blue-500/40">
+            <span class="text-xs font-bold text-cyan-200 group-hover:underline">은행 창구 바로가기</span>
+            <div class="w-7 h-7 rounded-full bg-white text-blue-700 flex items-center justify-center font-bold shadow group-hover:scale-110 transition-transform">
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 식당 카드 그리드 섹션 (1번: 메인 로비 인기투표 전면 개방) -->
+    <!-- [1] 식당 카드 그리드 섹션: 전체 유저 인기투표 상시 활성화 -->
     <section id="restaurantSection" class="space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 pb-3">
         <div>
@@ -392,26 +425,26 @@
             <span id="restaurantCountBadge" class="text-xs bg-slate-200 text-slate-700 font-bold px-2.5 py-0.5 rounded-full">0곳</span>
           </div>
           <p id="sectionSubTitle" class="text-xs text-slate-500 mt-0.5">
-            전체 유저 누구나 원하는 식당에 직접 투표할 수 있으며, 투표 순위에 따라 은행 투자 배당금이 정산됩니다!
+            전체 유저 대상 실시간 인기투표에 참여할 수 있습니다. 득표 순위에 따라 은행 투자 배당금이 매일 정산됩니다!
           </p>
         </div>
 
         <div class="flex items-center gap-2">
           <button id="menuAccordionBtn" onclick="toggleMenuAccordion()" class="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold shadow-xs transition-all">
-            <span id="accordionBtnText">식단표 접기</span>
-            <i data-lucide="chevron-down" id="accordionBtnIcon" class="w-4 h-4 transition-transform duration-300 rotate-180"></i>
+            <span id="accordionBtnText">식단표 펼쳐보기</span>
+            <i data-lucide="chevron-down" id="accordionBtnIcon" class="w-4 h-4 transition-transform duration-300"></i>
           </button>
         </div>
       </div>
 
-      <div id="cardsWrapper" class="transition-all duration-300">
+      <div id="cardsWrapper" class="hidden transition-all duration-300">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="restaurantCardsContainer"></div>
       </div>
     </section>
   </main>
 
   <!-- ==========================================
-       [밥심 중앙은행 모달] (요구사항 2, 2-1 ~ 2-7)
+       [2. 밥심 포인트 은행 모달 (예금/대출/투자)]
        ========================================== -->
   <div id="bankModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
@@ -421,87 +454,87 @@
             <i data-lucide="landmark" class="w-5 h-5"></i>
           </div>
           <div>
-            <h3 class="font-black text-slate-900 text-base">밥심 중앙은행 (Bapsim Bank)</h3>
-            <p class="text-[11px] text-slate-400">안전한 자산 관리, 당일 대출, 인기 식당 투자</p>
+            <h3 class="font-black text-slate-900 text-base">밥심 중앙은행 (Point Bank)</h3>
+            <p class="text-[11px] text-slate-400">안전 자산 예금 · 당일 무이자 대출 · 인기 식당 펀드 투자</p>
           </div>
         </div>
         <button onclick="closeBankModal()" class="text-slate-400 hover:text-slate-600 text-xs">✕</button>
       </div>
 
-      <!-- 계좌 요약 카드 -->
+      <!-- 내 계좌 요약 카드 -->
       <div class="p-4 bg-gradient-to-r from-blue-900 to-indigo-900 rounded-3xl text-white space-y-3 shadow-lg">
         <div class="flex justify-between items-center text-xs">
-          <span class="text-blue-200 font-medium">내 계좌 상태</span>
-          <span id="bankDebtStatusBadge" class="bg-emerald-500/30 text-emerald-300 px-2.5 py-0.5 rounded-full font-bold text-[10px]">정상 이용 가능</span>
+          <span class="text-blue-200 font-medium">내 포인트 계좌</span>
+          <span id="bankStatusBadge" class="bg-emerald-500/30 text-emerald-300 px-2.5 py-0.5 rounded-full font-bold text-[10px]">정상 거래</span>
         </div>
         <div class="grid grid-cols-3 gap-2 text-center pt-1">
           <div class="bg-white/10 rounded-2xl p-2.5">
             <span class="text-[10px] text-blue-200 block">보유 포인트</span>
-            <span id="bankUserPointsDisplay" class="font-black text-sm text-amber-300">0P</span>
+            <span id="bankUserPointsText" class="font-black text-sm text-amber-300">0P</span>
           </div>
           <div class="bg-white/10 rounded-2xl p-2.5">
             <span class="text-[10px] text-blue-200 block">예금 잔액</span>
-            <span id="bankDepositBalanceDisplay" class="font-black text-sm text-cyan-300">0P</span>
+            <span id="bankDepositText" class="font-black text-sm text-cyan-300">0P</span>
           </div>
           <div class="bg-white/10 rounded-2xl p-2.5">
             <span class="text-[10px] text-rose-300 block">미상환 대출</span>
-            <span id="bankLoanBalanceDisplay" class="font-black text-sm text-rose-400">0P</span>
+            <span id="bankLoanText" class="font-black text-sm text-rose-400">0P</span>
           </div>
         </div>
-        <div id="loanTimerBanner" class="hidden text-[11px] text-amber-300 bg-black/40 p-2 rounded-xl text-center font-bold">
-          ⏳ 대출 자동 상환까지 남은 시간: <span id="loanRemainingTime">60분 00초</span>
+        <div id="loanCountdownBanner" class="hidden text-[11px] text-amber-300 bg-black/40 p-2 rounded-xl text-center font-bold">
+          ⏳ 대출 자동 상환까지 남은 시간: <span id="loanCountdownTimer">60분 00초</span>
         </div>
       </div>
 
-      <!-- 은행 업무 3종 탭 -->
+      <!-- 은행 업무 탭 -->
       <div class="grid grid-cols-3 bg-slate-100 p-1 rounded-2xl gap-1 text-xs font-bold">
-        <button onclick="switchBankTab('deposit')" id="bankTabBtn_deposit" class="py-2.5 rounded-xl bg-white text-blue-900 shadow-xs font-black text-center">
+        <button onclick="switchBankTab('deposit')" id="bankTab_deposit" class="py-2.5 rounded-xl bg-white text-blue-900 shadow-xs font-black text-center">
           💰 안전 예금
         </button>
-        <button onclick="switchBankTab('loan')" id="bankTabBtn_loan" class="py-2.5 rounded-xl text-slate-500 hover:text-slate-800 text-center">
+        <button onclick="switchBankTab('loan')" id="bankTab_loan" class="py-2.5 rounded-xl text-slate-500 hover:text-slate-800 text-center">
           📑 긴급 대출
         </button>
-        <button onclick="switchBankTab('invest')" id="bankTabBtn_invest" class="py-2.5 rounded-xl text-slate-500 hover:text-slate-800 text-center">
+        <button onclick="switchBankTab('invest')" id="bankTab_invest" class="py-2.5 rounded-xl text-slate-500 hover:text-slate-800 text-center">
           📈 식당 투자
         </button>
       </div>
 
-      <!-- 1. 예금 탭 (대출금 미상환 시 제한) -->
+      <!-- 1. 예금 탭 (대출 잔여 시 예금 불가) -->
       <div id="bankView_deposit" class="space-y-3.5 text-xs">
         <div class="p-3 bg-blue-50 border border-blue-100 rounded-2xl text-blue-900 leading-relaxed">
-          <strong>안전 예금 안내:</strong> 예금 한도는 없습니다. 단, <strong>대출 상환 전까지는 예금이 불가</strong>합니다.
+          <strong>안전 예금 규정:</strong> 예금 한도는 없습니다. 단, <strong>대출 상환 전까지는 예금이 불가</strong>합니다.
         </div>
         <div class="space-y-2">
-          <label class="font-bold text-slate-700 block">예금 / 출금 금액 (P)</label>
-          <input id="depositAmountInput" type="number" min="10" placeholder="금액 입력" class="w-full border rounded-xl p-3 font-bold outline-none focus:border-blue-500 bg-slate-50" />
+          <label class="font-bold text-slate-700 block">입금 / 출금 금액 (P)</label>
+          <input id="bankDepositInput" type="number" min="10" placeholder="금액 입력" class="w-full border rounded-xl p-3 font-bold outline-none focus:border-blue-500 bg-slate-50" />
           <div class="grid grid-cols-2 gap-2 pt-1">
-            <button onclick="handleDeposit()" class="bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl shadow-sm transition-all">
+            <button onclick="handleBankDeposit()" class="bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl shadow-sm transition-all">
               예금 입금하기
             </button>
-            <button onclick="handleWithdraw()" class="bg-slate-800 hover:bg-slate-900 text-white font-black py-3 rounded-xl shadow-sm transition-all">
-              예금 전액/일부 출금
+            <button onclick="handleBankWithdraw()" class="bg-slate-800 hover:bg-slate-900 text-white font-black py-3 rounded-xl shadow-sm transition-all">
+              예금 출금하기
             </button>
           </div>
         </div>
       </div>
 
-      <!-- 2. 대출 탭 (일일 10,000P 한도, 1시간 후 자동 상환 & 랭킹 영향 없음 & 상점 제한) -->
+      <!-- 2. 대출 탭 (1일 10,000P 한도 / 1시간 타이머 / 순자산 랭킹 제외 / 상점 잠금) -->
       <div id="bankView_loan" class="hidden space-y-3.5 text-xs">
         <div class="p-3 bg-rose-50 border border-rose-100 rounded-2xl text-rose-900 leading-relaxed space-y-1">
-          <p><strong>⚠️ 대출 규정 안내:</strong></p>
+          <p><strong>⚠️ 대출 필수 정책:</strong></p>
           <ul class="list-disc list-inside space-y-0.5 text-[11px]">
             <li>1일 대출 한도: <strong>최대 10,000P</strong></li>
-            <li>대출금은 <strong>부자 랭킹에서 제외</strong>됩니다 (순자산 산정).</li>
-            <li>대출금이 남아있으면 <strong>명품 상점 이용이 차단</strong>됩니다.</li>
-            <li>대출 후 <strong>1시간 경과 시 강제 자동 상환</strong>되며, 포인트 부족 시 <strong>마이너스(음수) 잔고</strong>로 전환됩니다.</li>
+            <li>대출금은 <strong>순자산(보유P - 대출금) 랭킹에 영향을 주지 않습니다.</strong></li>
+            <li>대출금이 남아있을 경우 <strong>명품 상점 이용이 불가</strong>합니다.</li>
+            <li>대출 <strong>1시간 경과 시 강제 자동 상환</strong>되며, 잔액 부족 시 <strong>마이너스(음수) 잔고</strong>로 전환됩니다.</li>
           </ul>
         </div>
 
         <div class="space-y-2">
-          <label class="font-bold text-slate-700 block">신규 대출 신청 (남은 오늘 한도: <span id="todayLoanLimitText" class="text-blue-600 font-black">10,000P</span>)</label>
+          <label class="font-bold text-slate-700 block">신규 대출 (오늘 잔여 한도: <span id="todayLoanRemainText" class="text-blue-600 font-black">10,000P</span>)</label>
           <div class="flex gap-2">
-            <input id="loanAmountInput" type="number" min="100" max="10000" placeholder="금액 (최대 10,000P)" class="flex-1 border rounded-xl p-2.5 font-bold outline-none focus:border-rose-500 bg-slate-50" />
-            <button onclick="handleTakeLoan()" class="bg-rose-600 hover:bg-rose-700 text-white font-black px-5 py-2.5 rounded-xl shrink-0 shadow-sm">
+            <input id="bankLoanInput" type="number" min="100" max="10000" placeholder="금액 (최대 10,000P)" class="flex-1 border rounded-xl p-2.5 font-bold outline-none focus:border-rose-500 bg-slate-50" />
+            <button onclick="handleBankLoan()" class="bg-rose-600 hover:bg-rose-700 text-white font-black px-5 py-2.5 rounded-xl shrink-0 shadow-sm">
               대출 실행
             </button>
           </div>
@@ -509,45 +542,97 @@
 
         <div class="pt-3 border-t space-y-2">
           <div class="flex justify-between items-center">
-            <span class="font-bold text-slate-700">대출금 상환하기</span>
-            <span class="text-slate-400 text-[11px]">선택 즉시 상환 가능</span>
+            <span class="font-bold text-slate-700">대출금 상환</span>
+            <span class="text-slate-400 text-[11px]">언제든 즉시 상환 가능</span>
           </div>
-          <button onclick="handleRepayLoan()" class="w-full bg-slate-900 hover:bg-black text-emerald-400 font-black py-3 rounded-xl shadow-sm transition-all">
-            현재 대출금 즉시 상환하기
+          <button onclick="handleBankRepay()" class="w-full bg-slate-900 hover:bg-black text-emerald-400 font-black py-3 rounded-xl shadow-sm transition-all">
+            현재 대출금 전액 상환
           </button>
         </div>
       </div>
 
-      <!-- 3. 식당 투자 탭 (인기투표 1등 30%, 2등 10%, 3등 5%, 그 외 0%) -->
+      <!-- 3. 식당 펀드 투자 (1등 30%, 2등 10%, 3등 5%, 그 외 0%) -->
       <div id="bankView_invest" class="hidden space-y-3.5 text-xs">
         <div class="p-3 bg-cyan-50 border border-cyan-100 rounded-2xl text-cyan-900 leading-relaxed space-y-1">
-          <p><strong>📈 인기투표 연동 펀드 배당률:</strong></p>
+          <p><strong>📈 전체 인기투표 연동 배당률:</strong></p>
           <div class="flex justify-around text-center pt-1 font-bold">
             <span class="text-amber-600">🥇 1위: +30%</span>
             <span class="text-slate-600">🥈 2위: +10%</span>
             <span class="text-amber-800">🥉 3위: +5%</span>
             <span class="text-slate-400">기타: 0%</span>
           </div>
-          <p class="text-[10px] text-slate-500 mt-1">※ 매일 자정 또는 마감 시 당일 전체 인기투표 결과로 정산됩니다.</p>
+          <p class="text-[10px] text-slate-500 mt-1">※ 매일 투표 마감 시 당일 전체 인기투표 득표 순위로 정산됩니다.</p>
         </div>
 
         <div class="space-y-2">
           <label class="font-bold text-slate-700 block">투자할 식당 선택</label>
-          <select id="investRestaurantSelect" class="w-full border rounded-xl p-2.5 font-bold bg-slate-50 outline-none"></select>
+          <select id="bankInvestSelect" class="w-full border rounded-xl p-2.5 font-bold bg-slate-50 outline-none"></select>
           <label class="font-bold text-slate-700 block pt-1">투자 포인트</label>
-          <input id="investAmountInput" type="number" min="50" placeholder="투자 금액 (P)" class="w-full border rounded-xl p-2.5 font-bold bg-slate-50 outline-none" />
-          <button onclick="handleInvest()" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-black py-3 rounded-xl shadow-sm transition-all mt-1">
-            식당에 펀드 투자하기
+          <input id="bankInvestAmount" type="number" min="50" placeholder="투자 금액 (P)" class="w-full border rounded-xl p-2.5 font-bold bg-slate-50 outline-none" />
+          <button onclick="handleBankInvest()" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-black py-3 rounded-xl shadow-sm transition-all mt-1">
+            식당 펀드 투자하기
           </button>
         </div>
 
         <div class="pt-2">
-          <span class="font-bold text-slate-700 block mb-1">내 투자 포트폴리오</span>
-          <div id="myInvestListContainer" class="space-y-1.5 max-h-32 overflow-y-auto text-[11px] p-2 bg-slate-50 border rounded-xl">
+          <div class="flex justify-between items-center mb-1">
+            <span class="font-bold text-slate-700">내 투자 포트폴리오</span>
+            <button onclick="settleDailyInvestments()" class="text-[10px] bg-cyan-100 hover:bg-cyan-200 text-cyan-800 font-bold px-2 py-0.5 rounded-lg">일일 배당 정산</button>
+          </div>
+          <div id="bankInvestList" class="space-y-1.5 max-h-32 overflow-y-auto text-[11px] p-2 bg-slate-50 border rounded-xl">
             <div class="text-center text-slate-400 py-2">투자 내역이 없습니다.</div>
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- [사다리타기 미니게임 모달] -->
+  <div id="ladderGameModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b pb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center font-bold">
+            <i data-lucide="git-merge" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="font-black text-slate-900 text-base">밥심 실시간 사다리타기</h3>
+            <p class="text-[11px] text-slate-400">참여자를 입력하고 사다리를 타서 점심/커피를 결정하세요!</p>
+          </div>
+        </div>
+        <button onclick="closeLadderModal()" class="text-slate-400 hover:text-slate-600 text-xs">✕</button>
+      </div>
+
+      <div class="space-y-2.5 text-xs">
+        <div>
+          <label class="font-bold text-slate-700 block mb-1">1. 참여자 이름 (쉼표 구분, 2~6명)</label>
+          <input id="ladderInputNames" type="text" placeholder="예: 김대리, 이과장, 박팀장, 최사원" class="w-full border rounded-xl p-2.5 font-bold outline-none focus:border-teal-500 bg-slate-50" />
+        </div>
+        <div>
+          <label class="font-bold text-slate-700 block mb-1">2. 결과 항목 (쉼표 구분, 참여자 수와 동일하게)</label>
+          <input id="ladderInputResults" type="text" placeholder="예: 당첨(커피쏘기), 통과, 통과, 통과" class="w-full border rounded-xl p-2.5 font-bold outline-none focus:border-teal-500 bg-slate-50" />
+        </div>
+        <div class="flex gap-2">
+          <button onclick="autoFillLadderWithRestaurants()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-xl text-[11px] transition-colors">
+            🍽️ 오늘 식당들로 자동 채우기
+          </button>
+          <button onclick="buildLadderCanvas()" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded-xl text-[11px] transition-colors shadow-sm">
+            🪜 사다리 생성하기
+          </button>
+        </div>
+      </div>
+
+      <div class="relative bg-slate-900 rounded-2xl p-2 flex flex-col items-center justify-center border-2 border-teal-500 overflow-hidden min-h-[260px]">
+        <canvas id="ladderCanvas" width="440" height="240" class="max-w-full"></canvas>
+      </div>
+
+      <div id="ladderResultAnnounce" class="p-3 bg-teal-50 text-teal-900 rounded-xl font-bold text-xs text-center min-h-[42px] flex items-center justify-center">
+        사다리를 생성한 후 [사다리 타기 시작!]을 눌러주세요.
+      </div>
+
+      <button id="startLadderBtn" onclick="runLadderAnimation()" disabled class="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-black py-3 rounded-xl text-xs shadow-md transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+        사다리 타기 시작! (결과 추첨)
+      </button>
     </div>
   </div>
 
@@ -561,12 +646,13 @@
           </div>
           <div>
             <h3 class="font-black text-slate-900 text-base">밥심 포인트 게임장</h3>
-            <p class="text-[11px] text-slate-400">마이너스 잔고 상태에서는 노력형 게임만 가능합니다!</p>
+            <p class="text-[11px] text-slate-400">마이너스 잔고 상태에서는 노력형 게임만 플레이 가능합니다!</p>
           </div>
         </div>
         <button onclick="closeMiniGameModal()" class="text-slate-400 hover:text-slate-600 text-xs">✕</button>
       </div>
 
+      <!-- 게임 6종 탭 메뉴 -->
       <div class="grid grid-cols-3 sm:grid-cols-6 bg-slate-100 p-1 rounded-2xl gap-1 text-[10px] sm:text-[11px] font-bold">
         <button onclick="switchGameTab('clicker')" id="tabBtn_clicker" class="py-2 rounded-xl bg-white shadow-xs text-slate-900 transition-all font-black text-center">
           🍚 밥알광클
@@ -591,7 +677,7 @@
       <!-- 1. 노력형 1: 밥알 광클 -->
       <div id="gameView_clicker" class="space-y-4 text-center">
         <div class="p-3 bg-emerald-50 rounded-2xl border border-emerald-100 text-xs text-emerald-800">
-          <strong>제한시간 10초 동안 밥그릇을 마구 클릭하세요!</strong> (1클릭당 2P 적립 / 노력형)
+          <strong>제한시간 10초 동안 밥그릇을 마구 클릭하세요!</strong> (노력형 / 1클릭당 2P 적립)
         </div>
         <div class="flex items-center justify-around font-black text-sm text-slate-700">
           <div>남은 시간: <span id="gameTimer" class="text-rose-500 font-mono text-lg">10.0</span>초</div>
@@ -608,10 +694,10 @@
       </div>
 
       <!-- 2. 노력형 2: 스피드 연타 버스트 -->
-      <div id="gameView_speed" class="space-y-4 text-center hidden">
+      <div id="gameView_speed" class="hidden space-y-4 text-center">
         <div class="p-3 bg-teal-50 rounded-2xl border border-teal-100 text-xs text-teal-800">
           <strong>5초 동안 30타 이상 폭풍 연타!</strong> (노력형)<br/>
-          30타 성공 시 <strong>50P</strong> 지급! (+초과 1타당 2P)
+          30타 성공 시 <strong>50P</strong> 보너스 지급! (+초과 1타당 2P)
         </div>
         <div class="flex items-center justify-around font-black text-sm text-slate-700">
           <div>남은 시간: <span id="speedTimer" class="text-teal-600 font-mono text-lg">5.0</span>초</div>
@@ -628,15 +714,15 @@
       </div>
 
       <!-- 3. 노력형 3: 식단 메뉴 암기 챌린지 -->
-      <div id="gameView_memory" class="space-y-4 text-center hidden">
+      <div id="gameView_memory" class="hidden space-y-4 text-center">
         <div class="p-3 bg-violet-50 rounded-2xl border border-violet-100 text-xs text-violet-800">
-          <strong>깜빡이는 4가지 반찬 순서를 기억하세요!</strong> (노력형)<br/>
-          정확하게 클릭하면 <strong>80P</strong> 즉시 지급!
+          <strong>화면에 깜빡이는 4가지 반찬 순서를 기억하세요!</strong> (노력형)<br/>
+          정확하게 순서대로 클릭하면 <strong>80P</strong> 즉시 지급!
         </div>
         <div class="p-4 bg-slate-900 rounded-2xl text-white font-mono text-sm tracking-wider min-h-[60px] flex items-center justify-center border-2 border-violet-500" id="memoryDisplay">
           [게임 시작]을 눌러 암기를 시작하세요
         </div>
-        <div class="grid grid-cols-4 gap-2 pt-1">
+        <div class="grid grid-cols-4 gap-2 pt-1" id="memoryBtns">
           <button onclick="pickMemoryMenu('제육볶음')" disabled class="mem-btn bg-slate-100 hover:bg-slate-200 border rounded-xl py-2.5 font-bold text-xs disabled:opacity-40">제육볶음</button>
           <button onclick="pickMemoryMenu('돈까스')" disabled class="mem-btn bg-slate-100 hover:bg-slate-200 border rounded-xl py-2.5 font-bold text-xs disabled:opacity-40">돈까스</button>
           <button onclick="pickMemoryMenu('닭강정')" disabled class="mem-btn bg-slate-100 hover:bg-slate-200 border rounded-xl py-2.5 font-bold text-xs disabled:opacity-40">닭강정</button>
@@ -648,67 +734,83 @@
         </button>
       </div>
 
-      <!-- 4. 슬롯머신 (음수 불가) -->
+      <!-- 4. 행운의 슬롯머신 (음수 불가) -->
       <div id="gameView_slot" class="hidden space-y-4 text-center">
-        <div class="p-3 bg-indigo-50 rounded-2xl border border-indigo-100 text-xs text-indigo-800">
-          1회당 50P 베팅 | 0.00001% 초특급 잭팟 50,000P
+        <div class="p-3 bg-indigo-50 rounded-2xl border border-indigo-100 text-xs text-indigo-800 leading-relaxed">
+          <strong>1회당 50P 베팅!</strong> (3개 일치 500P / 2개 일치 100P)<br/>
+          <span class="text-rose-600 font-extrabold">🌟 0.00001% 확률 초특급 잭팟: 50,000P (다이아몬드 3개)</span>
         </div>
         <div class="py-5 bg-slate-900 rounded-2xl border-2 border-indigo-500 flex items-center justify-center gap-4 text-4xl shadow-inner">
           <div id="slot1" class="w-14 h-14 bg-slate-800 rounded-xl flex items-center justify-center border border-slate-700">🍚</div>
           <div id="slot2" class="w-14 h-14 bg-slate-800 rounded-xl flex items-center justify-center border border-slate-700">🍗</div>
           <div id="slot3" class="w-14 h-14 bg-slate-800 rounded-xl flex items-center justify-center border border-slate-700">🥩</div>
         </div>
-        <div id="slotResultText" class="text-xs font-bold text-slate-500 h-5">버튼을 눌러보세요!</div>
+        <div id="slotResultText" class="text-xs font-bold text-slate-500 h-5">행운의 버튼을 눌러보세요!</div>
+        
         <div class="grid grid-cols-3 gap-2">
-          <button id="slotSpinBtn" onclick="spinSlotMachine(1)" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md">1회 (50P)</button>
-          <button onclick="spinSlotMachine(10)" class="bg-indigo-700 hover:bg-indigo-800 text-amber-300 font-bold py-2.5 rounded-xl text-xs shadow-md">10회 (500P)</button>
-          <button onclick="spinSlotMachine(100)" class="bg-slate-900 hover:bg-black text-rose-400 font-bold py-2.5 rounded-xl text-xs shadow-md border border-indigo-500/40">100회 (5,000P)</button>
+          <button id="slotSpinBtn" onclick="spinSlotMachine(1)" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-all">
+            1회 (50P)
+          </button>
+          <button onclick="spinSlotMachine(10)" class="bg-indigo-700 hover:bg-indigo-800 text-amber-300 font-bold py-2.5 rounded-xl text-xs shadow-md transition-all">
+            10회 (500P)
+          </button>
+          <button onclick="spinSlotMachine(100)" class="bg-slate-900 hover:bg-black text-rose-400 font-bold py-2.5 rounded-xl text-xs shadow-md transition-all border border-indigo-500/40">
+            100회 (5,000P)
+          </button>
         </div>
       </div>
 
-      <!-- 5. 동전 던지기 (음수 불가) -->
+      <!-- 5. 동전 던지기 (음수 불가 / 최대 10,000P) -->
       <div id="gameView_coin" class="hidden space-y-4 text-center">
         <div class="p-3 bg-amber-50 rounded-2xl border border-amber-100 text-xs text-amber-800">
-          앞/뒤 적중 시 2배 지급! (최대 10,000P 베팅)
+          <strong>앞면 vs 뒷면 50% 승부!</strong> (적중 시 2배 지급 / 최대 10,000P)
         </div>
         <div class="flex items-center justify-center gap-2">
           <span class="text-xs font-bold text-slate-600">베팅액:</span>
-          <input id="coinBetInput" type="number" value="100" min="50" max="10000" step="50" class="w-32 border rounded-xl p-2 text-center font-black bg-slate-50" />
+          <input id="coinBetInput" type="number" value="100" min="50" max="10000" step="50" class="w-32 border rounded-xl p-2 text-center font-black bg-slate-50 outline-none focus:border-amber-500" />
           <span class="text-xs font-bold text-slate-500">P</span>
         </div>
-        <div class="py-5 bg-slate-900 rounded-2xl border-2 border-amber-500 flex items-center justify-center text-5xl">
+        <div class="py-5 bg-slate-900 rounded-2xl border-2 border-amber-500 flex items-center justify-center text-5xl shadow-inner">
           <span id="coinDisplay" class="animate-pulse">🪙</span>
         </div>
         <div id="coinResultText" class="text-xs font-bold text-slate-500 h-5">앞면 또는 뒷면을 선택하세요!</div>
         <div class="grid grid-cols-2 gap-3">
-          <button onclick="playCoinFlip('front')" class="bg-amber-500 hover:bg-amber-600 text-white font-black py-3 rounded-xl text-xs shadow-md">앞면</button>
-          <button onclick="playCoinFlip('back')" class="bg-orange-600 hover:bg-orange-700 text-white font-black py-3 rounded-xl text-xs shadow-md">뒷면</button>
+          <button onclick="playCoinFlip('front')" class="bg-amber-500 hover:bg-amber-600 text-white font-black py-3 rounded-xl text-xs shadow-md">
+            앞면 선택
+          </button>
+          <button onclick="playCoinFlip('back')" class="bg-orange-600 hover:bg-orange-700 text-white font-black py-3 rounded-xl text-xs shadow-md">
+            뒷면 선택
+          </button>
         </div>
       </div>
 
-      <!-- 6. 주사위 홀짝 (음수 불가) -->
+      <!-- 6. 주사위 홀짝 (음수 불가 / 최대 10,000P) -->
       <div id="gameView_dice" class="hidden space-y-4 text-center">
         <div class="p-3 bg-purple-50 rounded-2xl border border-purple-100 text-xs text-purple-800">
-          홀/짝 적중 시 2배 지급! (최대 10,000P 베팅)
+          <strong>주사위 숫자의 홀 / 짝을 맞추세요!</strong> (적중 시 2배 / 최대 10,000P)
         </div>
         <div class="flex items-center justify-center gap-2">
           <span class="text-xs font-bold text-slate-600">베팅액:</span>
-          <input id="diceBetInput" type="number" value="100" min="50" max="10000" step="50" class="w-32 border rounded-xl p-2 text-center font-black bg-slate-50" />
+          <input id="diceBetInput" type="number" value="100" min="50" max="10000" step="50" class="w-32 border rounded-xl p-2 text-center font-black bg-slate-50 outline-none focus:border-purple-500" />
           <span class="text-xs font-bold text-slate-500">P</span>
         </div>
-        <div class="py-5 bg-slate-900 rounded-2xl border-2 border-purple-500 flex items-center justify-center text-5xl">
+        <div class="py-5 bg-slate-900 rounded-2xl border-2 border-purple-500 flex items-center justify-center text-5xl shadow-inner">
           <span id="diceDisplay">🎲</span>
         </div>
         <div id="diceResultText" class="text-xs font-bold text-slate-500 h-5">홀수 또는 짝수를 선택하세요!</div>
         <div class="grid grid-cols-2 gap-3">
-          <button onclick="playDiceBet('odd')" class="bg-purple-600 hover:bg-purple-700 text-white font-black py-3 rounded-xl text-xs shadow-md">홀수 (1,3,5)</button>
-          <button onclick="playDiceBet('even')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-xl text-xs shadow-md">짝수 (2,4,6)</button>
+          <button onclick="playDiceBet('odd')" class="bg-purple-600 hover:bg-purple-700 text-white font-black py-3 rounded-xl text-xs shadow-md">
+            홀수 (1, 3, 5) 베팅
+          </button>
+          <button onclick="playDiceBet('even')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-xl text-xs shadow-md">
+            짝수 (2, 4, 6) 베팅
+          </button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- 전체 랭킹 모달 (순자산 반영) -->
+  <!-- 전체 순자산 랭킹 모달 -->
   <div id="rankModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
@@ -716,14 +818,14 @@
           <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-lg">🏆</div>
           <div>
             <h3 class="font-black text-slate-900 text-base">밥심 실시간 순자산 랭킹</h3>
-            <p class="text-[11px] text-slate-400">대출금은 자산에서 차감된 순수 자산으로 집계됩니다.</p>
+            <p class="text-[11px] text-slate-400">대출금은 제외된 순수 자산으로 랭킹이 집계됩니다.</p>
           </div>
         </div>
         <button onclick="closeRankModal()" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
       </div>
       <div class="p-4 bg-gradient-to-r from-amber-500 to-yellow-500 rounded-2xl text-slate-950 flex items-center justify-between shadow-md">
         <div>
-          <span class="text-[11px] font-extrabold uppercase tracking-wider text-amber-950/80">내 랭킹 정보</span>
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-amber-950/80">내 순자산 정보</span>
           <h4 class="font-black text-base" id="myRankSummary">집계 중...</h4>
         </div>
         <div class="text-right">
@@ -763,23 +865,43 @@
       </div>
 
       <div class="space-y-2.5">
-        <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><span>✨</span> 칭호 심볼 (각 150P)</span>
+        <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><span>✨</span> 닉네임 칭호 심볼 (각 150P)</span>
         <div class="grid grid-cols-2 gap-2 text-xs" id="shopSymbolList"></div>
       </div>
 
       <div class="space-y-2.5">
-        <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><span>🎨</span> 닉네임 색상 (각 300P)</span>
+        <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><span>🎨</span> 닉네임 글자 색상 (각 300P)</span>
         <div class="grid grid-cols-2 gap-2 text-xs" id="shopColorList"></div>
       </div>
 
       <div class="space-y-3">
-        <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><span>🏷️</span> 명품 & 신화 애니메이션 배지</span>
+        <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><span>🏷️</span> 닉네임 명품 & 신화 배지</span>
         <div class="space-y-2 text-xs" id="shopBadgeList"></div>
+      </div>
+
+      <div class="pt-2 border-t flex justify-end">
+        <button onclick="closeShopModal()" class="bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-bold">닫기</button>
       </div>
     </div>
   </div>
 
-  <!-- 관리자 대시보드 -->
+  <!-- 관리자 대시보드 및 인증 모달 -->
+  <div id="adminAuthModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-xs rounded-3xl shadow-2xl p-6 space-y-4">
+      <div class="text-center">
+        <div class="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center mx-auto mb-2">
+          <i data-lucide="shield" class="w-6 h-6 text-orange-400"></i>
+        </div>
+        <h3 class="font-black text-slate-900 text-base">관리자 보안 인증</h3>
+      </div>
+      <input id="adminPassInput" type="password" placeholder="비밀번호 5자리" class="w-full border rounded-xl p-2.5 text-center text-lg font-black outline-none" autocomplete="off" />
+      <div class="flex gap-2">
+        <button onclick="closeAdminAuthModal()" class="flex-1 bg-slate-100 text-slate-600 font-bold py-2.5 rounded-xl text-xs">취소</button>
+        <button onclick="checkAdminPassword()" class="flex-1 bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs">확인</button>
+      </div>
+    </div>
+  </div>
+
   <div id="adminDashboardModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
@@ -792,43 +914,28 @@
 
       <div class="p-4 bg-gradient-to-r from-red-950 to-slate-900 text-white rounded-2xl space-y-3 text-xs border border-red-800">
         <div class="flex items-center justify-between">
-          <span class="font-black text-amber-300 flex items-center gap-1.5">
-            <i data-lucide="award" class="w-4 h-4 text-amber-400"></i>
-            관리자 전용 특수 권한
-          </span>
+          <span class="font-black text-amber-300">관리자 전용 특수 권한 & 공권력</span>
           <span class="text-[10px] bg-red-800/80 px-2 py-0.5 rounded font-bold">ADMIN ONLY</span>
         </div>
         <div class="flex flex-wrap gap-2">
-          <button onclick="adminEquipSelf()" class="bg-red-600 hover:bg-red-700 text-white font-black px-3 py-1.5 rounded-xl shadow-sm">
-            👑 관리자 전용 배지(애니메이션) & 화이트 닉네임 장착
+          <button onclick="adminEquipSelf()" class="bg-red-600 hover:bg-red-700 text-white font-black px-3 py-1.5 rounded-xl">
+            👑 관리자 배지(애니메이션) & 화이트 닉네임 장착
           </button>
-          <button onclick="adminSendSpecialSticker('sticker_admin_exec')" class="bg-slate-800 hover:bg-slate-700 text-red-300 border border-red-500/50 font-bold px-3 py-1.5 rounded-xl">⚡ 처벌 집행</button>
-          <button onclick="adminSendSpecialSticker('sticker_admin_ok')" class="bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/50 font-bold px-3 py-1.5 rounded-xl">🛡️ 승인</button>
-          <button onclick="adminSendSpecialSticker('sticker_admin_warn')" class="bg-slate-800 hover:bg-slate-700 text-yellow-300 border border-yellow-500/50 font-bold px-3 py-1.5 rounded-xl">⚠️ 경고</button>
+          <button onclick="adminSendSpecialSticker('sticker_admin_exec')" class="bg-slate-800 text-red-300 border border-red-500/50 font-bold px-3 py-1.5 rounded-xl">⚡ 처벌 집행</button>
+          <button onclick="adminSendSpecialSticker('sticker_admin_ok')" class="bg-slate-800 text-emerald-300 border border-emerald-500/50 font-bold px-3 py-1.5 rounded-xl">🛡️ 승인</button>
+          <button onclick="adminSendSpecialSticker('sticker_admin_warn')" class="bg-slate-800 text-yellow-300 border border-yellow-500/50 font-bold px-3 py-1.5 rounded-xl">⚠️ 경고</button>
         </div>
       </div>
 
-      <div class="p-4 bg-indigo-50/70 border border-indigo-100 rounded-2xl space-y-2 text-xs">
-        <span class="font-bold text-indigo-900 block">📢 공지사항 전파</span>
-        <textarea id="adminNoticeTextarea" rows="2" class="w-full border rounded-xl p-2.5 bg-white font-medium outline-none"></textarea>
-        <button onclick="handleSaveNotice()" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-xl">공지 전파</button>
+      <div class="p-4 bg-indigo-50 border border-indigo-100 rounded-2xl space-y-2 text-xs">
+        <span class="font-bold text-indigo-900 block">📢 공지사항 편집 (전체 실시간 전파)</span>
+        <textarea id="adminNoticeTextarea" rows="2" class="w-full border rounded-xl p-2.5 bg-white outline-none"></textarea>
+        <button onclick="handleSaveNotice()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-xl">전파하기</button>
       </div>
 
       <div class="space-y-3 text-xs">
-        <h4 class="font-extrabold text-slate-800">회원 목록 및 관리</h4>
+        <h4 class="font-extrabold text-slate-800">전체 회원 포인트 & 아이템 관리</h4>
         <div id="adminUserListContainer" class="space-y-2 max-h-48 overflow-y-auto border rounded-2xl p-2 bg-slate-50"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 관리자 인증 모달 -->
-  <div id="adminAuthModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-xs rounded-3xl shadow-2xl p-6 space-y-4 text-center">
-      <h3 class="font-black text-slate-900 text-base">관리자 인증</h3>
-      <input id="adminPassInput" type="password" placeholder="비밀번호 5자리" class="w-full border rounded-xl p-2.5 text-center text-lg font-black outline-none" autocomplete="off" />
-      <div class="flex gap-2">
-        <button onclick="closeAdminAuthModal()" class="flex-1 bg-slate-100 font-bold py-2 rounded-xl text-xs">취소</button>
-        <button onclick="checkAdminPassword()" class="flex-1 bg-slate-900 text-white font-bold py-2 rounded-xl text-xs">확인</button>
       </div>
     </div>
   </div>
@@ -838,7 +945,7 @@
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
         <h3 id="modalTitle" class="font-extrabold text-slate-900 text-base">식당 등록 및 식단 업데이트</h3>
-        <button onclick="closeAddModal()" class="text-slate-400 hover:text-slate-600">✕</button>
+        <button onclick="closeAddModal()" class="text-slate-400">✕</button>
       </div>
       <form id="restaurantForm" onsubmit="handleSaveRestaurant(event)" class="space-y-3 text-xs">
         <input type="hidden" id="editRestId" value="" />
@@ -867,7 +974,7 @@
     </div>
   </div>
 
-  <!-- 사다리, 룰렛, N빵 모달 -->
+  <!-- 룰렛, N빵, 그룹, 프로필 모달 -->
   <div id="rouletteModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 text-center space-y-4">
       <div class="flex items-center justify-between border-b pb-2">
@@ -876,10 +983,9 @@
       </div>
       <div class="py-8 bg-slate-900 rounded-2xl border-2 border-orange-500">
         <div id="rouletteSlotText" class="text-xl font-black text-white px-4 truncate">???</div>
-        <div class="text-[11px] text-slate-400 mt-1" id="rouletteSubText">룰렛을 돌려보세요!</div>
       </div>
       <button onclick="spinRoulette()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 rounded-xl text-xs shadow-lg">
-        오늘 메뉴 강제 낙점!
+        오늘 메뉴 낙점!
       </button>
     </div>
   </div>
@@ -907,7 +1013,7 @@
         <h3 class="font-black text-slate-900 text-base">비밀 그룹방</h3>
         <button onclick="closeGroupModal()" class="text-slate-400">✕</button>
       </div>
-      <form onsubmit="handleCreateGroup(event)" class="p-4 bg-indigo-50/70 border border-indigo-100 rounded-2xl space-y-2 text-xs">
+      <form onsubmit="handleCreateGroup(event)" class="p-4 bg-indigo-50 border border-indigo-100 rounded-2xl space-y-2 text-xs">
         <input id="createGroupName" type="text" placeholder="새 그룹 이름" required class="w-full border rounded-xl p-2.5 bg-white" />
         <input id="createGroupPass" type="password" placeholder="입장 비밀번호" required class="w-full border rounded-xl p-2.5 bg-white" />
         <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-xl">그룹 생성 및 입장</button>
@@ -927,16 +1033,15 @@
     </div>
   </div>
 
-  <!-- 프로필 모달 -->
   <div id="authModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-xs rounded-3xl shadow-2xl p-6 space-y-4 text-xs">
-      <h3 class="font-extrabold text-slate-900 text-sm">닉네임 설정</h3>
+      <h3 class="font-extrabold text-slate-900 text-sm">내 닉네임 설정</h3>
       <input id="authNicknameInput" type="text" class="w-full border rounded-xl p-2.5 font-bold outline-none" />
       <button onclick="saveUserProfile()" class="w-full bg-slate-900 text-white font-bold py-2.5 rounded-xl">저장하기</button>
     </div>
   </div>
 
-  <!-- 플로팅 채팅창 -->
+  <!-- 플로팅 실시간 채팅창 -->
   <div class="fixed bottom-6 right-6 z-50">
     <button id="chatToggleBtn" onclick="toggleChatWindow()" class="relative bg-gradient-to-tr from-indigo-600 to-indigo-800 text-white w-14 h-14 rounded-2xl shadow-xl flex items-center justify-center">
       <i data-lucide="message-square" class="w-6 h-6"></i>
@@ -947,25 +1052,19 @@
       <div class="bg-slate-900 text-white p-4 flex items-center justify-between border-b border-slate-800">
         <div class="flex items-center gap-2 min-w-0">
           <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></div>
-          <div class="min-w-0">
-            <span class="font-bold text-xs truncate block" id="chatHeaderTitle">전체 로비 톡</span>
-            <span class="block text-[10px] text-slate-400 truncate">실시간 커뮤니티</span>
-          </div>
+          <span class="font-bold text-xs truncate" id="chatHeaderTitle">전체 로비 톡</span>
         </div>
         <div class="flex items-center gap-2 shrink-0">
           <span class="text-[10px] bg-amber-500/20 text-amber-300 font-bold px-2 py-0.5 rounded-md" id="chatPointDisplay">0P</span>
           <button onclick="toggleChatWindow()" class="text-slate-400 hover:text-white text-xs">✕</button>
         </div>
       </div>
-
       <div id="chatMessages" class="flex-1 p-4 overflow-y-auto space-y-3 text-xs bg-slate-50"></div>
-
       <div class="px-3 py-2 bg-slate-100 border-t flex items-center gap-2 overflow-x-auto scrollbar-hide text-xs">
         <button type="button" onclick="sendSticker('sticker-agree')" class="shrink-0 sticker-agree text-xs py-0.5 px-2">찬성! 👍</button>
         <button type="button" onclick="sendSticker('sticker-reject')" class="shrink-0 sticker-reject text-xs py-0.5 px-2">탈락 ❌</button>
         <button type="button" onclick="sendSticker('sticker-dismiss')" class="shrink-0 sticker-dismiss text-xs py-0.5 px-2">반려 ⚡</button>
       </div>
-
       <form onsubmit="handleSendChat(event)" class="p-2.5 bg-white border-t flex gap-2">
         <input id="chatInput" type="text" placeholder="메시지를 입력하세요..." class="flex-1 bg-slate-100 rounded-xl px-3.5 py-2.5 text-xs outline-none" autocomplete="off" />
         <button type="submit" class="bg-indigo-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold">전송</button>
@@ -975,9 +1074,10 @@
 
   <script>
     // ==========================================
-    // 0. 기본 설정 & Firebase
+    // Core Configuration & Database
     // ==========================================
     const GOOGLE_SHEET_API_URL = "https://script.google.com/macros/s/AKfycbxzRrg_ZZrdJGs6ps4ZRdgaNv3XG8g_CQT0376hbhV_oJt0AYe40Smkcl_0gIfwJM6WIQ/exec";
+
     const firebaseConfig = {
       apiKey: "AIzaSyDYTK4MRGsxXwZ_jzN7qlaFzrVhMVKgWxw",
       authDomain: "babsim-a3556.firebaseapp.com",
@@ -991,7 +1091,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 상태
+    // 기본 상태
     let restaurants = {};
     let allGroups = {};
     let currentGroupId = 'lobby';
@@ -1005,7 +1105,7 @@
     let myNickBg = localStorage.getItem('bapsim_custom_bg') || 'nb-none';
     let myNickSymbol = localStorage.getItem('bapsim_custom_symbol') || '';
 
-    // 은행 상태
+    // [2] 밥심 은행 금융 데이터 (예금/대출/투자)
     let bankData = JSON.parse(localStorage.getItem(`bapsim_bank_${currentUser.nickname}`) || '{"deposit":0,"loan":0,"loanTime":0,"todayLoan":0,"lastLoanDate":"","investments":{}}');
 
     let rawInv = {};
@@ -1016,12 +1116,12 @@
       symbols: Array.isArray(rawInv.symbols) ? rawInv.symbols : []
     };
 
-    let isMenuExpanded = true;
+    let isMenuExpanded = false;
     let groupVotesRef = null;
     let groupVotesData = {};
     let chatRef = null;
 
-    // 미니게임 상태
+    // 게임 상태 변수
     let gameInterval = null;
     let gameClicks = 0;
     let isGameRunning = false;
@@ -1034,10 +1134,10 @@
     let memorySequence = [];
     let memoryUserStep = 0;
     let isMemoryGameActive = false;
+
     const SLOT_ITEMS = ["🍚", "🍗", "🥩", "🍕", "🍜", "👑", "💎"];
     let isSlotSpinning = false;
 
-    // 상점 메타
     const SHOP_DATA = {
       symbols: [
         { id: "sym_star", name: "별빛 칭호", char: "★", cost: 150 },
@@ -1051,17 +1151,17 @@
         { id: "col_emerald", name: "에메랄드 그린", hex: "#10b981", cost: 300 }
       ],
       bgs: [
-        { id: "nb-cosmic", name: "🌌 코스믹 레인보우 (태초 신화)", class: "nb-cosmic", cost: 999999, desc: "찬란하게 요동치는 무지개 오라" },
+        { id: "nb-cosmic", name: "🌌 코스믹 레인보우 (신화)", class: "nb-cosmic", cost: 999999, desc: "찬란하게 요동치는 무지개 오라" },
         { id: "nb-solar", name: "☀️ 태양의 겁화 (솔라 플레어)", class: "nb-solar", cost: 999999, desc: "타오르는 붉은 태양 홍염 애니메이션" },
         { id: "nb-blackhole", name: "🕳️ 심연의 블랙홀 (시공 왜곡)", class: "nb-blackhole", cost: 888888, desc: "보랏빛 중력장과 암흑 물질 발광" },
         { id: "nb-matrix", name: "🟢 사이버 매트릭스 (디지털 네오)", class: "nb-matrix", cost: 777777, desc: "초록빛 디지털 비가 흐르는 해커 플레이트" },
         { id: "nb-universe", name: "🪐 다크 유니버스 (신화)", class: "nb-universe", cost: 500000, desc: "심오한 심우주 성운 워프 오라" },
-        { id: "nb-gold", name: "👑 황금빛 골드 배지 (10만P 이상)", class: "nb-gold", cost: 100000, desc: "럭셔리 쉬머 반사광 골드 플레이트" }
+        { id: "nb-gold", name: "👑 황금빛 골드 배지 (10만P)", class: "nb-gold", cost: 100000, desc: "럭셔리 쉬머 반사광 골드 플레이트" }
       ]
     };
 
     // ==========================================
-    // 1. 밥심 중앙은행 엔진 (요구사항 2, 2-1 ~ 2-7)
+    // 1. 밥심 포인트 은행 시스템 (요구사항 2, 2-1 ~ 2-7)
     // ==========================================
     function saveBankData() {
       localStorage.setItem(`bapsim_bank_${currentUser.nickname}`, JSON.stringify(bankData));
@@ -1078,47 +1178,46 @@
       }
     }
 
-    // 1시간 초과 자동 강제 상환 타이머 (부족 시 음수 전환)
-    function checkAutoLoanRepayment() {
+    // 2-5: 1시간 자동 강제 상환 타이머 (부족 시 음수 전환)
+    function monitorAutoLoanRepayment() {
       if (bankData.loan > 0 && bankData.loanTime > 0) {
         const elapsed = Date.now() - bankData.loanTime;
         const oneHour = 60 * 60 * 1000;
         const remainMs = Math.max(0, oneHour - elapsed);
 
-        const banner = document.getElementById('loanTimerBanner');
-        const timeSpan = document.getElementById('loanRemainingTime');
-        if (banner && timeSpan) {
+        const banner = document.getElementById('loanCountdownBanner');
+        const timerText = document.getElementById('loanCountdownTimer');
+        if (banner && timerText) {
           banner.classList.remove('hidden');
           const m = Math.floor(remainMs / 60000);
           const s = Math.floor((remainMs % 60000) / 1000);
-          timeSpan.textContent = `${m}분 ${s < 10 ? '0' : ''}${s}초`;
+          timerText.textContent = `${m}분 ${s < 10 ? '0' : ''}${s}초`;
         }
 
         if (elapsed >= oneHour) {
-          // 자동 상환 집행
           const loanToPay = bankData.loan;
-          userPoints -= loanToPay; // 잔여 포인트 부족 시 음수(마이너스)
+          userPoints -= loanToPay; // 2-5: 잔액 부족 시 음수 전환
           bankData.loan = 0;
           bankData.loanTime = 0;
           saveBankData();
           updatePointsUI();
-          alert(`⏰ [은행 알림] 대출 실행 후 1시간이 경과하여 ${loanToPay.toLocaleString()}P가 자동 상환되었습니다.\n(현재 잔고: ${userPoints.toLocaleString()}P)`);
+          alert(`⏰ [은행 자동 상환 집행]\n대출 후 1시간이 경과하여 ${loanToPay.toLocaleString()}P가 자동 상환되었습니다.\n(현재 보유 잔고: ${userPoints.toLocaleString()}P)`);
         }
       } else {
-        const banner = document.getElementById('loanTimerBanner');
+        const banner = document.getElementById('loanCountdownBanner');
         if (banner) banner.classList.add('hidden');
       }
     }
 
     function switchBankTab(tab) {
       ['deposit', 'loan', 'invest'].forEach(t => {
-        const view = document.getElementById(`bankView_${t}`);
-        const btn = document.getElementById(`bankTabBtn_${t}`);
-        if (view) view.classList.add('hidden');
-        if (btn) btn.className = "py-2.5 rounded-xl text-slate-500 hover:text-slate-800 text-center";
+        const v = document.getElementById(`bankView_${t}`);
+        const b = document.getElementById(`bankTab_${t}`);
+        if (v) v.classList.add('hidden');
+        if (b) b.className = "py-2.5 rounded-xl text-slate-500 hover:text-slate-800 text-center";
       });
       const curV = document.getElementById(`bankView_${tab}`);
-      const curB = document.getElementById(`bankTabBtn_${tab}`);
+      const curB = document.getElementById(`bankTab_${tab}`);
       if (curV) curV.classList.remove('hidden');
       if (curB) curB.className = "py-2.5 rounded-xl bg-white text-blue-900 shadow-xs font-black text-center";
     }
@@ -1126,50 +1225,49 @@
     function openBankModal() {
       checkTodayLoanReset();
       updateBankUI();
-      renderInvestmentOptions();
+      renderBankInvestOptions();
       document.getElementById('bankModal').classList.remove('hidden');
     }
     function closeBankModal() { document.getElementById('bankModal').classList.add('hidden'); }
 
     function updateBankUI() {
-      const up = document.getElementById('bankUserPointsDisplay');
-      const dp = document.getElementById('bankDepositBalanceDisplay');
-      const lp = document.getElementById('bankLoanBalanceDisplay');
-      const badge = document.getElementById('bankDebtStatusBadge');
-      const limitText = document.getElementById('todayLoanLimitText');
+      const pText = document.getElementById('bankUserPointsText');
+      const dText = document.getElementById('bankDepositText');
+      const lText = document.getElementById('bankLoanText');
+      const badge = document.getElementById('bankStatusBadge');
+      const limitText = document.getElementById('todayLoanRemainText');
 
-      if (up) {
-        up.textContent = `${userPoints.toLocaleString()}P`;
-        if (userPoints < 0) up.className = "font-black text-sm text-rose-400 animate-pulse";
-        else up.className = "font-black text-sm text-amber-300";
+      if (pText) {
+        pText.textContent = `${userPoints.toLocaleString()}P`;
+        pText.className = userPoints < 0 ? "font-black text-sm text-rose-400 animate-pulse" : "font-black text-sm text-amber-300";
       }
-      if (dp) dp.textContent = `${(bankData.deposit || 0).toLocaleString()}P`;
-      if (lp) lp.textContent = `${(bankData.loan || 0).toLocaleString()}P`;
+      if (dText) dText.textContent = `${(bankData.deposit || 0).toLocaleString()}P`;
+      if (lText) lText.textContent = `${(bankData.loan || 0).toLocaleString()}P`;
 
       if (badge) {
         if (userPoints < 0) {
-          badge.textContent = "🚨 부채 연체 (음수 제한 상태)";
+          badge.textContent = "🚨 부채 연체 (노력형 게임 전용)";
           badge.className = "bg-rose-500 text-white px-2.5 py-0.5 rounded-full font-bold text-[10px]";
         } else if (bankData.loan > 0) {
-          badge.textContent = "⚠️ 대출 상환 대기 중 (상점 이용 불가)";
+          badge.textContent = "⚠️ 대출 이용 중 (상점 제한)";
           badge.className = "bg-amber-500/40 text-amber-200 px-2.5 py-0.5 rounded-full font-bold text-[10px]";
         } else {
-          badge.textContent = "정상 이용 가능";
+          badge.textContent = "정상 계좌";
           badge.className = "bg-emerald-500/30 text-emerald-300 px-2.5 py-0.5 rounded-full font-bold text-[10px]";
         }
       }
 
       if (limitText) {
-        const remaining = Math.max(0, 10000 - (bankData.todayLoan || 0));
-        limitText.textContent = `${remaining.toLocaleString()}P`;
+        const remain = Math.max(0, 10000 - (bankData.todayLoan || 0));
+        limitText.textContent = `${remain.toLocaleString()}P`;
       }
-      renderMyInvestments();
+      renderBankInvestList();
     }
 
-    // 2-4: 예금 (대출 상환 전까지 예금 불가)
-    function handleDeposit() {
+    // 2-4: 예금 (대출금 미상환 시 예금 불가)
+    function handleBankDeposit() {
       if (bankData.loan > 0) return alert("❌ 대출 상환 전까지는 예금이 불가합니다! 대출금을 먼저 상환해주세요.");
-      const amt = parseInt(document.getElementById('depositAmountInput').value, 10);
+      const amt = parseInt(document.getElementById('bankDepositInput').value, 10);
       if (isNaN(amt) || amt <= 0) return alert("올바른 입금 금액을 입력하세요.");
       if (userPoints < amt) return alert("보유 포인트가 부족합니다.");
 
@@ -1177,48 +1275,48 @@
       bankData.deposit = (bankData.deposit || 0) + amt;
       saveBankData();
       updatePointsUI();
-      document.getElementById('depositAmountInput').value = '';
+      document.getElementById('bankDepositInput').value = '';
       alert(`💰 ${amt.toLocaleString()}P가 예금되었습니다.`);
     }
 
-    function handleWithdraw() {
-      const amt = parseInt(document.getElementById('depositAmountInput').value, 10);
+    function handleBankWithdraw() {
+      const amt = parseInt(document.getElementById('bankDepositInput').value, 10);
       const total = bankData.deposit || 0;
       const withdrawAmt = isNaN(amt) ? total : Math.min(amt, total);
+      if (withdrawAmt <= 0) return alert("출금 가능한 예금 잔액이 없습니다.");
 
-      if (withdrawAmt <= 0) return alert("출금할 수 있는 예금 잔액이 없습니다.");
       bankData.deposit -= withdrawAmt;
       userPoints += withdrawAmt;
       saveBankData();
       updatePointsUI();
-      document.getElementById('depositAmountInput').value = '';
+      document.getElementById('bankDepositInput').value = '';
       alert(`🏦 ${withdrawAmt.toLocaleString()}P를 출금했습니다.`);
     }
 
-    // 2-2, 2-5: 대출 (일일 10,000P 한도, 1시간 타이머)
-    function handleTakeLoan() {
+    // 2-2: 대출 (일일 10,000P 한도, 랭킹 영향 제외)
+    function handleBankLoan() {
       checkTodayLoanReset();
-      const amt = parseInt(document.getElementById('loanAmountInput').value, 10);
+      const amt = parseInt(document.getElementById('bankLoanInput').value, 10);
       if (isNaN(amt) || amt <= 0) return alert("대출 신청 금액을 입력하세요.");
 
       const todayRemain = 10000 - (bankData.todayLoan || 0);
-      if (amt > todayRemain) return alert(`❌ 1일 대출 잔여 한도(${todayRemain.toLocaleString()}P)를 초과할 수 없습니다.`);
+      if (amt > todayRemain) return alert(`❌ 오늘 대출 잔여 한도(${todayRemain.toLocaleString()}P)를 초과할 수 없습니다.`);
 
       bankData.loan = (bankData.loan || 0) + amt;
       bankData.todayLoan = (bankData.todayLoan || 0) + amt;
-      bankData.loanTime = Date.now(); // 1시간 타이머 시작
+      bankData.loanTime = Date.now();
       userPoints += amt;
 
       saveBankData();
       updatePointsUI();
-      document.getElementById('loanAmountInput').value = '';
-      alert(`📑 ${amt.toLocaleString()}P 대출이 완료되었습니다!\n※ 1시간 이내에 상환하지 않으면 자동 강제 상환되며 상점 이용이 제한됩니다.`);
+      document.getElementById('bankLoanInput').value = '';
+      alert(`📑 ${amt.toLocaleString()}P 대출이 완료되었습니다!\n※ 대출금은 순자산 랭킹에 반영되지 않으며, 1시간 이내 미상환 시 자동 차감(부족 시 음수)됩니다.`);
     }
 
-    function handleRepayLoan() {
+    function handleBankRepay() {
       if (!bankData.loan || bankData.loan <= 0) return alert("상환할 대출금이 없습니다.");
       if (userPoints < bankData.loan) {
-        if (!confirm(`보유 포인트(${userPoints.toLocaleString()}P)가 대출금(${bankData.loan.toLocaleString()}P)보다 적습니다.\n상환 시 잔고가 마이너스(음수)로 전환됩니다. 계속하시겠습니까?`)) return;
+        if (!confirm(`보유 포인트(${userPoints.toLocaleString()}P)가 대출금(${bankData.loan.toLocaleString()}P)보다 적어 상환 시 잔고가 마이너스로 전환됩니다. 진행하시겠습니까?`)) return;
       }
 
       const repayAmt = bankData.loan;
@@ -1230,23 +1328,23 @@
       alert(`✅ ${repayAmt.toLocaleString()}P 대출금이 모두 정상 상환되었습니다!`);
     }
 
-    // 2-3: 식당 펀드 투자 (1위 30%, 2위 10%, 3위 5%, 그 외 0%)
-    function renderInvestmentOptions() {
-      const select = document.getElementById('investRestaurantSelect');
+    // 2-3: 식당 펀드 투자 (1등 30%, 2등 10%, 3등 5%, 그 외 0%)
+    function renderBankInvestOptions() {
+      const select = document.getElementById('bankInvestSelect');
       if (!select) return;
       select.innerHTML = '';
       Object.values(restaurants || {}).forEach(r => {
         const opt = document.createElement('option');
         opt.value = r.id;
-        opt.textContent = `${r.name} (현재 로비 인기투표: ${groupVotesData[r.id] || 0}표)`;
+        opt.textContent = `${r.name} (현재 인기투표: ${groupVotesData[r.id] || 0}표)`;
         select.appendChild(opt);
       });
     }
 
-    function handleInvest() {
-      if (userPoints < 0) return alert("❌ 마이너스 잔고 상태에서는 투자가 불가능합니다. 노력형 게임으로 빚을 탕감하세요!");
-      const rid = document.getElementById('investRestaurantSelect').value;
-      const amt = parseInt(document.getElementById('investAmountInput').value, 10);
+    function handleBankInvest() {
+      if (userPoints < 0) return alert("❌ 마이너스 잔고 상태에서는 투자가 불가능합니다. 노력형 게임으로 빚을 먼저 갚으세요!");
+      const rid = document.getElementById('bankInvestSelect').value;
+      const amt = parseInt(document.getElementById('bankInvestAmount').value, 10);
       if (!rid || isNaN(amt) || amt <= 0) return alert("투자할 식당과 금액을 올바르게 선택하세요.");
       if (userPoints < amt) return alert("보유 포인트가 부족합니다.");
 
@@ -1256,19 +1354,19 @@
 
       saveBankData();
       updatePointsUI();
-      document.getElementById('investAmountInput').value = '';
+      document.getElementById('bankInvestAmount').value = '';
       alert(`📈 [${restaurants[rid]?.name || '식당'}]에 ${amt.toLocaleString()}P를 투자했습니다!`);
     }
 
-    function renderMyInvestments() {
-      const cont = document.getElementById('myInvestListContainer');
+    function renderBankInvestList() {
+      const cont = document.getElementById('bankInvestList');
       if (!cont) return;
       cont.innerHTML = '';
       const inv = bankData.investments || {};
       const keys = Object.keys(inv).filter(k => inv[k] > 0);
 
       if (keys.length === 0) {
-        cont.innerHTML = '<div class="text-center text-slate-400 py-2">현재 진행 중인 투자 내역이 없습니다.</div>';
+        cont.innerHTML = '<div class="text-center text-slate-400 py-2">진행 중인 투자 내역이 없습니다.</div>';
         return;
       }
 
@@ -1283,41 +1381,41 @@
       });
     }
 
-    // 투자 정산 집행 로직 (자정 또는 투표 마감 시 호출 가능)
-    function settleInvestments() {
+    function settleDailyInvestments() {
       const inv = bankData.investments || {};
       const keys = Object.keys(inv).filter(k => inv[k] > 0);
-      if (keys.length === 0) return;
+      if (keys.length === 0) return alert("정산할 투자 내역이 없습니다.");
 
       const restList = Object.values(restaurants || {});
       restList.sort((a, b) => (groupVotesData[b.id] || 0) - (groupVotesData[a.id] || 0));
 
       let totalReturn = 0;
-      let summaryLog = [];
+      let logs = [];
 
       keys.forEach(rid => {
-        const myInvestAmt = inv[rid];
+        const myAmt = inv[rid];
         const rankIdx = restList.findIndex(r => r.id === rid);
         let rate = 0;
         if (rankIdx === 0) rate = 0.30;
         else if (rankIdx === 1) rate = 0.10;
         else if (rankIdx === 2) rate = 0.05;
 
-        const profit = Math.floor(myInvestAmt * rate);
-        const payout = myInvestAmt + profit;
+        const profit = Math.floor(myAmt * rate);
+        const payout = myAmt + profit;
         totalReturn += payout;
-        summaryLog.push(`${restaurants[rid]?.name}: ${rankIdx + 1}위 (+${(rate * 100)}%) ➔ ${payout}P 환급`);
+        logs.push(`• ${restaurants[rid]?.name || '식당'}: ${rankIdx + 1}위 (+${Math.round(rate * 100)}%) ➔ ${payout.toLocaleString()}P`);
       });
 
       userPoints += totalReturn;
       bankData.investments = {};
       saveBankData();
       updatePointsUI();
-      alert(`🎉 [투자 일일 배당 정산 완료!]\n\n${summaryLog.join('\n')}\n총 입금: +${totalReturn.toLocaleString()}P`);
+      if (window.confetti) confetti({ particleCount: 100 });
+      alert(`🎉 [일일 투자 배당금 정산 완료]\n\n${logs.join('\n')}\n\n총 입금: +${totalReturn.toLocaleString()}P`);
     }
 
     // ==========================================
-    // 2. 전체 인기투표 & 카드 렌더링 (요구사항 1)
+    // 2. 전체 인기투표 및 식당 카드 렌더링 (요구사항 1)
     // ==========================================
     function renderCards() {
       const container = document.getElementById('restaurantCardsContainer');
@@ -1356,28 +1454,6 @@
         const card = document.createElement('div');
         card.className = `group bg-white rounded-3xl p-5 border transition-all duration-300 flex flex-col justify-between shadow-xs hover:shadow-xl hover:-translate-y-1 ${isVoted ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-slate-200/80'}`;
 
-        // 1번 요구사항: 로비 상태에서도 누구나 전체 인기투표 참여 가능
-        const voteActionHTML = `
-          <div class="mt-5 pt-4 border-t border-slate-100">
-            <div class="flex items-center justify-between text-xs font-bold mb-1.5">
-              <span class="text-indigo-600 font-extrabold flex items-center gap-1">
-                <i data-lucide="flame" class="w-3.5 h-3.5 text-orange-500"></i>
-                전체 인기투표: ${votesCount}표 (${percent}%)
-              </span>
-              <button onclick="openEditModal('${r.id}')" class="text-[11px] text-slate-400 hover:text-orange-500 font-semibold flex items-center gap-1">
-                <i data-lucide="settings-2" class="w-3.5 h-3.5"></i> 수정
-              </button>
-            </div>
-            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-3">
-              <div class="bg-gradient-to-r from-orange-500 to-amber-500 h-full rounded-full transition-all duration-500" style="width: ${percent}%"></div>
-            </div>
-            <button onclick="castVote('${r.id}')" class="w-full py-2.5 rounded-2xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 ${isVoted ? 'bg-orange-500 text-white shadow-md hover:bg-orange-600' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">
-              <i data-lucide="${isVoted ? 'check' : 'thumbs-up'}" class="w-3.5 h-3.5"></i>
-              <span>${isVoted ? '투표 완료됨 (다시 눌러 취소)' : '여기에 소중한 1표 투표'}</span>
-            </button>
-          </div>
-        `;
-
         card.innerHTML = `
           <div>
             <div class="flex items-start justify-between gap-2 mb-3">
@@ -1412,7 +1488,26 @@
               </div>
             </div>
           </div>
-          ${voteActionHTML}
+
+          <!-- [1] 전체 유저 대상 실시간 인기투표 바 & 버튼 -->
+          <div class="mt-5 pt-4 border-t border-slate-100">
+            <div class="flex items-center justify-between text-xs font-bold mb-1.5">
+              <span class="text-indigo-600 font-extrabold flex items-center gap-1">
+                <i data-lucide="flame" class="w-3.5 h-3.5 text-orange-500"></i>
+                전체 인기투표: ${votesCount}표 (${percent}%)
+              </span>
+              <button onclick="openEditModal('${r.id}')" class="text-[11px] text-slate-400 hover:text-orange-500 font-semibold flex items-center gap-1">
+                <i data-lucide="settings-2" class="w-3.5 h-3.5"></i> 수정
+              </button>
+            </div>
+            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-3">
+              <div class="bg-gradient-to-r from-orange-500 to-amber-500 h-full rounded-full transition-all duration-500" style="width: ${percent}%"></div>
+            </div>
+            <button onclick="castVote('${r.id}')" class="w-full py-2.5 rounded-2xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 ${isVoted ? 'bg-orange-500 text-white shadow-md hover:bg-orange-600' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">
+              <i data-lucide="${isVoted ? 'check' : 'thumbs-up'}" class="w-3.5 h-3.5"></i>
+              <span>${isVoted ? '투표 완료됨 (다시 눌러 취소)' : '여기에 소중한 1표 투표'}</span>
+            </button>
+          </div>
         `;
         container.appendChild(card);
       });
@@ -1445,11 +1540,11 @@
     }
 
     // ==========================================
-    // 3. 미니게임 & 음수 제한 (요구사항 2-6, 2-7)
+    // 3. 음수 가드 & 게임 아케이드 (2-6, 2-7)
     // ==========================================
     function checkNegativePenalty(gameName) {
       if (userPoints < 0) {
-        alert(`🚨 [부채 연체 경고]\n현재 잔고가 ${userPoints.toLocaleString()}P (음수)입니다.\n빚을 갚기 전까지는 [노력형 게임: 밥알광클, 스피드, 식단암기] 3종만 이용할 수 있습니다!`);
+        alert(`🚨 [부채 연체 경고]\n현재 보유 잔고가 ${userPoints.toLocaleString()}P (음수)입니다!\n빚을 상환하기 전까지는 [노력형 게임 3종: 밥알광클, 스피드, 식단암기]만 플레이할 수 있습니다.`);
         return true;
       }
       return false;
@@ -1512,7 +1607,7 @@
           userPoints += earned;
           updatePointsUI();
           if (window.confetti) confetti({ particleCount: 70 });
-          alert(`🍚 [노력형 채굴 완료] +${earned}P 적립! (현재 잔고: ${userPoints.toLocaleString()}P)`);
+          alert(`🍚 [노력형 채굴] +${earned}P 적립 완료! (현재 잔고: ${userPoints.toLocaleString()}P)`);
         }
       }, 50);
     }
@@ -1545,16 +1640,16 @@
             userPoints += reward;
             updatePointsUI();
             if (window.confetti) confetti({ particleCount: 90 });
-            alert(`⚡ [스피드 성공] +${reward}P 적립! (현재 잔고: ${userPoints.toLocaleString()}P)`);
+            alert(`⚡ [스피드 성공] +${reward}P 적립 완료! (현재 잔고: ${userPoints.toLocaleString()}P)`);
           } else {
-            alert(`😢 30타 미달 (${speedHits}타). 보너스를 획득하지 못했습니다.`);
+            alert(`😢 30타 미달 (${speedHits}타 기록).`);
           }
         }
       }, 50);
     }
     function handleSpeedHit() { if (isSpeedRunning) { speedHits++; document.getElementById('speedHits').textContent = speedHits; } }
 
-    // 2-7 노력형 3: 식단 암기
+    // 2-7 노력형 3: 식단 메뉴 암기
     function startMemoryGame() {
       memorySequence = [];
       memoryUserStep = 0;
@@ -1574,7 +1669,7 @@
           idx++;
         } else {
           clearInterval(flash);
-          display.textContent = "외운 순서대로 4개를 누르세요!";
+          display.textContent = "외운 순서대로 4개를 차례로 누르세요!";
           btns.forEach(b => b.disabled = false);
           isMemoryGameActive = true;
         }
@@ -1592,8 +1687,8 @@
           userPoints += 80;
           updatePointsUI();
           if (window.confetti) confetti({ particleCount: 100 });
-          display.innerHTML = `<span class="text-emerald-400 font-black">🎉 암기 완벽 성공! (+80P 지급)</span>`;
-          alert(`🧠 [식단 암기 성공] +80P 적립! (현재 잔고: ${userPoints.toLocaleString()}P)`);
+          display.innerHTML = `<span class="text-emerald-400 font-black">🎉 암기 완벽 성공! (+80P)</span>`;
+          alert(`🧠 [식단 암기 성공] +80P 적립 완료! (현재 잔고: ${userPoints.toLocaleString()}P)`);
         }
       } else {
         isMemoryGameActive = false;
@@ -1602,11 +1697,11 @@
       }
     }
 
-    // 비-노력형 베팅 게임 (음수 차단)
+    // 비-노력형 베팅 게임 (음수 페널티 차단)
     function spinSlotMachine(times = 1) {
       if (checkNegativePenalty('슬롯머신')) return;
       const totalCost = 50 * times;
-      if (userPoints < totalCost) return alert(`포인트가 부족합니다. (필요: ${totalCost}P)`);
+      if (userPoints < totalCost) return alert(`베팅할 포인트가 부족합니다. (필요: ${totalCost}P)`);
       userPoints -= totalCost;
       updatePointsUI();
 
@@ -1616,7 +1711,7 @@
         const slot1 = document.getElementById('slot1');
         const slot2 = document.getElementById('slot2');
         const slot3 = document.getElementById('slot3');
-        const isMega = Math.random() < 0.0000001; // 0.00001%
+        const isMega = Math.random() < 0.0000001; // 2-1: 0.00001%
 
         let cnt = 0;
         const timer = setInterval(() => {
@@ -1659,13 +1754,12 @@
       updatePointsUI();
 
       const isFront = Math.random() < 0.5;
-      const outcome = isFront ? 'front' : 'back';
       document.getElementById('coinDisplay').textContent = isFront ? "🪙" : "🔘";
 
-      if (userChoice === outcome) {
+      if (userChoice === (isFront ? 'front' : 'back')) {
         userPoints += bet * 2;
         updatePointsUI();
-        document.getElementById('coinResultText').innerHTML = `<span class="text-amber-500 font-black">🎉 예측 적중! +${bet * 2}P</span>`;
+        document.getElementById('coinResultText').innerHTML = `<span class="text-amber-500 font-black">🎉 적중! +${bet * 2}P</span>`;
       } else {
         document.getElementById('coinResultText').innerHTML = `<span class="text-rose-500">낙첨! (-${bet}P)</span>`;
       }
@@ -1679,8 +1773,7 @@
       updatePointsUI();
 
       const roll = Math.floor(Math.random() * 6) + 1;
-      const isOdd = (roll % 2 !== 0);
-      const outcome = isOdd ? 'odd' : 'even';
+      const outcome = (roll % 2 !== 0) ? 'odd' : 'even';
       document.getElementById('diceDisplay').textContent = ["⚀","⚁","⚂","⚃","⚄","⚅"][roll - 1];
 
       if (userChoice === outcome) {
@@ -1693,7 +1786,7 @@
     }
 
     // ==========================================
-    // 4. 상점 가드 (2-2: 대출금 미상환 시 이용 불가)
+    // 4. 상점 및 인벤토리 (2-2: 대출금 잔여 시 이용 불가)
     // ==========================================
     function openShopModal() {
       if (bankData.loan > 0) {
@@ -1799,14 +1892,14 @@
     function unequipAll() { myNickColor = ''; myNickBg = 'nb-none'; myNickSymbol = ''; updatePointsUI(); renderShopUI(); }
 
     // ==========================================
-    // 5. 순자산 기반 부자 랭킹 (2-2: 대출금 차감)
+    // 5. 실시간 순자산 랭킹 (2-2: 대출금 차감)
     // ==========================================
     function renderPointRankings() {
       db.ref('user_points').on('value', (snap) => {
         const data = snap.val() || {};
         const userList = Object.values(data);
 
-        // 순자산 = points (대출금은 포인트에서 제외 또는 음수 반영)
+        // 순자산(netWorth) 기준 내림차순 정렬
         userList.sort((a, b) => (b.netWorth !== undefined ? b.netWorth : (b.points || 0)) - (a.netWorth !== undefined ? a.netWorth : (a.points || 0)));
 
         const sideContainer = document.getElementById('sideRankListContainer');
@@ -1870,7 +1963,7 @@
     function closeRankModal() { document.getElementById('rankModal').classList.add('hidden'); }
 
     // ==========================================
-    // 6. 실시간 채팅 & 유틸리티
+    // 6. 실시간 채팅 & 그룹 & 공통 유틸
     // ==========================================
     function toggleChatWindow() {
       const w = document.getElementById('chatWindow');
@@ -1946,7 +2039,7 @@
 
     function syncUserPointToCloud() {
       if (!currentUser.nickname) return;
-      const netWorth = userPoints - (bankData.loan || 0); // 대출금 제외 순자산
+      const netWorth = userPoints - (bankData.loan || 0);
       db.ref(`user_points/${currentUser.nickname}`).update({
         nickname: currentUser.nickname,
         points: userPoints,
@@ -1978,15 +2071,19 @@
       }
     }
 
-    function toggleMenuAccordion() {
-      isMenuExpanded = !isMenuExpanded;
+    function toggleMenuAccordion(forceOpen = false) {
+      if (forceOpen) isMenuExpanded = true;
+      else isMenuExpanded = !isMenuExpanded;
+
       const w = document.getElementById('cardsWrapper');
       const t = document.getElementById('accordionBtnText');
       const i = document.getElementById('accordionBtnIcon');
+
       if (isMenuExpanded) {
         w.classList.remove('hidden');
         t.textContent = "식단표 접기";
         i.classList.add('rotate-180');
+        if (forceOpen) document.getElementById('restaurantSection').scrollIntoView({ behavior: 'smooth' });
       } else {
         w.classList.add('hidden');
         t.textContent = "식단표 펼쳐보기";
@@ -1994,13 +2091,13 @@
       }
     }
 
-    // 관리자
+    // 관리자 기능
     function adminEquipSelf() {
       myNickBg = 'nb-admin';
       myNickColor = '#ffffff';
       myNickSymbol = '👑';
       updatePointsUI();
-      alert("👑 관리자 배지 및 순백색 닉네임이 장착되었습니다.");
+      alert("👑 관리자 배지 및 순백색 닉네임 장착 완료");
     }
 
     function adminSendSpecialSticker(type) {
@@ -2111,14 +2208,14 @@
     db.ref('restaurants').on('value', snap => { restaurants = snap.val() || {}; renderCards(); });
     db.ref('lobby_votes').on('value', snap => { groupVotesData = snap.val() || {}; renderCards(); });
 
-    // 초기화 구동
+    // 앱 구동
     attachChatListener();
     initNoticeListener();
     initPresenceSystem();
     updatePointsUI();
     renderPointRankings();
     setInterval(updateCountdown, 1000);
-    setInterval(checkAutoLoanRepayment, 1000); // 1시간 자동상환 모니터링
+    setInterval(monitorAutoLoanRepayment, 1000); // 1시간 자동 상환 감시
     syncFromGoogleSheet();
     lucide.createIcons();
   </script>
