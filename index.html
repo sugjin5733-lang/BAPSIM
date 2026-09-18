@@ -347,7 +347,7 @@
       <p id="mobileNoticeContent" class="text-xs text-slate-700 font-medium">공지사항을 불러오는 중입니다...</p>
     </div>
 
-    <!-- 로비 2대 핵심 유도 카드 -->
+    <!-- 로비 카드 그리드 -->
     <section id="lobbyHeroSection" class="space-y-4">
       <div class="text-center space-y-1 py-1">
         <span class="text-xs font-extrabold text-indigo-600 bg-indigo-50 border border-indigo-200/80 px-3 py-1 rounded-full uppercase tracking-wider">
@@ -402,7 +402,7 @@
       </div>
     </section>
 
-    <!-- 식당 카드 그리드 섹션 -->
+    <!-- 식당 카드 섹션 -->
     <section id="restaurantSection" class="space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 pb-3">
         <div>
@@ -436,7 +436,7 @@
     </section>
   </main>
 
-  <!-- [사다리타기 미니게임 모달] -->
+  <!-- 사다리타기 모달 -->
   <div id="ladderGameModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
@@ -485,7 +485,7 @@
     </div>
   </div>
 
-  <!-- [포인트 게임 아케이드 모달 (UI 리뉴얼 및 100만P 잭팟)] -->
+  <!-- [포인트 게임장 모달 - 횡스크롤 제거 및 3x2 그리드 개편 완료] -->
   <div id="miniGameModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
@@ -501,25 +501,25 @@
         <button onclick="closeMiniGameModal()" class="text-slate-400 hover:text-slate-600 text-base font-bold p-1">✕</button>
       </div>
 
-      <!-- 탭 메뉴 -->
-      <div class="bg-slate-100/80 p-1.5 rounded-2xl flex items-center justify-between gap-1 overflow-x-auto scrollbar-hide text-xs font-bold">
-        <button onclick="switchGameTab('clicker')" id="tabBtn_clicker" class="flex-1 py-2 px-2.5 rounded-xl bg-white shadow-xs text-slate-900 font-extrabold flex items-center justify-center gap-1.5 transition-all whitespace-nowrap">
+      <!-- 횡스크롤 없이 한눈에 보이는 3열 그리드 탭 (3x2 정렬) -->
+      <div class="bg-slate-100/90 p-1.5 rounded-2xl grid grid-cols-3 gap-1.5 text-xs font-bold">
+        <button onclick="switchGameTab('clicker')" id="tabBtn_clicker" class="py-2.5 px-2 rounded-xl bg-white shadow-xs text-slate-900 font-extrabold flex items-center justify-center gap-1.5 transition-all">
           <span>🍚</span><span>밥알광클</span>
         </button>
-        <button onclick="switchGameTab('speed')" id="tabBtn_speed" class="flex-1 py-2 px-2.5 rounded-xl text-slate-500 hover:text-slate-900 flex items-center justify-center gap-1.5 transition-all whitespace-nowrap">
+        <button onclick="switchGameTab('speed')" id="tabBtn_speed" class="py-2.5 px-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-white/50 flex items-center justify-center gap-1.5 transition-all">
           <span>⚡</span><span>스피드</span>
         </button>
-        <button onclick="switchGameTab('memory')" id="tabBtn_memory" class="flex-1 py-2 px-2.5 rounded-xl text-slate-500 hover:text-slate-900 flex items-center justify-center gap-1.5 transition-all whitespace-nowrap">
+        <button onclick="switchGameTab('memory')" id="tabBtn_memory" class="py-2.5 px-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-white/50 flex items-center justify-center gap-1.5 transition-all">
           <span>🧠</span><span>식단암기</span>
         </button>
-        <button onclick="switchGameTab('slot')" id="tabBtn_slot" class="flex-1 py-2 px-2.5 rounded-xl text-slate-500 hover:text-slate-900 flex items-center justify-center gap-1.5 transition-all whitespace-nowrap">
+        <button onclick="switchGameTab('slot')" id="tabBtn_slot" class="py-2.5 px-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-white/50 flex items-center justify-center gap-1.5 transition-all">
           <span>🎰</span><span>슬롯머신</span>
         </button>
-        <button onclick="switchGameTab('coin')" id="tabBtn_coin" class="flex-1 py-2 px-2.5 rounded-xl text-slate-500 hover:text-slate-900 flex items-center justify-center gap-1.5 transition-all whitespace-nowrap">
+        <button onclick="switchGameTab('coin')" id="tabBtn_coin" class="py-2.5 px-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-white/50 flex items-center justify-center gap-1.5 transition-all">
           <span>🪙</span><span>동전던지기</span>
         </button>
-        <button onclick="switchGameTab('dice')" id="tabBtn_dice" class="flex-1 py-2 px-2.5 rounded-xl text-slate-500 hover:text-slate-900 flex items-center justify-center gap-1.5 transition-all whitespace-nowrap">
-          <span>🎲</span><span>주사위</span>
+        <button onclick="switchGameTab('dice')" id="tabBtn_dice" class="py-2.5 px-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-white/50 flex items-center justify-center gap-1.5 transition-all">
+          <span>🎲</span><span>주사위홀짝</span>
         </button>
       </div>
 
@@ -808,7 +808,7 @@
         </button>
       </div>
 
-      <!-- 2. 신규 회원가입 승인 대기 목록 -->
+      <!-- 신규 회원가입 승인 대기 목록 -->
       <div class="space-y-3">
         <div class="flex items-center justify-between">
           <h4 class="font-extrabold text-xs text-slate-800 flex items-center gap-1.5">
@@ -837,7 +837,7 @@
         <div id="adminPendingListContainer" class="space-y-2 max-h-36 overflow-y-auto"></div>
       </div>
 
-      <!-- 1. 승인된 전체 회원 목록 & 회원 삭제 버튼 -->
+      <!-- 승인된 전체 회원 목록 & 회원 삭제 / 아이템 몰수(인벤토리 완전삭제) -->
       <div class="space-y-3">
         <h4 class="font-extrabold text-xs text-slate-800 flex items-center gap-1.5">
           <i data-lucide="users" class="w-3.5 h-3.5 text-indigo-600"></i>
@@ -1178,7 +1178,6 @@
       ]
     };
 
-    // 승인 가드 함수
     function checkApprovalGuard() {
       if (currentUser.nickname === "문정러") {
         alert("닉네임을 설정(회원가입)하고 관리자 승인을 받은 후 이용하실 수 있습니다.");
@@ -1299,21 +1298,21 @@
       chatRef.on('child_added', snap => appendChatMessage(snap.val()));
     }
 
-    // 포인트 게임 6종
+    // 포인트 게임
     function switchGameTab(tabName) {
       ['clicker', 'speed', 'memory', 'slot', 'coin', 'dice'].forEach(t => {
         const view = document.getElementById(`gameView_${t}`);
         const tab = document.getElementById(`tabBtn_${t}`);
         if (view) view.classList.add('hidden');
         if (tab) {
-          tab.className = "flex-1 py-2 px-2.5 rounded-xl text-slate-500 hover:text-slate-900 flex items-center justify-center gap-1.5 transition-all whitespace-nowrap";
+          tab.className = "py-2.5 px-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-white/50 flex items-center justify-center gap-1.5 transition-all";
         }
       });
       const curView = document.getElementById(`gameView_${tabName}`);
       const curTab = document.getElementById(`tabBtn_${tabName}`);
       if (curView) curView.classList.remove('hidden');
       if (curTab) {
-        curTab.className = "flex-1 py-2 px-2.5 rounded-xl bg-white shadow-xs text-slate-900 font-extrabold flex items-center justify-center gap-1.5 transition-all whitespace-nowrap";
+        curTab.className = "py-2.5 px-2 rounded-xl bg-white shadow-xs text-slate-900 font-extrabold flex items-center justify-center gap-1.5 transition-all";
       }
     }
 
@@ -1653,7 +1652,7 @@
       }, 400);
     }
 
-    // 상점 및 치장
+    // 상점 및 치장 렌더링
     function renderShopUI() {
       const symContainer = document.getElementById('shopSymbolList');
       if (symContainer) {
@@ -1670,7 +1669,7 @@
             </div>
             <div>
               ${isEquipped 
-                ? `<button onclick="unequipSymbol()" class="bg-rose-500 text-white font-bold px-2.5 py-1 rounded-xl text-[11px]">해체</button>`
+                ? `<button onclick="unequipSymbol()" class="bg-rose-500 text-white font-bold px-2.5 py-1 rounded-xl text-[11px]">해제</button>`
                 : isOwned 
                   ? `<button onclick="equipSymbol('${sym.char}')" class="bg-indigo-600 text-white font-bold px-2.5 py-1 rounded-xl text-[11px]">장착</button>`
                   : `<button onclick="buySymbol('${sym.char}', ${sym.cost})" class="bg-slate-900 text-amber-300 font-bold px-2.5 py-1 rounded-xl text-[11px]">구매</button>`
@@ -1696,7 +1695,7 @@
             </div>
             <div>
               ${isEquipped 
-                ? `<button onclick="unequipColor()" class="bg-rose-500 text-white font-bold px-2.5 py-1 rounded-xl text-[11px]">해체</button>`
+                ? `<button onclick="unequipColor()" class="bg-rose-500 text-white font-bold px-2.5 py-1 rounded-xl text-[11px]">해제</button>`
                 : isOwned 
                   ? `<button onclick="equipColor('${col.hex}')" class="bg-indigo-600 text-white font-bold px-2.5 py-1 rounded-xl text-[11px]">장착</button>`
                   : `<button onclick="buyColor('${col.hex}', ${col.cost})" class="bg-slate-900 text-amber-300 font-bold px-2.5 py-1 rounded-xl text-[11px]">구매</button>`
@@ -1729,7 +1728,7 @@
             </div>
             <div>
               ${isEquipped 
-                ? `<button onclick="unequipBg()" class="bg-rose-500 text-white font-bold px-3 py-1.5 rounded-xl text-[11px]">해체</button>`
+                ? `<button onclick="unequipBg()" class="bg-rose-500 text-white font-bold px-3 py-1.5 rounded-xl text-[11px]">해제</button>`
                 : isOwned 
                   ? `<button onclick="equipBg('${bg.class}')" class="bg-indigo-600 text-white font-bold px-3 py-1.5 rounded-xl text-[11px]">장착</button>`
                   : `<button onclick="buyBg('${bg.class}', ${bg.cost}, '${bg.name}')" class="bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-black px-3 py-1.5 rounded-xl text-[11px] shadow-sm">${bg.cost.toLocaleString()}P</button>`
@@ -1805,6 +1804,9 @@
       myNickBg = 'nb-admin';
       myNickColor = '#ffffff';
       myNickSymbol = '👑';
+      if (!myInventory.bgs.includes('nb-admin')) myInventory.bgs.push('nb-admin');
+      if (!myInventory.symbols.includes('👑')) myInventory.symbols.push('👑');
+      if (!myInventory.colors.includes('#ffffff')) myInventory.colors.push('#ffffff');
       updatePointsUI();
       alert("👑 [관리자 전용] 애니메이션 배지, 순백색(#ffffff) 닉네임, 왕관 칭호가 즉시 장착되었습니다!");
     }
@@ -1822,7 +1824,7 @@
       alert("공권력 관리자 이모티콘이 채팅방에 전파되었습니다.");
     }
 
-    // 데이터 동기화
+    // 클라우드 동기화 (인벤토리 데이터 포함)
     function syncUserPointToCloud() {
       if (!currentUser.nickname || currentUser.nickname === "문정러") return;
       db.ref(`user_points/${currentUser.nickname}`).update({
@@ -1831,6 +1833,7 @@
         badge: myNickBg,
         color: myNickColor,
         symbol: myNickSymbol,
+        inventory: myInventory,
         updatedAt: Date.now()
       });
     }
@@ -1849,6 +1852,32 @@
         const pendingNick = document.getElementById('pendingBannerNick');
 
         if (val) {
+          // 관리자에 의한 강제 인벤토리 몰수 감지 (1번 요구사항 완비)
+          if (val.resetInventory === true) {
+            myInventory = { colors: [], bgs: ['nb-none'], symbols: [] };
+            myNickBg = 'nb-none';
+            myNickColor = '';
+            myNickSymbol = '';
+            localStorage.setItem('bapsim_inventory', JSON.stringify(myInventory));
+            localStorage.setItem('bapsim_custom_bg', 'nb-none');
+            localStorage.setItem('bapsim_custom_color', '');
+            localStorage.setItem('bapsim_custom_symbol', '');
+            updatePointsUI(false);
+            renderShopUI();
+            alert("⚠️ 관리자에 의해 보유 중인 모든 치장 아이템이 몰수 및 삭제 처리되었습니다.");
+            db.ref(`user_points/${currentUser.nickname}/resetInventory`).remove();
+            return;
+          }
+
+          if (val.inventory) {
+            myInventory = {
+              colors: Array.isArray(val.inventory.colors) ? val.inventory.colors : [],
+              bgs: Array.isArray(val.inventory.bgs) ? val.inventory.bgs : ['nb-none'],
+              symbols: Array.isArray(val.inventory.symbols) ? val.inventory.symbols : []
+            };
+            localStorage.setItem('bapsim_inventory', JSON.stringify(myInventory));
+          }
+
           const wasApproved = isUserApproved;
           isUserApproved = (val.status === 'approved' || val.approved === true);
 
@@ -2119,7 +2148,7 @@
       return { text: parsed, isToday: isToday, iso: parsed };
     }
 
-    // 관리자 모드
+    // 관리자 기능
     window.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
         e.preventDefault();
@@ -2152,7 +2181,6 @@
     }
     function closeAdminDashboard() { document.getElementById('adminDashboardModal').classList.add('hidden'); }
 
-    // 2. 신규 회원가입 승인 대기 목록 렌더링
     function renderAdminPendingUsers() {
       db.ref('user_points').on('value', (snap) => {
         const users = snap.val() || {};
@@ -2205,7 +2233,6 @@
       });
     }
 
-    // 1. 회원 목록 & 회원 삭제
     function renderAdminUserList() {
       db.ref('user_points').on('value', (snap) => {
         const users = snap.val() || {};
@@ -2259,24 +2286,50 @@
       });
     }
 
+    // 아이템 몰수 시 인벤토리 영구 삭제 로직 (1번 요구사항 완벽 반영)
     function adminManageUserItems(nick) {
-      const choice = prompt(`[${nick}] 회원의 아이템 관리\n1: 모든 아이템 몰수\n2: 코스믹 레인보우 선물\n3: 태양의 겁화 선물\n4: 원하는 배지 클래스명 직접 입력\n\n번호를 입력하세요:`);
+      const choice = prompt(`[${nick}] 회원의 아이템 관리\n1: 모든 아이템 몰수 및 인벤토리 영구 삭제 (재장착 불가)\n2: 코스믹 레인보우 선물\n3: 태양의 겁화 선물\n4: 원하는 배지 클래스명 직접 입력\n\n번호를 입력하세요:`);
       if (!choice) return;
 
       if (choice === '1') {
-        db.ref(`user_points/${nick}`).update({ badge: 'nb-none', color: '', symbol: '' });
-        alert(`[${nick}] 회원의 모든 치장 아이템을 몰수했습니다.`);
+        // 장착 해제뿐만 아니라 인벤토리 소유권 영구 삭제 플래그 반영
+        db.ref(`user_points/${nick}`).update({
+          badge: 'nb-none',
+          color: '',
+          symbol: '',
+          inventory: { colors: [], bgs: ['nb-none'], symbols: [] },
+          resetInventory: true // 타인 브라우저 로컬스토리지까지 파기하는 플래그
+        });
+        alert(`[${nick}] 회원의 모든 치장 아이템이 완벽히 몰수 및 삭제되었습니다. (상점에서 재장착 불가)`);
       } else if (choice === '2') {
-        db.ref(`user_points/${nick}`).update({ badge: 'nb-cosmic' });
-        alert(`[${nick}] 회원에게 코스믹 레인보우 배지를 선물했습니다.`);
+        db.ref(`user_points/${nick}`).once('value', snap => {
+          const u = snap.val() || {};
+          const inv = u.inventory || { colors: [], bgs: ['nb-none'], symbols: [] };
+          if (!inv.bgs) inv.bgs = ['nb-none'];
+          if (!inv.bgs.includes('nb-cosmic')) inv.bgs.push('nb-cosmic');
+          db.ref(`user_points/${nick}`).update({ badge: 'nb-cosmic', inventory: inv });
+          alert(`[${nick}] 회원에게 코스믹 레인보우 배지를 지급 및 장착시켰습니다.`);
+        });
       } else if (choice === '3') {
-        db.ref(`user_points/${nick}`).update({ badge: 'nb-solar' });
-        alert(`[${nick}] 회원에게 태양의 겁화 배지를 선물했습니다.`);
+        db.ref(`user_points/${nick}`).once('value', snap => {
+          const u = snap.val() || {};
+          const inv = u.inventory || { colors: [], bgs: ['nb-none'], symbols: [] };
+          if (!inv.bgs) inv.bgs = ['nb-none'];
+          if (!inv.bgs.includes('nb-solar')) inv.bgs.push('nb-solar');
+          db.ref(`user_points/${nick}`).update({ badge: 'nb-solar', inventory: inv });
+          alert(`[${nick}] 회원에게 태양의 겁화 배지를 지급 및 장착시켰습니다.`);
+        });
       } else if (choice === '4') {
         const bgName = prompt("배지 클래스명을 입력하세요 (예: nb-admin, nb-gold, nb-matrix):");
         if (bgName) {
-          db.ref(`user_points/${nick}`).update({ badge: bgName });
-          alert(`[${nick}] 회원에게 ${bgName} 배지를 장착시켰습니다.`);
+          db.ref(`user_points/${nick}`).once('value', snap => {
+            const u = snap.val() || {};
+            const inv = u.inventory || { colors: [], bgs: ['nb-none'], symbols: [] };
+            if (!inv.bgs) inv.bgs = ['nb-none'];
+            if (!inv.bgs.includes(bgName)) inv.bgs.push(bgName);
+            db.ref(`user_points/${nick}`).update({ badge: bgName, inventory: inv });
+            alert(`[${nick}] 회원에게 ${bgName} 배지를 지급 및 장착시켰습니다.`);
+          });
         }
       }
     }
@@ -3076,7 +3129,6 @@
     }
     function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
 
-    // 타인 가입 완전 대응 로직
     async function saveUserProfile() {
       const input = document.getElementById('authNicknameInput').value.trim();
       const saveBtn = document.getElementById('saveUserBtn');
@@ -3093,7 +3145,6 @@
       saveBtn.textContent = "가입 처리 중...";
 
       try {
-        // 1. 중복 확인
         const snap = await db.ref(`user_points/${input}`).once('value');
         if (snap.exists() && input !== currentUser.nickname) {
           alert(`❌ 이미 등록되었거나 사용 중인 닉네임입니다!\n다른 닉네임을 입력해 주세요.`);
@@ -3107,20 +3158,20 @@
         localStorage.setItem('bapsim_user', JSON.stringify(currentUser));
         document.getElementById('userProfileText').textContent = input;
 
-        // 2. 신규 유저 생성 (status: 'pending')
+        // 신규 회원 등록
         await db.ref(`user_points/${input}`).set({
           nickname: input,
-          points: 30, // 신규 가입 기본 30P
+          points: 30,
           badge: 'nb-none',
           color: '',
           symbol: '',
+          inventory: { colors: [], bgs: ['nb-none'], symbols: [] },
           status: 'pending',
           approved: false,
           createdAt: Date.now(),
           updatedAt: Date.now()
         });
 
-        // 3. 기존 문정러가 아닌 구 닉네임이 있다면 정리
         if (oldNick && oldNick !== "문정러" && oldNick !== input) {
           db.ref(`user_points/${oldNick}`).remove().catch(()=>{});
           db.ref(`online_users/${oldNick}`).remove().catch(()=>{});
@@ -3128,6 +3179,10 @@
 
         isUserApproved = false;
         userPoints = 30;
+        myInventory = { colors: [], bgs: ['nb-none'], symbols: [] };
+        myNickBg = 'nb-none';
+        myNickColor = '';
+        myNickSymbol = '';
         updatePointsUI(false);
         attachUserPointListener();
         initPresenceSystem();
@@ -3136,7 +3191,7 @@
         alert(`🎉 [${input}] 님, 회원가입 신청이 성공적으로 접수되었습니다!\n\n운영진(관리자)의 승인이 완료되는 즉시 모든 기능이 활성화됩니다.`);
       } catch (err) {
         console.error("회원가입 에러:", err);
-        alert("가입 처리 중 오류가 발생했습니다: " + err.message + "\n(Firebase Realtime Database 규칙 권한을 확인해주세요)");
+        alert("가입 처리 중 오류가 발생했습니다: " + err.message);
       } finally {
         saveBtn.disabled = false;
         saveBtn.textContent = "가입 및 승인 요청";
@@ -3171,7 +3226,6 @@
       }
     }
 
-    // 초기화 구동
     if (currentUser.nickname && currentUser.nickname !== "문정러") {
       const pText = document.getElementById('userProfileText');
       if (pText) pText.textContent = currentUser.nickname;
