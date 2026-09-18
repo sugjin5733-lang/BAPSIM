@@ -49,7 +49,6 @@
     /* 닉네임 배경 배지 스타일 */
     .nb-none { background: transparent; padding: 0; }
 
-    /* [관리자 전용 배지] 타오르는 다크레드 펄스 + 골드 글리터 애니메이션 */
     .nb-admin {
       background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 50%, #991b1b 100%);
       color: #ffffff !important;
@@ -63,7 +62,6 @@
       100% { box-shadow: 0 0 25px rgba(239, 68, 68, 1), 0 0 12px #f87171, inset 0 0 12px #fde047; }
     }
 
-    /* [50만P 이상 신화급 1] 코스믹 레인보우 - 극채색 오라 애니메이션 */
     .nb-cosmic {
       background: linear-gradient(90deg, #ff007f, #7928ca, #0070f3, #00dfd8, #ff007f);
       background-size: 300% 300%;
@@ -74,7 +72,6 @@
     @keyframes cosmicShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
     @keyframes cosmicGlow { 0% { box-shadow: 0 0 12px rgba(255, 0, 128, 0.8), 0 0 20px rgba(0, 223, 216, 0.5); } 100% { box-shadow: 0 0 24px rgba(255, 0, 128, 1), 0 0 32px rgba(121, 40, 202, 0.8); } }
 
-    /* [50만P 이상 신화급 2] 태양의 겁화 - 솔라 플레어 폭발 애니메이션 */
     .nb-solar {
       background: linear-gradient(90deg, #ff4500, #ff8c00, #ffd700, #ff4500);
       background-size: 250% 250%;
@@ -85,7 +82,6 @@
     @keyframes solarFlare { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
     @keyframes solarPulse { 0% { box-shadow: 0 0 14px rgba(255, 69, 0, 0.8); } 100% { box-shadow: 0 0 28px rgba(255, 69, 0, 1), 0 0 18px rgba(255, 215, 0, 0.9); } }
 
-    /* [50만P 이상 신화급 3] 심연의 블랙홀 - 시공간 중력 왜곡 */
     .nb-blackhole {
       background: radial-gradient(circle, #581c87 0%, #0f051d 60%, #000000 100%);
       color: #f3e8ff !important; border: 1.5px solid #c084fc;
@@ -98,7 +94,6 @@
       100% { box-shadow: 0 0 12px rgba(192, 132, 252, 0.6), inset 0 0 6px #a855f7; transform: scale(1); }
     }
 
-    /* [50만P 이상 신화급 4] 사이버 매트릭스 - 디지털 비 흐름 애니메이션 */
     .nb-matrix {
       background: linear-gradient(180deg, #022c22 0%, #064e3b 50%, #022c22 100%);
       background-size: 100% 200%;
@@ -112,7 +107,6 @@
       100% { background-position: 0% 200%; box-shadow: 0 0 10px rgba(16, 185, 129, 0.7); }
     }
 
-    /* [50만P 이상 신화급 5] 다크 유니버스 - 심우주 성운 워프 */
     .nb-universe {
       background: linear-gradient(135deg, #020617, #1e1b4b, #3b0764, #020617);
       background-size: 300% 300%;
@@ -126,7 +120,6 @@
       100% { background-position: 0% 50%; box-shadow: 0 0 12px rgba(139, 92, 246, 0.6); }
     }
 
-    /* [10만P 이상] 골드 배지 - 럭셔리 골드 쉬머 반사광 */
     .nb-gold { 
       background: linear-gradient(110deg, #b45309 0%, #fef08a 30%, #facc15 50%, #ca8a04 70%, #b45309 100%); 
       background-size: 200% auto;
@@ -134,56 +127,27 @@
       color: #713f12 !important; border: 1.5px solid #fef08a;
       padding: 2px 8px; border-radius: 8px; font-weight: 900;
     }
-    @keyframes goldShimmer {
-      to { background-position: 200% center; box-shadow: 0 0 16px rgba(234, 179, 8, 0.8); }
-    }
+    @keyframes goldShimmer { to { background-position: 200% center; box-shadow: 0 0 16px rgba(234, 179, 8, 0.8); } }
 
-    /* 일반 명품 배지 */
-    .nb-darkvip { 
-      background: linear-gradient(135deg, #18181b 0%, #09090b 100%); color: #f43f5e !important;
-      border: 1.5px solid #e11d48; box-shadow: 0 0 10px rgba(225, 29, 72, 0.4);
-      padding: 2px 8px; border-radius: 8px; font-weight: 900; 
-    }
-    .nb-aurora {
-      background: linear-gradient(135deg, #059669, #10b981, #06b6d4); color: #ecfdf5 !important;
-      border: 1.5px solid #34d399; box-shadow: 0 0 10px rgba(52, 211, 153, 0.6);
-      padding: 2px 8px; border-radius: 8px; font-weight: 900;
-    }
-    .nb-diamond { 
-      background: linear-gradient(135deg, #ecfeff 0%, #a5f3fc 50%, #38bdf8 100%); color: #0369a1 !important;
-      border: 1.5px solid #0284c7; box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
-      padding: 2px 8px; border-radius: 8px; font-weight: 900; 
-    }
-    .nb-galaxy {
-      background: linear-gradient(135deg, #312e81 0%, #4c1d95 50%, #831843 100%); color: #fdf4ff !important;
-      border: 1.5px solid #c084fc; box-shadow: 0 0 8px rgba(192, 132, 252, 0.5);
-      padding: 2px 8px; border-radius: 8px; font-weight: 800;
-    }
-    .nb-cyberpunk {
-      background: #050505; color: #f43f5e !important; border: 1.5px solid #06b6d4;
-      box-shadow: 2px 2px 0px #06b6d4; padding: 2px 8px; border-radius: 4px; font-weight: 900;
-    }
-    .nb-neon { 
-      background: #09090b; color: #4ade80 !important; border: 1.5px solid #22c55e; 
-      box-shadow: 0 0 8px rgba(34, 197, 94, 0.45); padding: 2px 8px; border-radius: 8px; font-weight: 800; 
-    }
-    .nb-fire {
-      background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%); color: #c2410c !important;
-      border: 1.5px solid #ea580c; padding: 2px 8px; border-radius: 8px; font-weight: 800;
-    }
-    .nb-cherry {
-      background: #fff1f2; color: #be123c !important; border: 1.5px solid #fb7185;
-      padding: 2px 7px; border-radius: 7px; font-weight: 800;
-    }
-    .nb-sunset { 
-      background: linear-gradient(135deg, #fef3c7, #fed7aa); color: #9a3412 !important;
-      border: 1px solid #fb923c; padding: 2px 7px; border-radius: 7px; font-weight: 800; 
-    }
+    .nb-darkvip { background: linear-gradient(135deg, #18181b 0%, #09090b 100%); color: #f43f5e !important; border: 1.5px solid #e11d48; box-shadow: 0 0 10px rgba(225, 29, 72, 0.4); padding: 2px 8px; border-radius: 8px; font-weight: 900; }
+    .nb-aurora { background: linear-gradient(135deg, #059669, #10b981, #06b6d4); color: #ecfdf5 !important; border: 1.5px solid #34d399; box-shadow: 0 0 10px rgba(52, 211, 153, 0.6); padding: 2px 8px; border-radius: 8px; font-weight: 900; }
+    .nb-diamond { background: linear-gradient(135deg, #ecfeff 0%, #a5f3fc 50%, #38bdf8 100%); color: #0369a1 !important; border: 1.5px solid #0284c7; box-shadow: 0 0 10px rgba(56, 189, 248, 0.5); padding: 2px 8px; border-radius: 8px; font-weight: 900; }
+    .nb-galaxy { background: linear-gradient(135deg, #312e81 0%, #4c1d95 50%, #831843 100%); color: #fdf4ff !important; border: 1.5px solid #c084fc; box-shadow: 0 0 8px rgba(192, 132, 252, 0.5); padding: 2px 8px; border-radius: 8px; font-weight: 800; }
+    .nb-cyberpunk { background: #050505; color: #f43f5e !important; border: 1.5px solid #06b6d4; box-shadow: 2px 2px 0px #06b6d4; padding: 2px 8px; border-radius: 4px; font-weight: 900; }
+    .nb-neon { background: #09090b; color: #4ade80 !important; border: 1.5px solid #22c55e; box-shadow: 0 0 8px rgba(34, 197, 94, 0.45); padding: 2px 8px; border-radius: 8px; font-weight: 800; }
+    .nb-fire { background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%); color: #c2410c !important; border: 1.5px solid #ea580c; padding: 2px 8px; border-radius: 8px; font-weight: 800; }
+    .nb-cherry { background: #fff1f2; color: #be123c !important; border: 1.5px solid #fb7185; padding: 2px 7px; border-radius: 7px; font-weight: 800; }
+    .nb-sunset { background: linear-gradient(135deg, #fef3c7, #fed7aa); color: #9a3412 !important; border: 1px solid #fb923c; padding: 2px 7px; border-radius: 7px; font-weight: 800; }
     .nb-mint { background: #ecfdf5; color: #065f46 !important; border: 1px solid #10b981; padding: 2px 7px; border-radius: 7px; font-weight: 800; }
     .nb-lavender { background: #f5f3ff; color: #5b21b6 !important; border: 1px solid #8b5cf6; padding: 2px 7px; border-radius: 7px; font-weight: 800; }
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white relative">
+
+  <!-- 승인 대기 안내 배너 -->
+  <div id="pendingApprovalBanner" class="hidden bg-amber-500 text-slate-950 px-4 py-2.5 text-center text-xs font-black sticky top-0 z-50 shadow-md">
+    ⚠️ 관리자 회원가입 승인 대기 중입니다. 관리자의 승인이 완료된 후 모든 기능(채팅, 투표, 게임 등)을 이용하실 수 있습니다.
+  </div>
 
   <!-- [좌측 날개 배너] -->
   <aside class="hidden 2xl:block fixed left-4 top-20 z-30 w-64 space-y-4">
@@ -520,134 +484,134 @@
     </div>
   </div>
 
-  <!-- [포인트 획득 게임 아케이드 모달] -->
+  <!-- [3 & 4. 포인트 획득 게임 아케이드 모달 (UI 개편 및 잭팟 1,000,000P 반영)] -->
   <div id="miniGameModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
-            <i data-lucide="gamepad-2" class="w-4 h-4"></i>
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-xs">
+            <i data-lucide="gamepad-2" class="w-5 h-5"></i>
           </div>
           <div>
-            <h3 class="font-black text-slate-900 text-base">밥심 포인트 게임장</h3>
-            <p class="text-[11px] text-slate-400">포인트를 베팅하거나 노력으로 채굴하세요!</p>
+            <h3 class="font-extrabold text-slate-900 text-lg tracking-tight">밥심 포인트 게임장</h3>
+            <p class="text-xs text-slate-400">포인트를 베팅하거나 노력으로 채굴하세요!</p>
           </div>
         </div>
-        <button onclick="closeMiniGameModal()" class="text-slate-400 hover:text-slate-600 text-xs">✕</button>
+        <button onclick="closeMiniGameModal()" class="text-slate-400 hover:text-slate-600 text-base font-bold p-1">✕</button>
       </div>
 
-      <!-- 게임 6종 탭 메뉴 -->
-      <div class="grid grid-cols-3 sm:grid-cols-6 bg-slate-100 p-1 rounded-2xl gap-1 text-[10px] sm:text-[11px] font-bold">
-        <button onclick="switchGameTab('clicker')" id="tabBtn_clicker" class="py-2 rounded-xl bg-white shadow-xs text-slate-900 transition-all font-black text-center">
-          🍚 밥알광클
+      <!-- 정갈한 탭 메뉴 -->
+      <div class="bg-slate-100/80 p-1.5 rounded-2xl flex items-center justify-between gap-1 overflow-x-auto scrollbar-hide text-xs font-bold">
+        <button onclick="switchGameTab('clicker')" id="tabBtn_clicker" class="flex-1 py-2 px-2.5 rounded-xl bg-white shadow-xs text-slate-900 font-extrabold flex items-center justify-center gap-1.5 transition-all whitespace-nowrap">
+          <span>🍚</span><span>밥알광클</span>
         </button>
-        <button onclick="switchGameTab('speed')" id="tabBtn_speed" class="py-2 rounded-xl text-slate-500 hover:text-slate-800 transition-all text-center">
-          ⚡ 스피드
+        <button onclick="switchGameTab('speed')" id="tabBtn_speed" class="flex-1 py-2 px-2.5 rounded-xl text-slate-500 hover:text-slate-900 flex items-center justify-center gap-1.5 transition-all whitespace-nowrap">
+          <span>⚡</span><span>스피드</span>
         </button>
-        <button onclick="switchGameTab('memory')" id="tabBtn_memory" class="py-2 rounded-xl text-slate-500 hover:text-slate-800 transition-all text-center">
-          🧠 식단암기
+        <button onclick="switchGameTab('memory')" id="tabBtn_memory" class="flex-1 py-2 px-2.5 rounded-xl text-slate-500 hover:text-slate-900 flex items-center justify-center gap-1.5 transition-all whitespace-nowrap">
+          <span>🧠</span><span>식단암기</span>
         </button>
-        <button onclick="switchGameTab('slot')" id="tabBtn_slot" class="py-2 rounded-xl text-slate-500 hover:text-slate-800 transition-all text-center">
-          🎰 슬롯머신
+        <button onclick="switchGameTab('slot')" id="tabBtn_slot" class="flex-1 py-2 px-2.5 rounded-xl text-slate-500 hover:text-slate-900 flex items-center justify-center gap-1.5 transition-all whitespace-nowrap">
+          <span>🎰</span><span>슬롯머신</span>
         </button>
-        <button onclick="switchGameTab('coin')" id="tabBtn_coin" class="py-2 rounded-xl text-slate-500 hover:text-slate-800 transition-all text-center">
-          🪙 동전던지기
+        <button onclick="switchGameTab('coin')" id="tabBtn_coin" class="flex-1 py-2 px-2.5 rounded-xl text-slate-500 hover:text-slate-900 flex items-center justify-center gap-1.5 transition-all whitespace-nowrap">
+          <span>🪙</span><span>동전던지기</span>
         </button>
-        <button onclick="switchGameTab('dice')" id="tabBtn_dice" class="py-2 rounded-xl text-slate-500 hover:text-slate-800 transition-all text-center">
-          🎲 주사위홀짝
+        <button onclick="switchGameTab('dice')" id="tabBtn_dice" class="flex-1 py-2 px-2.5 rounded-xl text-slate-500 hover:text-slate-900 flex items-center justify-center gap-1.5 transition-all whitespace-nowrap">
+          <span>🎲</span><span>주사위</span>
         </button>
       </div>
 
-      <!-- 1. 밥알 광클 (1클릭 = 2P) -->
-      <div id="gameView_clicker" class="space-y-4 text-center">
-        <div class="p-3 bg-emerald-50 rounded-2xl border border-emerald-100 text-xs text-emerald-800">
+      <!-- 1. 밥알 광클 -->
+      <div id="gameView_clicker" class="space-y-5 text-center pt-1">
+        <div class="p-3.5 bg-emerald-50/80 rounded-2xl border border-emerald-100 text-xs text-emerald-800 font-medium">
           <strong>제한시간 10초 동안 밥그릇을 마구 클릭하세요!</strong> (1클릭당 2P 적립)
         </div>
         <div class="flex items-center justify-around font-black text-sm text-slate-700">
-          <div>남은 시간: <span id="gameTimer" class="text-rose-500 font-mono text-lg">10.0</span>초</div>
-          <div>밥알: <span id="gameScore" class="text-emerald-600 font-mono text-lg">0</span>개</div>
+          <div>남은 시간: <span id="gameTimer" class="text-rose-500 font-mono text-xl">10.0</span>초</div>
+          <div>밥알: <span id="gameScore" class="text-emerald-600 font-mono text-xl">0</span>개</div>
         </div>
-        <div class="py-3">
-          <button id="gameClickBtn" onclick="handleGameClick()" disabled class="w-24 h-24 mx-auto rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 text-white text-4xl shadow-xl flex items-center justify-center transition-transform active:scale-90 select-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+        <div class="py-2">
+          <button id="gameClickBtn" onclick="handleGameClick()" disabled class="w-32 h-32 mx-auto rounded-full bg-gradient-to-tr from-amber-300 via-amber-400 to-orange-400 text-white text-5xl shadow-xl flex items-center justify-center transition-transform active:scale-95 select-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed border-4 border-white/60">
             🍚
           </button>
         </div>
-        <button id="gameStartBtn" onclick="startMiniGame()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-xs shadow-md">
+        <button id="gameStartBtn" onclick="startMiniGame()" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-extrabold py-3.5 rounded-2xl text-xs shadow-md transition-all">
           게임 시작하기!
         </button>
       </div>
 
-      <!-- 2. 신규 노력형 게임 1: 스피드 연타 버스트 -->
-      <div id="gameView_speed" class="hidden space-y-4 text-center">
-        <div class="p-3 bg-teal-50 rounded-2xl border border-teal-100 text-xs text-teal-800">
+      <!-- 2. 스피드 연타 -->
+      <div id="gameView_speed" class="hidden space-y-5 text-center pt-1">
+        <div class="p-3.5 bg-teal-50/80 rounded-2xl border border-teal-100 text-xs text-teal-800 font-medium">
           <strong>5초 동안 30타 이상 폭풍 연타!</strong><br/>
           30타 성공 시 <strong>50P</strong> 보너스 지급! (+초과 1타당 2P)
         </div>
         <div class="flex items-center justify-around font-black text-sm text-slate-700">
-          <div>남은 시간: <span id="speedTimer" class="text-teal-600 font-mono text-lg">5.0</span>초</div>
-          <div>연타 수: <span id="speedHits" class="text-rose-500 font-mono text-lg">0</span>타</div>
+          <div>남은 시간: <span id="speedTimer" class="text-teal-600 font-mono text-xl">5.0</span>초</div>
+          <div>연타 수: <span id="speedHits" class="text-rose-500 font-mono text-xl">0</span>타</div>
         </div>
-        <div class="py-3">
-          <button id="speedHitBtn" onclick="handleSpeedHit()" disabled class="w-24 h-24 mx-auto rounded-3xl bg-gradient-to-tr from-teal-500 to-emerald-600 text-white text-4xl shadow-xl flex items-center justify-center transition-transform active:scale-90 select-none cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
+        <div class="py-2">
+          <button id="speedHitBtn" onclick="handleSpeedHit()" disabled class="w-32 h-32 mx-auto rounded-3xl bg-gradient-to-tr from-teal-400 to-emerald-500 text-white text-5xl shadow-xl flex items-center justify-center transition-transform active:scale-90 select-none cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed border-4 border-white/60">
             ⚡
           </button>
         </div>
-        <button id="speedStartBtn" onclick="startSpeedGame()" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-xl text-xs shadow-md">
+        <button id="speedStartBtn" onclick="startSpeedGame()" class="w-full bg-teal-600 hover:bg-teal-700 active:scale-[0.99] text-white font-extrabold py-3.5 rounded-2xl text-xs shadow-md transition-all">
           5초 스피드 연타 시작!
         </button>
       </div>
 
-      <!-- 3. 신규 노력형 게임 2: 식단 메뉴 암기 챌린지 -->
-      <div id="gameView_memory" class="hidden space-y-4 text-center">
-        <div class="p-3 bg-violet-50 rounded-2xl border border-violet-100 text-xs text-violet-800">
+      <!-- 3. 식단 암기 -->
+      <div id="gameView_memory" class="hidden space-y-4 text-center pt-1">
+        <div class="p-3.5 bg-violet-50/80 rounded-2xl border border-violet-100 text-xs text-violet-800 font-medium">
           <strong>화면에 깜빡이는 4가지 반찬 순서를 기억하세요!</strong><br/>
           정확하게 순서대로 클릭하면 <strong>80P</strong> 즉시 지급!
         </div>
-        <div class="p-4 bg-slate-900 rounded-2xl text-white font-mono text-sm tracking-wider min-h-[60px] flex items-center justify-center border-2 border-violet-500" id="memoryDisplay">
+        <div class="p-5 bg-slate-900 rounded-2xl text-white font-mono text-sm tracking-wider min-h-[70px] flex items-center justify-center border-2 border-violet-500" id="memoryDisplay">
           [게임 시작]을 눌러 암기를 시작하세요
         </div>
         <div class="grid grid-cols-4 gap-2 pt-1" id="memoryBtns">
-          <button onclick="pickMemoryMenu('제육볶음')" disabled class="mem-btn bg-slate-100 hover:bg-slate-200 border rounded-xl py-2.5 font-bold text-xs disabled:opacity-40">제육볶음</button>
-          <button onclick="pickMemoryMenu('돈까스')" disabled class="mem-btn bg-slate-100 hover:bg-slate-200 border rounded-xl py-2.5 font-bold text-xs disabled:opacity-40">돈까스</button>
-          <button onclick="pickMemoryMenu('닭강정')" disabled class="mem-btn bg-slate-100 hover:bg-slate-200 border rounded-xl py-2.5 font-bold text-xs disabled:opacity-40">닭강정</button>
-          <button onclick="pickMemoryMenu('김치찜')" disabled class="mem-btn bg-slate-100 hover:bg-slate-200 border rounded-xl py-2.5 font-bold text-xs disabled:opacity-40">김치찜</button>
+          <button onclick="pickMemoryMenu('제육볶음')" disabled class="mem-btn bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl py-3 font-bold text-xs disabled:opacity-40 transition-colors">제육볶음</button>
+          <button onclick="pickMemoryMenu('돈까스')" disabled class="mem-btn bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl py-3 font-bold text-xs disabled:opacity-40 transition-colors">돈까스</button>
+          <button onclick="pickMemoryMenu('닭강정')" disabled class="mem-btn bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl py-3 font-bold text-xs disabled:opacity-40 transition-colors">닭강정</button>
+          <button onclick="pickMemoryMenu('김치찜')" disabled class="mem-btn bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl py-3 font-bold text-xs disabled:opacity-40 transition-colors">김치찜</button>
         </div>
         <div id="memoryProgressText" class="text-xs font-bold text-slate-500 h-5"></div>
-        <button id="memoryStartBtn" onclick="startMemoryGame()" class="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-3 rounded-xl text-xs shadow-md">
+        <button id="memoryStartBtn" onclick="startMemoryGame()" class="w-full bg-violet-600 hover:bg-violet-700 active:scale-[0.99] text-white font-extrabold py-3.5 rounded-2xl text-xs shadow-md transition-all">
           메뉴 암기 도전하기!
         </button>
       </div>
 
-      <!-- 4. 행운의 슬롯머신 (50P + 0.00001% 초특급 50,000P 잭팟) -->
-      <div id="gameView_slot" class="hidden space-y-4 text-center">
-        <div class="p-3 bg-indigo-50 rounded-2xl border border-indigo-100 text-xs text-indigo-800 leading-relaxed">
+      <!-- 4. 슬롯머신 (초특급 잭팟 1,000,000P 반영) -->
+      <div id="gameView_slot" class="hidden space-y-4 text-center pt-1">
+        <div class="p-3.5 bg-indigo-50/80 rounded-2xl border border-indigo-100 text-xs text-indigo-800 leading-relaxed font-medium">
           <strong>1회당 50P 베팅!</strong><br/>
           3개 일치: <strong>500P</strong> | 2개 일치: <strong>100P</strong><br/>
-          <span class="text-rose-600 font-extrabold">🌟 0.00001% 확률 초특급 잭팟: 50,000P (다이아몬드 3개)</span>
+          <span class="text-rose-600 font-black">🌟 0.00001% 확률 초특급 잭팟: 1,000,000P (다이아몬드 3개)</span>
         </div>
-        <div class="py-5 bg-slate-900 rounded-2xl border-2 border-indigo-500 flex items-center justify-center gap-4 text-4xl shadow-inner">
-          <div id="slot1" class="w-14 h-14 bg-slate-800 rounded-xl flex items-center justify-center border border-slate-700">🍚</div>
-          <div id="slot2" class="w-14 h-14 bg-slate-800 rounded-xl flex items-center justify-center border border-slate-700">🍗</div>
-          <div id="slot3" class="w-14 h-14 bg-slate-800 rounded-xl flex items-center justify-center border border-slate-700">🥩</div>
+        <div class="py-6 bg-slate-900 rounded-2xl border-2 border-indigo-500 flex items-center justify-center gap-4 text-4xl shadow-inner">
+          <div id="slot1" class="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center border border-slate-700 shadow-md">🍚</div>
+          <div id="slot2" class="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center border border-slate-700 shadow-md">🍗</div>
+          <div id="slot3" class="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center border border-slate-700 shadow-md">🥩</div>
         </div>
         <div id="slotResultText" class="text-xs font-bold text-slate-500 h-5">행운의 버튼을 눌러보세요!</div>
         
         <div class="grid grid-cols-3 gap-2">
-          <button id="slotSpinBtn" onclick="spinSlotMachine(1)" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-all">
+          <button id="slotSpinBtn" onclick="spinSlotMachine(1)" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl text-xs shadow-md transition-all">
             1회 (50P)
           </button>
-          <button id="slotSpin10Btn" onclick="spinSlotMachine(10)" class="bg-indigo-700 hover:bg-indigo-800 text-amber-300 font-bold py-2.5 rounded-xl text-xs shadow-md transition-all">
+          <button id="slotSpin10Btn" onclick="spinSlotMachine(10)" class="bg-indigo-700 hover:bg-indigo-800 text-amber-300 font-bold py-3 rounded-xl text-xs shadow-md transition-all">
             10회 (500P)
           </button>
-          <button id="slotSpin100Btn" onclick="spinSlotMachine(100)" class="bg-slate-900 hover:bg-black text-rose-400 font-bold py-2.5 rounded-xl text-xs shadow-md transition-all border border-indigo-500/40">
+          <button id="slotSpin100Btn" onclick="spinSlotMachine(100)" class="bg-slate-900 hover:bg-black text-rose-400 font-bold py-3 rounded-xl text-xs shadow-md transition-all border border-indigo-500/40">
             100회 (5,000P)
           </button>
         </div>
       </div>
 
-      <!-- 5. 동전 던지기 (최대 10,000P 자유 베팅) -->
-      <div id="gameView_coin" class="hidden space-y-4 text-center">
-        <div class="p-3 bg-amber-50 rounded-2xl border border-amber-100 text-xs text-amber-800">
+      <!-- 5. 동전 던지기 -->
+      <div id="gameView_coin" class="hidden space-y-4 text-center pt-1">
+        <div class="p-3.5 bg-amber-50/80 rounded-2xl border border-amber-100 text-xs text-amber-800 font-medium">
           <strong>앞면 vs 뒷면 50% 확률 승부!</strong><br/>
           성공 시 베팅액의 <strong>2배</strong> 즉시 지급! (최대 10,000P)
         </div>
@@ -656,23 +620,23 @@
           <input id="coinBetInput" type="number" value="100" min="50" max="10000" step="50" class="w-32 border rounded-xl p-2 text-center font-black bg-slate-50 outline-none focus:border-amber-500" />
           <span class="text-xs font-bold text-slate-500">P</span>
         </div>
-        <div class="py-5 bg-slate-900 rounded-2xl border-2 border-amber-500 flex items-center justify-center text-5xl shadow-inner">
+        <div class="py-6 bg-slate-900 rounded-2xl border-2 border-amber-500 flex items-center justify-center text-5xl shadow-inner">
           <span id="coinDisplay" class="animate-pulse">🪙</span>
         </div>
         <div id="coinResultText" class="text-xs font-bold text-slate-500 h-5">앞면 또는 뒷면을 선택하세요!</div>
         <div class="grid grid-cols-2 gap-3">
-          <button onclick="playCoinFlip('front')" class="bg-amber-500 hover:bg-amber-600 text-white font-black py-3 rounded-xl text-xs shadow-md">
+          <button onclick="playCoinFlip('front')" class="bg-amber-500 hover:bg-amber-600 text-white font-black py-3.5 rounded-2xl text-xs shadow-md transition-all">
             앞면 선택
           </button>
-          <button onclick="playCoinFlip('back')" class="bg-orange-600 hover:bg-orange-700 text-white font-black py-3 rounded-xl text-xs shadow-md">
+          <button onclick="playCoinFlip('back')" class="bg-orange-600 hover:bg-orange-700 text-white font-black py-3.5 rounded-2xl text-xs shadow-md transition-all">
             뒷면 선택
           </button>
         </div>
       </div>
 
-      <!-- 6. 주사위 홀짝 (최대 10,000P 자유 베팅) -->
-      <div id="gameView_dice" class="hidden space-y-4 text-center">
-        <div class="p-3 bg-purple-50 rounded-2xl border border-purple-100 text-xs text-purple-800">
+      <!-- 6. 주사위 홀짝 -->
+      <div id="gameView_dice" class="hidden space-y-4 text-center pt-1">
+        <div class="p-3.5 bg-purple-50/80 rounded-2xl border border-purple-100 text-xs text-purple-800 font-medium">
           <strong>주사위 숫자의 홀 / 짝을 맞추세요!</strong><br/>
           적중 시 베팅액의 <strong>2배</strong> 지급! (최대 10,000P)
         </div>
@@ -681,15 +645,15 @@
           <input id="diceBetInput" type="number" value="100" min="50" max="10000" step="50" class="w-32 border rounded-xl p-2 text-center font-black bg-slate-50 outline-none focus:border-purple-500" />
           <span class="text-xs font-bold text-slate-500">P</span>
         </div>
-        <div class="py-5 bg-slate-900 rounded-2xl border-2 border-purple-500 flex items-center justify-center text-5xl shadow-inner">
+        <div class="py-6 bg-slate-900 rounded-2xl border-2 border-purple-500 flex items-center justify-center text-5xl shadow-inner">
           <span id="diceDisplay">🎲</span>
         </div>
         <div id="diceResultText" class="text-xs font-bold text-slate-500 h-5">홀수 또는 짝수를 선택하세요!</div>
         <div class="grid grid-cols-2 gap-3">
-          <button onclick="playDiceBet('odd')" class="bg-purple-600 hover:bg-purple-700 text-white font-black py-3 rounded-xl text-xs shadow-md">
+          <button onclick="playDiceBet('odd')" class="bg-purple-600 hover:bg-purple-700 text-white font-black py-3.5 rounded-2xl text-xs shadow-md transition-all">
             홀수 (1, 3, 5) 베팅
           </button>
-          <button onclick="playDiceBet('even')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-xl text-xs shadow-md">
+          <button onclick="playDiceBet('even')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3.5 rounded-2xl text-xs shadow-md transition-all">
             짝수 (2, 4, 6) 베팅
           </button>
         </div>
@@ -794,7 +758,7 @@
     </div>
   </div>
 
-  <!-- 관리자 대시보드 -->
+  <!-- [관리자 대시보드 (회원 삭제 & 가입 승인 기능 통합)] -->
   <div id="adminDashboardModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
@@ -843,6 +807,19 @@
         </button>
       </div>
 
+      <!-- 2. 신규 회원가입 승인 대기 목록 -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <h4 class="font-extrabold text-xs text-slate-800 flex items-center gap-1.5">
+            <i data-lucide="user-check" class="w-4 h-4 text-emerald-600"></i>
+            신규 회원 가입 승인 대기 목록
+          </h4>
+          <span id="pendingUserCount" class="text-[11px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">0명 대기</span>
+        </div>
+        <div id="adminPendingUsersContainer" class="space-y-2 max-h-36 overflow-y-auto border rounded-2xl p-2 bg-slate-50 text-xs"></div>
+      </div>
+
+      <!-- 개설된 비밀 그룹 관리 -->
       <div class="space-y-3">
         <h4 class="font-extrabold text-xs text-slate-800 flex items-center gap-1.5">
           <i data-lucide="folder-lock" class="w-4 h-4 text-indigo-600"></i>
@@ -859,10 +836,11 @@
         <div id="adminPendingListContainer" class="space-y-2 max-h-36 overflow-y-auto"></div>
       </div>
 
+      <!-- 1. 전체 회원 관리 (회원 삭제 기능 완비) -->
       <div class="space-y-3">
         <h4 class="font-extrabold text-xs text-slate-800 flex items-center gap-1.5">
           <i data-lucide="users" class="w-3.5 h-3.5 text-indigo-600"></i>
-          전체 회원 관리 및 아이템 선물/몰수 (<span id="adminTotalUserCount">0명</span>)
+          전체 승인 회원 관리 & 회원 삭제 (<span id="adminTotalUserCount">0명</span>)
         </h4>
         <div id="adminUserListContainer" class="space-y-2 max-h-48 overflow-y-auto border rounded-2xl p-2 bg-slate-50 text-xs"></div>
       </div>
@@ -1025,23 +1003,23 @@
     </div>
   </div>
 
-  <!-- 프로필 설정 모달 -->
+  <!-- 프로필 설정 모달 (관리자 승인 안내 연동) -->
   <div id="authModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-xs rounded-3xl shadow-2xl p-6 space-y-4 text-xs">
       <div class="flex items-center justify-between border-b pb-2">
-        <h3 class="font-extrabold text-slate-900 text-sm">내 닉네임 설정</h3>
+        <h3 class="font-extrabold text-slate-900 text-sm">내 닉네임 설정 (회원가입)</h3>
         <button onclick="closeAuthModal()" class="text-slate-400">✕</button>
       </div>
       <div>
         <label class="block font-bold text-slate-700 mb-1">닉네임 (한글, 영문, 숫자만 / 중복 불가)</label>
         <input id="authNicknameInput" type="text" placeholder="예: 테라타워직장인" class="w-full border rounded-xl p-2.5 font-bold outline-none focus:border-indigo-500" />
-        <p class="text-[10px] text-slate-400 mt-1">※ 이미 사용 중인 닉네임은 사용할 수 없습니다.</p>
+        <p class="text-[10px] text-amber-600 font-bold mt-1.5">※ 회원가입 후 관리자 승인이 완료되어야 사이트의 모든 기능을 정상 이용하실 수 있습니다.</p>
       </div>
-      <button id="saveUserBtn" onclick="saveUserProfile()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-2.5 rounded-xl transition-colors">저장하기</button>
+      <button id="saveUserBtn" onclick="saveUserProfile()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-2.5 rounded-xl transition-colors">가입 및 승인 요청</button>
     </div>
   </div>
 
-  <!-- [플로팅 실시간 채팅창] (1번 요구사항 완벽 복원) -->
+  <!-- [플로팅 실시간 채팅창] -->
   <div class="fixed bottom-6 right-6 z-50">
     <button id="chatToggleBtn" onclick="toggleChatWindow()" class="relative bg-gradient-to-tr from-indigo-600 to-indigo-800 text-white w-14 h-14 rounded-2xl shadow-xl shadow-indigo-600/30 flex items-center justify-center transition-all hover:scale-105 active:scale-95">
       <i data-lucide="message-square" class="w-6 h-6"></i>
@@ -1117,6 +1095,7 @@
     let myNickColor = localStorage.getItem('bapsim_custom_color') || '';
     let myNickBg = localStorage.getItem('bapsim_custom_bg') || 'nb-none';
     let myNickSymbol = localStorage.getItem('bapsim_custom_symbol') || '';
+    let isUserApproved = false; // 2. 회원 승인 여부 플래그
 
     let rawInv = {};
     try { rawInv = JSON.parse(localStorage.getItem('bapsim_inventory') || '{}'); } catch(e) {}
@@ -1199,7 +1178,19 @@
     };
 
     // ==========================================
-    // 1. 실시간 채팅 기능 (완전 복원)
+    // 2. 가입 승인 검증 가드 유틸
+    // ==========================================
+    function checkApprovalGuard() {
+      if (currentUser.nickname === "문정러") return true;
+      if (!isUserApproved) {
+        alert("🔒 관리자 회원 승인 대기 중입니다.\n관리자가 승인한 후 이용하실 수 있습니다.");
+        return false;
+      }
+      return true;
+    }
+
+    // ==========================================
+    // 1. 실시간 채팅 기능
     // ==========================================
     function toggleChatWindow() {
       const chatWin = document.getElementById('chatWindow');
@@ -1213,6 +1204,7 @@
 
     function handleSendChat(e) {
       e.preventDefault();
+      if (!checkApprovalGuard()) return;
       const input = document.getElementById('chatInput');
       const text = input.value.trim();
       if (!text) return;
@@ -1230,6 +1222,7 @@
     }
 
     function sendSticker(stickerType) {
+      if (!checkApprovalGuard()) return;
       if (userPoints < 10) return alert("❌ 이모티콘 전송에는 10P가 필요합니다!");
       userPoints -= 10;
       updatePointsUI();
@@ -1246,6 +1239,7 @@
     }
 
     function quickChat(text) {
+      if (!checkApprovalGuard()) return;
       const input = document.getElementById('chatInput');
       if (input) {
         input.value = text;
@@ -1305,22 +1299,27 @@
     }
 
     // ==========================================
-    // 2. 게임 아케이드 6종 (노력형 2종 추가 + 베팅 확장)
+    // 3 & 4. 포인트 게임 아케이드 (UI 개편 & 1,000,000P 잭팟)
     // ==========================================
     function switchGameTab(tabName) {
       ['clicker', 'speed', 'memory', 'slot', 'coin', 'dice'].forEach(t => {
         const view = document.getElementById(`gameView_${t}`);
         const tab = document.getElementById(`tabBtn_${t}`);
         if (view) view.classList.add('hidden');
-        if (tab) tab.className = "py-2 rounded-xl text-slate-500 hover:text-slate-800 transition-all text-center";
+        if (tab) {
+          tab.className = "flex-1 py-2 px-2.5 rounded-xl text-slate-500 hover:text-slate-900 flex items-center justify-center gap-1.5 transition-all whitespace-nowrap";
+        }
       });
       const curView = document.getElementById(`gameView_${tabName}`);
       const curTab = document.getElementById(`tabBtn_${tabName}`);
       if (curView) curView.classList.remove('hidden');
-      if (curTab) curTab.className = "py-2 rounded-xl bg-white shadow-xs text-slate-900 transition-all font-black text-center";
+      if (curTab) {
+        curTab.className = "flex-1 py-2 px-2.5 rounded-xl bg-white shadow-xs text-slate-900 font-extrabold flex items-center justify-center gap-1.5 transition-all whitespace-nowrap";
+      }
     }
 
     function openMiniGameModal() { 
+      if (!checkApprovalGuard()) return;
       resetMiniGameState(); 
       switchGameTab('clicker');
       document.getElementById('miniGameModal').classList.remove('hidden'); 
@@ -1331,7 +1330,7 @@
       document.getElementById('miniGameModal').classList.add('hidden'); 
     }
 
-    // 2-A. 밥알 광클
+    // 밥알 광클
     function resetMiniGameState() {
       if (gameInterval) clearInterval(gameInterval);
       isGameRunning = false;
@@ -1384,7 +1383,7 @@
       alert(`🍚 미니게임 종료!\n총 클릭 수: ${gameClicks}회\n🎉 +${earned.toLocaleString()}P 적립 완료! (1클릭당 2P)`);
     }
 
-    // 2-B. 신규 노력형 1: 스피드 연타 (5초)
+    // 스피드 연타 (5초)
     function startSpeedGame() {
       if (speedInterval) clearInterval(speedInterval);
       isSpeedRunning = true;
@@ -1433,7 +1432,7 @@
       document.getElementById('speedHits').textContent = speedHits;
     }
 
-    // 2-C. 신규 노력형 2: 식단 메뉴 암기 챌린지
+    // 식단 메뉴 암기
     function startMemoryGame() {
       memorySequence = [];
       memoryUserStep = 0;
@@ -1492,7 +1491,7 @@
       }
     }
 
-    // 2-D. 행운의 슬롯머신 (0.00001% 잭팟 탑재)
+    // 4. 슬롯머신 (0.00001% 초특급 잭팟 상금 1,000,000P 반영)
     function spinSlotMachine(times = 1) {
       if (isSlotSpinning) return;
       const totalCost = 50 * times;
@@ -1509,7 +1508,7 @@
       if (times === 1) {
         isSlotSpinning = true;
         spinBtn.disabled = true;
-        resultText.textContent = "슬롯 회전 중... 과연 잭팟은?!";
+        resultText.textContent = "슬롯 회전 중... 과연 1,000,000P 잭팟은?!";
 
         const slot1 = document.getElementById('slot1');
         const slot2 = document.getElementById('slot2');
@@ -1534,10 +1533,10 @@
               slot1.textContent = "💎";
               slot2.textContent = "💎";
               slot3.textContent = "💎";
-              userPoints += 50000;
+              userPoints += 1000000;
               updatePointsUI();
-              if (window.confetti) confetti({ particleCount: 300, spread: 120 });
-              resultText.innerHTML = `<span class="text-rose-500 font-black text-sm animate-bounce">🌟 0.00001% 초특급 잭팟! 50,000P 획득!! 🌟</span>`;
+              if (window.confetti) confetti({ particleCount: 400, spread: 140 });
+              resultText.innerHTML = `<span class="text-rose-500 font-black text-sm animate-bounce">🌟 0.00001% 초특급 잭팟! 1,000,000P 획득!! 🌟</span>`;
               return;
             }
 
@@ -1568,7 +1567,7 @@
         for (let i = 0; i < times; i++) {
           if (Math.random() < 0.0000001) {
             megaJackpots++;
-            totalWon += 50000;
+            totalWon += 1000000;
             continue;
           }
           const r1 = SLOT_ITEMS[Math.floor(Math.random() * SLOT_ITEMS.length)];
@@ -1588,18 +1587,18 @@
         updatePointsUI();
 
         const net = totalWon - totalCost;
-        if (megaJackpots > 0 && window.confetti) confetti({ particleCount: 300 });
+        if (megaJackpots > 0 && window.confetti) confetti({ particleCount: 400 });
         else if (triples > 0 && window.confetti) confetti({ particleCount: 150 });
 
         resultText.innerHTML = `
           <span class="${net >= 0 ? 'text-amber-500' : 'text-rose-500'} font-bold">
-            ${times}회 정산: ${megaJackpots > 0 ? `💎초특급 ${megaJackpots}회! ` : ''}트리플 ${triples}회 | 더블 ${doubles}회 (순수익: ${net >= 0 ? '+' : ''}${net.toLocaleString()}P)
+            ${times}회 정산: ${megaJackpots > 0 ? `💎초특급 ${megaJackpots}회(+${(megaJackpots * 1000000).toLocaleString()}P)! ` : ''}트리플 ${triples}회 | 더블 ${doubles}회 (순수익: ${net >= 0 ? '+' : ''}${net.toLocaleString()}P)
           </span>
         `;
       }
     }
 
-    // 2-E. 동전 던지기 (최대 10,000P)
+    // 동전 던지기
     function playCoinFlip(userChoice) {
       const betInput = parseInt(document.getElementById('coinBetInput').value, 10);
       const bet = Math.min(Math.max(betInput || 50, 50), 10000);
@@ -1629,7 +1628,7 @@
       }, 400);
     }
 
-    // 2-F. 주사위 홀짝 (최대 10,000P)
+    // 주사위 홀짝
     const DICE_ICONS = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
     function playDiceBet(userChoice) {
       const betInput = parseInt(document.getElementById('diceBetInput').value, 10);
@@ -1753,6 +1752,7 @@
     }
 
     function openShopModal() { 
+      if (!checkApprovalGuard()) return;
       try {
         renderShopUI(); 
         updatePointsUI(); 
@@ -1811,7 +1811,7 @@
       renderShopUI();
     }
 
-    // 관리자 전용 배지 + 화이트 닉네임 장착 (요구사항 3-2, 3-3 반영)
+    // 관리자 전용 배지 + 화이트 닉네임 장착
     function adminEquipSelf() {
       myNickBg = 'nb-admin';
       myNickColor = '#ffffff';
@@ -1852,14 +1852,21 @@
       if (!currentUser.nickname) return;
       db.ref(`user_points/${currentUser.nickname}`).on('value', (snap) => {
         const val = snap.val();
-        if (val && typeof val.points === 'number') {
-          if (val.points !== userPoints) {
+        const banner = document.getElementById('pendingApprovalBanner');
+
+        if (val) {
+          // 2. 승인 상태 체크 (status가 'approved'이거나 기존 승인 사용자)
+          isUserApproved = (val.status === 'approved' || val.approved === true || currentUser.nickname === "문정러");
+          if (banner) {
+            if (val.status === 'pending') banner.classList.remove('hidden');
+            else banner.classList.add('hidden');
+          }
+
+          if (typeof val.points === 'number' && val.points !== userPoints) {
             userPoints = val.points;
             localStorage.setItem('bapsim_points', userPoints.toString());
             updatePointsUI(false);
           }
-        }
-        if (val) {
           if (val.badge && val.badge !== myNickBg) {
             myNickBg = val.badge;
             localStorage.setItem('bapsim_custom_bg', myNickBg);
@@ -1874,6 +1881,16 @@
             myNickSymbol = val.symbol;
             localStorage.setItem('bapsim_custom_symbol', myNickSymbol);
             updatePreviewBox();
+          }
+        } else {
+          // 유저가 관리자에 의해 삭제된 경우
+          if (currentUser.nickname !== "문정러") {
+            alert("회원 정보가 삭제되었거나 초기화되었습니다. 기본 사용자로 전환됩니다.");
+            localStorage.removeItem('bapsim_user');
+            currentUser = { nickname: "문정러" };
+            isUserApproved = true;
+            if (banner) banner.classList.add('hidden');
+            location.reload();
           }
         }
       });
@@ -2103,7 +2120,7 @@
     }
 
     // ==========================================
-    // 5. 관리자 대시보드 및 사용자 관리
+    // 5. 관리자 대시보드 및 사용자 관리 (1. 회원 삭제 & 2. 가입 승인)
     // ==========================================
     window.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
@@ -2133,8 +2150,155 @@
       loadPendingPointRequests();
       renderAdminUserList();
       renderAdminGroupList();
+      renderAdminPendingUsers();
     }
     function closeAdminDashboard() { document.getElementById('adminDashboardModal').classList.add('hidden'); }
+
+    // 2. 신규 가입 승인 대기 목록 렌더링
+    function renderAdminPendingUsers() {
+      db.ref('user_points').on('value', (snap) => {
+        const users = snap.val() || {};
+        const container = document.getElementById('adminPendingUsersContainer');
+        const pendingList = Object.values(users).filter(u => u.status === 'pending');
+        const cntEl = document.getElementById('pendingUserCount');
+        if (cntEl) cntEl.textContent = `${pendingList.length}명 대기`;
+        if (!container) return;
+        container.innerHTML = '';
+
+        if (pendingList.length === 0) {
+          container.innerHTML = '<div class="text-center text-slate-400 py-3">승인 대기 중인 회원이 없습니다.</div>';
+          return;
+        }
+
+        pendingList.forEach(u => {
+          const item = document.createElement('div');
+          item.className = "p-2.5 bg-white border rounded-xl flex items-center justify-between";
+          item.innerHTML = `
+            <div class="min-w-0 pr-2">
+              <span class="font-bold text-slate-900 truncate block">${u.nickname}</span>
+              <span class="text-[10px] text-slate-400">가입신청: ${new Date(u.createdAt || Date.now()).toLocaleDateString()}</span>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button onclick="adminApproveUser('${u.nickname}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-1 rounded-lg text-[11px] shadow-xs">
+                승인
+              </button>
+              <button onclick="adminRejectUser('${u.nickname}')" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-2.5 py-1 rounded-lg text-[11px]">
+                거절
+              </button>
+            </div>
+          `;
+          container.appendChild(item);
+        });
+      });
+    }
+
+    function adminApproveUser(nick) {
+      db.ref(`user_points/${nick}`).update({ status: 'approved', approved: true }, (err) => {
+        if (err) return alert("오류: " + err.message);
+        alert(`✅ [${nick}] 회원의 가입을 승인했습니다.`);
+      });
+    }
+
+    function adminRejectUser(nick) {
+      if (!confirm(`[${nick}] 회원의 가입을 거절하고 삭제하시겠습니까?`)) return;
+      db.ref(`user_points/${nick}`).remove(() => {
+        db.ref(`online_users/${nick}`).remove();
+        alert(`[${nick}] 회원의 가입 신청이 거절되었습니다.`);
+      });
+    }
+
+    // 1. 회원 목록 & 회원 영구 삭제 기능
+    function renderAdminUserList() {
+      db.ref('user_points').on('value', (snap) => {
+        const users = snap.val() || {};
+        const container = document.getElementById('adminUserListContainer');
+        const list = Object.values(users).filter(u => u.status !== 'pending');
+        const cntEl = document.getElementById('adminTotalUserCount');
+        if (cntEl) cntEl.textContent = `${list.length}명`;
+        if (!container) return;
+        container.innerHTML = '';
+
+        if (list.length === 0) {
+          container.innerHTML = '<div class="text-center text-slate-400 py-3">등록된 회원이 없습니다.</div>';
+          return;
+        }
+
+        list.sort((a, b) => (b.points || 0) - (a.points || 0));
+
+        list.forEach(u => {
+          const item = document.createElement('div');
+          item.className = "p-2 bg-white border rounded-xl flex items-center justify-between";
+          item.innerHTML = `
+            <div class="flex items-center gap-1.5 min-w-0">
+              <span class="font-bold text-slate-800 truncate">${u.nickname}</span>
+              <span class="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.2 rounded font-black shrink-0">
+                ${(u.points || 0).toLocaleString()}P
+              </span>
+            </div>
+            <div class="flex items-center gap-1 shrink-0">
+              <button onclick="adminManageUserItems('${u.nickname}')" class="bg-amber-50 text-amber-800 font-bold px-2 py-1 rounded-lg text-[10px]">
+                아이템
+              </button>
+              <button onclick="adminQuickSetPoint('${u.nickname}')" class="bg-indigo-50 text-indigo-700 font-bold px-2 py-1 rounded-lg text-[10px]">
+                포인트
+              </button>
+              <button onclick="adminDeleteUser('${u.nickname}')" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-2 py-1 rounded-lg text-[10px]">
+                삭제
+              </button>
+            </div>
+          `;
+          container.appendChild(item);
+        });
+      });
+    }
+
+    // 1. 관리자 모드 회원 삭제
+    function adminDeleteUser(nick) {
+      if (!confirm(`🚨 정말로 [${nick}] 회원을 영구 삭제하시겠습니까?\n해당 회원의 모든 데이터와 포인트가 삭제됩니다.`)) return;
+      db.ref(`user_points/${nick}`).remove((err) => {
+        if (err) return alert("회원 삭제 실패: " + err.message);
+        db.ref(`online_users/${nick}`).remove();
+        alert(`✅ [${nick}] 회원이 성공적으로 삭제되었습니다.`);
+      });
+    }
+
+    function adminManageUserItems(nick) {
+      const choice = prompt(`[${nick}] 회원의 아이템 관리\n1: 모든 아이템 몰수\n2: 코스믹 레인보우 선물\n3: 태양의 겁화 선물\n4: 원하는 배지 클래스명 직접 입력\n\n번호를 입력하세요:`);
+      if (!choice) return;
+
+      if (choice === '1') {
+        db.ref(`user_points/${nick}`).update({ badge: 'nb-none', color: '', symbol: '' });
+        alert(`[${nick}] 회원의 모든 치장 아이템을 몰수했습니다.`);
+      } else if (choice === '2') {
+        db.ref(`user_points/${nick}`).update({ badge: 'nb-cosmic' });
+        alert(`[${nick}] 회원에게 코스믹 레인보우 배지를 선물했습니다.`);
+      } else if (choice === '3') {
+        db.ref(`user_points/${nick}`).update({ badge: 'nb-solar' });
+        alert(`[${nick}] 회원에게 태양의 겁화 배지를 선물했습니다.`);
+      } else if (choice === '4') {
+        const bgName = prompt("배지 클래스명을 입력하세요 (예: nb-admin, nb-gold, nb-matrix):");
+        if (bgName) {
+          db.ref(`user_points/${nick}`).update({ badge: bgName });
+          alert(`[${nick}] 회원에게 ${bgName} 배지를 장착시켰습니다.`);
+        }
+      }
+    }
+
+    function adminQuickSetPoint(nick) {
+      const val = prompt(`[${nick}] 회원의 새 포인트 값을 입력하세요:`);
+      if (val === null) return;
+      const num = parseInt(val, 10);
+      if (isNaN(num)) return alert("숫자만 입력 가능합니다.");
+
+      db.ref(`user_points/${nick}/points`).set(num, (err) => {
+        if (err) return alert("오류: " + err.message);
+        if (currentUser.nickname === nick) {
+          userPoints = num;
+          updatePointsUI(false);
+        }
+        alert(`[${nick}] 님의 포인트가 ${num.toLocaleString()}P 로 변경되었습니다.`);
+      });
+    }
 
     function handleAdminResetAllPoints() {
       const confirmCode = prompt("경고: 모든 회원의 보유 포인트가 '0P'로 초기화됩니다!\n진행하시려면 '초기화'를 입력하세요.");
@@ -2205,85 +2369,6 @@
       });
     }
 
-    function renderAdminUserList() {
-      db.ref('user_points').on('value', (snap) => {
-        const users = snap.val() || {};
-        const container = document.getElementById('adminUserListContainer');
-        const list = Object.values(users);
-        const cntEl = document.getElementById('adminTotalUserCount');
-        if (cntEl) cntEl.textContent = `${list.length}명`;
-        if (!container) return;
-        container.innerHTML = '';
-
-        if (list.length === 0) {
-          container.innerHTML = '<div class="text-center text-slate-400 py-3">등록된 회원이 없습니다.</div>';
-          return;
-        }
-
-        list.sort((a, b) => (b.points || 0) - (a.points || 0));
-
-        list.forEach(u => {
-          const item = document.createElement('div');
-          item.className = "p-2 bg-white border rounded-xl flex items-center justify-between";
-          item.innerHTML = `
-            <div class="flex items-center gap-1.5 min-w-0">
-              <span class="font-bold text-slate-800 truncate">${u.nickname}</span>
-              <span class="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.2 rounded font-black shrink-0">
-                ${(u.points || 0).toLocaleString()}P
-              </span>
-            </div>
-            <div class="flex items-center gap-1 shrink-0">
-              <button onclick="adminManageUserItems('${u.nickname}')" class="bg-amber-50 text-amber-800 font-bold px-2 py-1 rounded-lg text-[10px]">
-                아이템 관리
-              </button>
-              <button onclick="adminQuickSetPoint('${u.nickname}')" class="bg-indigo-50 text-indigo-700 font-bold px-2 py-1 rounded-lg text-[10px]">
-                포인트 수정
-              </button>
-            </div>
-          `;
-          container.appendChild(item);
-        });
-      });
-    }
-
-    function adminManageUserItems(nick) {
-      const choice = prompt(`[${nick}] 회원의 아이템 관리\n1: 모든 아이템 몰수\n2: 코스믹 레인보우 선물\n3: 태양의 겁화 선물\n4: 원하는 배지 클래스명 직접 입력\n\n번호를 입력하세요:`);
-      if (!choice) return;
-
-      if (choice === '1') {
-        db.ref(`user_points/${nick}`).update({ badge: 'nb-none', color: '', symbol: '' });
-        alert(`[${nick}] 회원의 모든 치장 아이템을 몰수했습니다.`);
-      } else if (choice === '2') {
-        db.ref(`user_points/${nick}`).update({ badge: 'nb-cosmic' });
-        alert(`[${nick}] 회원에게 코스믹 레인보우 배지를 선물했습니다.`);
-      } else if (choice === '3') {
-        db.ref(`user_points/${nick}`).update({ badge: 'nb-solar' });
-        alert(`[${nick}] 회원에게 태양의 겁화 배지를 선물했습니다.`);
-      } else if (choice === '4') {
-        const bgName = prompt("배지 클래스명을 입력하세요 (예: nb-admin, nb-gold, nb-matrix):");
-        if (bgName) {
-          db.ref(`user_points/${nick}`).update({ badge: bgName });
-          alert(`[${nick}] 회원에게 ${bgName} 배지를 장착시켰습니다.`);
-        }
-      }
-    }
-
-    function adminQuickSetPoint(nick) {
-      const val = prompt(`[${nick}] 회원의 새 포인트 값을 입력하세요:`);
-      if (val === null) return;
-      const num = parseInt(val, 10);
-      if (isNaN(num)) return alert("숫자만 입력 가능합니다.");
-
-      db.ref(`user_points/${nick}/points`).set(num, (err) => {
-        if (err) return alert("오류: " + err.message);
-        if (currentUser.nickname === nick) {
-          userPoints = num;
-          updatePointsUI(false);
-        }
-        alert(`[${nick}] 님의 포인트가 ${num.toLocaleString()}P 로 변경되었습니다.`);
-      });
-    }
-
     function loadPendingPointRequests() {
       db.ref('point_requests').on('value', (snap) => {
         const data = snap.val() || {};
@@ -2337,7 +2422,7 @@
     function renderPointRankings() {
       db.ref('user_points').on('value', (snap) => {
         const data = snap.val() || {};
-        const userList = Object.values(data);
+        const userList = Object.values(data).filter(u => u.status !== 'pending');
         userList.sort((a, b) => (b.points || 0) - (a.points || 0));
 
         const sideContainer = document.getElementById('sideRankListContainer');
@@ -2563,6 +2648,7 @@
     }
 
     function castVote(id) {
+      if (!checkApprovalGuard()) return;
       if (currentGroupId === 'lobby') {
         openGroupListModal();
         return;
@@ -2631,6 +2717,7 @@
 
     function handleCreateGroup(e) {
       e.preventDefault();
+      if (!checkApprovalGuard()) return;
       const groupName = document.getElementById('createGroupName').value.trim();
       const password = document.getElementById('createGroupPass').value.trim();
       const gid = 'grp_' + Date.now();
@@ -2723,6 +2810,7 @@
     // 사다리타기 게임 엔진
     let ladderData = { lines: 4, rungs: [], names: [], results: [] };
     function openLadderModal() {
+      if (!checkApprovalGuard()) return;
       document.getElementById('ladderGameModal').classList.remove('hidden');
       const inputNames = document.getElementById('ladderInputNames');
       if (inputNames && inputNames.value.trim() === '') autoFillLadderWithRestaurants();
@@ -2868,7 +2956,11 @@
       }, 120);
     }
 
-    function openRouletteModal() { document.getElementById('rouletteSlotText').textContent = "???"; document.getElementById('rouletteModal').classList.remove('hidden'); }
+    function openRouletteModal() { 
+      if (!checkApprovalGuard()) return;
+      document.getElementById('rouletteSlotText').textContent = "???"; 
+      document.getElementById('rouletteModal').classList.remove('hidden'); 
+    }
     function closeRouletteModal() { document.getElementById('rouletteModal').classList.add('hidden'); }
 
     function spinRoulette() {
@@ -2903,6 +2995,7 @@
     }
 
     function openAddModal() {
+      if (!checkApprovalGuard()) return;
       document.getElementById('restaurantForm').reset();
       document.getElementById('editRestId').value = '';
       const now = new Date();
@@ -2915,6 +3008,7 @@
     }
 
     function openEditModal(id) {
+      if (!checkApprovalGuard()) return;
       const r = restaurants[id];
       if (!r) return;
       document.getElementById('editRestId').value = id;
@@ -2983,11 +3077,12 @@
     }
 
     function openAuthModal() {
-      document.getElementById('authNicknameInput').value = currentUser.nickname;
+      document.getElementById('authNicknameInput').value = (currentUser.nickname !== "문정러" ? currentUser.nickname : '');
       document.getElementById('authModal').classList.remove('hidden');
     }
     function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
 
+    // 2. 회원가입 시 관리자 승인 대기 처리
     async function saveUserProfile() {
       const input = document.getElementById('authNicknameInput').value.trim();
       const saveBtn = document.getElementById('saveUserBtn');
@@ -3005,9 +3100,9 @@
       try {
         const snap = await db.ref(`user_points/${input}`).once('value');
         if (snap.exists()) {
-          alert(`❌ 이미 다른 사용자가 사용 중인 닉네임입니다!\n다른 닉네임을 입력해 주세요.`);
+          alert(`❌ 이미 등록되었거나 사용 중인 닉네임입니다!\n다른 닉네임을 입력해 주세요.`);
           saveBtn.disabled = false;
-          saveBtn.textContent = "저장하기";
+          saveBtn.textContent = "가입 및 승인 요청";
           return;
         }
 
@@ -3016,12 +3111,16 @@
         localStorage.setItem('bapsim_user', JSON.stringify(currentUser));
         document.getElementById('userProfileText').textContent = input;
 
+        // 신규 가입 시 status: 'pending' 으로 등록
         await db.ref(`user_points/${input}`).set({
           nickname: input,
           points: userPoints,
           badge: myNickBg,
           color: myNickColor,
           symbol: myNickSymbol,
+          status: 'pending',
+          approved: false,
+          createdAt: Date.now(),
           updatedAt: Date.now()
         });
 
@@ -3030,16 +3129,17 @@
           db.ref(`online_users/${oldNick}`).remove();
         }
 
+        isUserApproved = false;
         attachUserPointListener();
         initPresenceSystem();
         updatePointsUI();
         closeAuthModal();
-        alert(`🎉 닉네임이 [${input}] 으로 성공적으로 변경되었습니다!`);
+        alert(`🎉 회원가입 신청이 완료되었습니다!\n관리자의 승인이 완료된 후 모든 기능을 이용하실 수 있습니다.`);
       } catch (err) {
         alert("오류 발생: " + err.message);
       } finally {
         saveBtn.disabled = false;
-        saveBtn.textContent = "저장하기";
+        saveBtn.textContent = "가입 및 승인 요청";
       }
     }
 
