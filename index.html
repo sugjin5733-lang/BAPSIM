@@ -485,7 +485,7 @@
     </div>
   </div>
 
-  <!-- [포인트 게임장 모달 - 횡스크롤 제거 및 3x2 그리드 개편 완료] -->
+  <!-- [포인트 게임장 모달 - 횡스크롤 없이 한눈에 보이는 3x2 그리드 배열] -->
   <div id="miniGameModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
@@ -501,7 +501,7 @@
         <button onclick="closeMiniGameModal()" class="text-slate-400 hover:text-slate-600 text-base font-bold p-1">✕</button>
       </div>
 
-      <!-- 횡스크롤 없이 한눈에 보이는 3열 그리드 탭 (3x2 정렬) -->
+      <!-- 3x2 그리드 배열 (스크롤 불필요) -->
       <div class="bg-slate-100/90 p-1.5 rounded-2xl grid grid-cols-3 gap-1.5 text-xs font-bold">
         <button onclick="switchGameTab('clicker')" id="tabBtn_clicker" class="py-2.5 px-2 rounded-xl bg-white shadow-xs text-slate-900 font-extrabold flex items-center justify-center gap-1.5 transition-all">
           <span>🍚</span><span>밥알광클</span>
@@ -542,11 +542,11 @@
         </button>
       </div>
 
-      <!-- 2. 스피드 연타 -->
+      <!-- 2. 스피드 연타 (성공 시 150P 지급) -->
       <div id="gameView_speed" class="hidden space-y-5 text-center pt-1">
         <div class="p-3.5 bg-teal-50/80 rounded-2xl border border-teal-100 text-xs text-teal-800 font-medium">
           <strong>5초 동안 30타 이상 폭풍 연타!</strong><br/>
-          30타 성공 시 <strong>50P</strong> 보너스 지급! (+초과 1타당 2P)
+          30타 성공 시 <strong class="text-teal-700 underline text-sm">150P</strong> 보너스 지급! (+초과 1타당 2P)
         </div>
         <div class="flex items-center justify-around font-black text-sm text-slate-700">
           <div>남은 시간: <span id="speedTimer" class="text-teal-600 font-mono text-xl">5.0</span>초</div>
@@ -837,11 +837,11 @@
         <div id="adminPendingListContainer" class="space-y-2 max-h-36 overflow-y-auto"></div>
       </div>
 
-      <!-- 승인된 전체 회원 목록 & 회원 삭제 / 아이템 몰수(인벤토리 완전삭제) -->
+      <!-- 승인된 정회원 관리 & 회원 삭제 / 회원 차단(영구 불가) 기능 완비 -->
       <div class="space-y-3">
         <h4 class="font-extrabold text-xs text-slate-800 flex items-center gap-1.5">
           <i data-lucide="users" class="w-3.5 h-3.5 text-indigo-600"></i>
-          승인된 정회원 관리 & 회원 삭제 (<span id="adminTotalUserCount">0명</span>)
+          승인된 정회원 관리 & 삭제 / 차단 (<span id="adminTotalUserCount">0명</span>)
         </h4>
         <div id="adminUserListContainer" class="space-y-2 max-h-48 overflow-y-auto border rounded-2xl p-2 bg-slate-50 text-xs"></div>
       </div>
@@ -1380,6 +1380,7 @@
       alert(`🍚 미니게임 종료!\n총 클릭 수: ${gameClicks}회\n🎉 +${earned.toLocaleString()}P 적립 완료! (1클릭당 2P)`);
     }
 
+    // 3. 스피드 연타 (성공 시 150P)
     function startSpeedGame() {
       if (speedInterval) clearInterval(speedInterval);
       isSpeedRunning = true;
@@ -1410,13 +1411,13 @@
 
           let reward = 0;
           if (speedHits >= 30) {
-            reward = 50 + (speedHits - 30) * 2;
+            reward = 150 + (speedHits - 30) * 2;
             userPoints += reward;
             updatePointsUI();
-            if (window.confetti) confetti({ particleCount: 100 });
+            if (window.confetti) confetti({ particleCount: 120 });
             alert(`⚡ 미션 성공!\n기록: ${speedHits}타!\n🎉 보너스 +${reward}P 지급 완료!`);
           } else {
-            alert(`😢 아쉽습니다! ${speedHits}타 기록.\n30타 이상을 달성해야 보너스를 획득할 수 있습니다.`);
+            alert(`😢 아쉽습니다! ${speedHits}타 기록.\n30타 이상을 달성해야 150P 보너스를 획득할 수 있습니다.`);
           }
         }
       }, 50);
@@ -1824,7 +1825,7 @@
       alert("공권력 관리자 이모티콘이 채팅방에 전파되었습니다.");
     }
 
-    // 클라우드 동기화 (인벤토리 데이터 포함)
+    // 클라우드 동기화
     function syncUserPointToCloud() {
       if (!currentUser.nickname || currentUser.nickname === "문정러") return;
       db.ref(`user_points/${currentUser.nickname}`).update({
@@ -1852,7 +1853,7 @@
         const pendingNick = document.getElementById('pendingBannerNick');
 
         if (val) {
-          // 관리자에 의한 강제 인벤토리 몰수 감지 (1번 요구사항 완비)
+          // 인벤토리 강제 몰수 처리
           if (val.resetInventory === true) {
             myInventory = { colors: [], bgs: ['nb-none'], symbols: [] };
             myNickBg = 'nb-none';
@@ -1915,8 +1916,8 @@
             updatePreviewBox();
           }
         } else {
-          // 관리자가 해당 회원을 삭제한 경우
-          alert("회원 정보가 삭제되었습니다. 기본 사용자로 초기화됩니다.");
+          // 관리자가 해당 회원을 삭제 또는 차단한 경우
+          alert("회원 정보가 삭제되었거나 운영자에 의해 차단되었습니다.");
           localStorage.removeItem('bapsim_user');
           currentUser = { nickname: "문정러" };
           isUserApproved = true;
@@ -2233,6 +2234,7 @@
       });
     }
 
+    // 1. 회원 목록 & 회원 삭제 / 회원 영구 차단 기능
     function renderAdminUserList() {
       db.ref('user_points').on('value', (snap) => {
         const users = snap.val() || {};
@@ -2267,8 +2269,11 @@
               <button onclick="adminQuickSetPoint('${u.nickname}')" class="bg-indigo-50 text-indigo-700 font-bold px-2 py-1 rounded-lg text-[10px]">
                 포인트
               </button>
-              <button onclick="adminDeleteUser('${u.nickname}')" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-2 py-1 rounded-lg text-[10px]">
+              <button onclick="adminDeleteUser('${u.nickname}')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-2 py-1 rounded-lg text-[10px]">
                 삭제
+              </button>
+              <button onclick="adminBanUser('${u.nickname}')" class="bg-rose-500 hover:bg-rose-600 text-white font-bold px-2 py-1 rounded-lg text-[10px]">
+                차단
               </button>
             </div>
           `;
@@ -2277,28 +2282,46 @@
       });
     }
 
+    // 일반 회원 삭제
     function adminDeleteUser(nick) {
-      if (!confirm(`🚨 정말로 [${nick}] 회원을 영구 삭제하시겠습니까?\n해당 회원의 모든 데이터와 포인트가 삭제됩니다.`)) return;
+      if (!confirm(`[${nick}] 회원을 삭제하시겠습니까?\n해당 회원의 데이터가 초기화됩니다.`)) return;
       db.ref(`user_points/${nick}`).remove((err) => {
         if (err) return alert("회원 삭제 실패: " + err.message);
         db.ref(`online_users/${nick}`).remove();
-        alert(`✅ [${nick}] 회원이 성공적으로 삭제되었습니다.`);
+        alert(`✅ [${nick}] 회원이 삭제되었습니다.`);
       });
     }
 
-    // 아이템 몰수 시 인벤토리 영구 삭제 로직 (1번 요구사항 완벽 반영)
+    // 1. 회원 영구 차단 기능 (영구 재가입 불가 + 즉시 삭제)
+    function adminBanUser(nick) {
+      if (!confirm(`🚨 경고: [${nick}] 회원을 영구 차단하시겠습니까?\n차단된 닉네임은 다시는 사용할 수 없으며, 모든 계정 정보가 즉시 삭제됩니다.`)) return;
+
+      // 1) 영구 차단 목록 등록
+      db.ref(`banned_users/${nick}`).set({
+        nickname: nick,
+        bannedAt: Date.now()
+      }, (err) => {
+        if (err) return alert("차단 처리 오류: " + err.message);
+
+        // 2) 회원 데이터 및 접속 제거
+        db.ref(`user_points/${nick}`).remove();
+        db.ref(`online_users/${nick}`).remove();
+
+        alert(`⛔ [${nick}] 회원이 영구 차단되었습니다.\n해당 닉네임으로는 앞으로 가입할 수 없습니다.`);
+      });
+    }
+
     function adminManageUserItems(nick) {
       const choice = prompt(`[${nick}] 회원의 아이템 관리\n1: 모든 아이템 몰수 및 인벤토리 영구 삭제 (재장착 불가)\n2: 코스믹 레인보우 선물\n3: 태양의 겁화 선물\n4: 원하는 배지 클래스명 직접 입력\n\n번호를 입력하세요:`);
       if (!choice) return;
 
       if (choice === '1') {
-        // 장착 해제뿐만 아니라 인벤토리 소유권 영구 삭제 플래그 반영
         db.ref(`user_points/${nick}`).update({
           badge: 'nb-none',
           color: '',
           symbol: '',
           inventory: { colors: [], bgs: ['nb-none'], symbols: [] },
-          resetInventory: true // 타인 브라우저 로컬스토리지까지 파기하는 플래그
+          resetInventory: true
         });
         alert(`[${nick}] 회원의 모든 치장 아이템이 완벽히 몰수 및 삭제되었습니다. (상점에서 재장착 불가)`);
       } else if (choice === '2') {
@@ -2463,7 +2486,7 @@
       alert('반려 완료');
     }
 
-    // 랭킹 및 식당
+    // 2. 랭킹 및 식당 카드 (당일 미업데이트 식당 '업데이트 예정' 처리)
     function openRankModal() { renderPointRankings(); document.getElementById('rankModal').classList.remove('hidden'); }
     function closeRankModal() { document.getElementById('rankModal').classList.add('hidden'); }
 
@@ -2560,6 +2583,7 @@
       });
     }
 
+    // 2. 당일 업데이트된 식당만 메뉴 보여주기 & 미업데이트 식당 '업데이트 예정' 처리
     function renderCards() {
       const container = document.getElementById('restaurantCardsContainer');
       if (!container) return;
@@ -2600,6 +2624,9 @@
 
         const isSuspended = (r.mains || []).some(m => String(m).includes("ㅈ망") || String(m).includes("휴무") || String(m).includes("미운영"));
 
+        // 2번 핵심: 오늘 날짜가 아니면 업데이트 예정 처리
+        const isNotToday = !dateInfo.isToday;
+
         const card = document.createElement('div');
         card.className = `group bg-white rounded-3xl p-5 border transition-all duration-300 flex flex-col justify-between shadow-xs hover:shadow-xl hover:-translate-y-1 ${isVoted ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-slate-200/80'}`;
 
@@ -2638,6 +2665,55 @@
           `;
         }
 
+        // 2번 메뉴 본문 조건부 렌더링
+        let menuBodyHTML = '';
+        if (isNotToday) {
+          menuBodyHTML = `
+            <div class="my-5 py-8 bg-slate-50 border border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center text-center space-y-2">
+              <div class="w-10 h-10 rounded-full bg-slate-200/70 text-slate-400 flex items-center justify-center">
+                <i data-lucide="clock" class="w-5 h-5 animate-pulse"></i>
+              </div>
+              <div>
+                <span class="text-slate-700 font-black text-sm tracking-tight block">식단 업데이트 예정</span>
+                <span class="text-[10px] text-slate-400 font-medium">당일 메뉴가 아직 등록되지 않았습니다</span>
+              </div>
+            </div>
+          `;
+        } else if (isSuspended) {
+          menuBodyHTML = `
+            <div class="mt-4 space-y-2">
+              <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">오늘의 메인 메뉴</span>
+              <div class="p-4 bg-rose-50 border border-rose-200/80 rounded-2xl text-center text-rose-600 font-extrabold text-xs">
+                ⚠️ 오늘 식단 휴무 또는 미운영 상태입니다
+              </div>
+            </div>
+          `;
+        } else {
+          menuBodyHTML = `
+            <div class="mt-4 space-y-2">
+              <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">오늘의 메인 메뉴</span>
+              <div class="flex flex-wrap gap-1.5">
+                ${(r.mains || []).map(m => `
+                  <span class="bg-gradient-to-r from-slate-50 to-slate-100 text-slate-800 border border-slate-200/90 px-2.5 py-1 rounded-xl text-xs font-bold shadow-2xs leading-snug">
+                    ${m}
+                  </span>
+                `).join('')}
+              </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs">
+              <div class="flex items-center">
+                <span class="shrink-0 text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 px-1.5 py-0.5 rounded-md mr-2">국/탕</span>
+                <span class="text-slate-700 font-medium truncate">${r.soup || '-'}</span>
+              </div>
+              <div class="flex items-center">
+                <span class="shrink-0 text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-md mr-2">서비스</span>
+                <span class="text-slate-600 font-medium truncate">${r.dessert || '-'}</span>
+              </div>
+            </div>
+          `;
+        }
+
         card.innerHTML = `
           <div>
             <div class="flex items-start justify-between gap-2 mb-3">
@@ -2661,30 +2737,7 @@
               </div>
             </div>
 
-            <div class="mt-4 space-y-2">
-              <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">오늘의 메인 메뉴</span>
-              ${isSuspended 
-                ? `<div class="p-3 bg-rose-50 border border-rose-200/80 rounded-2xl text-center text-rose-600 font-extrabold text-xs">⚠️ 오늘 식단 휴무 또는 미등록 상태입니다</div>`
-                : `<div class="flex flex-wrap gap-1.5">
-                    ${(r.mains || []).map(m => `
-                      <span class="bg-gradient-to-r from-slate-50 to-slate-100 text-slate-800 border border-slate-200/90 px-2.5 py-1 rounded-xl text-xs font-bold shadow-2xs leading-snug">
-                        ${m}
-                      </span>
-                    `).join('')}
-                  </div>`
-              }
-            </div>
-
-            <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs">
-              <div class="flex items-center">
-                <span class="shrink-0 text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 px-1.5 py-0.5 rounded-md mr-2">국/탕</span>
-                <span class="text-slate-700 font-medium truncate">${r.soup || '-'}</span>
-              </div>
-              <div class="flex items-center">
-                <span class="shrink-0 text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-md mr-2">서비스</span>
-                <span class="text-slate-600 font-medium truncate">${r.dessert || '-'}</span>
-              </div>
-            </div>
+            ${menuBodyHTML}
           </div>
 
           ${bottomActionHTML}
@@ -3129,6 +3182,7 @@
     }
     function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
 
+    // 1. 회원가입/닉네임설정 시 차단자(블랙리스트) 체크
     async function saveUserProfile() {
       const input = document.getElementById('authNicknameInput').value.trim();
       const saveBtn = document.getElementById('saveUserBtn');
@@ -3145,6 +3199,16 @@
       saveBtn.textContent = "가입 처리 중...";
 
       try {
+        // 1-1. 차단된 닉네임인지 영구 체크
+        const banSnap = await db.ref(`banned_users/${input}`).once('value');
+        if (banSnap.exists()) {
+          alert(`⛔ [${input}] 은(는) 운영자에 의해 영구 차단된 닉네임입니다.\n다른 닉네임으로 신청해주세요.`);
+          saveBtn.disabled = false;
+          saveBtn.textContent = "가입 및 승인 요청";
+          return;
+        }
+
+        // 1-2. 중복 확인
         const snap = await db.ref(`user_points/${input}`).once('value');
         if (snap.exists() && input !== currentUser.nickname) {
           alert(`❌ 이미 등록되었거나 사용 중인 닉네임입니다!\n다른 닉네임을 입력해 주세요.`);
