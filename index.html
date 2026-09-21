@@ -665,11 +665,11 @@
         </div>
       </div>
 
-      <!-- 6. 주사위 게임 (홀짝 2배 + 특정 숫자 적중 시 10배 배당) -->
+      <!-- 6. 주사위 게임 (홀짝 2배 + 숫자 맞추기 최대 500P, 8배 배당, 1분 10회 제한) -->
       <div id="gameView_dice" class="hidden space-y-4 text-center pt-1">
         <div class="p-3 bg-purple-50/80 rounded-2xl border border-purple-100 text-xs text-purple-800 leading-relaxed font-medium">
           <strong>주사위 승부!</strong> 홀/짝 적중 시 <strong>2배</strong> 지급!<br/>
-          <span class="text-rose-600 font-extrabold">🌟 숫자 단일 적중 시 베팅액의 10배 초대박 지급!</span> (최대 10,000P)
+          <span class="text-rose-600 font-extrabold">🌟 숫자 단일 적중 시 베팅액의 8배 지급! (최대 500P / 1분당 10회 제한)</span>
         </div>
         <div class="flex items-center justify-center gap-2">
           <span class="text-xs font-bold text-slate-600">베팅액:</span>
@@ -681,7 +681,7 @@
         </div>
         <div id="diceResultText" class="text-xs font-bold text-slate-500 h-5">베팅 방식을 선택하세요!</div>
         
-        <!-- 홀짝 (2배) -->
+        <!-- 홀짝 (2배, 최대 10,000P) -->
         <div class="grid grid-cols-2 gap-2">
           <button onclick="playDiceBet('odd')" class="bg-purple-600 hover:bg-purple-700 text-white font-black py-2.5 rounded-xl text-xs shadow-md transition-all">
             홀수 (2배)
@@ -691,16 +691,19 @@
           </button>
         </div>
 
-        <!-- 숫자 맞추기 (10배) -->
-        <div class="space-y-1">
-          <span class="text-[10px] font-extrabold text-slate-400 block">🎯 숫자 단일 예측 베팅 (10배 배당)</span>
+        <!-- 숫자 맞추기 (1, 2번 요구사항: 최대 500P / 8배 배당 / 1분 10회 제한) -->
+        <div class="space-y-1.5 pt-1">
+          <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 px-1">
+            <span>🎯 숫자 단일 예측 (8배 배당)</span>
+            <span class="text-rose-600 font-extrabold text-[10px]">최대 500P · 1분 10회</span>
+          </div>
           <div class="grid grid-cols-6 gap-1">
-            <button onclick="playDiceBet('1')" class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-black py-2 rounded-lg text-xs border border-slate-700">⚀ 1</button>
-            <button onclick="playDiceBet('2')" class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-black py-2 rounded-lg text-xs border border-slate-700">⚁ 2</button>
-            <button onclick="playDiceBet('3')" class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-black py-2 rounded-lg text-xs border border-slate-700">⚂ 3</button>
-            <button onclick="playDiceBet('4')" class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-black py-2 rounded-lg text-xs border border-slate-700">⚃ 4</button>
-            <button onclick="playDiceBet('5')" class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-black py-2 rounded-lg text-xs border border-slate-700">⚄ 5</button>
-            <button onclick="playDiceBet('6')" class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-black py-2 rounded-lg text-xs border border-slate-700">⚅ 6</button>
+            <button onclick="playDiceBet('1')" class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-black py-2.5 rounded-lg text-xs border border-slate-700">⚀ 1</button>
+            <button onclick="playDiceBet('2')" class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-black py-2.5 rounded-lg text-xs border border-slate-700">⚁ 2</button>
+            <button onclick="playDiceBet('3')" class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-black py-2.5 rounded-lg text-xs border border-slate-700">⚂ 3</button>
+            <button onclick="playDiceBet('4')" class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-black py-2.5 rounded-lg text-xs border border-slate-700">⚃ 4</button>
+            <button onclick="playDiceBet('5')" class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-black py-2.5 rounded-lg text-xs border border-slate-700">⚄ 5</button>
+            <button onclick="playDiceBet('6')" class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-black py-2.5 rounded-lg text-xs border border-slate-700">⚅ 6</button>
           </div>
         </div>
       </div>
@@ -891,17 +894,31 @@
         <div id="adminUserListContainer" class="space-y-2 max-h-48 overflow-y-auto border rounded-2xl p-2 bg-slate-50 text-xs"></div>
       </div>
 
+      <!-- 3. 전체 아이템 몰수 및 삭제 관리 구역 -->
       <div class="p-4 bg-rose-50 border border-rose-200 rounded-2xl space-y-3 text-xs">
         <span class="font-black text-rose-900 block">🚨 위험 관리 구역</span>
+        
+        <!-- 전체 회원 아이템 몰수 및 영구 삭제 -->
+        <div class="flex items-center justify-between border-b border-rose-200/60 pb-2.5">
+          <div>
+            <span class="font-bold text-rose-800">모든 회원 아이템 전체 일괄 몰수 및 삭제</span>
+            <p class="text-[11px] text-rose-600 mt-0.5">모든 회원의 착용 치장 및 인벤토리 보유 아이템을 영구 삭제합니다.</p>
+          </div>
+          <button onclick="handleAdminResetAllItems()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-2 rounded-xl shrink-0">
+            아이템 전체 몰수
+          </button>
+        </div>
+
         <div class="flex items-center justify-between border-b border-rose-200/60 pb-2.5">
           <div>
             <span class="font-bold text-rose-800">모든 회원 포인트 전체 일괄 초기화 (0P)</span>
             <p class="text-[11px] text-rose-600 mt-0.5">모든 회원의 포인트를 0P로 리셋합니다.</p>
           </div>
-          <button onclick="handleAdminResetAllPoints()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-2 rounded-xl shrink-0">
+          <button onclick="handleAdminResetAllPoints()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold px-3 py-2 rounded-xl shrink-0">
             포인트 전체 초기화
           </button>
         </div>
+
         <div class="flex items-center justify-between">
           <div>
             <span class="font-bold text-rose-800">당일 전체 투표수 강제 초기화</span>
@@ -1049,7 +1066,7 @@
     </div>
   </div>
 
-  <!-- 2. 프로필 설정 모달 (숫자 4자리 고유 비밀번호 도입) -->
+  <!-- 프로필 설정 모달 (숫자 4자리 고유 비밀번호 도입) -->
   <div id="authModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-xs rounded-3xl shadow-2xl p-6 space-y-4 text-xs">
       <div class="flex items-center justify-between border-b pb-2">
@@ -1185,7 +1202,10 @@
     const SLOT_ITEMS = ["🍚", "🍗", "🥩", "🍕", "🍜", "👑", "💎"];
     let isSlotSpinning = false;
 
-    // 5. 상점 메타데이터 (999,999P 신화급 배지 3종 추가)
+    // 2. 주사위 숫자 맞추기 1분당 10회 제한 추적 배열
+    let diceExactBetTimestamps = [];
+
+    // 상점 메타데이터 (999,999P 신화급 배지 컬렉션 포함)
     const SHOP_DATA = {
       symbols: [
         { id: "sym_star", name: "별빛 칭호", char: "★", cost: 150 },
@@ -1688,15 +1708,45 @@
       }, 400);
     }
 
-    // 3. 주사위 게임 (홀짝 2배 + 특정 숫자 10배 배당)
+    // 1 & 2. 주사위 게임 (홀짝 2배 + 숫자 맞추기 최대 500P 제한, 8배 배당, 1분 10회 제한)
     const DICE_ICONS = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
     function playDiceBet(userChoice) {
-      const betInput = parseInt(document.getElementById('diceBetInput').value, 10);
-      const bet = Math.min(Math.max(betInput || 50, 50), 10000);
+      const rawBet = parseInt(document.getElementById('diceBetInput').value, 10) || 50;
+      const isExactNumberBet = ['1', '2', '3', '4', '5', '6'].includes(userChoice);
+
+      // 2. 숫자 맞추기 1분당 10회 제한 검사
+      if (isExactNumberBet) {
+        const now = Date.now();
+        // 60초 지난 기록 제거
+        diceExactBetTimestamps = diceExactBetTimestamps.filter(t => now - t < 60000);
+
+        if (diceExactBetTimestamps.length >= 10) {
+          const oldest = diceExactBetTimestamps[0];
+          const remainingSec = Math.ceil((60000 - (now - oldest)) / 1000);
+          return alert(`⏳ 주사위 숫자 맞추기는 1분에 최대 10회까지만 가능합니다!\n잠시 후 (${remainingSec}초 뒤) 다시 시도해주세요.`);
+        }
+      }
+
+      // 1. 숫자 맞추기 베팅액 500P 제한 (홀짝은 10,000P까지)
+      let bet = 50;
+      if (isExactNumberBet) {
+        bet = Math.min(Math.max(rawBet, 50), 500);
+        if (rawBet > 500) {
+          document.getElementById('diceBetInput').value = 500;
+        }
+      } else {
+        bet = Math.min(Math.max(rawBet, 50), 10000);
+      }
 
       if (userPoints < bet) return alert(`❌ 베팅할 포인트가 부족합니다! (필요: ${bet.toLocaleString()}P)`);
+
+      // 베팅 차감
       userPoints -= bet;
       updatePointsUI();
+
+      if (isExactNumberBet) {
+        diceExactBetTimestamps.push(Date.now());
+      }
 
       const diceEl = document.getElementById('diceDisplay');
       const resultEl = document.getElementById('diceResultText');
@@ -1720,14 +1770,14 @@
           multiplier = 2;
         } else if (userChoice === rollStr) {
           won = true;
-          multiplier = 10; // 숫자 정확히 일치 시 10배
+          multiplier = 8; // 1. 맞출 시 8배 배당
         }
 
         if (won) {
           const reward = bet * multiplier;
           userPoints += reward;
           updatePointsUI();
-          if (window.confetti) confetti({ particleCount: multiplier === 10 ? 200 : 80 });
+          if (window.confetti) confetti({ particleCount: multiplier === 8 ? 200 : 80 });
           resultEl.innerHTML = `<span class="text-amber-500 font-black">🎉 대박 적중! [${roll}나옴] +${reward.toLocaleString()}P (${multiplier}배) 획득!</span>`;
         } else {
           resultEl.innerHTML = `<span class="text-rose-500 font-bold">낙첨! [${roll}나옴] -${bet.toLocaleString()}P</span>`;
@@ -1921,7 +1971,6 @@
       });
     }
 
-    // 1. 새로고침 시 승인 안내 팝업 1회만 노출되도록 개선
     function attachUserPointListener() {
       if (!currentUser.nickname || currentUser.nickname === "문정러") {
         isUserApproved = true;
@@ -1972,7 +2021,7 @@
           } else {
             if (banner) banner.classList.add('hidden');
 
-            // 1번 핵심: localStorage를 체크하여 최초 1회만 알림창 띄우기
+            // 1. localStorage를 체크하여 최초 1회만 알림창 띄우기
             const notifyKey = `bapsim_approved_notified_${currentUser.nickname}`;
             const hasNotified = localStorage.getItem(notifyKey);
 
@@ -2455,6 +2504,35 @@
       });
     }
 
+    // 3. 전체 회원 아이템 일괄 몰수 및 인벤토리 영구 삭제
+    function handleAdminResetAllItems() {
+      const confirmCode = prompt("🚨 경고: 모든 회원의 보유 아이템 및 착용 치장이 전부 몰수 및 삭제됩니다!\n진행하시려면 '아이템삭제'를 입력하세요.");
+      if (confirmCode !== "아이템삭제") return alert("아이템 몰수 작업이 취소되었습니다.");
+
+      db.ref('user_points').once('value', (snap) => {
+        const users = snap.val() || {};
+        const updates = {};
+        Object.keys(users).forEach(nick => {
+          updates[`user_points/${nick}/badge`] = 'nb-none';
+          updates[`user_points/${nick}/color`] = '';
+          updates[`user_points/${nick}/symbol`] = '';
+          updates[`user_points/${nick}/inventory`] = { colors: [], bgs: ['nb-none'], symbols: [] };
+          updates[`user_points/${nick}/resetInventory`] = true; // 전원 실시간 파기 신호
+        });
+
+        db.ref().update(updates, (err) => {
+          if (err) return alert("아이템 몰수 실패: " + err.message);
+          myInventory = { colors: [], bgs: ['nb-none'], symbols: [] };
+          myNickBg = 'nb-none';
+          myNickColor = '';
+          myNickSymbol = '';
+          updatePointsUI(false);
+          renderShopUI();
+          alert("✅ 모든 회원의 보유 아이템 및 치장이 성공적으로 몰수/삭제되었습니다.");
+        });
+      });
+    }
+
     function handleAdminResetAllPoints() {
       const confirmCode = prompt("경고: 모든 회원의 보유 포인트가 '0P'로 초기화됩니다!\n진행하시려면 '초기화'를 입력하세요.");
       if (confirmCode !== "초기화") return alert("초기화가 취소되었습니다.");
@@ -2568,7 +2646,7 @@
       alert('반려 완료');
     }
 
-    // 랭킹 및 식당 카드 (당일 미업데이트 식당 '업데이트 예정' 처리)
+    // 랭킹 및 식당 카드
     function openRankModal() { renderPointRankings(); document.getElementById('rankModal').classList.remove('hidden'); }
     function closeRankModal() { document.getElementById('rankModal').classList.add('hidden'); }
 
@@ -3261,7 +3339,7 @@
     }
     function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
 
-    // 2. 회원가입 및 닉네임 설정 (고유 비밀번호 4자리 검증 및 저장)
+    // 회원가입 및 닉네임 설정 (고유 비밀번호 4자리 검증 및 저장)
     async function saveUserProfile() {
       const input = document.getElementById('authNicknameInput').value.trim();
       const pass = document.getElementById('authPasswordInput').value.trim();
@@ -3275,7 +3353,6 @@
       saveBtn.textContent = "확인 중...";
 
       try {
-        // 차단 닉네임 체크
         const banSnap = await db.ref(`banned_users/${input}`).once('value');
         if (banSnap.exists()) {
           alert(`⛔ [${input}] 은(는) 운영자에 의해 영구 차단된 닉네임입니다.\n다른 닉네임으로 신청해주세요.`);
@@ -3284,12 +3361,10 @@
           return;
         }
 
-        // 기존 등록 계정 여부 확인
         const snap = await db.ref(`user_points/${input}`).once('value');
         const existingData = snap.val();
 
         if (snap.exists()) {
-          // 이미 존재하는 계정인 경우: 비밀번호 검증으로 본인 로그인 지원
           if (existingData.password && existingData.password !== pass) {
             alert("❌ 비밀번호가 일치하지 않습니다. 해당 닉네임의 본인 비밀번호를 입력해주세요.");
             saveBtn.disabled = false;
@@ -3297,7 +3372,6 @@
             return;
           }
 
-          // 기존 유저 로그인 복원
           currentUser = { nickname: input };
           localStorage.setItem('bapsim_user', JSON.stringify(currentUser));
           document.getElementById('userProfileText').textContent = input;
@@ -3316,7 +3390,6 @@
           return;
         }
 
-        // 신규 회원 등록
         const oldNick = currentUser.nickname;
         currentUser = { nickname: input };
         localStorage.setItem('bapsim_user', JSON.stringify(currentUser));
@@ -3324,7 +3397,7 @@
 
         await db.ref(`user_points/${input}`).set({
           nickname: input,
-          password: pass, // 고유 비밀번호 저장
+          password: pass,
           points: 30,
           badge: 'nb-none',
           color: '',
