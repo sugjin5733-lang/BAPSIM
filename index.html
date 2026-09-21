@@ -62,6 +62,7 @@
       100% { box-shadow: 0 0 25px rgba(239, 68, 68, 1), 0 0 12px #f87171, inset 0 0 12px #fde047; }
     }
 
+    /* 999,999P 신화급 배지 컬렉션 */
     .nb-cosmic {
       background: linear-gradient(90deg, #ff007f, #7928ca, #0070f3, #00dfd8, #ff007f);
       background-size: 300% 300%;
@@ -81,6 +82,35 @@
     }
     @keyframes solarFlare { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
     @keyframes solarPulse { 0% { box-shadow: 0 0 14px rgba(255, 69, 0, 0.8); } 100% { box-shadow: 0 0 28px rgba(255, 69, 0, 1), 0 0 18px rgba(255, 215, 0, 0.9); } }
+
+    .nb-abyss {
+      background: linear-gradient(135deg, #450a0a 0%, #b91c1c 40%, #000000 80%, #ef4444 100%);
+      background-size: 200% 200%;
+      animation: abyssShift 2.2s ease infinite;
+      color: #fee2e2 !important; border: 2px solid #f87171;
+      padding: 2px 9px; border-radius: 8px; font-weight: 900;
+    }
+    @keyframes abyssShift { 0% { background-position: 0% 0%; box-shadow: 0 0 14px rgba(239, 68, 68, 0.8); } 50% { background-position: 100% 100%; box-shadow: 0 0 26px rgba(185, 28, 28, 1); } 100% { background-position: 0% 0%; box-shadow: 0 0 14px rgba(239, 68, 68, 0.8); } }
+
+    .nb-cyberaurora {
+      background: linear-gradient(115deg, #06b6d4, #3b82f6, #8b5cf6, #ec4899, #06b6d4);
+      background-size: 300% 300%;
+      animation: cyberAura 3s linear infinite;
+      color: #ffffff !important; border: 1.5px solid #a5f3fc;
+      padding: 2px 9px; border-radius: 8px; font-weight: 900;
+    }
+    @keyframes cyberAura { 0% { background-position: 0% 50%; box-shadow: 0 0 15px #06b6d4; } 50% { background-position: 100% 50%; box-shadow: 0 0 25px #ec4899; } 100% { background-position: 0% 50%; box-shadow: 0 0 15px #06b6d4; } }
+
+    .nb-infinity {
+      background: radial-gradient(circle, #fde047 0%, #ca8a04 40%, #3b0764 80%, #000000 100%);
+      color: #fef9c3 !important; border: 2px solid #fef08a;
+      animation: infinityGlow 2s ease-in-out infinite alternate;
+      padding: 2px 9px; border-radius: 8px; font-weight: 900;
+    }
+    @keyframes infinityGlow {
+      0% { box-shadow: 0 0 12px rgba(250, 204, 21, 0.7), inset 0 0 6px #facc15; transform: scale(1); }
+      100% { box-shadow: 0 0 28px rgba(250, 204, 21, 1), 0 0 15px #a855f7, inset 0 0 10px #fde047; transform: scale(1.02); }
+    }
 
     .nb-blackhole {
       background: radial-gradient(circle, #581c87 0%, #0f051d 60%, #000000 100%);
@@ -485,7 +515,7 @@
     </div>
   </div>
 
-  <!-- [포인트 게임장 모달 - 횡스크롤 없이 한눈에 보이는 3x2 그리드 배열] -->
+  <!-- [포인트 게임장 모달 - 3x2 그리드 배열] -->
   <div id="miniGameModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
@@ -501,7 +531,7 @@
         <button onclick="closeMiniGameModal()" class="text-slate-400 hover:text-slate-600 text-base font-bold p-1">✕</button>
       </div>
 
-      <!-- 3x2 그리드 배열 (스크롤 불필요) -->
+      <!-- 3x2 그리드 배열 -->
       <div class="bg-slate-100/90 p-1.5 rounded-2xl grid grid-cols-3 gap-1.5 text-xs font-bold">
         <button onclick="switchGameTab('clicker')" id="tabBtn_clicker" class="py-2.5 px-2 rounded-xl bg-white shadow-xs text-slate-900 font-extrabold flex items-center justify-center gap-1.5 transition-all">
           <span>🍚</span><span>밥알광클</span>
@@ -523,10 +553,10 @@
         </button>
       </div>
 
-      <!-- 1. 밥알 광클 -->
+      <!-- 1. 밥알 광클 (최대 500P 제한) -->
       <div id="gameView_clicker" class="space-y-5 text-center pt-1">
         <div class="p-3.5 bg-emerald-50/80 rounded-2xl border border-emerald-100 text-xs text-emerald-800 font-medium">
-          <strong>제한시간 10초 동안 밥그릇을 마구 클릭하세요!</strong> (1클릭당 2P 적립)
+          <strong>10초 동안 밥그릇 광클!</strong> (1클릭당 2P / <span class="text-rose-600 font-bold">1판 최대 500P</span>)
         </div>
         <div class="flex items-center justify-around font-black text-sm text-slate-700">
           <div>남은 시간: <span id="gameTimer" class="text-rose-500 font-mono text-xl">10.0</span>초</div>
@@ -542,11 +572,11 @@
         </button>
       </div>
 
-      <!-- 2. 스피드 연타 (성공 시 150P 지급) -->
+      <!-- 2. 스피드 연타 (성공 시 150P / 최대 500P 제한) -->
       <div id="gameView_speed" class="hidden space-y-5 text-center pt-1">
         <div class="p-3.5 bg-teal-50/80 rounded-2xl border border-teal-100 text-xs text-teal-800 font-medium">
           <strong>5초 동안 30타 이상 폭풍 연타!</strong><br/>
-          30타 성공 시 <strong class="text-teal-700 underline text-sm">150P</strong> 보너스 지급! (+초과 1타당 2P)
+          30타 성공 시 <strong class="text-teal-700 underline text-sm">150P</strong> 보너스! (+초과 1타당 2P / <span class="text-rose-600 font-bold">최대 500P</span>)
         </div>
         <div class="flex items-center justify-around font-black text-sm text-slate-700">
           <div>남은 시간: <span id="speedTimer" class="text-teal-600 font-mono text-xl">5.0</span>초</div>
@@ -635,28 +665,43 @@
         </div>
       </div>
 
-      <!-- 6. 주사위 홀짝 -->
+      <!-- 6. 주사위 게임 (홀짝 2배 + 특정 숫자 적중 시 10배 배당) -->
       <div id="gameView_dice" class="hidden space-y-4 text-center pt-1">
-        <div class="p-3.5 bg-purple-50/80 rounded-2xl border border-purple-100 text-xs text-purple-800 font-medium">
-          <strong>주사위 숫자의 홀 / 짝을 맞추세요!</strong><br/>
-          적중 시 베팅액의 <strong>2배</strong> 지급! (최대 10,000P)
+        <div class="p-3 bg-purple-50/80 rounded-2xl border border-purple-100 text-xs text-purple-800 leading-relaxed font-medium">
+          <strong>주사위 승부!</strong> 홀/짝 적중 시 <strong>2배</strong> 지급!<br/>
+          <span class="text-rose-600 font-extrabold">🌟 숫자 단일 적중 시 베팅액의 10배 초대박 지급!</span> (최대 10,000P)
         </div>
         <div class="flex items-center justify-center gap-2">
           <span class="text-xs font-bold text-slate-600">베팅액:</span>
           <input id="diceBetInput" type="number" value="100" min="50" max="10000" step="50" class="w-32 border rounded-xl p-2 text-center font-black bg-slate-50 outline-none focus:border-purple-500" />
           <span class="text-xs font-bold text-slate-500">P</span>
         </div>
-        <div class="py-6 bg-slate-900 rounded-2xl border-2 border-purple-500 flex items-center justify-center text-5xl shadow-inner">
+        <div class="py-5 bg-slate-900 rounded-2xl border-2 border-purple-500 flex items-center justify-center text-5xl shadow-inner">
           <span id="diceDisplay">🎲</span>
         </div>
-        <div id="diceResultText" class="text-xs font-bold text-slate-500 h-5">홀수 또는 짝수를 선택하세요!</div>
-        <div class="grid grid-cols-2 gap-3">
-          <button onclick="playDiceBet('odd')" class="bg-purple-600 hover:bg-purple-700 text-white font-black py-3.5 rounded-2xl text-xs shadow-md transition-all">
-            홀수 (1, 3, 5) 베팅
+        <div id="diceResultText" class="text-xs font-bold text-slate-500 h-5">베팅 방식을 선택하세요!</div>
+        
+        <!-- 홀짝 (2배) -->
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="playDiceBet('odd')" class="bg-purple-600 hover:bg-purple-700 text-white font-black py-2.5 rounded-xl text-xs shadow-md transition-all">
+            홀수 (2배)
           </button>
-          <button onclick="playDiceBet('even')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3.5 rounded-2xl text-xs shadow-md transition-all">
-            짝수 (2, 4, 6) 베팅
+          <button onclick="playDiceBet('even')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-2.5 rounded-xl text-xs shadow-md transition-all">
+            짝수 (2배)
           </button>
+        </div>
+
+        <!-- 숫자 맞추기 (10배) -->
+        <div class="space-y-1">
+          <span class="text-[10px] font-extrabold text-slate-400 block">🎯 숫자 단일 예측 베팅 (10배 배당)</span>
+          <div class="grid grid-cols-6 gap-1">
+            <button onclick="playDiceBet('1')" class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-black py-2 rounded-lg text-xs border border-slate-700">⚀ 1</button>
+            <button onclick="playDiceBet('2')" class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-black py-2 rounded-lg text-xs border border-slate-700">⚁ 2</button>
+            <button onclick="playDiceBet('3')" class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-black py-2 rounded-lg text-xs border border-slate-700">⚂ 3</button>
+            <button onclick="playDiceBet('4')" class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-black py-2 rounded-lg text-xs border border-slate-700">⚃ 4</button>
+            <button onclick="playDiceBet('5')" class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-black py-2 rounded-lg text-xs border border-slate-700">⚄ 5</button>
+            <button onclick="playDiceBet('6')" class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-black py-2 rounded-lg text-xs border border-slate-700">⚅ 6</button>
+          </div>
         </div>
       </div>
     </div>
@@ -694,7 +739,7 @@
     </div>
   </div>
 
-  <!-- 상점 모달 -->
+  <!-- 상점 모달 (999,999P 신화급 배지 포함) -->
   <div id="shopModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
@@ -731,7 +776,7 @@
       </div>
 
       <div class="space-y-3">
-        <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><span>🏷️</span> 닉네임 명품 & 신화 배지</span>
+        <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><span>🏷️</span> 닉네임 명품 & 신화 배지 (최고 999,999P)</span>
         <div class="space-y-2 text-xs" id="shopBadgeList"></div>
       </div>
 
@@ -837,7 +882,7 @@
         <div id="adminPendingListContainer" class="space-y-2 max-h-36 overflow-y-auto"></div>
       </div>
 
-      <!-- 승인된 정회원 관리 & 회원 삭제 / 회원 차단(영구 불가) 기능 완비 -->
+      <!-- 승인된 정회원 관리 & 삭제 / 차단 -->
       <div class="space-y-3">
         <h4 class="font-extrabold text-xs text-slate-800 flex items-center gap-1.5">
           <i data-lucide="users" class="w-3.5 h-3.5 text-indigo-600"></i>
@@ -1004,17 +1049,24 @@
     </div>
   </div>
 
-  <!-- 프로필 설정 모달 -->
+  <!-- 2. 프로필 설정 모달 (숫자 4자리 고유 비밀번호 도입) -->
   <div id="authModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-xs rounded-3xl shadow-2xl p-6 space-y-4 text-xs">
       <div class="flex items-center justify-between border-b pb-2">
-        <h3 class="font-extrabold text-slate-900 text-sm">내 닉네임 설정 (회원가입)</h3>
+        <h3 class="font-extrabold text-slate-900 text-sm">내 닉네임 & 비밀번호 설정</h3>
         <button onclick="closeAuthModal()" class="text-slate-400">✕</button>
       </div>
-      <div>
-        <label class="block font-bold text-slate-700 mb-1">닉네임 (한글, 영문, 숫자만 / 중복 불가)</label>
-        <input id="authNicknameInput" type="text" placeholder="예: 테라타워직장인" class="w-full border rounded-xl p-2.5 font-bold outline-none focus:border-indigo-500" />
-        <p class="text-[10px] text-amber-600 font-bold mt-1.5">※ 회원가입 후 관리자 승인이 완료되어야 사이트의 모든 기능을 정상 이용하실 수 있습니다.</p>
+      <div class="space-y-3">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">닉네임 (한글, 영문, 숫자 / 중복 불가)</label>
+          <input id="authNicknameInput" type="text" placeholder="예: 테라타워직장인" class="w-full border rounded-xl p-2.5 font-bold outline-none focus:border-indigo-500" />
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">계정 고유 비밀번호 (숫자 4자리) *</label>
+          <input id="authPasswordInput" type="password" maxlength="4" placeholder="숫자 4자리 입력" class="w-full border rounded-xl p-2.5 font-bold outline-none text-center tracking-widest focus:border-indigo-500" />
+          <p class="text-[10px] text-slate-400 mt-1">※ 다른 기기 접속이나 닉네임 인증 시 본인 확인용으로 사용됩니다.</p>
+        </div>
+        <p class="text-[10px] text-amber-600 font-bold">※ 최초 회원가입 후 관리자 승인이 완료되어야 사이트의 모든 기능을 정상 이용하실 수 있습니다.</p>
       </div>
       <button id="saveUserBtn" onclick="saveUserProfile()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-2.5 rounded-xl transition-colors">가입 및 승인 요청</button>
     </div>
@@ -1133,7 +1185,7 @@
     const SLOT_ITEMS = ["🍚", "🍗", "🥩", "🍕", "🍜", "👑", "💎"];
     let isSlotSpinning = false;
 
-    // 상점 메타데이터
+    // 5. 상점 메타데이터 (999,999P 신화급 배지 3종 추가)
     const SHOP_DATA = {
       symbols: [
         { id: "sym_star", name: "별빛 칭호", char: "★", cost: 150 },
@@ -1160,6 +1212,9 @@
       bgs: [
         { id: "nb-cosmic", name: "🌌 코스믹 레인보우 (태초 신화)", class: "nb-cosmic", cost: 999999, desc: "찬란하게 요동치는 무지개 홀로그램 오라" },
         { id: "nb-solar", name: "☀️ 태양의 겁화 (솔라 플레어)", class: "nb-solar", cost: 999999, desc: "타오르는 붉은 태양 홍염 애니메이션" },
+        { id: "nb-abyss", name: "🌋 심연의 지옥염화 (헬파이어)", class: "nb-abyss", cost: 999999, desc: "심연의 마그마와 핏빛 불길이 일렁이는 궁극의 배지" },
+        { id: "nb-cyberaurora", name: "💎 사이버 네온 프리즘 (환상)", class: "nb-cyberaurora", cost: 999999, desc: "초고주파 프리즘 레이저와 청록빛 오로라 발광" },
+        { id: "nb-infinity", name: "♾️ 영겁의 인피니티 (절대자)", class: "nb-infinity", cost: 999999, desc: "황금빛 차원문과 시공간 왜곡 절대자의 상징" },
         { id: "nb-blackhole", name: "🕳️ 심연의 블랙홀 (시공 왜곡)", class: "nb-blackhole", cost: 888888, desc: "보랏빛 중력장과 암흑 물질 발광" },
         { id: "nb-matrix", name: "🟢 사이버 매트릭스 (디지털 네오)", class: "nb-matrix", cost: 777777, desc: "초록빛 디지털 비가 흐르는 해커 플레이트" },
         { id: "nb-universe", name: "🪐 다크 유니버스 (신화)", class: "nb-universe", cost: 500000, desc: "심오하고 묵직한 심우주 성운 워프 오라" },
@@ -1298,7 +1353,7 @@
       chatRef.on('child_added', snap => appendChatMessage(snap.val()));
     }
 
-    // 포인트 게임
+    // 포인트 게임 아케이드
     function switchGameTab(tabName) {
       ['clicker', 'speed', 'memory', 'slot', 'coin', 'dice'].forEach(t => {
         const view = document.getElementById(`gameView_${t}`);
@@ -1366,21 +1421,28 @@
       document.getElementById('gameScore').textContent = gameClicks;
     }
 
+    // 4. 밥알광클 한판당 500P 제한
     function finishMiniGame() {
       isGameRunning = false;
       document.getElementById('gameClickBtn').disabled = true;
       document.getElementById('gameStartBtn').disabled = false;
       document.getElementById('gameStartBtn').textContent = "다시 플레이하기";
 
-      const earned = gameClicks * 2;
+      let earned = gameClicks * 2;
+      let isCapped = false;
+      if (earned > 500) {
+        earned = 500;
+        isCapped = true;
+      }
+
       userPoints += earned;
       updatePointsUI();
 
       if (window.confetti) confetti({ particleCount: 80, spread: 60 });
-      alert(`🍚 미니게임 종료!\n총 클릭 수: ${gameClicks}회\n🎉 +${earned.toLocaleString()}P 적립 완료! (1클릭당 2P)`);
+      alert(`🍚 미니게임 종료!\n총 클릭 수: ${gameClicks}회\n🎉 +${earned.toLocaleString()}P 적립 완료! ${isCapped ? '(한판 최대 상한 500P 적용)' : ''}`);
     }
 
-    // 3. 스피드 연타 (성공 시 150P)
+    // 4. 스피드 연타 한판당 500P 제한
     function startSpeedGame() {
       if (speedInterval) clearInterval(speedInterval);
       isSpeedRunning = true;
@@ -1410,12 +1472,17 @@
           startBtn.textContent = "다시 도전하기";
 
           let reward = 0;
+          let isCapped = false;
           if (speedHits >= 30) {
             reward = 150 + (speedHits - 30) * 2;
+            if (reward > 500) {
+              reward = 500;
+              isCapped = true;
+            }
             userPoints += reward;
             updatePointsUI();
             if (window.confetti) confetti({ particleCount: 120 });
-            alert(`⚡ 미션 성공!\n기록: ${speedHits}타!\n🎉 보너스 +${reward}P 지급 완료!`);
+            alert(`⚡ 미션 성공!\n기록: ${speedHits}타!\n🎉 보너스 +${reward}P 지급 완료! ${isCapped ? '(한판 최대 상한 500P 적용)' : ''}`);
           } else {
             alert(`😢 아쉽습니다! ${speedHits}타 기록.\n30타 이상을 달성해야 150P 보너스를 획득할 수 있습니다.`);
           }
@@ -1621,6 +1688,7 @@
       }, 400);
     }
 
+    // 3. 주사위 게임 (홀짝 2배 + 특정 숫자 10배 배당)
     const DICE_ICONS = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
     function playDiceBet(userChoice) {
       const betInput = parseInt(document.getElementById('diceBetInput').value, 10);
@@ -1639,16 +1707,30 @@
         diceEl.textContent = DICE_ICONS[roll - 1];
 
         const isOdd = (roll % 2 !== 0);
-        const actualOutcome = isOdd ? 'odd' : 'even';
+        const rollStr = roll.toString();
 
-        if (userChoice === actualOutcome) {
-          const reward = bet * 2;
+        let won = false;
+        let multiplier = 2;
+
+        if (userChoice === 'odd' && isOdd) {
+          won = true;
+          multiplier = 2;
+        } else if (userChoice === 'even' && !isOdd) {
+          won = true;
+          multiplier = 2;
+        } else if (userChoice === rollStr) {
+          won = true;
+          multiplier = 10; // 숫자 정확히 일치 시 10배
+        }
+
+        if (won) {
+          const reward = bet * multiplier;
           userPoints += reward;
           updatePointsUI();
-          if (window.confetti) confetti({ particleCount: 80 });
-          resultEl.innerHTML = `<span class="text-amber-500 font-black">🎉 적중! [${roll} (${isOdd ? '홀' : '짝'})] +${reward.toLocaleString()}P 획득!</span>`;
+          if (window.confetti) confetti({ particleCount: multiplier === 10 ? 200 : 80 });
+          resultEl.innerHTML = `<span class="text-amber-500 font-black">🎉 대박 적중! [${roll}나옴] +${reward.toLocaleString()}P (${multiplier}배) 획득!</span>`;
         } else {
-          resultEl.innerHTML = `<span class="text-rose-500 font-bold">낙첨! [${roll} (${isOdd ? '홀' : '짝'})] -${bet.toLocaleString()}P</span>`;
+          resultEl.innerHTML = `<span class="text-rose-500 font-bold">낙첨! [${roll}나옴] -${bet.toLocaleString()}P</span>`;
         }
       }, 400);
     }
@@ -1839,6 +1921,7 @@
       });
     }
 
+    // 1. 새로고침 시 승인 안내 팝업 1회만 노출되도록 개선
     function attachUserPointListener() {
       if (!currentUser.nickname || currentUser.nickname === "문정러") {
         isUserApproved = true;
@@ -1879,7 +1962,6 @@
             localStorage.setItem('bapsim_inventory', JSON.stringify(myInventory));
           }
 
-          const wasApproved = isUserApproved;
           isUserApproved = (val.status === 'approved' || val.approved === true);
 
           if (!isUserApproved) {
@@ -1889,7 +1971,13 @@
             }
           } else {
             if (banner) banner.classList.add('hidden');
-            if (!wasApproved && val.status === 'approved') {
+
+            // 1번 핵심: localStorage를 체크하여 최초 1회만 알림창 띄우기
+            const notifyKey = `bapsim_approved_notified_${currentUser.nickname}`;
+            const hasNotified = localStorage.getItem(notifyKey);
+
+            if (!hasNotified && val.status === 'approved') {
+              localStorage.setItem(notifyKey, 'true');
               if (window.confetti) confetti({ particleCount: 150 });
               alert(`🎉 [${currentUser.nickname}] 님의 계정이 관리자로부터 최종 승인되었습니다!\n이제 모든 서비스를 자유롭게 이용하실 수 있습니다.`);
             }
@@ -1916,7 +2004,6 @@
             updatePreviewBox();
           }
         } else {
-          // 관리자가 해당 회원을 삭제 또는 차단한 경우
           alert("회원 정보가 삭제되었거나 운영자에 의해 차단되었습니다.");
           localStorage.removeItem('bapsim_user');
           currentUser = { nickname: "문정러" };
@@ -2234,7 +2321,6 @@
       });
     }
 
-    // 1. 회원 목록 & 회원 삭제 / 회원 영구 차단 기능
     function renderAdminUserList() {
       db.ref('user_points').on('value', (snap) => {
         const users = snap.val() || {};
@@ -2282,7 +2368,6 @@
       });
     }
 
-    // 일반 회원 삭제
     function adminDeleteUser(nick) {
       if (!confirm(`[${nick}] 회원을 삭제하시겠습니까?\n해당 회원의 데이터가 초기화됩니다.`)) return;
       db.ref(`user_points/${nick}`).remove((err) => {
@@ -2292,18 +2377,15 @@
       });
     }
 
-    // 1. 회원 영구 차단 기능 (영구 재가입 불가 + 즉시 삭제)
     function adminBanUser(nick) {
       if (!confirm(`🚨 경고: [${nick}] 회원을 영구 차단하시겠습니까?\n차단된 닉네임은 다시는 사용할 수 없으며, 모든 계정 정보가 즉시 삭제됩니다.`)) return;
 
-      // 1) 영구 차단 목록 등록
       db.ref(`banned_users/${nick}`).set({
         nickname: nick,
         bannedAt: Date.now()
       }, (err) => {
         if (err) return alert("차단 처리 오류: " + err.message);
 
-        // 2) 회원 데이터 및 접속 제거
         db.ref(`user_points/${nick}`).remove();
         db.ref(`online_users/${nick}`).remove();
 
@@ -2343,7 +2425,7 @@
           alert(`[${nick}] 회원에게 태양의 겁화 배지를 지급 및 장착시켰습니다.`);
         });
       } else if (choice === '4') {
-        const bgName = prompt("배지 클래스명을 입력하세요 (예: nb-admin, nb-gold, nb-matrix):");
+        const bgName = prompt("배지 클래스명을 입력하세요 (예: nb-admin, nb-abyss, nb-cyberaurora, nb-infinity, nb-gold):");
         if (bgName) {
           db.ref(`user_points/${nick}`).once('value', snap => {
             const u = snap.val() || {};
@@ -2486,7 +2568,7 @@
       alert('반려 완료');
     }
 
-    // 2. 랭킹 및 식당 카드 (당일 미업데이트 식당 '업데이트 예정' 처리)
+    // 랭킹 및 식당 카드 (당일 미업데이트 식당 '업데이트 예정' 처리)
     function openRankModal() { renderPointRankings(); document.getElementById('rankModal').classList.remove('hidden'); }
     function closeRankModal() { document.getElementById('rankModal').classList.add('hidden'); }
 
@@ -2583,7 +2665,6 @@
       });
     }
 
-    // 2. 당일 업데이트된 식당만 메뉴 보여주기 & 미업데이트 식당 '업데이트 예정' 처리
     function renderCards() {
       const container = document.getElementById('restaurantCardsContainer');
       if (!container) return;
@@ -2623,8 +2704,6 @@
         }
 
         const isSuspended = (r.mains || []).some(m => String(m).includes("ㅈ망") || String(m).includes("휴무") || String(m).includes("미운영"));
-
-        // 2번 핵심: 오늘 날짜가 아니면 업데이트 예정 처리
         const isNotToday = !dateInfo.isToday;
 
         const card = document.createElement('div');
@@ -2665,7 +2744,6 @@
           `;
         }
 
-        // 2번 메뉴 본문 조건부 렌더링
         let menuBodyHTML = '';
         if (isNotToday) {
           menuBodyHTML = `
@@ -3178,28 +3256,26 @@
 
     function openAuthModal() {
       document.getElementById('authNicknameInput').value = (currentUser.nickname !== "문정러" ? currentUser.nickname : '');
+      document.getElementById('authPasswordInput').value = '';
       document.getElementById('authModal').classList.remove('hidden');
     }
     function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
 
-    // 1. 회원가입/닉네임설정 시 차단자(블랙리스트) 체크
+    // 2. 회원가입 및 닉네임 설정 (고유 비밀번호 4자리 검증 및 저장)
     async function saveUserProfile() {
       const input = document.getElementById('authNicknameInput').value.trim();
+      const pass = document.getElementById('authPasswordInput').value.trim();
       const saveBtn = document.getElementById('saveUserBtn');
+
       if (!input) return alert('닉네임을 입력해주세요.');
       if (!isValidNickname(input)) return alert('⚠️ 닉네임에는 특수문자를 사용할 수 없습니다! (한글, 영문, 숫자만)');
-
-      if (input === currentUser.nickname && !isUserApproved) {
-        alert("현재 관리자 승인 대기 중입니다. 관리자의 승인을 기다려주세요!");
-        closeAuthModal();
-        return;
-      }
+      if (!/^\d{4}$/.test(pass)) return alert('⚠️ 비밀번호는 반드시 숫자 4자리로 입력해주세요!');
 
       saveBtn.disabled = true;
-      saveBtn.textContent = "가입 처리 중...";
+      saveBtn.textContent = "확인 중...";
 
       try {
-        // 1-1. 차단된 닉네임인지 영구 체크
+        // 차단 닉네임 체크
         const banSnap = await db.ref(`banned_users/${input}`).once('value');
         if (banSnap.exists()) {
           alert(`⛔ [${input}] 은(는) 운영자에 의해 영구 차단된 닉네임입니다.\n다른 닉네임으로 신청해주세요.`);
@@ -3208,23 +3284,47 @@
           return;
         }
 
-        // 1-2. 중복 확인
+        // 기존 등록 계정 여부 확인
         const snap = await db.ref(`user_points/${input}`).once('value');
-        if (snap.exists() && input !== currentUser.nickname) {
-          alert(`❌ 이미 등록되었거나 사용 중인 닉네임입니다!\n다른 닉네임을 입력해 주세요.`);
-          saveBtn.disabled = false;
-          saveBtn.textContent = "가입 및 승인 요청";
+        const existingData = snap.val();
+
+        if (snap.exists()) {
+          // 이미 존재하는 계정인 경우: 비밀번호 검증으로 본인 로그인 지원
+          if (existingData.password && existingData.password !== pass) {
+            alert("❌ 비밀번호가 일치하지 않습니다. 해당 닉네임의 본인 비밀번호를 입력해주세요.");
+            saveBtn.disabled = false;
+            saveBtn.textContent = "가입 및 승인 요청";
+            return;
+          }
+
+          // 기존 유저 로그인 복원
+          currentUser = { nickname: input };
+          localStorage.setItem('bapsim_user', JSON.stringify(currentUser));
+          document.getElementById('userProfileText').textContent = input;
+          userPoints = existingData.points || 30;
+          myNickBg = existingData.badge || 'nb-none';
+          myNickColor = existingData.color || '';
+          myNickSymbol = existingData.symbol || '';
+          myInventory = existingData.inventory || { colors: [], bgs: ['nb-none'], symbols: [] };
+          isUserApproved = (existingData.status === 'approved' || existingData.approved === true);
+
+          updatePointsUI(false);
+          attachUserPointListener();
+          initPresenceSystem();
+          closeAuthModal();
+          alert(`🔑 [${input}] 님으로 로그인되었습니다.`);
           return;
         }
 
+        // 신규 회원 등록
         const oldNick = currentUser.nickname;
         currentUser = { nickname: input };
         localStorage.setItem('bapsim_user', JSON.stringify(currentUser));
         document.getElementById('userProfileText').textContent = input;
 
-        // 신규 회원 등록
         await db.ref(`user_points/${input}`).set({
           nickname: input,
+          password: pass, // 고유 비밀번호 저장
           points: 30,
           badge: 'nb-none',
           color: '',
@@ -3252,7 +3352,7 @@
         initPresenceSystem();
         closeAuthModal();
 
-        alert(`🎉 [${input}] 님, 회원가입 신청이 성공적으로 접수되었습니다!\n\n운영진(관리자)의 승인이 완료되는 즉시 모든 기능이 활성화됩니다.`);
+        alert(`🎉 [${input}] 님, 회원가입 신청이 성공적으로 접수되었습니다!\n\n설정하신 비밀번호(${pass})를 꼭 기억해주세요. 운영진 승인 후 모든 기능이 활성화됩니다.`);
       } catch (err) {
         console.error("회원가입 에러:", err);
         alert("가입 처리 중 오류가 발생했습니다: " + err.message);
