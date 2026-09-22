@@ -6,9 +6,7 @@
   <title>밥심 (Bapsim) - 문정동 한식뷔페 올인원 점심 솔루션</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Canvas Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <!-- Firebase SDK v8 -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Black+Han+Sans&family=Rubik+Glitch&family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -17,7 +15,6 @@
     .scrollbar-hide::-webkit-scrollbar { display: none; }
     .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-    /* 이모티콘 3종 + 관리자 스티커 */
     .sticker-agree {
       font-family: 'Gaegu', cursive; font-size: 1.45rem; color: #2563eb; background: #eff6ff;
       border: 2px dashed #60a5fa; padding: 3px 12px; border-radius: 9999px; display: inline-flex;
@@ -46,13 +43,10 @@
       border: 2px solid #f59e0b; box-shadow: 0 0 12px rgba(245, 158, 11, 0.6); padding: 4px 14px; border-radius: 8px;
     }
 
-    /* 닉네임 배경 배지 스타일 */
     .nb-none { background: transparent; padding: 0; }
-
     .nb-admin {
       background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 50%, #991b1b 100%);
-      color: #ffffff !important;
-      border: 2px solid #facc15;
+      color: #ffffff !important; border: 2px solid #facc15;
       box-shadow: 0 0 16px rgba(239, 68, 68, 0.9), inset 0 0 8px #fde047;
       animation: adminPulseGlow 1.8s infinite alternate ease-in-out;
       padding: 2px 9px; border-radius: 8px; font-weight: 900; letter-spacing: -0.02em;
@@ -61,110 +55,65 @@
       0% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.7), inset 0 0 4px #fde047; }
       100% { box-shadow: 0 0 25px rgba(239, 68, 68, 1), 0 0 12px #f87171, inset 0 0 12px #fde047; }
     }
-
     .nb-cosmic {
       background: linear-gradient(90deg, #ff007f, #7928ca, #0070f3, #00dfd8, #ff007f);
       background-size: 300% 300%;
       animation: cosmicShift 3s ease infinite, cosmicGlow 2s alternate infinite;
-      color: #ffffff !important; border: 1.5px solid #ffffff;
-      padding: 2px 9px; border-radius: 8px; font-weight: 900;
+      color: #ffffff !important; border: 1.5px solid #ffffff; padding: 2px 9px; border-radius: 8px; font-weight: 900;
     }
     @keyframes cosmicShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
     @keyframes cosmicGlow { 0% { box-shadow: 0 0 12px rgba(255, 0, 128, 0.8), 0 0 20px rgba(0, 223, 216, 0.5); } 100% { box-shadow: 0 0 24px rgba(255, 0, 128, 1), 0 0 32px rgba(121, 40, 202, 0.8); } }
-
     .nb-solar {
       background: linear-gradient(90deg, #ff4500, #ff8c00, #ffd700, #ff4500);
       background-size: 250% 250%;
       animation: solarFlare 2.5s ease infinite, solarPulse 1.5s alternate infinite;
-      color: #ffffff !important; border: 1.5px solid #fff7ed;
-      padding: 2px 9px; border-radius: 8px; font-weight: 900;
+      color: #ffffff !important; border: 1.5px solid #fff7ed; padding: 2px 9px; border-radius: 8px; font-weight: 900;
     }
     @keyframes solarFlare { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
     @keyframes solarPulse { 0% { box-shadow: 0 0 14px rgba(255, 69, 0, 0.8); } 100% { box-shadow: 0 0 28px rgba(255, 69, 0, 1), 0 0 18px rgba(255, 215, 0, 0.9); } }
-
     .nb-abyss {
       background: linear-gradient(135deg, #450a0a 0%, #b91c1c 40%, #000000 80%, #ef4444 100%);
-      background-size: 200% 200%;
-      animation: abyssShift 2.2s ease infinite;
-      color: #fee2e2 !important; border: 2px solid #f87171;
-      padding: 2px 9px; border-radius: 8px; font-weight: 900;
+      background-size: 200% 200%; animation: abyssShift 2.2s ease infinite;
+      color: #fee2e2 !important; border: 2px solid #f87171; padding: 2px 9px; border-radius: 8px; font-weight: 900;
     }
-    @keyframes abyssShift { 0% { background-position: 0% 0%; box-shadow: 0 0 14px rgba(239, 68, 68, 0.8); } 50% { background-position: 100% 100%; box-shadow: 0 0 26px rgba(185, 28, 28, 1); } 100% { background-position: 0% 0%; box-shadow: 0 0 14px rgba(239, 68, 68, 0.8); } }
-
+    @keyframes abyssShift { 0% { background-position: 0% 0%; } 50% { background-position: 100% 100%; } 100% { background-position: 0% 0%; } }
     .nb-cyberaurora {
       background: linear-gradient(115deg, #06b6d4, #3b82f6, #8b5cf6, #ec4899, #06b6d4);
-      background-size: 300% 300%;
-      animation: cyberAura 3s linear infinite;
-      color: #ffffff !important; border: 1.5px solid #a5f3fc;
-      padding: 2px 9px; border-radius: 8px; font-weight: 900;
+      background-size: 300% 300%; animation: cyberAura 3s linear infinite;
+      color: #ffffff !important; border: 1.5px solid #a5f3fc; padding: 2px 9px; border-radius: 8px; font-weight: 900;
     }
-    @keyframes cyberAura { 0% { background-position: 0% 50%; box-shadow: 0 0 15px #06b6d4; } 50% { background-position: 100% 50%; box-shadow: 0 0 25px #ec4899; } 100% { background-position: 0% 50%; box-shadow: 0 0 15px #06b6d4; } }
-
+    @keyframes cyberAura { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
     .nb-infinity {
       background: radial-gradient(circle, #fde047 0%, #ca8a04 40%, #3b0764 80%, #000000 100%);
-      color: #fef9c3 !important; border: 2px solid #fef08a;
-      animation: infinityGlow 2s ease-in-out infinite alternate;
+      color: #fef9c3 !important; border: 2px solid #fef08a; animation: infinityGlow 2s ease-in-out infinite alternate;
       padding: 2px 9px; border-radius: 8px; font-weight: 900;
     }
-    @keyframes infinityGlow {
-      0% { box-shadow: 0 0 12px rgba(250, 204, 21, 0.7), inset 0 0 6px #facc15; transform: scale(1); }
-      100% { box-shadow: 0 0 28px rgba(250, 204, 21, 1), 0 0 15px #a855f7, inset 0 0 10px #fde047; transform: scale(1.02); }
-    }
-
+    @keyframes infinityGlow { 0% { box-shadow: 0 0 12px rgba(250, 204, 21, 0.7); } 100% { box-shadow: 0 0 28px rgba(250, 204, 21, 1); } }
     .nb-blackhole {
       background: radial-gradient(circle, #581c87 0%, #0f051d 60%, #000000 100%);
-      color: #f3e8ff !important; border: 1.5px solid #c084fc;
-      animation: blackholePulse 3s infinite ease-in-out;
+      color: #f3e8ff !important; border: 1.5px solid #c084fc; animation: blackholePulse 3s infinite ease-in-out;
       padding: 2px 9px; border-radius: 8px; font-weight: 900;
     }
-    @keyframes blackholePulse {
-      0% { box-shadow: 0 0 12px rgba(192, 132, 252, 0.6), inset 0 0 6px #a855f7; transform: scale(1); }
-      50% { box-shadow: 0 0 24px rgba(168, 85, 247, 0.9), inset 0 0 14px #e9d5ff; transform: scale(1.02); }
-      100% { box-shadow: 0 0 12px rgba(192, 132, 252, 0.6), inset 0 0 6px #a855f7; transform: scale(1); }
-    }
-
+    @keyframes blackholePulse { 0%, 100% { box-shadow: 0 0 12px rgba(192, 132, 252, 0.6); } 50% { box-shadow: 0 0 24px rgba(168, 85, 247, 0.9); } }
     .nb-matrix {
       background: linear-gradient(180deg, #022c22 0%, #064e3b 50%, #022c22 100%);
-      background-size: 100% 200%;
-      animation: matrixScan 2s linear infinite;
-      color: #34d399 !important; border: 1.5px solid #10b981;
-      font-family: monospace; padding: 2px 8px; border-radius: 6px; font-weight: 900; letter-spacing: 0.05em;
+      color: #34d399 !important; border: 1.5px solid #10b981; font-family: monospace; padding: 2px 8px; border-radius: 6px; font-weight: 900;
     }
-    @keyframes matrixScan {
-      0% { background-position: 0% 0%; box-shadow: 0 0 10px rgba(16, 185, 129, 0.7); }
-      50% { box-shadow: 0 0 20px rgba(52, 211, 153, 0.9); }
-      100% { background-position: 0% 200%; box-shadow: 0 0 10px rgba(16, 185, 129, 0.7); }
-    }
-
     .nb-universe {
       background: linear-gradient(135deg, #020617, #1e1b4b, #3b0764, #020617);
-      background-size: 300% 300%;
-      animation: universeWarp 5s ease infinite;
-      color: #e0e7ff !important; border: 1.5px solid #a78bfa;
-      padding: 2px 8px; border-radius: 8px; font-weight: 900;
+      color: #e0e7ff !important; border: 1.5px solid #a78bfa; padding: 2px 8px; border-radius: 8px; font-weight: 900;
     }
-    @keyframes universeWarp {
-      0% { background-position: 0% 50%; box-shadow: 0 0 12px rgba(139, 92, 246, 0.6); }
-      50% { background-position: 100% 50%; box-shadow: 0 0 24px rgba(167, 139, 250, 0.9); }
-      100% { background-position: 0% 50%; box-shadow: 0 0 12px rgba(139, 92, 246, 0.6); }
-    }
-
     .nb-gold { 
       background: linear-gradient(110deg, #b45309 0%, #fef08a 30%, #facc15 50%, #ca8a04 70%, #b45309 100%); 
-      background-size: 200% auto;
-      animation: goldShimmer 3s linear infinite;
-      color: #713f12 !important; border: 1.5px solid #fef08a;
-      padding: 2px 8px; border-radius: 8px; font-weight: 900;
+      color: #713f12 !important; border: 1.5px solid #fef08a; padding: 2px 8px; border-radius: 8px; font-weight: 900;
     }
-    @keyframes goldShimmer { to { background-position: 200% center; box-shadow: 0 0 16px rgba(234, 179, 8, 0.8); } }
-
-    .nb-darkvip { background: linear-gradient(135deg, #18181b 0%, #09090b 100%); color: #f43f5e !important; border: 1.5px solid #e11d48; box-shadow: 0 0 10px rgba(225, 29, 72, 0.4); padding: 2px 8px; border-radius: 8px; font-weight: 900; }
-    .nb-aurora { background: linear-gradient(135deg, #059669, #10b981, #06b6d4); color: #ecfdf5 !important; border: 1.5px solid #34d399; box-shadow: 0 0 10px rgba(52, 211, 153, 0.6); padding: 2px 8px; border-radius: 8px; font-weight: 900; }
-    .nb-diamond { background: linear-gradient(135deg, #ecfeff 0%, #a5f3fc 50%, #38bdf8 100%); color: #0369a1 !important; border: 1.5px solid #0284c7; box-shadow: 0 0 10px rgba(56, 189, 248, 0.5); padding: 2px 8px; border-radius: 8px; font-weight: 900; }
-    .nb-galaxy { background: linear-gradient(135deg, #312e81 0%, #4c1d95 50%, #831843 100%); color: #fdf4ff !important; border: 1.5px solid #c084fc; box-shadow: 0 0 8px rgba(192, 132, 252, 0.5); padding: 2px 8px; border-radius: 8px; font-weight: 800; }
-    .nb-cyberpunk { background: #050505; color: #f43f5e !important; border: 1.5px solid #06b6d4; box-shadow: 2px 2px 0px #06b6d4; padding: 2px 8px; border-radius: 4px; font-weight: 900; }
-    .nb-neon { background: #09090b; color: #4ade80 !important; border: 1.5px solid #22c55e; box-shadow: 0 0 8px rgba(34, 197, 94, 0.45); padding: 2px 8px; border-radius: 8px; font-weight: 800; }
-    .nb-fire { background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%); color: #c2410c !important; border: 1.5px solid #ea580c; padding: 2px 8px; border-radius: 8px; font-weight: 800; }
+    .nb-darkvip { background: linear-gradient(135deg, #18181b 0%, #09090b 100%); color: #f43f5e !important; border: 1.5px solid #e11d48; padding: 2px 8px; border-radius: 8px; font-weight: 900; }
+    .nb-aurora { background: linear-gradient(135deg, #059669, #10b981, #06b6d4); color: #ecfdf5 !important; border: 1.5px solid #34d399; padding: 2px 8px; border-radius: 8px; font-weight: 900; }
+    .nb-diamond { background: linear-gradient(135deg, #ecfeff 0%, #a5f3fc 50%, #38bdf8 100%); color: #0369a1 !important; border: 1.5px solid #0284c7; padding: 2px 8px; border-radius: 8px; font-weight: 900; }
+    .nb-galaxy { background: linear-gradient(135deg, #312e81 0%, #4c1d95 50%, #831843 100%); color: #fdf4ff !important; border: 1.5px solid #c084fc; padding: 2px 8px; border-radius: 8px; font-weight: 800; }
+    .nb-cyberpunk { background: #050505; color: #f43f5e !important; border: 1.5px solid #06b6d4; padding: 2px 8px; border-radius: 4px; font-weight: 900; }
+    .nb-neon { background: #09090b; color: #4ade80 !important; border: 1.5px solid #22c55e; padding: 2px 8px; border-radius: 8px; font-weight: 800; }
+    .nb-fire { background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%); color: #c2410c !important; border: 1.5px solid #ea580c; padding: 2px 8px; border-radius: 8px; font-weight: 800; }
     .nb-cherry { background: #fff1f2; color: #be123c !important; border: 1.5px solid #fb7185; padding: 2px 7px; border-radius: 7px; font-weight: 800; }
     .nb-sunset { background: linear-gradient(135deg, #fef3c7, #fed7aa); color: #9a3412 !important; border: 1px solid #fb923c; padding: 2px 7px; border-radius: 7px; font-weight: 800; }
     .nb-mint { background: #ecfdf5; color: #065f46 !important; border: 1px solid #10b981; padding: 2px 7px; border-radius: 7px; font-weight: 800; }
@@ -176,7 +125,7 @@
   <!-- 승인 대기 안내 알림 바 -->
   <div id="pendingApprovalBanner" class="hidden bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-2.5 text-center text-xs font-black sticky top-0 z-50 shadow-md flex items-center justify-center gap-2">
     <i data-lucide="clock" class="w-4 h-4 animate-spin"></i>
-    <span>현재 <strong id="pendingBannerNick" class="underline"></strong> 님의 계정은 <strong>관리자 승인 대기 중</strong>입니다. 관리자 승인 후 투표 및 게임이 활성화됩니다.</span>
+    <span>현재 <strong id="pendingBannerNick" class="underline"></strong> 님의 계정은 <strong>관리자 승인 대기 중</strong>입니다. 승인 후 모든 기능이 활성화됩니다.</span>
   </div>
 
   <!-- [좌측 날개 배너] -->
@@ -218,8 +167,9 @@
     </div>
   </aside>
 
-  <!-- [우측 날개 배너] -->
-  <aside class="hidden 2xl:block fixed right-4 top-20 z-30 w-64">
+  <!-- [우측 날개 배너: 부자 랭킹 + 밥키우기 실시간 랭킹] -->
+  <aside class="hidden 2xl:block fixed right-4 top-20 z-30 w-64 space-y-4">
+    <!-- 실시간 부자 랭킹 -->
     <div class="bg-white/95 backdrop-blur-md rounded-3xl p-4 border border-slate-200 shadow-xl space-y-3">
       <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
         <div class="flex items-center gap-2">
@@ -229,7 +179,7 @@
             <p class="text-[9px] text-slate-400">TOP 5 명예의 전당</p>
           </div>
         </div>
-        <button onclick="openRankModal()" class="text-[11px] text-indigo-600 hover:text-indigo-800 font-bold">전체보기</button>
+        <button onclick="openRankModal('points')" class="text-[11px] text-indigo-600 hover:text-indigo-800 font-bold">전체보기</button>
       </div>
 
       <div class="p-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 rounded-2xl text-slate-950 flex items-center justify-between shadow-xs">
@@ -242,6 +192,32 @@
 
       <div id="sideRankListContainer" class="space-y-1.5 text-xs">
         <div class="text-center text-slate-400 py-3 text-xs">랭킹 집계 중...</div>
+      </div>
+    </div>
+
+    <!-- 우측 밥키우기 실시간 랭킹 -->
+    <div class="bg-white/95 backdrop-blur-md rounded-3xl p-4 border border-amber-200/90 shadow-xl space-y-3">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+        <div class="flex items-center gap-2">
+          <span class="p-1.5 bg-orange-50 text-orange-600 rounded-xl">🍚</span>
+          <div>
+            <h3 class="font-extrabold text-slate-900 text-xs">밥키우기 실시간 랭킹</h3>
+            <p class="text-[9px] text-slate-400">최고 강화 밥그릇 TOP 5</p>
+          </div>
+        </div>
+        <button onclick="openRankModal('enhance')" class="text-[11px] text-orange-600 hover:text-orange-800 font-bold">전체보기</button>
+      </div>
+
+      <div class="p-2 bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl text-slate-950 flex items-center justify-between shadow-xs">
+        <div class="min-w-0">
+          <span class="text-[9px] font-black uppercase text-amber-950/80 block">MY BOWL</span>
+          <span id="sideMyBowlLevel" class="text-xs font-black truncate block">+0 따스한 햇쌀밥</span>
+        </div>
+        <span id="sideMyBowlRank" class="text-xs font-black bg-white/40 px-2 py-0.5 rounded-lg shrink-0">-위</span>
+      </div>
+
+      <div id="sideEnhanceRankListContainer" class="space-y-1.5 text-xs">
+        <div class="text-center text-slate-400 py-3 text-xs">밥키우기 집계 중...</div>
       </div>
     </div>
   </aside>
@@ -289,9 +265,8 @@
     </div>
   </header>
 
-  <!-- 메인 본문 컨테이너 -->
+  <!-- 메인 본문 -->
   <main class="max-w-6xl mx-auto px-4 pt-6 space-y-7">
-
     <!-- 상단 배너 & 타이머 -->
     <div class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 rounded-3xl p-6 sm:p-7 text-white shadow-xl shadow-slate-900/10 space-y-5">
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -319,7 +294,7 @@
         </div>
       </div>
 
-      <!-- 배너 하단 툴바 (포인트 게임장 옆에 '밥키우기' 추가) -->
+      <!-- 배너 하단 툴바 -->
       <div class="pt-4 border-t border-slate-700/60 flex flex-wrap items-center justify-between gap-2.5">
         <span class="text-xs font-bold text-slate-400 hidden sm:inline-flex items-center gap-1.5">
           <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
@@ -332,11 +307,11 @@
             <span>포인트 게임장</span>
           </button>
 
-          <!-- 신규 추가된 밥키우기 강화 게임 버튼 -->
+          <!-- 밥키우기 강화 버튼 -->
           <button onclick="openEnhanceModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-black px-3 py-2 rounded-xl text-xs shadow-md transition-all">
             <span>🍚</span>
             <span>밥키우기</span>
-            <span class="text-[10px] bg-slate-900 text-amber-300 px-1.5 py-0.2 rounded-full">NEW</span>
+            <span id="headerEnhanceBadge" class="text-[10px] bg-slate-900 text-amber-300 px-1.5 py-0.2 rounded-full font-bold">+0강</span>
           </button>
 
           <button onclick="openShopModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-amber-300 font-bold px-3 py-2 rounded-xl text-xs shadow-md transition-all">
@@ -344,9 +319,9 @@
             <span>명품 상점</span>
           </button>
 
-          <button onclick="openRankModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-3 py-2 rounded-xl text-xs shadow-md transition-all">
+          <button onclick="openRankModal('points')" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-3 py-2 rounded-xl text-xs shadow-md transition-all">
             <i data-lucide="award" class="w-3.5 h-3.5"></i>
-            <span>부자 랭킹</span>
+            <span>랭킹 전당</span>
           </button>
 
           <button onclick="openRouletteModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-3 py-2 rounded-xl text-xs border border-slate-700 transition-all">
@@ -365,7 +340,6 @@
           </button>
         </div>
       </div>
-
       <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
     </div>
 
@@ -483,7 +457,7 @@
           <div>
             <h3 class="font-black text-white text-base tracking-tight flex items-center gap-1.5">
               밥키우기 강화소
-              <span class="text-[10px] bg-indigo-500/30 text-indigo-300 px-2 py-0.5 rounded font-bold border border-indigo-400/20">Enhancement</span>
+              <span class="text-[10px] bg-indigo-500/30 text-indigo-300 px-2 py-0.5 rounded font-bold border border-indigo-400/20">Lv.1~20</span>
             </h3>
             <p class="text-[11px] text-slate-400">밥을 전설의 20강까지 성장시켜 대박 수익을 노려보세요!</p>
           </div>
@@ -501,12 +475,12 @@
         </div>
 
         <div class="pt-4 py-2">
-          <div id="enhanceBowlAvatar" class="w-28 h-28 mx-auto rounded-3xl bg-gradient-to-tr from-amber-500/20 via-orange-500/10 to-transparent border-2 border-amber-500/40 flex items-center justify-center text-6xl shadow-inner transition-transform active:scale-95">
+          <div id="enhanceBowlAvatar" class="w-28 h-28 mx-auto rounded-3xl bg-gradient-to-tr from-amber-500/20 via-orange-500/10 to-transparent border-2 border-amber-500/40 flex items-center justify-center text-5xl shadow-inner transition-transform active:scale-95">
             🍚
           </div>
           <div class="mt-3">
-            <span id="enhanceLevelBadge" class="text-2xl font-black tracking-tight text-amber-400">
-              +0 일반 밥
+            <span id="enhanceLevelBadge" class="text-xl font-black tracking-tight text-amber-400">
+              +0 따스한 햇쌀밥
             </span>
           </div>
         </div>
@@ -552,14 +526,15 @@
       <div class="space-y-2">
         <button onclick="toggleEnhanceProbTable()" class="w-full py-2 bg-slate-800/80 hover:bg-slate-800 rounded-xl text-slate-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors">
           <i data-lucide="table" class="w-3.5 h-3.5"></i>
-          <span>단계별 전체 강화 확률표 보기</span>
+          <span>단계별 전체 강화 이름 및 확률표 보기</span>
         </button>
 
-        <div id="enhanceProbTableContainer" class="hidden max-h-48 overflow-y-auto border border-slate-800 rounded-2xl p-2 bg-slate-950 text-[11px]">
+        <div id="enhanceProbTableContainer" class="hidden max-h-52 overflow-y-auto border border-slate-800 rounded-2xl p-2 bg-slate-950 text-[11px]">
           <table class="w-full text-center">
             <thead class="text-slate-500 border-b border-slate-800">
               <tr>
                 <th class="py-1">단계</th>
+                <th class="py-1 text-left pl-2">이름</th>
                 <th class="py-1 text-emerald-400">성공</th>
                 <th class="py-1 text-amber-400">유지</th>
                 <th class="py-1 text-rose-400">파괴</th>
@@ -638,7 +613,6 @@
         <button onclick="closeMiniGameModal()" class="text-slate-400 hover:text-slate-600 text-base font-bold p-1">✕</button>
       </div>
 
-      <!-- 3x2 그리드 배열 -->
       <div class="bg-slate-100/90 p-1.5 rounded-2xl grid grid-cols-3 gap-1.5 text-xs font-bold">
         <button onclick="switchGameTab('clicker')" id="tabBtn_clicker" class="py-2.5 px-2 rounded-xl bg-white shadow-xs text-slate-900 font-extrabold flex items-center justify-center gap-1.5 transition-all">
           <span>🍚</span><span>밥알광클</span>
@@ -660,7 +634,7 @@
         </button>
       </div>
 
-      <!-- 1. 밥알 광클 (최대 500P 제한) -->
+      <!-- 1. 밥알 광클 -->
       <div id="gameView_clicker" class="space-y-5 text-center pt-1">
         <div class="p-3.5 bg-emerald-50/80 rounded-2xl border border-emerald-100 text-xs text-emerald-800 font-medium">
           <strong>10초 동안 밥그릇 광클!</strong> (1클릭당 2P / <span class="text-rose-600 font-bold">1판 최대 500P</span>)
@@ -679,7 +653,7 @@
         </button>
       </div>
 
-      <!-- 2. 스피드 연타 (성공 시 150P / 최대 500P 제한) -->
+      <!-- 2. 스피드 연타 -->
       <div id="gameView_speed" class="hidden space-y-5 text-center pt-1">
         <div class="p-3.5 bg-teal-50/80 rounded-2xl border border-teal-100 text-xs text-teal-800 font-medium">
           <strong>5초 동안 30타 이상 폭풍 연타!</strong><br/>
@@ -720,7 +694,7 @@
         </button>
       </div>
 
-      <!-- 4. 슬롯머신 (1,000,000P 잭팟) -->
+      <!-- 4. 슬롯머신 -->
       <div id="gameView_slot" class="hidden space-y-4 text-center pt-1">
         <div class="p-3.5 bg-indigo-50/80 rounded-2xl border border-indigo-100 text-xs text-indigo-800 leading-relaxed font-medium">
           <strong>1회당 50P 베팅!</strong><br/>
@@ -772,7 +746,7 @@
         </div>
       </div>
 
-      <!-- 6. 주사위 게임 (홀짝 2배 + 숫자 맞추기 최대 500P 제한, 8배 배당, 1분 10회 제한) -->
+      <!-- 6. 주사위 게임 -->
       <div id="gameView_dice" class="hidden space-y-4 text-center pt-1">
         <div class="p-3 bg-purple-50/80 rounded-2xl border border-purple-100 text-xs text-purple-800 leading-relaxed font-medium">
           <strong>주사위 승부!</strong> 홀/짝 적중 시 <strong>2배</strong> 지급!<br/>
@@ -788,7 +762,6 @@
         </div>
         <div id="diceResultText" class="text-xs font-bold text-slate-500 h-5">베팅 방식을 선택하세요!</div>
         
-        <!-- 홀짝 (2배, 최대 10,000P) -->
         <div class="grid grid-cols-2 gap-2">
           <button onclick="playDiceBet('odd')" class="bg-purple-600 hover:bg-purple-700 text-white font-black py-2.5 rounded-xl text-xs shadow-md transition-all">
             홀수 (2배)
@@ -798,7 +771,6 @@
           </button>
         </div>
 
-        <!-- 숫자 맞추기 (최대 500P / 8배 배당 / 1분 10회 제한) -->
         <div class="space-y-1.5 pt-1">
           <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 px-1">
             <span>🎯 숫자 단일 예측 (8배 배당)</span>
@@ -817,19 +789,31 @@
     </div>
   </div>
 
-  <!-- 전체 랭킹 모달 -->
+  <!-- 전체 랭킹 모달 (부자 랭킹 / 밥키우기 랭킹 탭 전환 지원) -->
   <div id="rankModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
+    <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
         <div class="flex items-center gap-2">
           <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-lg">🏆</div>
           <div>
-            <h3 class="font-black text-slate-900 text-base">밥심 실시간 포인트 랭킹</h3>
-            <p class="text-[11px] text-slate-400">문정동 최고의 식단 기여자 & 포인트 부자 순위</p>
+            <h3 class="font-black text-slate-900 text-base" id="rankModalTitle">밥심 명예의 전당</h3>
+            <p class="text-[11px] text-slate-400">문정동 최고의 포인트 부자 & 밥키우기 순위</p>
           </div>
         </div>
         <button onclick="closeRankModal()" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
       </div>
+
+      <!-- 랭킹 탭 전환 -->
+      <div class="bg-slate-100 p-1 rounded-2xl grid grid-cols-2 gap-1 text-xs font-bold">
+        <button id="rankTab_points" onclick="switchRankTab('points')" class="py-2 rounded-xl bg-white shadow-xs text-slate-900 font-black">
+          🪙 포인트 부자 랭킹
+        </button>
+        <button id="rankTab_enhance" onclick="switchRankTab('enhance')" class="py-2 rounded-xl text-slate-500 hover:text-slate-900 font-bold">
+          🍚 밥키우기 강화 랭킹
+        </button>
+      </div>
+
+      <!-- 내 랭킹 요약 카드 -->
       <div class="p-4 bg-gradient-to-r from-amber-500 to-yellow-500 rounded-2xl text-slate-950 flex items-center justify-between shadow-md">
         <div>
           <span class="text-[11px] font-extrabold uppercase tracking-wider text-amber-950/80">내 랭킹 정보</span>
@@ -839,17 +823,18 @@
           <span class="text-xs font-black bg-white/40 px-2.5 py-1 rounded-xl" id="myRankPointDisplay">0P</span>
         </div>
       </div>
+
       <div class="space-y-2">
-        <h4 class="text-xs font-black text-slate-700 flex items-center gap-1">
+        <h4 class="text-xs font-black text-slate-700 flex items-center gap-1" id="rankListHeaderLabel">
           <i data-lucide="crown" class="w-3.5 h-3.5 text-amber-500"></i>
-          <span>전체 포인트 랭킹 순위표</span>
+          <span>순위표</span>
         </h4>
         <div id="rankListContainer" class="space-y-2 text-xs"></div>
       </div>
     </div>
   </div>
 
-  <!-- 상점 모달 (999,999P 신화급 배지 포함) -->
+  <!-- 상점 모달 -->
   <div id="shopModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
@@ -857,7 +842,7 @@
           <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-lg">🪙</div>
           <div>
             <h3 class="font-black text-slate-900 text-base">밥심 명품 상점 & 인벤토리</h3>
-            <p class="text-[11px] text-slate-400">내 보유 포인트: <strong id="shopCurrentPoints" class="text-amber-600">0P</strong></p>
+            <p class="text-[11px] text-slate-400">내 보유: <strong id="shopCurrentPoints" class="text-amber-600">0P</strong> | 밥 등급: <strong id="shopCurrentEnhanceLvl" class="text-orange-600">+0강</strong></p>
           </div>
         </div>
         <button onclick="closeShopModal()" class="text-slate-400 hover:text-slate-600 text-xs p-1">✕</button>
@@ -886,7 +871,14 @@
       </div>
 
       <div class="space-y-3">
-        <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><span>🏷️</span> 닉네임 명품 & 신화 배지 (최고 999,999P)</span>
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5">
+            <span>🏷️</span> 닉네임 명품 & 신화 배지
+          </span>
+          <span class="text-[10px] text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded-full">
+            3만P↑: 13강 / 99만P: 17강 필수
+          </span>
+        </div>
         <div class="space-y-2 text-xs" id="shopBadgeList"></div>
       </div>
 
@@ -914,7 +906,7 @@
     </div>
   </div>
 
-  <!-- [관리자 대시보드 모달] -->
+  <!-- 관리자 대시보드 모달 -->
   <div id="adminDashboardModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
@@ -1001,7 +993,7 @@
         <div id="adminUserListContainer" class="space-y-2 max-h-48 overflow-y-auto border rounded-2xl p-2 bg-slate-50 text-xs"></div>
       </div>
 
-      <!-- 전체 아이템 몰수 및 삭제 관리 구역 -->
+      <!-- 위험 관리 구역 -->
       <div class="p-4 bg-rose-50 border border-rose-200 rounded-2xl space-y-3 text-xs">
         <span class="font-black text-rose-900 block">🚨 위험 관리 구역</span>
         
@@ -1286,35 +1278,53 @@
     let groupVotesData = {};
     let chatRef = null;
 
-    // 미니게임 상태
+    // 미니게임 변수들
     let gameInterval = null;
     let gameTimeLeft = 10.0;
     let gameClicks = 0;
     let isGameRunning = false;
 
-    // 스피드 연타
     let speedInterval = null;
     let speedTimeLeft = 5.0;
     let speedHits = 0;
     let isSpeedRunning = false;
 
-    // 식단 암기
     const MEMORY_OPTIONS = ["제육볶음", "돈까스", "닭강정", "김치찜"];
     let memorySequence = [];
     let memoryUserStep = 0;
     let isMemoryGameActive = false;
 
-    // 슬롯머신
     const SLOT_ITEMS = ["🍚", "🍗", "🥩", "🍕", "🍜", "👑", "💎"];
     let isSlotSpinning = false;
-
-    // 주사위 쿨타임 배열
     let diceExactBetTimestamps = [];
 
     // ==========================================
-    // 신규: 밥키우기 (강화 시스템 메타데이터)
+    // 1 & 2. 밥키우기 단계별 고유 진화 테이블 & 차등 강화비용
     // ==========================================
-    // 사진의 강화 확률표 100% 반영: [성공, 유지, 파괴]
+    const BOWL_EVOLUTION = [
+      { level: 0,  icon: "🍚", name: "따스한 햇쌀밥" },
+      { level: 1,  icon: "🌾", name: "갓 도정한 햅쌀밥" },
+      { level: 2,  icon: "🍙", name: "고소한 참기름 주먹밥" },
+      { level: 3,  icon: "🍘", name: "바삭한 누룽지 튀밥" },
+      { level: 4,  icon: "🍚", name: "찰진 영양 흑미밥" },
+      { level: 5,  icon: "🍣", name: "신선한 초밥용 단촛물밥" },
+      { level: 6,  icon: "🍛", name: "매콤달콤 카레 덮밥" },
+      { level: 7,  icon: "🍳", name: "지글지글 김치볶음밥" },
+      { level: 8,  icon: "🥣", name: "속 편한 전복 소라죽" },
+      { level: 9,  icon: "🥢", name: "오색나물 전주비빔밥" },
+      { level: 10, icon: "🧑‍🍳", name: "윤기 좔좔 가마솥 영양밥" },
+      { level: 11, icon: "🍲", name: "얼큰 뚝배기 국밥" },
+      { level: 12, icon: "🍱", name: "임금님 수라상 칠첩반상 밥" },
+      { level: 13, icon: "🍖", name: "육즙 가득 대왕 규동 덮밥" },
+      { level: 14, icon: "🦞", name: "황금 랍스터 해물 리조또" },
+      { level: 15, icon: "🥟", name: "천하일미 만한전석 볶음밥" },
+      { level: 16, icon: "🪨", name: "천년 묵은 태고의 돌솥 누룽지" },
+      { level: 17, icon: "🌀", name: "우주 기운을 품은 오로라 밥" },
+      { level: 18, icon: "✨", name: "차원을 초월한 다이아몬드 신선밥" },
+      { level: 19, icon: "🪐", name: "무한 에너지를 머금은 성운의 밥" },
+      { level: 20, icon: "👑", name: "태초의 천상 만다라 불멸 영생밥" }
+    ];
+
     const ENHANCE_PROBABILITIES = [
       { level: 1,  success: 100.0, keep: 0.0,  break: 0.0,  reward: 50 },
       { level: 2,  success: 90.6,  keep: 9.4,  break: 0.0,  reward: 120 },
@@ -1325,7 +1335,7 @@
       { level: 7,  success: 45.4,  keep: 44.1, break: 10.5, reward: 1000 },
       { level: 8,  success: 40.2,  keep: 49.6, break: 10.3, reward: 1450 },
       { level: 9,  success: 33.6,  keep: 56.6, break: 9.8,  reward: 2000 },
-      { level: 10, success: 29.3,  keep: 61.4, break: 9.5,  reward: 3000 }, // 지정: 10강 3천
+      { level: 10, success: 29.3,  keep: 61.4, break: 9.5,  reward: 3000 },
       { level: 11, success: 25.5,  keep: 64.5, break: 10.1, reward: 4200 },
       { level: 12, success: 23.6,  keep: 65.9, break: 10.6, reward: 5800 },
       { level: 13, success: 19.3,  keep: 70.2, break: 10.5, reward: 8000 },
@@ -1334,12 +1344,21 @@
       { level: 16, success: 13.1,  keep: 78.0, break: 9.8,  reward: 18500 },
       { level: 17, success: 10.9,  keep: 76.8, break: 12.6, reward: 22000 },
       { level: 18, success: 9.9,   keep: 79.9, break: 10.7, reward: 26000 },
-      { level: 19, success: 4.7,   keep: 86.2, break: 10.6, reward: 30000 }, // 지정: 19강 3만
-      { level: 20, success: 3.3,   keep: 90.3, break: 9.9,  reward: 100000 } // 지정: 20강 10만
+      { level: 19, success: 4.7,   keep: 86.2, break: 10.6, reward: 30000 },
+      { level: 20, success: 3.3,   keep: 90.3, break: 9.9,  reward: 100000 }
     ];
 
+    function getEnhanceCost(lvl) {
+      if (lvl < 5) return 100;
+      if (lvl < 10) return 150;
+      if (lvl < 15) return 250;
+      if (lvl < 17) return 400;
+      if (lvl < 19) return 800;
+      return 1000;
+    }
+
     let currentEnhanceLevel = parseInt(localStorage.getItem('bapsim_enhance_level') || '0', 10);
-    let enhanceActionTimestamps = []; // 분당 30회 제한
+    let enhanceActionTimestamps = [];
 
     function openEnhanceModal() {
       if (!checkApprovalGuard()) return;
@@ -1362,28 +1381,27 @@
       const probB = document.getElementById('probBreak');
       const actionBtn = document.getElementById('enhanceActionBtn');
 
-      // 단계별 타이틀 및 아바타
-      let name = "일반 밥";
-      let icon = "🍚";
-      if (currentEnhanceLevel >= 20) { name = "신화의 갓지은 영생밥"; icon = "👑"; }
-      else if (currentEnhanceLevel >= 17) { name = "황금 오라 불멸밥"; icon = "✨"; }
-      else if (currentEnhanceLevel >= 14) { name = "명품 흑미 고봉밥"; icon = "🍲"; }
-      else if (currentEnhanceLevel >= 10) { name = "윤기좔좔 찰진 솥밥"; icon = "🥘"; }
-      else if (currentEnhanceLevel >= 5) { name = "따끈한 즉석 쌀밥"; icon = "🍚"; }
+      const bowl = BOWL_EVOLUTION[Math.min(currentEnhanceLevel, 20)];
+      const bowlName = bowl ? bowl.name : "일반 밥";
+      const bowlIcon = bowl ? bowl.icon : "🍚";
 
       if (levelBadge) {
-        levelBadge.innerHTML = `<span class="${currentEnhanceLevel >= 15 ? 'text-amber-300 font-black animate-pulse' : 'text-amber-400'}">+${currentEnhanceLevel} ${name}</span>`;
+        levelBadge.innerHTML = `<span class="${currentEnhanceLevel >= 15 ? 'text-amber-300 font-black animate-pulse' : 'text-amber-400'}">+${currentEnhanceLevel} ${bowlName}</span>`;
       }
-      if (avatar) avatar.textContent = icon;
+      if (avatar) avatar.textContent = bowlIcon;
 
-      // 판매 금액
+      const hBadge = document.getElementById('headerEnhanceBadge');
+      if (hBadge) hBadge.textContent = `+${currentEnhanceLevel}강`;
+
+      const shopEnhanceTxt = document.getElementById('shopCurrentEnhanceLvl');
+      if (shopEnhanceTxt) shopEnhanceTxt.textContent = `+${currentEnhanceLevel}강 (${bowlName})`;
+
       let currentSellVal = 0;
       if (currentEnhanceLevel > 0) {
         currentSellVal = ENHANCE_PROBABILITIES[currentEnhanceLevel - 1].reward;
       }
       if (sellText) sellText.textContent = `${currentSellVal.toLocaleString()}P`;
 
-      // 다음 강화 목표 및 확률
       if (currentEnhanceLevel >= 20) {
         if (costText) costText.textContent = "최대 강화 달성";
         if (probS) probS.textContent = "-";
@@ -1395,23 +1413,24 @@
         }
       } else {
         const nextMeta = ENHANCE_PROBABILITIES[currentEnhanceLevel];
-        if (costText) costText.textContent = "강화비: 100P";
+        const nextCost = getEnhanceCost(currentEnhanceLevel);
+        if (costText) costText.textContent = `강화비: ${nextCost}P`;
         if (probS) probS.textContent = `${nextMeta.success.toFixed(1)}%`;
         if (probK) probK.textContent = `${nextMeta.keep.toFixed(1)}%`;
         if (probB) probB.textContent = `${nextMeta.break.toFixed(1)}%`;
         if (actionBtn) {
           actionBtn.disabled = false;
-          actionBtn.textContent = `+${currentEnhanceLevel + 1} 강화 시도 (100P)`;
+          actionBtn.textContent = `+${currentEnhanceLevel + 1} 강화 시도 (${nextCost}P)`;
         }
       }
 
-      // 분당 제한 카운트 표시
       const now = Date.now();
       enhanceActionTimestamps = enhanceActionTimestamps.filter(t => now - t < 60000);
       const cdEl = document.getElementById('enhanceCooldownText');
       if (cdEl) cdEl.textContent = `분당 강화: ${enhanceActionTimestamps.length} / 30회`;
 
       localStorage.setItem('bapsim_enhance_level', currentEnhanceLevel.toString());
+      syncEnhanceToCloud();
     }
 
     function renderEnhanceTable() {
@@ -1422,8 +1441,10 @@
       ENHANCE_PROBABILITIES.forEach(p => {
         const tr = document.createElement('tr');
         tr.className = (currentEnhanceLevel === p.level - 1) ? 'bg-amber-500/10 font-bold' : '';
+        const bowlInfo = BOWL_EVOLUTION[p.level] || { icon: '🍚', name: '' };
         tr.innerHTML = `
           <td class="py-1 text-slate-300">+${p.level}</td>
+          <td class="py-1 text-left pl-2 text-slate-200 truncate max-w-[120px]">${bowlInfo.icon} ${bowlInfo.name}</td>
           <td class="py-1 text-emerald-400">${p.success.toFixed(1)}%</td>
           <td class="py-1 text-amber-400">${p.keep.toFixed(1)}%</td>
           <td class="py-1 text-rose-400">${p.break.toFixed(1)}%</td>
@@ -1438,7 +1459,6 @@
       if (c) c.classList.toggle('hidden');
     }
 
-    // 강화 실행 (분당 30회 제한 + 확률 적용)
     function runEnhancement() {
       if (currentEnhanceLevel >= 20) return alert("이미 20강 최고 단계에 도달했습니다! 판매하여 정산하세요.");
 
@@ -1450,12 +1470,12 @@
         return alert(`⏳ 분당 강화 횟수(30회)를 초과했습니다!\n잠시 후 (${remSec}초 뒤) 다시 시도해주세요.`);
       }
 
-      const ENHANCE_COST = 100;
-      if (userPoints < ENHANCE_COST) {
-        return alert(`❌ 강화 비용이 부족합니다! (필요: ${ENHANCE_COST}P)`);
+      const cost = getEnhanceCost(currentEnhanceLevel);
+      if (userPoints < cost) {
+        return alert(`❌ 강화 비용이 부족합니다! (필요: ${cost}P / 보유: ${userPoints}P)`);
       }
 
-      userPoints -= ENHANCE_COST;
+      userPoints -= cost;
       enhanceActionTimestamps.push(now);
       updatePointsUI();
 
@@ -1464,21 +1484,18 @@
       const actionBtn = document.getElementById('enhanceActionBtn');
       actionBtn.disabled = true;
 
-      // 주사위 롤 (0 ~ 100)
       const roll = Math.random() * 100;
 
       if (roll < nextMeta.success) {
-        // 성공
         currentEnhanceLevel++;
+        const evolvedBowl = BOWL_EVOLUTION[currentEnhanceLevel];
         if (currentEnhanceLevel >= 15 && window.confetti) confetti({ particleCount: 150 });
-        alertEl.innerHTML = `<span class="text-emerald-400 font-extrabold text-sm">🎉 +${currentEnhanceLevel}강 성공! 축하합니다!</span>`;
+        alertEl.innerHTML = `<span class="text-emerald-400 font-extrabold text-xs">🎉 +${currentEnhanceLevel}강 [${evolvedBowl.name}] 성공! 축하합니다!</span>`;
       } else if (roll < (nextMeta.success + nextMeta.keep)) {
-        // 유지
-        alertEl.innerHTML = `<span class="text-amber-400 font-bold">⚠️ 강화 실패! 다행히 단계가 유지되었습니다.</span>`;
+        alertEl.innerHTML = `<span class="text-amber-400 font-bold text-xs">⚠️ 강화 실패! 다행히 밥이 타지 않고 유지되었습니다.</span>`;
       } else {
-        // 파괴
         currentEnhanceLevel = 0;
-        alertEl.innerHTML = `<span class="text-rose-500 font-black text-sm">💥 밥이 타버렸습니다! (파괴되어 +0단계로 리셋)</span>`;
+        alertEl.innerHTML = `<span class="text-rose-500 font-black text-xs">💥 밥이 타버렸습니다! (파괴되어 +0 따스한 햇쌀밥으로 리셋)</span>`;
       }
 
       updateEnhanceUI();
@@ -1486,12 +1503,12 @@
       setTimeout(() => { if (actionBtn) actionBtn.disabled = false; }, 200);
     }
 
-    // 밥 판매 및 수익 정산
     function sellEnhancedBowl() {
       if (currentEnhanceLevel <= 0) return alert("현재 +0단계 밥은 판매할 수 없습니다. 강화 후 판매하세요!");
 
       const reward = ENHANCE_PROBABILITIES[currentEnhanceLevel - 1].reward;
-      if (!confirm(`+${currentEnhanceLevel}단계 밥을 판매하고 ${reward.toLocaleString()}P를 획득하시겠습니까?\n판매 후 밥은 +0단계로 리셋됩니다.`)) return;
+      const currentName = BOWL_EVOLUTION[currentEnhanceLevel]?.name || '밥';
+      if (!confirm(`+${currentEnhanceLevel}강 [${currentName}]을(를) 판매하고 ${reward.toLocaleString()}P를 획득하시겠습니까?\n판매 후 밥은 +0단계로 리셋됩니다.`)) return;
 
       userPoints += reward;
       const soldLvl = currentEnhanceLevel;
@@ -1504,7 +1521,17 @@
       alert(`💰 +${soldLvl}강 밥을 판매하여 +${reward.toLocaleString()}P를 획득했습니다!`);
     }
 
-    // 상점 메타데이터 (999,999P 신화급 배지 컬렉션 포함)
+    function syncEnhanceToCloud() {
+      if (!currentUser.nickname || currentUser.nickname === "문정러") return;
+      db.ref(`user_points/${currentUser.nickname}`).update({
+        enhanceLevel: currentEnhanceLevel,
+        enhanceUpdated: Date.now()
+      });
+    }
+
+    // ==========================================
+    // 4. 상점 메타데이터 및 밥키우기 레벨 제한 적용
+    // ==========================================
     const SHOP_DATA = {
       symbols: [
         { id: "sym_star", name: "별빛 칭호", char: "★", cost: 150 },
@@ -1529,26 +1556,26 @@
         { id: "col_dark", name: "다크 나이트", hex: "#0f172a", cost: 300 }
       ],
       bgs: [
-        { id: "nb-cosmic", name: "🌌 코스믹 레인보우 (태초 신화)", class: "nb-cosmic", cost: 999999, desc: "찬란하게 요동치는 무지개 홀로그램 오라" },
-        { id: "nb-solar", name: "☀️ 태양의 겁화 (솔라 플레어)", class: "nb-solar", cost: 999999, desc: "타오르는 붉은 태양 홍염 애니메이션" },
-        { id: "nb-abyss", name: "🌋 심연의 지옥염화 (헬파이어)", class: "nb-abyss", cost: 999999, desc: "심연의 마그마와 핏빛 불길이 일렁이는 궁극의 배지" },
-        { id: "nb-cyberaurora", name: "💎 사이버 네온 프리즘 (환상)", class: "nb-cyberaurora", cost: 999999, desc: "초고주파 프리즘 레이저와 청록빛 오로라 발광" },
-        { id: "nb-infinity", name: "♾️ 영겁의 인피니티 (절대자)", class: "nb-infinity", cost: 999999, desc: "황금빛 차원문과 시공간 왜곡 절대자의 상징" },
-        { id: "nb-blackhole", name: "🕳️ 심연의 블랙홀 (시공 왜곡)", class: "nb-blackhole", cost: 888888, desc: "보랏빛 중력장과 암흑 물질 발광" },
-        { id: "nb-matrix", name: "🟢 사이버 매트릭스 (디지털 네오)", class: "nb-matrix", cost: 777777, desc: "초록빛 디지털 비가 흐르는 해커 플레이트" },
-        { id: "nb-universe", name: "🪐 다크 유니버스 (신화)", class: "nb-universe", cost: 500000, desc: "심오하고 묵직한 심우주 성운 워프 오라" },
-        { id: "nb-gold", name: "👑 황금빛 골드 배지 (10만P 이상)", class: "nb-gold", cost: 100000, desc: "럭셔리 쉬머 반사광이 감도는 최상위 부자의 상징" },
-        { id: "nb-darkvip", name: "💳 블랙 VIP 카드 배지", class: "nb-darkvip", cost: 50000, desc: "문정 VVIP 전용 블랙 플레이트" },
-        { id: "nb-aurora", name: "🌠 에메랄드 오로라 배지", class: "nb-aurora", cost: 35000, desc: "북극광처럼 일렁이는 청록빛 섬광" },
-        { id: "nb-diamond", name: "💎 다이아몬드 아이스", class: "nb-diamond", cost: 25000, desc: "차가운 블루 크리스탈 발광" },
-        { id: "nb-galaxy", name: "🌌 심연의 갤럭시", class: "nb-galaxy", cost: 10000, desc: "보랏빛 우주와 성운 그라데이션" },
-        { id: "nb-cyberpunk", name: "⚡ 사이버펑크 2077", class: "nb-cyberpunk", cost: 5000, desc: "사이안 & 핫핑크 글리치 테두리" },
-        { id: "nb-neon", name: "🟢 사이버 네온 글로우", class: "nb-neon", cost: 2500, desc: "초록빛 야간 네온 라이트" },
-        { id: "nb-fire", name: "🔥 불타는 밥심", class: "nb-fire", cost: 1000, desc: "열정적인 오렌지 플레임" },
-        { id: "nb-cherry", name: "🍒 체리 블라썸", class: "nb-cherry", cost: 800, desc: "화사하고 산뜻한 핑크빛 플레이트" },
-        { id: "nb-sunset", name: "🌅 문정 선셋", class: "nb-sunset", cost: 500, desc: "퇴근길 따뜻한 노을빛" },
-        { id: "nb-mint", name: "🌿 프레시 민트", class: "nb-mint", cost: 300, desc: "상쾌하고 깔끔한 민트 그린" },
-        { id: "nb-lavender", name: "🌸 소프트 라벤더", class: "nb-lavender", cost: 200, desc: "부드러운 파스텔 보랏빛" }
+        { id: "nb-cosmic", name: "🌌 코스믹 레인보우 (태초 신화)", class: "nb-cosmic", cost: 999999, reqLvl: 17, desc: "찬란하게 요동치는 무지개 홀로그램 오라 [17강 필요]" },
+        { id: "nb-solar", name: "☀️ 태양의 겁화 (솔라 플레어)", class: "nb-solar", cost: 999999, reqLvl: 17, desc: "타오르는 붉은 태양 홍염 애니메이션 [17강 필요]" },
+        { id: "nb-abyss", name: "🌋 심연의 지옥염화 (헬파이어)", class: "nb-abyss", cost: 999999, reqLvl: 17, desc: "심연의 마그마와 핏빛 불길이 일렁이는 궁극의 배지 [17강 필요]" },
+        { id: "nb-cyberaurora", name: "💎 사이버 네온 프리즘 (환상)", class: "nb-cyberaurora", cost: 999999, reqLvl: 17, desc: "초고주파 프리즘 레이저와 청록빛 오로라 발광 [17강 필요]" },
+        { id: "nb-infinity", name: "♾️ 영겁의 인피니티 (절대자)", class: "nb-infinity", cost: 999999, reqLvl: 17, desc: "황금빛 차원문과 시공간 왜곡 절대자의 상징 [17강 필요]" },
+        { id: "nb-blackhole", name: "🕳️ 심연의 블랙홀 (시공 왜곡)", class: "nb-blackhole", cost: 888888, reqLvl: 13, desc: "보랏빛 중력장과 암흑 물질 발광 [13강 필요]" },
+        { id: "nb-matrix", name: "🟢 사이버 매트릭스 (디지털 네오)", class: "nb-matrix", cost: 777777, reqLvl: 13, desc: "초록빛 디지털 비가 흐르는 해커 플레이트 [13강 필요]" },
+        { id: "nb-universe", name: "🪐 다크 유니버스 (신화)", class: "nb-universe", cost: 500000, reqLvl: 13, desc: "심오하고 묵직한 심우주 성운 워프 오라 [13강 필요]" },
+        { id: "nb-gold", name: "👑 황금빛 골드 배지 (10만P 이상)", class: "nb-gold", cost: 100000, reqLvl: 13, desc: "럭셔리 쉬머 반사광이 감도는 최상위 부자의 상징 [13강 필요]" },
+        { id: "nb-darkvip", name: "💳 블랙 VIP 카드 배지", class: "nb-darkvip", cost: 50000, reqLvl: 13, desc: "문정 VVIP 전용 블랙 플레이트 [13강 필요]" },
+        { id: "nb-aurora", name: "🌠 에메랄드 오로라 배지", class: "nb-aurora", cost: 35000, reqLvl: 13, desc: "북극광처럼 일렁이는 청록빛 섬광 [13강 필요]" },
+        { id: "nb-diamond", name: "💎 다이아몬드 아이스", class: "nb-diamond", cost: 25000, reqLvl: 0, desc: "차가운 블루 크리스탈 발광" },
+        { id: "nb-galaxy", name: "🌌 심연의 갤럭시", class: "nb-galaxy", cost: 10000, reqLvl: 0, desc: "보랏빛 우주와 성운 그라데이션" },
+        { id: "nb-cyberpunk", name: "⚡ 사이버펑크 2077", class: "nb-cyberpunk", cost: 5000, reqLvl: 0, desc: "사이안 & 핫핑크 글리치 테두리" },
+        { id: "nb-neon", name: "🟢 사이버 네온 글로우", class: "nb-neon", cost: 2500, reqLvl: 0, desc: "초록빛 야간 네온 라이트" },
+        { id: "nb-fire", name: "🔥 불타는 밥심", class: "nb-fire", cost: 1000, reqLvl: 0, desc: "열정적인 오렌지 플레임" },
+        { id: "nb-cherry", name: "🍒 체리 블라썸", class: "nb-cherry", cost: 800, reqLvl: 0, desc: "화사하고 산뜻한 핑크빛 플레이트" },
+        { id: "nb-sunset", name: "🌅 문정 선셋", class: "nb-sunset", cost: 500, reqLvl: 0, desc: "퇴근길 따뜻한 노을빛" },
+        { id: "nb-mint", name: "🌿 프레시 민트", class: "nb-mint", cost: 300, reqLvl: 0, desc: "상쾌하고 깔끔한 민트 그린" },
+        { id: "nb-lavender", name: "🌸 소프트 라벤더", class: "nb-lavender", cost: 200, reqLvl: 0, desc: "부드러운 파스텔 보랏빛" }
       ]
     };
 
@@ -1565,7 +1592,6 @@
       return true;
     }
 
-    // 실시간 채팅
     function toggleChatWindow() {
       const chatWin = document.getElementById('chatWindow');
       const unread = document.getElementById('chatUnreadPulse');
@@ -1672,7 +1698,6 @@
       chatRef.on('child_added', snap => appendChatMessage(snap.val()));
     }
 
-    // 포인트 게임 아케이드
     function switchGameTab(tabName) {
       ['clicker', 'speed', 'memory', 'slot', 'coin', 'dice'].forEach(t => {
         const view = document.getElementById(`gameView_${t}`);
@@ -2005,7 +2030,6 @@
       }, 400);
     }
 
-    // 주사위 게임 (홀짝 2배 + 숫자 맞추기 최대 500P 제한, 8배 배당, 1분 10회 제한)
     const DICE_ICONS = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
     function playDiceBet(userChoice) {
       const rawBet = parseInt(document.getElementById('diceBetInput').value, 10) || 50;
@@ -2078,7 +2102,7 @@
       }, 400);
     }
 
-    // 상점 및 치장 렌더링
+    // 상점 및 치장 렌더링 (밥키우기 레벨 제한 완벽 적용)
     function renderShopUI() {
       const symContainer = document.getElementById('shopSymbolList');
       if (symContainer) {
@@ -2141,24 +2165,47 @@
           const isMythic = bg.cost >= 500000;
           const isGold = bg.cost >= 100000 && !isMythic;
 
+          let reqLvl = 0;
+          if (bg.cost >= 999999) reqLvl = 17;
+          else if (bg.cost >= 30000) reqLvl = 13;
+
+          const isLocked = (currentEnhanceLevel < reqLvl) && !isOwned;
+
           const card = document.createElement('div');
           card.className = `p-3.5 border rounded-2xl flex items-center justify-between transition-all ${
             isMythic ? 'border-2 border-purple-500 bg-slate-950 text-white shadow-xl' :
             isGold ? 'border-2 border-amber-400 bg-amber-50/50 shadow-md' : 'bg-slate-50'
           }`;
 
+          let actionBtnHTML = '';
+          if (isEquipped) {
+            actionBtnHTML = `<button onclick="unequipBg()" class="bg-rose-500 text-white font-bold px-3 py-1.5 rounded-xl text-[11px]">해제</button>`;
+          } else if (isOwned) {
+            actionBtnHTML = `<button onclick="equipBg('${bg.class}')" class="bg-indigo-600 text-white font-bold px-3 py-1.5 rounded-xl text-[11px]">장착</button>`;
+          } else if (isLocked) {
+            actionBtnHTML = `
+              <button disabled class="bg-slate-800 text-slate-400 font-bold px-3 py-1.5 rounded-xl text-[11px] border border-slate-700 cursor-not-allowed opacity-75">
+                🔒 ${reqLvl}강 이상
+              </button>
+            `;
+          } else {
+            actionBtnHTML = `
+              <button onclick="buyBg('${bg.class}', ${bg.cost}, '${bg.name}', ${reqLvl})" class="bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-black px-3 py-1.5 rounded-xl text-[11px] shadow-sm hover:brightness-105 active:scale-95 transition-all">
+                ${bg.cost.toLocaleString()}P
+              </button>
+            `;
+          }
+
           card.innerHTML = `
-            <div>
-              <span class="${bg.class} text-xs inline-block">${bg.name}</span>
+            <div class="pr-2">
+              <div class="flex items-center gap-1.5">
+                <span class="${bg.class} text-xs inline-block">${bg.name}</span>
+                ${reqLvl > 0 && !isOwned ? `<span class="text-[9px] font-extrabold ${currentEnhanceLevel >= reqLvl ? 'text-emerald-400' : 'text-rose-400'}">(${reqLvl}강 달성 필수)</span>` : ''}
+              </div>
               <p class="text-[10px] text-slate-400 mt-1">${bg.desc} (${bg.cost.toLocaleString()}P)</p>
             </div>
-            <div>
-              ${isEquipped 
-                ? `<button onclick="unequipBg()" class="bg-rose-500 text-white font-bold px-3 py-1.5 rounded-xl text-[11px]">해제</button>`
-                : isOwned 
-                  ? `<button onclick="equipBg('${bg.class}')" class="bg-indigo-600 text-white font-bold px-3 py-1.5 rounded-xl text-[11px]">장착</button>`
-                  : `<button onclick="buyBg('${bg.class}', ${bg.cost}, '${bg.name}')" class="bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-black px-3 py-1.5 rounded-xl text-[11px] shadow-sm">${bg.cost.toLocaleString()}P</button>`
-              }
+            <div class="shrink-0">
+              ${actionBtnHTML}
             </div>
           `;
           bgContainer.appendChild(card);
@@ -2204,7 +2251,10 @@
     function equipColor(hex) { myNickColor = hex; updatePointsUI(); renderShopUI(); }
     function unequipColor() { myNickColor = ''; updatePointsUI(); renderShopUI(); }
 
-    function buyBg(bgClass, cost, bgName) {
+    function buyBg(bgClass, cost, bgName, reqLvl = 0) {
+      if (reqLvl > 0 && currentEnhanceLevel < reqLvl) {
+        return alert(`🔒 구매 불가!\n이 배지는 [밥키우기 ${reqLvl}강] 이상을 달성해야만 구매할 수 있습니다.\n(현재 내 강화 레벨: +${currentEnhanceLevel}강)`);
+      }
       if (userPoints < cost) return alert(`❌ 포인트가 부족합니다!`);
       if (!confirm(`정말로 ${cost.toLocaleString()}P로 [${bgName}] 배지를 구매하시겠습니까?`)) return;
       userPoints -= cost;
@@ -2250,12 +2300,12 @@
       alert("공권력 관리자 이모티콘이 채팅방에 전파되었습니다.");
     }
 
-    // 클라우드 동기화
     function syncUserPointToCloud() {
       if (!currentUser.nickname || currentUser.nickname === "문정러") return;
       db.ref(`user_points/${currentUser.nickname}`).update({
         nickname: currentUser.nickname,
         points: userPoints,
+        enhanceLevel: currentEnhanceLevel,
         badge: myNickBg,
         color: myNickColor,
         symbol: myNickSymbol,
@@ -2327,6 +2377,11 @@
             userPoints = val.points;
             localStorage.setItem('bapsim_points', userPoints.toString());
             updatePointsUI(false);
+          }
+          if (typeof val.enhanceLevel === 'number' && val.enhanceLevel !== currentEnhanceLevel) {
+            currentEnhanceLevel = val.enhanceLevel;
+            localStorage.setItem('bapsim_enhance_level', currentEnhanceLevel.toString());
+            updateEnhanceUI();
           }
           if (val.badge && val.badge !== myNickBg) {
             myNickBg = val.badge;
@@ -2576,7 +2631,7 @@
       return { text: parsed, isToday: isToday, iso: parsed };
     }
 
-    // 관리자 기능
+    // 관리자 키보드 단축키
     window.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
         e.preventDefault();
@@ -2681,11 +2736,15 @@
         list.forEach(u => {
           const item = document.createElement('div');
           item.className = "p-2 bg-white border rounded-xl flex items-center justify-between";
+          const eLvl = u.enhanceLevel || 0;
           item.innerHTML = `
             <div class="flex items-center gap-1.5 min-w-0">
               <span class="font-bold text-slate-800 truncate">${u.nickname}</span>
               <span class="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.2 rounded font-black shrink-0">
                 ${(u.points || 0).toLocaleString()}P
+              </span>
+              <span class="text-[10px] text-orange-700 bg-orange-50 border border-orange-200 px-1 py-0.2 rounded font-black shrink-0">
+                +${eLvl}강
               </span>
             </div>
             <div class="flex items-center gap-1 shrink-0">
@@ -2734,7 +2793,7 @@
     }
 
     function adminManageUserItems(nick) {
-      const choice = prompt(`[${nick}] 회원의 아이템 관리\n1: 모든 아이템 몰수 및 인벤토리 영구 삭제 (재장착 불가)\n2: 코스믹 레인보우 선물\n3: 태양의 겁화 선물\n4: 원하는 배지 클래스명 직접 입력\n\n번호를 입력하세요:`);
+      const choice = prompt(`[${nick}] 회원의 아이템 관리\n1: 모든 아이템 몰수 및 인벤토리 영구 삭제\n2: 코스믹 레인보우 선물\n3: 태양의 겁화 선물\n4: 원하는 배지 클래스명 직접 입력\n\n번호를 입력하세요:`);
       if (!choice) return;
 
       if (choice === '1') {
@@ -2745,7 +2804,7 @@
           inventory: { colors: [], bgs: ['nb-none'], symbols: [] },
           resetInventory: true
         });
-        alert(`[${nick}] 회원의 모든 치장 아이템이 완벽히 몰수 및 삭제되었습니다. (상점에서 재장착 불가)`);
+        alert(`[${nick}] 회원의 모든 치장 아이템이 완벽히 몰수 및 삭제되었습니다.`);
       } else if (choice === '2') {
         db.ref(`user_points/${nick}`).once('value', snap => {
           const u = snap.val() || {};
@@ -2795,7 +2854,6 @@
       });
     }
 
-    // 전체 회원 아이템 일괄 몰수 및 인벤토리 영구 삭제
     function handleAdminResetAllItems() {
       const confirmCode = prompt("🚨 경고: 모든 회원의 보유 아이템 및 착용 치장이 전부 몰수 및 삭제됩니다!\n진행하시려면 '아이템삭제'를 입력하세요.");
       if (confirmCode !== "아이템삭제") return alert("아이템 몰수 작업이 취소되었습니다.");
@@ -2937,25 +2995,52 @@
       alert('반려 완료');
     }
 
-    // 랭킹 및 식당 카드
-    function openRankModal() { renderPointRankings(); document.getElementById('rankModal').classList.remove('hidden'); }
+    // ==========================================
+    // 3. 밥키우기 랭킹 & 우측 실시간 랭킹 시스템
+    // ==========================================
+    let currentRankTab = 'points';
+
+    function openRankModal(tab = 'points') { 
+      switchRankTab(tab); 
+      document.getElementById('rankModal').classList.remove('hidden'); 
+    }
     function closeRankModal() { document.getElementById('rankModal').classList.add('hidden'); }
 
-    function renderPointRankings() {
-      db.ref('user_points').on('value', (snap) => {
+    function switchRankTab(tab) {
+      currentRankTab = tab;
+      const btnP = document.getElementById('rankTab_points');
+      const btnE = document.getElementById('rankTab_enhance');
+      const headerLabel = document.getElementById('rankListHeaderLabel');
+
+      if (tab === 'points') {
+        if (btnP) btnP.className = "py-2 rounded-xl bg-white shadow-xs text-slate-900 font-black";
+        if (btnE) btnE.className = "py-2 rounded-xl text-slate-500 hover:text-slate-900 font-bold";
+        if (headerLabel) headerLabel.innerHTML = `<i data-lucide="crown" class="w-3.5 h-3.5 text-amber-500"></i><span>전체 포인트 부자 랭킹</span>`;
+      } else {
+        if (btnE) btnE.className = "py-2 rounded-xl bg-white shadow-xs text-slate-900 font-black";
+        if (btnP) btnP.className = "py-2 rounded-xl text-slate-500 hover:text-slate-900 font-bold";
+        if (headerLabel) headerLabel.innerHTML = `<i data-lucide="award" class="w-3.5 h-3.5 text-orange-500"></i><span>전체 밥키우기 강화 랭킹</span>`;
+      }
+      lucide.createIcons();
+      renderRankingsData();
+    }
+
+    function renderRankingsData() {
+      db.ref('user_points').once('value', (snap) => {
         const data = snap.val() || {};
         const userList = Object.values(data).filter(u => u.status !== 'pending');
-        userList.sort((a, b) => (b.points || 0) - (a.points || 0));
 
+        // 1) 사이드바 부자 랭킹 (TOP 5)
+        const sortedPoints = [...userList].sort((a, b) => (b.points || 0) - (a.points || 0));
         const sideContainer = document.getElementById('sideRankListContainer');
         const sideRankEl = document.getElementById('sideMyRankText');
         const sidePointEl = document.getElementById('sideMyPointText');
 
-        let myRankIndex = userList.findIndex(u => u.nickname === currentUser.nickname);
+        let myPointRankIndex = sortedPoints.findIndex(u => u.nickname === currentUser.nickname);
         if (sideRankEl && sidePointEl) {
-          if (myRankIndex !== -1) {
-            sideRankEl.textContent = `${myRankIndex + 1}위 (${currentUser.nickname})`;
-            sidePointEl.textContent = `${(userList[myRankIndex].points || 0).toLocaleString()}P`;
+          if (myPointRankIndex !== -1) {
+            sideRankEl.textContent = `${myPointRankIndex + 1}위 (${currentUser.nickname})`;
+            sidePointEl.textContent = `${(sortedPoints[myPointRankIndex].points || 0).toLocaleString()}P`;
           } else {
             sideRankEl.textContent = `${currentUser.nickname} (순위밖)`;
             sidePointEl.textContent = `${userPoints.toLocaleString()}P`;
@@ -2964,10 +3049,10 @@
 
         if (sideContainer) {
           sideContainer.innerHTML = '';
-          if (userList.length === 0) {
+          if (sortedPoints.length === 0) {
             sideContainer.innerHTML = '<div class="text-center text-slate-400 py-3 text-xs">랭킹 데이터가 없습니다.</div>';
           } else {
-            userList.slice(0, 5).forEach((user, index) => {
+            sortedPoints.slice(0, 5).forEach((user, index) => {
               let medal = `${index + 1}위`;
               if (index === 0) medal = '🥇';
               else if (index === 1) medal = '🥈';
@@ -2996,40 +3081,132 @@
           }
         }
 
+        // 2) 사이드바 밥키우기 실시간 랭킹 (TOP 5)
+        const sortedEnhance = [...userList].sort((a, b) => (b.enhanceLevel || 0) - (a.enhanceLevel || 0));
+        const sideEnhanceContainer = document.getElementById('sideEnhanceRankListContainer');
+        const sideMyBowlLevel = document.getElementById('sideMyBowlLevel');
+        const sideMyBowlRank = document.getElementById('sideMyBowlRank');
+
+        let myEnhanceRankIndex = sortedEnhance.findIndex(u => u.nickname === currentUser.nickname);
+        const myBowlObj = BOWL_EVOLUTION[Math.min(currentEnhanceLevel, 20)];
+
+        if (sideMyBowlLevel) {
+          sideMyBowlLevel.textContent = `+${currentEnhanceLevel} ${myBowlObj?.name || '일반 밥'}`;
+        }
+        if (sideMyBowlRank) {
+          sideMyBowlRank.textContent = myEnhanceRankIndex !== -1 ? `${myEnhanceRankIndex + 1}위` : `-위`;
+        }
+
+        if (sideEnhanceContainer) {
+          sideEnhanceContainer.innerHTML = '';
+          if (sortedEnhance.length === 0) {
+            sideEnhanceContainer.innerHTML = '<div class="text-center text-slate-400 py-3 text-xs">밥키우기 기록이 없습니다.</div>';
+          } else {
+            sortedEnhance.slice(0, 5).forEach((user, index) => {
+              let medal = `${index + 1}위`;
+              if (index === 0) medal = '🥇';
+              else if (index === 1) medal = '🥈';
+              else if (index === 2) medal = '🥉';
+
+              const eLvl = user.enhanceLevel || 0;
+              const bObj = BOWL_EVOLUTION[Math.min(eLvl, 20)];
+              const item = document.createElement('div');
+              item.className = `p-2 rounded-xl border flex items-center justify-between transition-all ${index < 3 ? 'bg-orange-50/70 border-orange-200' : 'bg-slate-50 border-slate-200'}`;
+              const badgeClass = user.badge || 'nb-none';
+              const sym = user.symbol ? `${user.symbol} ` : '';
+              const symEnd = user.symbol ? ` ${user.symbol}` : '';
+              const colorStyle = user.color ? `color: ${user.color} !important;` : '';
+
+              item.innerHTML = `
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <span class="font-black text-xs shrink-0">${medal}</span>
+                  <span class="${badgeClass} text-xs inline-block truncate" style="${colorStyle}">
+                    ${sym}${user.nickname}${symEnd}
+                  </span>
+                </div>
+                <span class="font-black text-orange-600 bg-white border border-orange-100 px-2 py-0.5 rounded-md text-[11px] shrink-0">
+                  ${bObj?.icon || '🍚'} +${eLvl}강
+                </span>
+              `;
+              sideEnhanceContainer.appendChild(item);
+            });
+          }
+        }
+
+        // 3) 모달 내부 랭킹 렌더링
         const modalContainer = document.getElementById('rankListContainer');
+        const summaryEl = document.getElementById('myRankSummary');
+        const myPointEl = document.getElementById('myRankPointDisplay');
+
         if (modalContainer) {
           modalContainer.innerHTML = '';
-          const summaryEl = document.getElementById('myRankSummary');
-          const myPointEl = document.getElementById('myRankPointDisplay');
-          if (summaryEl) summaryEl.textContent = myRankIndex !== -1 ? `${currentUser.nickname} 님은 현재 ${myRankIndex + 1}위입니다!` : `${currentUser.nickname} 님 (순위 밖)`;
-          if (myPointEl) myPointEl.textContent = `${userPoints.toLocaleString()}P`;
 
-          userList.forEach((user, index) => {
-            let rankBadge = `${index + 1}위`;
-            if (index === 0) rankBadge = '🥇 1등';
-            else if (index === 1) rankBadge = '🥈 2등';
-            else if (index === 2) rankBadge = '🥉 3등';
+          if (currentRankTab === 'points') {
+            if (summaryEl) summaryEl.textContent = myPointRankIndex !== -1 ? `${currentUser.nickname} 님은 포인트 ${myPointRankIndex + 1}위입니다!` : `${currentUser.nickname} 님 (순위 밖)`;
+            if (myPointEl) myPointEl.textContent = `${userPoints.toLocaleString()}P`;
 
-            const item = document.createElement('div');
-            item.className = `p-3 rounded-2xl border flex items-center justify-between transition-all ${index < 3 ? 'bg-amber-50/70 border-amber-200' : 'bg-slate-50 border-slate-200'}`;
-            const badgeClass = user.badge || 'nb-none';
-            const sym = user.symbol ? `${user.symbol} ` : '';
-            const symEnd = user.symbol ? ` ${user.symbol}` : '';
-            const colorStyle = user.color ? `color: ${user.color} !important;` : '';
+            sortedPoints.forEach((user, index) => {
+              let rankBadge = `${index + 1}위`;
+              if (index === 0) rankBadge = '🥇 1등';
+              else if (index === 1) rankBadge = '🥈 2등';
+              else if (index === 2) rankBadge = '🥉 3등';
 
-            item.innerHTML = `
-              <div class="flex items-center gap-2">
-                <span class="font-black text-xs ${index === 0 ? 'text-amber-600 text-sm' : 'text-slate-600'}">${rankBadge}</span>
-                <span class="${badgeClass} text-xs inline-block" style="${colorStyle}">
-                  ${sym}${user.nickname}${symEnd}
+              const item = document.createElement('div');
+              item.className = `p-3 rounded-2xl border flex items-center justify-between transition-all ${index < 3 ? 'bg-amber-50/70 border-amber-200' : 'bg-slate-50 border-slate-200'}`;
+              const badgeClass = user.badge || 'nb-none';
+              const sym = user.symbol ? `${user.symbol} ` : '';
+              const symEnd = user.symbol ? ` ${user.symbol}` : '';
+              const colorStyle = user.color ? `color: ${user.color} !important;` : '';
+
+              item.innerHTML = `
+                <div class="flex items-center gap-2">
+                  <span class="font-black text-xs ${index === 0 ? 'text-amber-600 text-sm' : 'text-slate-600'}">${rankBadge}</span>
+                  <span class="${badgeClass} text-xs inline-block" style="${colorStyle}">
+                    ${sym}${user.nickname}${symEnd}
+                  </span>
+                </div>
+                <span class="font-extrabold text-amber-700 bg-white border border-amber-100 px-2.5 py-0.5 rounded-xl shadow-xs">
+                  ${(user.points || 0).toLocaleString()}P
                 </span>
-              </div>
-              <span class="font-extrabold text-amber-700 bg-white border border-amber-100 px-2.5 py-0.5 rounded-xl shadow-xs">
-                ${(user.points || 0).toLocaleString()}P
-              </span>
-            `;
-            modalContainer.appendChild(item);
-          });
+              `;
+              modalContainer.appendChild(item);
+            });
+          } else {
+            if (summaryEl) summaryEl.textContent = myEnhanceRankIndex !== -1 ? `${currentUser.nickname} 님은 밥키우기 ${myEnhanceRankIndex + 1}위입니다!` : `${currentUser.nickname} 님 (순위 밖)`;
+            if (myPointEl) myPointEl.textContent = `+${currentEnhanceLevel}강`;
+
+            sortedEnhance.forEach((user, index) => {
+              let rankBadge = `${index + 1}위`;
+              if (index === 0) rankBadge = '👑 1등';
+              else if (index === 1) rankBadge = '🥈 2등';
+              else if (index === 2) rankBadge = '🥉 3등';
+
+              const eLvl = user.enhanceLevel || 0;
+              const bObj = BOWL_EVOLUTION[Math.min(eLvl, 20)];
+              const item = document.createElement('div');
+              item.className = `p-3 rounded-2xl border flex items-center justify-between transition-all ${index < 3 ? 'bg-orange-50/80 border-orange-200' : 'bg-slate-50 border-slate-200'}`;
+              const badgeClass = user.badge || 'nb-none';
+              const sym = user.symbol ? `${user.symbol} ` : '';
+              const symEnd = user.symbol ? ` ${user.symbol}` : '';
+              const colorStyle = user.color ? `color: ${user.color} !important;` : '';
+
+              item.innerHTML = `
+                <div class="flex items-center gap-2">
+                  <span class="font-black text-xs ${index === 0 ? 'text-orange-600 text-sm' : 'text-slate-600'}">${rankBadge}</span>
+                  <span class="${badgeClass} text-xs inline-block" style="${colorStyle}">
+                    ${sym}${user.nickname}${symEnd}
+                  </span>
+                </div>
+                <div class="text-right">
+                  <span class="font-black text-orange-600 bg-white border border-orange-200 px-2.5 py-0.5 rounded-xl shadow-xs text-xs">
+                    ${bObj?.icon || '🍚'} +${eLvl}강
+                  </span>
+                  <span class="text-[10px] text-slate-400 block mt-0.5 truncate max-w-[120px]">${bObj?.name || ''}</span>
+                </div>
+              `;
+              modalContainer.appendChild(item);
+            });
+          }
         }
       });
     }
@@ -3630,7 +3807,6 @@
     }
     function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
 
-    // 회원가입 및 닉네임 설정
     async function saveUserProfile() {
       const input = document.getElementById('authNicknameInput').value.trim();
       const pass = document.getElementById('authPasswordInput').value.trim();
@@ -3667,6 +3843,9 @@
           localStorage.setItem('bapsim_user', JSON.stringify(currentUser));
           document.getElementById('userProfileText').textContent = input;
           userPoints = existingData.points || 30;
+          currentEnhanceLevel = existingData.enhanceLevel || 0;
+          localStorage.setItem('bapsim_enhance_level', currentEnhanceLevel.toString());
+
           myNickBg = existingData.badge || 'nb-none';
           myNickColor = existingData.color || '';
           myNickSymbol = existingData.symbol || '';
@@ -3674,6 +3853,7 @@
           isUserApproved = (existingData.status === 'approved' || existingData.approved === true);
 
           updatePointsUI(false);
+          updateEnhanceUI();
           attachUserPointListener();
           initPresenceSystem();
           closeAuthModal();
@@ -3690,6 +3870,7 @@
           nickname: input,
           password: pass,
           points: 30,
+          enhanceLevel: currentEnhanceLevel,
           badge: 'nb-none',
           color: '',
           symbol: '',
@@ -3712,6 +3893,7 @@
         myNickColor = '';
         myNickSymbol = '';
         updatePointsUI(false);
+        updateEnhanceUI();
         attachUserPointListener();
         initPresenceSystem();
         closeAuthModal();
@@ -3764,12 +3946,14 @@
 
     initPresenceSystem();
     initNoticeListener();
-    renderPointRankings();
+    renderRankingsData();
     attachUserPointListener();
     updatePointsUI();
+    updateEnhanceUI();
     updateGroupUI();
     syncFromGoogleSheet(false);
     setInterval(() => syncFromGoogleSheet(false), 1000 * 60 * 3);
+    setInterval(() => renderRankingsData(), 1000 * 10);
     lucide.createIcons();
   </script>
 </body>
