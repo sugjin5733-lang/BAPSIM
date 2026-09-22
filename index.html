@@ -62,7 +62,6 @@
       100% { box-shadow: 0 0 25px rgba(239, 68, 68, 1), 0 0 12px #f87171, inset 0 0 12px #fde047; }
     }
 
-    /* 999,999P 신화급 배지 컬렉션 */
     .nb-cosmic {
       background: linear-gradient(90deg, #ff007f, #7928ca, #0070f3, #00dfd8, #ff007f);
       background-size: 300% 300%;
@@ -320,7 +319,7 @@
         </div>
       </div>
 
-      <!-- 배너 하단 툴바 -->
+      <!-- 배너 하단 툴바 (포인트 게임장 옆에 '밥키우기' 추가) -->
       <div class="pt-4 border-t border-slate-700/60 flex flex-wrap items-center justify-between gap-2.5">
         <span class="text-xs font-bold text-slate-400 hidden sm:inline-flex items-center gap-1.5">
           <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
@@ -331,6 +330,13 @@
           <button onclick="openMiniGameModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-2 rounded-xl text-xs shadow-md transition-all">
             <i data-lucide="gamepad-2" class="w-3.5 h-3.5"></i>
             <span>포인트 게임장</span>
+          </button>
+
+          <!-- 신규 추가된 밥키우기 강화 게임 버튼 -->
+          <button onclick="openEnhanceModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-black px-3 py-2 rounded-xl text-xs shadow-md transition-all">
+            <span>🍚</span>
+            <span>밥키우기</span>
+            <span class="text-[10px] bg-slate-900 text-amber-300 px-1.5 py-0.2 rounded-full">NEW</span>
           </button>
 
           <button onclick="openShopModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-amber-300 font-bold px-3 py-2 rounded-xl text-xs shadow-md transition-all">
@@ -466,6 +472,107 @@
     </section>
   </main>
 
+  <!-- [신규: 밥키우기 (강화) 모달] -->
+  <div id="enhanceModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 text-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto relative">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xl border border-amber-500/30">
+            🍚
+          </div>
+          <div>
+            <h3 class="font-black text-white text-base tracking-tight flex items-center gap-1.5">
+              밥키우기 강화소
+              <span class="text-[10px] bg-indigo-500/30 text-indigo-300 px-2 py-0.5 rounded font-bold border border-indigo-400/20">Enhancement</span>
+            </h3>
+            <p class="text-[11px] text-slate-400">밥을 전설의 20강까지 성장시켜 대박 수익을 노려보세요!</p>
+          </div>
+        </div>
+        <button onclick="closeEnhanceModal()" class="text-slate-400 hover:text-white text-base font-bold p-1">✕</button>
+      </div>
+
+      <!-- 강화 진행 카드 -->
+      <div class="p-5 bg-slate-950 rounded-3xl border border-slate-800 text-center space-y-3 relative overflow-hidden">
+        <div class="absolute top-3 left-3 text-[10px] text-slate-500 font-mono" id="enhanceCooldownText">
+          분당 강화: 0 / 30회
+        </div>
+        <div class="absolute top-3 right-3 text-[10px] text-amber-400 font-bold" id="enhanceCostText">
+          강화비: 100P
+        </div>
+
+        <div class="pt-4 py-2">
+          <div id="enhanceBowlAvatar" class="w-28 h-28 mx-auto rounded-3xl bg-gradient-to-tr from-amber-500/20 via-orange-500/10 to-transparent border-2 border-amber-500/40 flex items-center justify-center text-6xl shadow-inner transition-transform active:scale-95">
+            🍚
+          </div>
+          <div class="mt-3">
+            <span id="enhanceLevelBadge" class="text-2xl font-black tracking-tight text-amber-400">
+              +0 일반 밥
+            </span>
+          </div>
+        </div>
+
+        <!-- 확률 안내 바 -->
+        <div class="p-3 bg-slate-900 rounded-2xl border border-slate-800 grid grid-cols-3 gap-2 text-center text-xs">
+          <div>
+            <span class="text-[10px] text-emerald-400 block font-bold">성공 확률</span>
+            <span id="probSuccess" class="font-black text-emerald-300 text-sm">100.0%</span>
+          </div>
+          <div>
+            <span class="text-[10px] text-amber-400 block font-bold">유지 확률</span>
+            <span id="probKeep" class="font-black text-amber-300 text-sm">0.0%</span>
+          </div>
+          <div>
+            <span class="text-[10px] text-rose-400 block font-bold">파괴 확률</span>
+            <span id="probBreak" class="font-black text-rose-300 text-sm">0.0%</span>
+          </div>
+        </div>
+
+        <!-- 판매 수익 안내 -->
+        <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-800/80 text-xs">
+          <span class="text-slate-400 font-medium">지금 판매 시 수익:</span>
+          <span id="enhanceSellValueText" class="font-black text-amber-400 text-sm">0P</span>
+        </div>
+
+        <div id="enhanceStatusAlert" class="text-xs font-bold text-slate-400 min-h-[20px]">
+          [강화 시도]를 눌러 밥을 성장시키세요!
+        </div>
+
+        <!-- 액션 버튼 -->
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <button id="enhanceSellBtn" onclick="sellEnhancedBowl()" class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold py-3 rounded-2xl text-xs transition-colors border border-amber-500/20">
+            밥 판매 및 정산
+          </button>
+          <button id="enhanceActionBtn" onclick="runEnhancement()" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-black py-3 rounded-2xl text-xs shadow-lg transition-transform active:scale-95">
+            강화 시도 (100P)
+          </button>
+        </div>
+      </div>
+
+      <!-- 강화 안내 및 확률표 펼치기 버튼 -->
+      <div class="space-y-2">
+        <button onclick="toggleEnhanceProbTable()" class="w-full py-2 bg-slate-800/80 hover:bg-slate-800 rounded-xl text-slate-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors">
+          <i data-lucide="table" class="w-3.5 h-3.5"></i>
+          <span>단계별 전체 강화 확률표 보기</span>
+        </button>
+
+        <div id="enhanceProbTableContainer" class="hidden max-h-48 overflow-y-auto border border-slate-800 rounded-2xl p-2 bg-slate-950 text-[11px]">
+          <table class="w-full text-center">
+            <thead class="text-slate-500 border-b border-slate-800">
+              <tr>
+                <th class="py-1">단계</th>
+                <th class="py-1 text-emerald-400">성공</th>
+                <th class="py-1 text-amber-400">유지</th>
+                <th class="py-1 text-rose-400">파괴</th>
+                <th class="py-1 text-amber-300">판매가</th>
+              </tr>
+            </thead>
+            <tbody id="enhanceProbTableBody" class="divide-y divide-slate-900 font-medium"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- 사다리타기 모달 -->
   <div id="ladderGameModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
@@ -583,7 +690,7 @@
           <div>연타 수: <span id="speedHits" class="text-rose-500 font-mono text-xl">0</span>타</div>
         </div>
         <div class="py-2">
-          <button id="speedHitBtn" onclick="handleSpeedHit()" disabled class="w-32 h-32 mx-auto rounded-3xl bg-gradient-to-tr from-teal-400 to-emerald-500 text-white text-5xl shadow-xl flex items-center justify-center transition-transform active:scale-90 select-none cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed border-4 border-white/60">
+          <button id="speedHitBtn" onclick="handleSpeedHit()" disabled class="w-32 h-32 mx-auto rounded-3xl bg-gradient-to-tr from-teal-400 to-emerald-500 text-white text-5xl shadow-xl flex items-center justify-center transition-transform active:scale-95 select-none cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed border-4 border-white/60">
             ⚡
           </button>
         </div>
@@ -665,7 +772,7 @@
         </div>
       </div>
 
-      <!-- 6. 주사위 게임 (홀짝 2배 + 숫자 맞추기 최대 500P, 8배 배당, 1분 10회 제한) -->
+      <!-- 6. 주사위 게임 (홀짝 2배 + 숫자 맞추기 최대 500P 제한, 8배 배당, 1분 10회 제한) -->
       <div id="gameView_dice" class="hidden space-y-4 text-center pt-1">
         <div class="p-3 bg-purple-50/80 rounded-2xl border border-purple-100 text-xs text-purple-800 leading-relaxed font-medium">
           <strong>주사위 승부!</strong> 홀/짝 적중 시 <strong>2배</strong> 지급!<br/>
@@ -691,7 +798,7 @@
           </button>
         </div>
 
-        <!-- 숫자 맞추기 (1, 2번 요구사항: 최대 500P / 8배 배당 / 1분 10회 제한) -->
+        <!-- 숫자 맞추기 (최대 500P / 8배 배당 / 1분 10회 제한) -->
         <div class="space-y-1.5 pt-1">
           <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 px-1">
             <span>🎯 숫자 단일 예측 (8배 배당)</span>
@@ -894,11 +1001,10 @@
         <div id="adminUserListContainer" class="space-y-2 max-h-48 overflow-y-auto border rounded-2xl p-2 bg-slate-50 text-xs"></div>
       </div>
 
-      <!-- 3. 전체 아이템 몰수 및 삭제 관리 구역 -->
+      <!-- 전체 아이템 몰수 및 삭제 관리 구역 -->
       <div class="p-4 bg-rose-50 border border-rose-200 rounded-2xl space-y-3 text-xs">
         <span class="font-black text-rose-900 block">🚨 위험 관리 구역</span>
         
-        <!-- 전체 회원 아이템 몰수 및 영구 삭제 -->
         <div class="flex items-center justify-between border-b border-rose-200/60 pb-2.5">
           <div>
             <span class="font-bold text-rose-800">모든 회원 아이템 전체 일괄 몰수 및 삭제</span>
@@ -1066,7 +1172,7 @@
     </div>
   </div>
 
-  <!-- 프로필 설정 모달 (숫자 4자리 고유 비밀번호 도입) -->
+  <!-- 프로필 설정 모달 -->
   <div id="authModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-xs rounded-3xl shadow-2xl p-6 space-y-4 text-xs">
       <div class="flex items-center justify-between border-b pb-2">
@@ -1202,8 +1308,201 @@
     const SLOT_ITEMS = ["🍚", "🍗", "🥩", "🍕", "🍜", "👑", "💎"];
     let isSlotSpinning = false;
 
-    // 2. 주사위 숫자 맞추기 1분당 10회 제한 추적 배열
+    // 주사위 쿨타임 배열
     let diceExactBetTimestamps = [];
+
+    // ==========================================
+    // 신규: 밥키우기 (강화 시스템 메타데이터)
+    // ==========================================
+    // 사진의 강화 확률표 100% 반영: [성공, 유지, 파괴]
+    const ENHANCE_PROBABILITIES = [
+      { level: 1,  success: 100.0, keep: 0.0,  break: 0.0,  reward: 50 },
+      { level: 2,  success: 90.6,  keep: 9.4,  break: 0.0,  reward: 120 },
+      { level: 3,  success: 79.8,  keep: 20.2, break: 0.0,  reward: 200 },
+      { level: 4,  success: 70.1,  keep: 27.9, break: 2.1,  reward: 320 },
+      { level: 5,  success: 59.9,  keep: 35.0, break: 5.1,  reward: 480 },
+      { level: 6,  success: 50.1,  keep: 39.7, break: 10.2, reward: 700 },
+      { level: 7,  success: 45.4,  keep: 44.1, break: 10.5, reward: 1000 },
+      { level: 8,  success: 40.2,  keep: 49.6, break: 10.3, reward: 1450 },
+      { level: 9,  success: 33.6,  keep: 56.6, break: 9.8,  reward: 2000 },
+      { level: 10, success: 29.3,  keep: 61.4, break: 9.5,  reward: 3000 }, // 지정: 10강 3천
+      { level: 11, success: 25.5,  keep: 64.5, break: 10.1, reward: 4200 },
+      { level: 12, success: 23.6,  keep: 65.9, break: 10.6, reward: 5800 },
+      { level: 13, success: 19.3,  keep: 70.2, break: 10.5, reward: 8000 },
+      { level: 14, success: 18.1,  keep: 72.3, break: 9.7,  reward: 11000 },
+      { level: 15, success: 14.8,  keep: 75.5, break: 9.9,  reward: 15000 },
+      { level: 16, success: 13.1,  keep: 78.0, break: 9.8,  reward: 18500 },
+      { level: 17, success: 10.9,  keep: 76.8, break: 12.6, reward: 22000 },
+      { level: 18, success: 9.9,   keep: 79.9, break: 10.7, reward: 26000 },
+      { level: 19, success: 4.7,   keep: 86.2, break: 10.6, reward: 30000 }, // 지정: 19강 3만
+      { level: 20, success: 3.3,   keep: 90.3, break: 9.9,  reward: 100000 } // 지정: 20강 10만
+    ];
+
+    let currentEnhanceLevel = parseInt(localStorage.getItem('bapsim_enhance_level') || '0', 10);
+    let enhanceActionTimestamps = []; // 분당 30회 제한
+
+    function openEnhanceModal() {
+      if (!checkApprovalGuard()) return;
+      updateEnhanceUI();
+      renderEnhanceTable();
+      document.getElementById('enhanceModal').classList.remove('hidden');
+    }
+
+    function closeEnhanceModal() {
+      document.getElementById('enhanceModal').classList.add('hidden');
+    }
+
+    function updateEnhanceUI() {
+      const levelBadge = document.getElementById('enhanceLevelBadge');
+      const avatar = document.getElementById('enhanceBowlAvatar');
+      const costText = document.getElementById('enhanceCostText');
+      const sellText = document.getElementById('enhanceSellValueText');
+      const probS = document.getElementById('probSuccess');
+      const probK = document.getElementById('probKeep');
+      const probB = document.getElementById('probBreak');
+      const actionBtn = document.getElementById('enhanceActionBtn');
+
+      // 단계별 타이틀 및 아바타
+      let name = "일반 밥";
+      let icon = "🍚";
+      if (currentEnhanceLevel >= 20) { name = "신화의 갓지은 영생밥"; icon = "👑"; }
+      else if (currentEnhanceLevel >= 17) { name = "황금 오라 불멸밥"; icon = "✨"; }
+      else if (currentEnhanceLevel >= 14) { name = "명품 흑미 고봉밥"; icon = "🍲"; }
+      else if (currentEnhanceLevel >= 10) { name = "윤기좔좔 찰진 솥밥"; icon = "🥘"; }
+      else if (currentEnhanceLevel >= 5) { name = "따끈한 즉석 쌀밥"; icon = "🍚"; }
+
+      if (levelBadge) {
+        levelBadge.innerHTML = `<span class="${currentEnhanceLevel >= 15 ? 'text-amber-300 font-black animate-pulse' : 'text-amber-400'}">+${currentEnhanceLevel} ${name}</span>`;
+      }
+      if (avatar) avatar.textContent = icon;
+
+      // 판매 금액
+      let currentSellVal = 0;
+      if (currentEnhanceLevel > 0) {
+        currentSellVal = ENHANCE_PROBABILITIES[currentEnhanceLevel - 1].reward;
+      }
+      if (sellText) sellText.textContent = `${currentSellVal.toLocaleString()}P`;
+
+      // 다음 강화 목표 및 확률
+      if (currentEnhanceLevel >= 20) {
+        if (costText) costText.textContent = "최대 강화 달성";
+        if (probS) probS.textContent = "-";
+        if (probK) probK.textContent = "-";
+        if (probB) probB.textContent = "-";
+        if (actionBtn) {
+          actionBtn.disabled = true;
+          actionBtn.textContent = "20강 최고등급 달성!";
+        }
+      } else {
+        const nextMeta = ENHANCE_PROBABILITIES[currentEnhanceLevel];
+        if (costText) costText.textContent = "강화비: 100P";
+        if (probS) probS.textContent = `${nextMeta.success.toFixed(1)}%`;
+        if (probK) probK.textContent = `${nextMeta.keep.toFixed(1)}%`;
+        if (probB) probB.textContent = `${nextMeta.break.toFixed(1)}%`;
+        if (actionBtn) {
+          actionBtn.disabled = false;
+          actionBtn.textContent = `+${currentEnhanceLevel + 1} 강화 시도 (100P)`;
+        }
+      }
+
+      // 분당 제한 카운트 표시
+      const now = Date.now();
+      enhanceActionTimestamps = enhanceActionTimestamps.filter(t => now - t < 60000);
+      const cdEl = document.getElementById('enhanceCooldownText');
+      if (cdEl) cdEl.textContent = `분당 강화: ${enhanceActionTimestamps.length} / 30회`;
+
+      localStorage.setItem('bapsim_enhance_level', currentEnhanceLevel.toString());
+    }
+
+    function renderEnhanceTable() {
+      const tbody = document.getElementById('enhanceProbTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      ENHANCE_PROBABILITIES.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.className = (currentEnhanceLevel === p.level - 1) ? 'bg-amber-500/10 font-bold' : '';
+        tr.innerHTML = `
+          <td class="py-1 text-slate-300">+${p.level}</td>
+          <td class="py-1 text-emerald-400">${p.success.toFixed(1)}%</td>
+          <td class="py-1 text-amber-400">${p.keep.toFixed(1)}%</td>
+          <td class="py-1 text-rose-400">${p.break.toFixed(1)}%</td>
+          <td class="py-1 text-amber-300">${p.reward.toLocaleString()}P</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function toggleEnhanceProbTable() {
+      const c = document.getElementById('enhanceProbTableContainer');
+      if (c) c.classList.toggle('hidden');
+    }
+
+    // 강화 실행 (분당 30회 제한 + 확률 적용)
+    function runEnhancement() {
+      if (currentEnhanceLevel >= 20) return alert("이미 20강 최고 단계에 도달했습니다! 판매하여 정산하세요.");
+
+      const now = Date.now();
+      enhanceActionTimestamps = enhanceActionTimestamps.filter(t => now - t < 60000);
+      if (enhanceActionTimestamps.length >= 30) {
+        const oldest = enhanceActionTimestamps[0];
+        const remSec = Math.ceil((60000 - (now - oldest)) / 1000);
+        return alert(`⏳ 분당 강화 횟수(30회)를 초과했습니다!\n잠시 후 (${remSec}초 뒤) 다시 시도해주세요.`);
+      }
+
+      const ENHANCE_COST = 100;
+      if (userPoints < ENHANCE_COST) {
+        return alert(`❌ 강화 비용이 부족합니다! (필요: ${ENHANCE_COST}P)`);
+      }
+
+      userPoints -= ENHANCE_COST;
+      enhanceActionTimestamps.push(now);
+      updatePointsUI();
+
+      const nextMeta = ENHANCE_PROBABILITIES[currentEnhanceLevel];
+      const alertEl = document.getElementById('enhanceStatusAlert');
+      const actionBtn = document.getElementById('enhanceActionBtn');
+      actionBtn.disabled = true;
+
+      // 주사위 롤 (0 ~ 100)
+      const roll = Math.random() * 100;
+
+      if (roll < nextMeta.success) {
+        // 성공
+        currentEnhanceLevel++;
+        if (currentEnhanceLevel >= 15 && window.confetti) confetti({ particleCount: 150 });
+        alertEl.innerHTML = `<span class="text-emerald-400 font-extrabold text-sm">🎉 +${currentEnhanceLevel}강 성공! 축하합니다!</span>`;
+      } else if (roll < (nextMeta.success + nextMeta.keep)) {
+        // 유지
+        alertEl.innerHTML = `<span class="text-amber-400 font-bold">⚠️ 강화 실패! 다행히 단계가 유지되었습니다.</span>`;
+      } else {
+        // 파괴
+        currentEnhanceLevel = 0;
+        alertEl.innerHTML = `<span class="text-rose-500 font-black text-sm">💥 밥이 타버렸습니다! (파괴되어 +0단계로 리셋)</span>`;
+      }
+
+      updateEnhanceUI();
+      renderEnhanceTable();
+      setTimeout(() => { if (actionBtn) actionBtn.disabled = false; }, 200);
+    }
+
+    // 밥 판매 및 수익 정산
+    function sellEnhancedBowl() {
+      if (currentEnhanceLevel <= 0) return alert("현재 +0단계 밥은 판매할 수 없습니다. 강화 후 판매하세요!");
+
+      const reward = ENHANCE_PROBABILITIES[currentEnhanceLevel - 1].reward;
+      if (!confirm(`+${currentEnhanceLevel}단계 밥을 판매하고 ${reward.toLocaleString()}P를 획득하시겠습니까?\n판매 후 밥은 +0단계로 리셋됩니다.`)) return;
+
+      userPoints += reward;
+      const soldLvl = currentEnhanceLevel;
+      currentEnhanceLevel = 0;
+      updatePointsUI();
+      updateEnhanceUI();
+      renderEnhanceTable();
+
+      if (window.confetti) confetti({ particleCount: 100 });
+      alert(`💰 +${soldLvl}강 밥을 판매하여 +${reward.toLocaleString()}P를 획득했습니다!`);
+    }
 
     // 상점 메타데이터 (999,999P 신화급 배지 컬렉션 포함)
     const SHOP_DATA = {
@@ -1441,7 +1740,6 @@
       document.getElementById('gameScore').textContent = gameClicks;
     }
 
-    // 4. 밥알광클 한판당 500P 제한
     function finishMiniGame() {
       isGameRunning = false;
       document.getElementById('gameClickBtn').disabled = true;
@@ -1462,7 +1760,6 @@
       alert(`🍚 미니게임 종료!\n총 클릭 수: ${gameClicks}회\n🎉 +${earned.toLocaleString()}P 적립 완료! ${isCapped ? '(한판 최대 상한 500P 적용)' : ''}`);
     }
 
-    // 4. 스피드 연타 한판당 500P 제한
     function startSpeedGame() {
       if (speedInterval) clearInterval(speedInterval);
       isSpeedRunning = true;
@@ -1708,16 +2005,14 @@
       }, 400);
     }
 
-    // 1 & 2. 주사위 게임 (홀짝 2배 + 숫자 맞추기 최대 500P 제한, 8배 배당, 1분 10회 제한)
+    // 주사위 게임 (홀짝 2배 + 숫자 맞추기 최대 500P 제한, 8배 배당, 1분 10회 제한)
     const DICE_ICONS = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
     function playDiceBet(userChoice) {
       const rawBet = parseInt(document.getElementById('diceBetInput').value, 10) || 50;
       const isExactNumberBet = ['1', '2', '3', '4', '5', '6'].includes(userChoice);
 
-      // 2. 숫자 맞추기 1분당 10회 제한 검사
       if (isExactNumberBet) {
         const now = Date.now();
-        // 60초 지난 기록 제거
         diceExactBetTimestamps = diceExactBetTimestamps.filter(t => now - t < 60000);
 
         if (diceExactBetTimestamps.length >= 10) {
@@ -1727,7 +2022,6 @@
         }
       }
 
-      // 1. 숫자 맞추기 베팅액 500P 제한 (홀짝은 10,000P까지)
       let bet = 50;
       if (isExactNumberBet) {
         bet = Math.min(Math.max(rawBet, 50), 500);
@@ -1740,7 +2034,6 @@
 
       if (userPoints < bet) return alert(`❌ 베팅할 포인트가 부족합니다! (필요: ${bet.toLocaleString()}P)`);
 
-      // 베팅 차감
       userPoints -= bet;
       updatePointsUI();
 
@@ -1770,7 +2063,7 @@
           multiplier = 2;
         } else if (userChoice === rollStr) {
           won = true;
-          multiplier = 8; // 1. 맞출 시 8배 배당
+          multiplier = 8;
         }
 
         if (won) {
@@ -1985,7 +2278,6 @@
         const pendingNick = document.getElementById('pendingBannerNick');
 
         if (val) {
-          // 인벤토리 강제 몰수 처리
           if (val.resetInventory === true) {
             myInventory = { colors: [], bgs: ['nb-none'], symbols: [] };
             myNickBg = 'nb-none';
@@ -2021,7 +2313,6 @@
           } else {
             if (banner) banner.classList.add('hidden');
 
-            // 1. localStorage를 체크하여 최초 1회만 알림창 띄우기
             const notifyKey = `bapsim_approved_notified_${currentUser.nickname}`;
             const hasNotified = localStorage.getItem(notifyKey);
 
@@ -2504,7 +2795,7 @@
       });
     }
 
-    // 3. 전체 회원 아이템 일괄 몰수 및 인벤토리 영구 삭제
+    // 전체 회원 아이템 일괄 몰수 및 인벤토리 영구 삭제
     function handleAdminResetAllItems() {
       const confirmCode = prompt("🚨 경고: 모든 회원의 보유 아이템 및 착용 치장이 전부 몰수 및 삭제됩니다!\n진행하시려면 '아이템삭제'를 입력하세요.");
       if (confirmCode !== "아이템삭제") return alert("아이템 몰수 작업이 취소되었습니다.");
@@ -2517,7 +2808,7 @@
           updates[`user_points/${nick}/color`] = '';
           updates[`user_points/${nick}/symbol`] = '';
           updates[`user_points/${nick}/inventory`] = { colors: [], bgs: ['nb-none'], symbols: [] };
-          updates[`user_points/${nick}/resetInventory`] = true; // 전원 실시간 파기 신호
+          updates[`user_points/${nick}/resetInventory`] = true;
         });
 
         db.ref().update(updates, (err) => {
@@ -3339,7 +3630,7 @@
     }
     function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
 
-    // 회원가입 및 닉네임 설정 (고유 비밀번호 4자리 검증 및 저장)
+    // 회원가입 및 닉네임 설정
     async function saveUserProfile() {
       const input = document.getElementById('authNicknameInput').value.trim();
       const pass = document.getElementById('authPasswordInput').value.trim();
