@@ -446,7 +446,7 @@
     </section>
   </main>
 
-  <!-- [신규: 밥키우기 (강화) 모달] -->
+  <!-- [밥키우기 (강화) 모달] -->
   <div id="enhanceModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 text-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto relative">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -459,7 +459,7 @@
               밥키우기 강화소
               <span class="text-[10px] bg-indigo-500/30 text-indigo-300 px-2 py-0.5 rounded font-bold border border-indigo-400/20">Lv.1~20</span>
             </h3>
-            <p class="text-[11px] text-slate-400">밥을 전설의 20강까지 성장시켜 대박 수익을 노려보세요!</p>
+            <p class="text-[11px] text-slate-400">밥을 전설의 20강까지 성장시켜 대박 수익을 노려보세요! (스페이스바 가능)</p>
           </div>
         </div>
         <button onclick="closeEnhanceModal()" class="text-slate-400 hover:text-white text-base font-bold p-1">✕</button>
@@ -468,7 +468,7 @@
       <!-- 강화 진행 카드 -->
       <div class="p-5 bg-slate-950 rounded-3xl border border-slate-800 text-center space-y-3 relative overflow-hidden">
         <div class="absolute top-3 left-3 text-[10px] text-slate-500 font-mono" id="enhanceCooldownText">
-          분당 강화: 0 / 30회
+          분당 강화: 0 / 100회
         </div>
         <div class="absolute top-3 right-3 text-[10px] text-amber-400 font-bold" id="enhanceCostText">
           강화비: 100P
@@ -508,7 +508,7 @@
         </div>
 
         <div id="enhanceStatusAlert" class="text-xs font-bold text-slate-400 min-h-[20px]">
-          [강화 시도]를 눌러 밥을 성장시키세요!
+          [강화 시도]를 누르거나 스페이스바(Space)를 눌러 밥을 성장시키세요!
         </div>
 
         <!-- 액션 버튼 -->
@@ -597,7 +597,7 @@
     </div>
   </div>
 
-  <!-- [포인트 게임장 모달 - 3x2 그리드 배열] -->
+  <!-- 포인트 게임장 모달 -->
   <div id="miniGameModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
@@ -789,7 +789,7 @@
     </div>
   </div>
 
-  <!-- 전체 랭킹 모달 (부자 랭킹 / 밥키우기 랭킹 탭 전환 지원) -->
+  <!-- 전체 랭킹 모달 -->
   <div id="rankModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
@@ -834,7 +834,7 @@
     </div>
   </div>
 
-  <!-- 상점 모달 -->
+  <!-- 명품 상점 모달 -->
   <div id="shopModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
@@ -876,7 +876,7 @@
             <span>🏷️</span> 닉네임 명품 & 신화 배지
           </span>
           <span class="text-[10px] text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded-full">
-            3만P↑: 13강 / 99만P: 17강 필수
+            5,000P↑: 12강 / 99만P: 17강 필수
           </span>
         </div>
         <div class="space-y-2 text-xs" id="shopBadgeList"></div>
@@ -1427,7 +1427,7 @@
       const now = Date.now();
       enhanceActionTimestamps = enhanceActionTimestamps.filter(t => now - t < 60000);
       const cdEl = document.getElementById('enhanceCooldownText');
-      if (cdEl) cdEl.textContent = `분당 강화: ${enhanceActionTimestamps.length} / 30회`;
+      if (cdEl) cdEl.textContent = `분당 강화: ${enhanceActionTimestamps.length} / 100회`;
 
       localStorage.setItem('bapsim_enhance_level', currentEnhanceLevel.toString());
       syncEnhanceToCloud();
@@ -1464,10 +1464,10 @@
 
       const now = Date.now();
       enhanceActionTimestamps = enhanceActionTimestamps.filter(t => now - t < 60000);
-      if (enhanceActionTimestamps.length >= 30) {
+      if (enhanceActionTimestamps.length >= 100) {
         const oldest = enhanceActionTimestamps[0];
         const remSec = Math.ceil((60000 - (now - oldest)) / 1000);
-        return alert(`⏳ 분당 강화 횟수(30회)를 초과했습니다!\n잠시 후 (${remSec}초 뒤) 다시 시도해주세요.`);
+        return alert(`⏳ 분당 강화 횟수(100회)를 초과했습니다!\n잠시 후 (${remSec}초 뒤) 다시 시도해주세요.`);
       }
 
       const cost = getEnhanceCost(currentEnhanceLevel);
@@ -1482,7 +1482,7 @@
       const nextMeta = ENHANCE_PROBABILITIES[currentEnhanceLevel];
       const alertEl = document.getElementById('enhanceStatusAlert');
       const actionBtn = document.getElementById('enhanceActionBtn');
-      actionBtn.disabled = true;
+      if (actionBtn) actionBtn.disabled = true;
 
       const roll = Math.random() * 100;
 
@@ -1500,7 +1500,7 @@
 
       updateEnhanceUI();
       renderEnhanceTable();
-      setTimeout(() => { if (actionBtn) actionBtn.disabled = false; }, 200);
+      setTimeout(() => { if (actionBtn && currentEnhanceLevel < 20) actionBtn.disabled = false; }, 150);
     }
 
     function sellEnhancedBowl() {
@@ -1530,7 +1530,7 @@
     }
 
     // ==========================================
-    // 4. 상점 메타데이터 및 밥키우기 레벨 제한 적용
+    // 4. 상점 메타데이터 및 밥키우기 레벨 제한 (5000P 이상은 12강부터)
     // ==========================================
     const SHOP_DATA = {
       symbols: [
@@ -1561,15 +1561,15 @@
         { id: "nb-abyss", name: "🌋 심연의 지옥염화 (헬파이어)", class: "nb-abyss", cost: 999999, reqLvl: 17, desc: "심연의 마그마와 핏빛 불길이 일렁이는 궁극의 배지 [17강 필요]" },
         { id: "nb-cyberaurora", name: "💎 사이버 네온 프리즘 (환상)", class: "nb-cyberaurora", cost: 999999, reqLvl: 17, desc: "초고주파 프리즘 레이저와 청록빛 오로라 발광 [17강 필요]" },
         { id: "nb-infinity", name: "♾️ 영겁의 인피니티 (절대자)", class: "nb-infinity", cost: 999999, reqLvl: 17, desc: "황금빛 차원문과 시공간 왜곡 절대자의 상징 [17강 필요]" },
-        { id: "nb-blackhole", name: "🕳️ 심연의 블랙홀 (시공 왜곡)", class: "nb-blackhole", cost: 888888, reqLvl: 13, desc: "보랏빛 중력장과 암흑 물질 발광 [13강 필요]" },
-        { id: "nb-matrix", name: "🟢 사이버 매트릭스 (디지털 네오)", class: "nb-matrix", cost: 777777, reqLvl: 13, desc: "초록빛 디지털 비가 흐르는 해커 플레이트 [13강 필요]" },
-        { id: "nb-universe", name: "🪐 다크 유니버스 (신화)", class: "nb-universe", cost: 500000, reqLvl: 13, desc: "심오하고 묵직한 심우주 성운 워프 오라 [13강 필요]" },
-        { id: "nb-gold", name: "👑 황금빛 골드 배지 (10만P 이상)", class: "nb-gold", cost: 100000, reqLvl: 13, desc: "럭셔리 쉬머 반사광이 감도는 최상위 부자의 상징 [13강 필요]" },
-        { id: "nb-darkvip", name: "💳 블랙 VIP 카드 배지", class: "nb-darkvip", cost: 50000, reqLvl: 13, desc: "문정 VVIP 전용 블랙 플레이트 [13강 필요]" },
-        { id: "nb-aurora", name: "🌠 에메랄드 오로라 배지", class: "nb-aurora", cost: 35000, reqLvl: 13, desc: "북극광처럼 일렁이는 청록빛 섬광 [13강 필요]" },
-        { id: "nb-diamond", name: "💎 다이아몬드 아이스", class: "nb-diamond", cost: 25000, reqLvl: 0, desc: "차가운 블루 크리스탈 발광" },
-        { id: "nb-galaxy", name: "🌌 심연의 갤럭시", class: "nb-galaxy", cost: 10000, reqLvl: 0, desc: "보랏빛 우주와 성운 그라데이션" },
-        { id: "nb-cyberpunk", name: "⚡ 사이버펑크 2077", class: "nb-cyberpunk", cost: 5000, reqLvl: 0, desc: "사이안 & 핫핑크 글리치 테두리" },
+        { id: "nb-blackhole", name: "🕳️ 심연의 블랙홀 (시공 왜곡)", class: "nb-blackhole", cost: 888888, reqLvl: 12, desc: "보랏빛 중력장과 암흑 물질 발광 [12강 필요]" },
+        { id: "nb-matrix", name: "🟢 사이버 매트릭스 (디지털 네오)", class: "nb-matrix", cost: 777777, reqLvl: 12, desc: "초록빛 디지털 비가 흐르는 해커 플레이트 [12강 필요]" },
+        { id: "nb-universe", name: "🪐 다크 유니버스 (신화)", class: "nb-universe", cost: 500000, reqLvl: 12, desc: "심오하고 묵직한 심우주 성운 워프 오라 [12강 필요]" },
+        { id: "nb-gold", name: "👑 황금빛 골드 배지 (10만P 이상)", class: "nb-gold", cost: 100000, reqLvl: 12, desc: "럭셔리 쉬머 반사광이 감도는 최상위 부자의 상징 [12강 필요]" },
+        { id: "nb-darkvip", name: "💳 블랙 VIP 카드 배지", class: "nb-darkvip", cost: 50000, reqLvl: 12, desc: "문정 VVIP 전용 블랙 플레이트 [12강 필요]" },
+        { id: "nb-aurora", name: "🌠 에메랄드 오로라 배지", class: "nb-aurora", cost: 35000, reqLvl: 12, desc: "북극광처럼 일렁이는 청록빛 섬광 [12강 필요]" },
+        { id: "nb-diamond", name: "💎 다이아몬드 아이스", class: "nb-diamond", cost: 25000, reqLvl: 12, desc: "차가운 블루 크리스탈 발광 [12강 필요]" },
+        { id: "nb-galaxy", name: "🌌 심연의 갤럭시", class: "nb-galaxy", cost: 10000, reqLvl: 12, desc: "보랏빛 우주와 성운 그라데이션 [12강 필요]" },
+        { id: "nb-cyberpunk", name: "⚡ 사이버펑크 2077", class: "nb-cyberpunk", cost: 5000, reqLvl: 12, desc: "사이안 & 핫핑크 글리치 테두리 [12강 필요]" },
         { id: "nb-neon", name: "🟢 사이버 네온 글로우", class: "nb-neon", cost: 2500, reqLvl: 0, desc: "초록빛 야간 네온 라이트" },
         { id: "nb-fire", name: "🔥 불타는 밥심", class: "nb-fire", cost: 1000, reqLvl: 0, desc: "열정적인 오렌지 플레임" },
         { id: "nb-cherry", name: "🍒 체리 블라썸", class: "nb-cherry", cost: 800, reqLvl: 0, desc: "화사하고 산뜻한 핑크빛 플레이트" },
@@ -2102,7 +2102,7 @@
       }, 400);
     }
 
-    // 상점 및 치장 렌더링 (밥키우기 레벨 제한 완벽 적용)
+    // 상점 및 치장 렌더링 (5000P 이상은 12강 이상 필수 적용)
     function renderShopUI() {
       const symContainer = document.getElementById('shopSymbolList');
       if (symContainer) {
@@ -2165,9 +2165,9 @@
           const isMythic = bg.cost >= 500000;
           const isGold = bg.cost >= 100000 && !isMythic;
 
-          let reqLvl = 0;
+          let reqLvl = bg.reqLvl || 0;
           if (bg.cost >= 999999) reqLvl = 17;
-          else if (bg.cost >= 30000) reqLvl = 13;
+          else if (bg.cost >= 5000) reqLvl = 12;
 
           const isLocked = (currentEnhanceLevel < reqLvl) && !isOwned;
 
@@ -2636,6 +2636,19 @@
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
         e.preventDefault();
         openAdminAuthModal();
+      }
+    });
+
+    // 밥키우기 스페이스바로 강화 시도
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' || e.key === ' ') {
+        const enhanceModal = document.getElementById('enhanceModal');
+        if (enhanceModal && !enhanceModal.classList.contains('hidden')) {
+          const tag = (document.activeElement && document.activeElement.tagName) ? document.activeElement.tagName.toLowerCase() : '';
+          if (tag === 'input' || tag === 'textarea') return;
+          e.preventDefault();
+          runEnhancement();
+        }
       }
     });
 
