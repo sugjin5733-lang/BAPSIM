@@ -158,6 +158,18 @@
     </div>
   </header>
 
+  <!-- 실시간 대박 전광판 -->
+  <div id="feedTicker" onclick="openFeedHistory()" data-level="normal" class="hidden sticky top-16 z-30 cursor-pointer">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="feed-ticker-bar flex items-center gap-2 px-3 py-1.5 rounded-b-2xl text-xs">
+        <span class="shrink-0 font-black feed-ticker-label">📢 LIVE</span>
+        <div id="feedTickerText" class="min-w-0 truncate text-slate-800"></div>
+        <span class="ml-auto shrink-0 text-[10px] text-slate-400 font-bold">전체 보기 ›</span>
+      </div>
+    </div>
+  </div>
+  <div id="feedToastContainer" class="fixed top-20 right-4 z-[60] flex flex-col gap-2 items-end pointer-events-none"></div>
+
   <!-- 메인 본문 -->
   <main class="max-w-6xl mx-auto px-4 pt-6 space-y-7">
     <!-- 상단 배너 & 타이머 -->
@@ -205,6 +217,12 @@
             <span>🍚</span>
             <span>밥키우기</span>
             <span id="headerEnhanceBadge" class="text-[10px] bg-slate-900 text-amber-300 px-1.5 py-0.2 rounded-full font-bold">+0강</span>
+          </button>
+
+          <button onclick="openCardModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white font-black px-3 py-2 rounded-xl text-xs shadow-md transition-all">
+            <span>🃏</span>
+            <span>반찬 도감</span>
+            <span id="headerCardCount" class="text-[10px] bg-white/20 px-1.5 py-0.2 rounded-full font-bold">0/24</span>
           </button>
 
           <button onclick="openShopModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-amber-300 font-bold px-3 py-2 rounded-xl text-xs shadow-md transition-all">
@@ -333,6 +351,8 @@
         </div>
       </div>
 
+      <div id="predictionPanel" class="hidden p-4 rounded-3xl bg-gradient-to-br from-violet-50 to-fuchsia-50 border border-violet-200 shadow-xs"></div>
+
       <div id="cardsWrapper" class="hidden transition-all duration-300">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="restaurantCardsContainer"></div>
       </div>
@@ -394,6 +414,20 @@
           </div>
         </div>
 
+        <!-- 골든타임 & 강화 아이템 -->
+        <div id="enhanceGoldenBanner" class="hidden golden-banner rounded-xl py-1.5 text-[11px] font-black text-amber-950">
+          🌞 점심 골든타임! (평일 11:30~13:00) 성공 확률 1.5배
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <button id="enhItem_protect" onclick="toggleEnhanceItem('protect')"></button>
+          <button id="enhItem_bless" onclick="toggleEnhanceItem('bless')"></button>
+        </div>
+        <div class="flex items-center justify-center gap-3 text-[10px] text-slate-500">
+          <span>아이템 추가 구매:</span>
+          <button onclick="buyEnhanceItem('protect')" class="text-sky-300 hover:underline font-bold">🛡️ <span id="enhBuy_protect"></span></button>
+          <button onclick="buyEnhanceItem('bless')" class="text-amber-300 hover:underline font-bold">✨ <span id="enhBuy_bless"></span></button>
+        </div>
+
         <!-- 판매 수익 안내 -->
         <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-800/80 text-xs">
           <span class="text-slate-400 font-medium">지금 판매 시 수익:</span>
@@ -438,6 +472,59 @@
           </table>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- 반찬 도감 모달 -->
+  <div id="cardModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-2xl bg-violet-100 flex items-center justify-center text-xl">🃏</div>
+          <div>
+            <h3 class="font-black text-slate-900 text-base">반찬 카드 도감</h3>
+            <p class="text-[11px] text-slate-400">게임에서 이기면 카드가 떨어져요! 카드팩으로 직접 뽑을 수도 있어요</p>
+          </div>
+        </div>
+        <button onclick="closeCardModal()" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="font-black text-sm">🎁 반찬 카드팩</div>
+            <div class="text-[10px] text-violet-100">3장 랜덤 · 전설 1% · 영웅 7% · 희귀 24%</div>
+          </div>
+          <button onclick="buyCardPack()" class="bg-white text-violet-700 hover:bg-violet-50 font-black px-4 py-2.5 rounded-xl text-xs shadow-lg active:scale-95 transition-transform">500P 개봉!</button>
+        </div>
+        <div id="cardPackStage" class="hidden grid grid-cols-3 gap-2"></div>
+      </div>
+
+      <div class="space-y-1.5">
+        <div class="flex items-center justify-between text-xs">
+          <span id="cardBookProgress" class="text-slate-700"></span>
+          <button id="cardDismantleBtn" onclick="dismantleDuplicates()" class="text-[11px] font-bold text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-lg">♻️ 중복 분해</button>
+        </div>
+        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden"><div id="cardBookBar" class="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500 transition-all" style="width:0%"></div></div>
+      </div>
+
+      <div id="cardBookGrid" class="grid grid-cols-4 sm:grid-cols-6 gap-2"></div>
+
+      <div class="space-y-2">
+        <div class="text-xs font-black text-slate-800">🎯 세트 수집 보상</div>
+        <div id="cardSetList" class="space-y-1.5"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 전광판 전체 보기 -->
+  <div id="feedHistoryModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this) closeFeedHistory()">
+    <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-5 space-y-3 max-h-[80vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="font-black text-slate-900 text-base">📢 실시간 대박 전광판</h3>
+        <button onclick="closeFeedHistory()" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
+      </div>
+      <div id="feedHistoryList" class="space-y-1.5"></div>
     </div>
   </div>
 
@@ -521,6 +608,9 @@
         </button>
         <button onclick="switchGameTab('coin')" id="tabBtn_coin" class="py-2.5 px-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-white/50 flex items-center justify-center gap-1.5 transition-all">
           <span>🪙</span><span>동전던지기</span>
+        </button>
+        <button onclick="switchGameTab('duel')" id="tabBtn_duel" class="col-span-3 py-2.5 px-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-white/50 flex items-center justify-center gap-1.5 transition-all">
+          <span>⚔️</span><span>1:1 주사위 결투</span><span id="duelOpenBadge" class="hidden bg-rose-500 text-white text-[10px] font-black rounded-full px-1.5">0</span>
         </button>
         <button onclick="switchGameTab('dice')" id="tabBtn_dice" class="py-2.5 px-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-white/50 flex items-center justify-center gap-1.5 transition-all">
           <span>🎲</span><span>주사위홀짝</span>
@@ -639,6 +729,29 @@
         </div>
       </div>
 
+      <!-- 7. 1:1 결투 -->
+      <div id="gameView_duel" class="hidden space-y-3 text-center pt-1">
+        <div class="p-3.5 bg-rose-50/80 rounded-2xl border border-rose-100 text-xs text-rose-800 font-medium">
+          <strong>판돈을 걸고 주사위 한 판 승부!</strong> 높은 눈이 이기면 판돈 2배<br/>
+          <span class="text-[11px]">결과는 서버 시각으로 정해져서 아무도 조작할 수 없어요 · 15분 안에 아무도 안 받으면 자동 환불</span>
+        </div>
+        <div class="flex gap-1.5">
+          <input id="duelTargetInput" list="duelTargetList" type="text" placeholder="상대 닉네임 (비우면 누구나)" class="flex-1 min-w-0 border rounded-xl p-2 text-xs font-bold bg-slate-50 outline-none focus:border-rose-500" />
+          <datalist id="duelTargetList"></datalist>
+          <input id="duelBetInput" type="number" value="500" min="100" max="5000" step="100" class="w-20 border rounded-xl p-2 text-xs font-black text-center bg-slate-50 outline-none focus:border-rose-500" />
+        </div>
+        <button onclick="createDuel()" class="w-full bg-gradient-to-r from-rose-600 to-red-700 hover:from-rose-700 hover:to-red-800 text-white font-black py-3 rounded-2xl text-xs shadow-md transition-all">⚔️ 도전장 던지기</button>
+        <div id="duelResultStage" class="hidden p-4 bg-slate-900 rounded-2xl text-white border-2 border-rose-500"></div>
+        <div class="text-left space-y-1.5">
+          <div class="text-[11px] font-black text-slate-600">🔥 열린 결투</div>
+          <div id="duelOpenList" class="space-y-1.5 max-h-52 overflow-y-auto"></div>
+        </div>
+        <div class="text-left space-y-1 pt-1 border-t">
+          <div class="text-[11px] font-black text-slate-600 pt-2">📜 내 최근 결투</div>
+          <div id="duelHistoryList" class="space-y-0.5"></div>
+        </div>
+      </div>
+
       <!-- 6. 주사위 게임 -->
       <div id="gameView_dice" class="hidden space-y-4 text-center pt-1">
         <div class="p-3 bg-purple-50/80 rounded-2xl border border-purple-100 text-xs text-purple-800 leading-relaxed font-medium">
@@ -697,12 +810,15 @@
       </div>
 
       <!-- 랭킹 탭 전환 -->
-      <div class="bg-slate-100 p-1 rounded-2xl grid grid-cols-2 gap-1 text-xs font-bold">
+      <div class="bg-slate-100 p-1 rounded-2xl grid grid-cols-3 gap-1 text-xs font-bold">
         <button id="rankTab_points" onclick="switchRankTab('points')" class="py-2 rounded-xl bg-white shadow-xs text-slate-900 font-black">
-          🪙 포인트 부자 랭킹
+          🪙 포인트 부자
         </button>
         <button id="rankTab_enhance" onclick="switchRankTab('enhance')" class="py-2 rounded-xl text-slate-500 hover:text-slate-900 font-bold">
-          🍚 밥키우기 강화 랭킹
+          🍚 강화 랭킹
+        </button>
+        <button id="rankTab_season" onclick="switchRankTab('season')" class="py-2 rounded-xl text-slate-500 hover:text-slate-900 font-bold">
+          🗓️ 주간 시즌
         </button>
       </div>
 
@@ -761,6 +877,11 @@
       <div class="space-y-2.5">
         <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><span>🎨</span> 닉네임 글자 색상 (각 300P)</span>
         <div class="grid grid-cols-2 gap-2 text-xs" id="shopColorList"></div>
+      </div>
+
+      <div id="shopOwnedSpecialWrap" class="hidden space-y-2.5">
+        <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><span>🏆</span> 내 획득 배지 (세트 완성 · 시즌 보상)</span>
+        <div class="space-y-2 text-xs" id="shopOwnedSpecialList"></div>
       </div>
 
       <div class="space-y-3">
@@ -1158,6 +1279,11 @@
   <script src="js/ranking.js"></script>
   <script src="js/restaurants.js"></script>
   <script src="js/tools.js"></script>
+  <script src="js/feed.js"></script>
+  <script src="js/cards.js"></script>
+  <script src="js/season.js"></script>
+  <script src="js/duel.js"></script>
+  <script src="js/predict.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

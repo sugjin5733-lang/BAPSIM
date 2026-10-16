@@ -13,19 +13,19 @@ function closeRankModal() { document.getElementById('rankModal').classList.add('
 
 function switchRankTab(tab) {
   currentRankTab = tab;
-  const btnP = document.getElementById('rankTab_points');
-  const btnE = document.getElementById('rankTab_enhance');
+  const labels = {
+    points: '<i data-lucide="crown" class="w-3.5 h-3.5 text-amber-500"></i><span>전체 포인트 부자 랭킹</span>',
+    enhance: '<i data-lucide="award" class="w-3.5 h-3.5 text-orange-500"></i><span>전체 밥키우기 강화 랭킹</span>',
+    season: '<i data-lucide="calendar" class="w-3.5 h-3.5 text-indigo-500"></i><span>이번 주 밥키우기 시즌</span>'
+  };
+  ['points', 'enhance', 'season'].forEach(t => {
+    const btn = document.getElementById(`rankTab_${t}`);
+    if (btn) btn.className = t === tab
+      ? "py-2 rounded-xl bg-white shadow-xs text-slate-900 font-black"
+      : "py-2 rounded-xl text-slate-500 hover:text-slate-900 font-bold";
+  });
   const headerLabel = document.getElementById('rankListHeaderLabel');
-
-  if (tab === 'points') {
-    if (btnP) btnP.className = "py-2 rounded-xl bg-white shadow-xs text-slate-900 font-black";
-    if (btnE) btnE.className = "py-2 rounded-xl text-slate-500 hover:text-slate-900 font-bold";
-    if (headerLabel) headerLabel.innerHTML = `<i data-lucide="crown" class="w-3.5 h-3.5 text-amber-500"></i><span>전체 포인트 부자 랭킹</span>`;
-  } else {
-    if (btnE) btnE.className = "py-2 rounded-xl bg-white shadow-xs text-slate-900 font-black";
-    if (btnP) btnP.className = "py-2 rounded-xl text-slate-500 hover:text-slate-900 font-bold";
-    if (headerLabel) headerLabel.innerHTML = `<i data-lucide="award" class="w-3.5 h-3.5 text-orange-500"></i><span>전체 밥키우기 강화 랭킹</span>`;
-  }
+  if (headerLabel) headerLabel.innerHTML = labels[tab] || labels.points;
   lucide.createIcons();
   renderRankingsData();
 }
@@ -139,7 +139,9 @@ function renderRankingsData() {
     const summaryEl = document.getElementById('myRankSummary');
     const myPointEl = document.getElementById('myRankPointDisplay');
 
-    if (modalContainer) {
+    if (modalContainer && currentRankTab === 'season') {
+      renderSeasonRanking(modalContainer, summaryEl, myPointEl).catch(onDbError);
+    } else if (modalContainer) {
       modalContainer.innerHTML = '';
 
       if (currentRankTab === 'points') {

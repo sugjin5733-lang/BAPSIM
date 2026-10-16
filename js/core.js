@@ -63,7 +63,7 @@ let currentGroupName = localStorage.getItem('bapsim_current_group_name') || '전
 // (같은 PC를 여러 사람이 써도 이전 사용자의 포인트/아이템이 섞이지 않도록)
 const GUEST_NICK = "문정러";
 let currentUser = { nickname: GUEST_NICK };
-let myVotedId = localStorage.getItem(`bapsim_my_vote_${currentGroupId}`);
+let myVotedId = null; // 오늘 내 투표 (서버의 ballots 에서 채워짐)
 let targetJoinGroupId = null;
 
 let userPoints = 0;
@@ -142,4 +142,39 @@ function showFatalBanner(text) {
     document.body.prepend(el);
   }
   el.textContent = '⚠️ ' + text;
+}
+
+// ==========================================
+// 한국 시간(KST) 기준 날짜/시간 헬퍼
+// (투표 날짜, 예측 마감, 골든타임, 주간 시즌 모두 이 기준)
+// ==========================================
+function kstParts(ts = Date.now()) {
+  const d = new Date(ts + 9 * 3600 * 1000); // UTC+9 를 UTC 필드로 읽음
+  return { y: d.getUTCFullYear(), m: d.getUTCMonth() + 1, d: d.getUTCDate(), dow: d.getUTCDay(), h: d.getUTCHours(), min: d.getUTCMinutes() };
+}
+function todayKey(ts = Date.now()) {
+  const p = kstParts(ts);
+  return `${p.y}-${String(p.m).padStart(2, '0')}-${String(p.d).padStart(2, '0')}`;
+}
+function kstMinutesOfDay(ts = Date.now()) {
+  const p = kstParts(ts);
+  return p.h * 60 + p.min;
+}
+function isWeekdayKST(ts = Date.now()) {
+  const dow = kstParts(ts).dow;
+  return dow >= 1 && dow <= 5;
+}
+// 주간 시즌 키: 그 주 월요일 날짜 (예: "2026-10-12")
+function weekKey(ts = Date.now()) {
+  const dow = kstParts(ts).dow;              // 0=일 ... 6=토
+  const sinceMonday = (dow + 6) % 7;
+  return todayKey(ts - sinceMonday * 86400000);
+}
+function prevWeekKey(ts = Date.now()) {
+  return weekKey(ts - 7 * 86400000);
+}
+// 결정적 난수: 같은 문자열이면 모든 사람 화면에서 같은 결과 (결투 주사위 등)
+async function seededBytes(seedText) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(seedText));
+  return Array.from(new Uint8Array(buf));
 }

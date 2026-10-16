@@ -52,6 +52,7 @@ const SHOP_DATA = {
 
 // 상점 및 치장 렌더링 (5000P 이상은 12강 이상 필수 적용)
 function renderShopUI() {
+  renderOwnedSpecialBadges();
   const symContainer = document.getElementById('shopSymbolList');
   if (symContainer) {
     symContainer.innerHTML = '';
@@ -159,6 +160,29 @@ function renderShopUI() {
       bgContainer.appendChild(card);
     });
   }
+}
+
+// 상점에서 팔지 않는 특별 배지 (세트 완성, 시즌 보상, 관리자 지급 등)
+const SPECIAL_BADGE_NAMES = {
+  'nb-buffet': '🍱 한식뷔페 마스터', 'nb-royal': '👑 수라상 미식가', 'nb-collector': '📒 반찬 도감 완성자',
+  'nb-season-1': '🥇 시즌 챔피언', 'nb-season-2': '🥈 시즌 준우승', 'nb-season-3': '🥉 시즌 3위',
+  'nb-admin': '🛡️ 관리자'
+};
+
+function renderOwnedSpecialBadges() {
+  const box = document.getElementById('shopOwnedSpecialList');
+  if (!box) return;
+  const shopClasses = new Set(SHOP_DATA.bgs.map(b => b.class));
+  const special = (myInventory.bgs || []).filter(c => c !== 'nb-none' && !shopClasses.has(c));
+  const wrap = document.getElementById('shopOwnedSpecialWrap');
+  if (wrap) wrap.classList.toggle('hidden', special.length === 0);
+  box.innerHTML = [...new Set(special)].map(c => `
+    <div class="p-3 border rounded-2xl flex items-center justify-between bg-slate-50">
+      <span class="${safeClass(c)} text-xs inline-block">${esc(SPECIAL_BADGE_NAMES[c] || c)}</span>
+      ${myNickBg === c
+        ? `<button onclick="unequipBg()" class="bg-rose-500 text-white font-bold px-3 py-1.5 rounded-xl text-[11px]">해제</button>`
+        : `<button onclick="equipBg(${jsArg(c)})" class="bg-indigo-600 text-white font-bold px-3 py-1.5 rounded-xl text-[11px]">장착</button>`}
+    </div>`).join('');
 }
 
 function openShopModal() { 

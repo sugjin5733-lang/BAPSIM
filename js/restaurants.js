@@ -155,7 +155,7 @@ function renderCards() {
           </div>
           <button onclick="castVote(${jsArg(r.id)})" class="w-full py-2.5 rounded-2xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 ${isVoted ? 'bg-orange-500 text-white shadow-md hover:bg-orange-600' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">
             <i data-lucide="${isVoted ? 'check' : 'thumbs-up'}" class="w-3.5 h-3.5"></i>
-            <span>${isVoted ? '투표 완료됨 (다시 눌러 취소)' : '여기로 투표'}</span>
+            <span>${isVotingClosed() ? (isVoted ? '내가 고른 곳 (투표 마감)' : '오늘 투표 마감') : isVoted ? '투표 완료됨 (다시 눌러 취소)' : '여기로 투표'}</span>
           </button>
         </div>
       `;
@@ -243,36 +243,41 @@ function renderCards() {
   lucide.createIcons();
 }
 
-function castVote(id) {
+// 투표는 날짜별 1인 1표: groups/{그룹}/ballots/{YYYY-MM-DD}/{닉네임} = { rid, uid, ts }
+// 매일 자동으로 새로 시작되고, 11:30(한국 시간)에 그날 투표가 마감됨
+const VOTE_CLOSE_MIN = 11 * 60 + 30;
+let ballotsDate = todayKey();
+let todayBallots = {};
+
+function isVotingClosed() {
+  return kstMinutesOfDay() >= VOTE_CLOSE_MIN;
+}
+
+async function castVote(id) {
   if (!checkApprovalGuard()) return;
   if (currentGroupId === 'lobby') {
     openGroupListModal();
     return;
   }
+  if (isVotingClosed()) return alert('⏰ 오늘 점심 투표는 11:30에 마감됐어요. 내일 다시 투표해주세요!');
 
-  const votePath = `groups/${currentGroupId}/votes`;
+  const ballotRef = db.ref(`groups/${currentGroupId}/ballots/${todayKey()}/${currentUser.nickname}`);
   const chatPath = `groups/${currentGroupId}/messages`;
-
-  if (myVotedId === id) {
-    db.ref(`${votePath}/${id}`).transaction(v => Math.max(0, (v || 1) - 1));
-    myVotedId = null;
-    localStorage.removeItem(`bapsim_my_vote_${currentGroupId}`);
-  } else {
-    if (myVotedId) {
-      db.ref(`${votePath}/${myVotedId}`).transaction(v => Math.max(0, (v || 1) - 1));
+  try {
+    if (myVotedId === id) {
+      await ballotRef.remove();
+    } else {
+      await ballotRef.set({ rid: id, uid: authUser.uid, ts: firebase.database.ServerValue.TIMESTAMP });
+      db.ref(chatPath).push({
+        uid: authUser.uid,
+        type: 'system',
+        text: `🔔 ${currentUser.nickname}님이 [${restaurants[id]?.name || '식당'}]에 투표하셨습니다!`,
+        timestamp: Date.now()
+      });
     }
-    db.ref(`${votePath}/${id}`).transaction(v => (v || 0) + 1);
-    myVotedId = id;
-    localStorage.setItem(`bapsim_my_vote_${currentGroupId}`, id);
-
-    db.ref(chatPath).push({
-      uid: authUser.uid,
-      type: 'system',
-      text: `🔔 ${currentUser.nickname}님이 [${restaurants[id]?.name || '식당'}]에 투표하셨습니다!`,
-      timestamp: Date.now()
-    });
+  } catch (err) {
+    alert('투표하지 못했어요: ' + err.message);
   }
-  renderCards();
 }
 
 function enterGroup(gid, gname) {
@@ -348,7 +353,6 @@ function renderGroupList() {
 }
 
 function updateGroupUI() {
-  myVotedId = localStorage.getItem(`bapsim_my_vote_${currentGroupId}`);
   const isLobby = (currentGroupId === 'lobby');
 
   const nameText = document.getElementById('currentGroupNameText');
@@ -394,18 +398,33 @@ function updateGroupUI() {
 
   attachVotesListener();
   attachChatListener();
+  attachPredictionListener();
   renderCards();
 }
 
 function attachVotesListener() {
   if (groupVotesRef) groupVotesRef.off();
-  const votePath = currentGroupId === 'lobby' ? 'lobby_votes' : `groups/${currentGroupId}/votes`;
-  groupVotesRef = db.ref(votePath);
+  groupVotesData = {};
+  todayBallots = {};
+  myVotedId = null;
+  if (currentGroupId === 'lobby') { renderCards(); return; }
+  ballotsDate = todayKey();
+  groupVotesRef = db.ref(`groups/${currentGroupId}/ballots/${ballotsDate}`);
   groupVotesRef.on('value', snap => {
-    groupVotesData = snap.val() || {};
+    todayBallots = snap.val() || {};
+    groupVotesData = {};
+    Object.values(todayBallots).forEach(b => { if (b && b.rid) groupVotesData[b.rid] = (groupVotesData[b.rid] || 0) + 1; });
+    const mine = todayBallots[currentUser.nickname];
+    myVotedId = mine ? mine.rid : null;
     renderCards();
-  });
+    if (typeof renderPredictionPanel === 'function') renderPredictionPanel();
+  }, onDbError);
 }
+
+// 자정이 지나면 새 날짜의 투표로 자동 전환
+setInterval(() => {
+  if (currentGroupId !== 'lobby' && todayKey() !== ballotsDate) attachVotesListener();
+}, 30000);
 
 function attachGlobalListeners() {
   db.ref('groups').on('value', snap => { allGroups = snap.val() || {}; renderGroupList(); }, onDbError);

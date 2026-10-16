@@ -31,6 +31,8 @@ function startApp() {
   appStarted = true;
   attachGlobalListeners();
   attachOnlineUsersListener();
+  attachFeedListener();
+  attachDuelListener();
   initNoticeListener();
   renderRankingsData();
   updateEnhanceUI();

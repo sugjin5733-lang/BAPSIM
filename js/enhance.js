@@ -64,6 +64,7 @@ let enhanceActionTimestamps = [];
 
 function openEnhanceModal() {
   if (!checkApprovalGuard()) return;
+  renderEnhanceItems();
   updateEnhanceUI();
   renderEnhanceTable();
   document.getElementById('enhanceModal').classList.remove('hidden');
@@ -114,7 +115,7 @@ function updateEnhanceUI() {
       actionBtn.textContent = "20강 최고등급 달성!";
     }
   } else {
-    const nextMeta = ENHANCE_PROBABILITIES[currentEnhanceLevel];
+    const nextMeta = effectiveOdds(currentEnhanceLevel);
     const nextCost = getEnhanceCost(currentEnhanceLevel);
     if (costText) costText.textContent = `강화비: ${nextCost}P`;
     if (probS) probS.textContent = `${nextMeta.success.toFixed(1)}%`;
@@ -149,7 +150,7 @@ function renderEnhanceTable() {
       <td class="py-1 text-left pl-2 text-slate-200 truncate max-w-[120px]">${bowlInfo.icon} ${bowlInfo.name}</td>
       <td class="py-1 text-emerald-400">${p.success.toFixed(1)}%</td>
       <td class="py-1 text-amber-400">${p.keep.toFixed(1)}%</td>
-      <td class="py-1 text-rose-400">${p.break.toFixed(1)}%</td>
+      <td class="py-1 text-rose-400">${Math.max(0, 100 - p.success - p.keep).toFixed(1)}%</td>
       <td class="py-1 text-amber-300">${p.reward.toLocaleString()}P</td>
     `;
     tbody.appendChild(tr);
@@ -159,6 +160,106 @@ function renderEnhanceTable() {
 function toggleEnhanceProbTable() {
   const c = document.getElementById('enhanceProbTableContainer');
   if (c) c.classList.toggle('hidden');
+}
+
+// ==========================================
+// 강화 아이템 & 골든타임
+// ==========================================
+const ENHANCE_ITEMS = {
+  protect: { name: '🛡️ 파괴 방지권', price: 1500, desc: '이번 강화에서 밥이 타면 대신 유지돼요' },
+  bless:   { name: '✨ 축복 주문서', price: 800,  desc: '이번 강화 성공 확률 1.5배' }
+};
+// 평일 점심시간(11:30~13:00) 성공 확률 보너스
+const GOLDEN_TIME = { start: 11 * 60 + 30, end: 13 * 60, mult: 1.5 };
+
+let myItems = { protect: 0, bless: 0 };
+let useItem = { protect: false, bless: false };
+
+function loadItemsFromUser(val) {
+  const it = (val && val.items) || {};
+  myItems = { protect: Math.max(0, Number(it.protect) || 0), bless: Math.max(0, Number(it.bless) || 0) };
+  if (myItems.protect === 0) useItem.protect = false;
+  if (myItems.bless === 0) useItem.bless = false;
+  renderEnhanceItems();
+}
+
+function isGoldenTime() {
+  const m = kstMinutesOfDay();
+  return isWeekdayKST() && m >= GOLDEN_TIME.start && m < GOLDEN_TIME.end;
+}
+
+// 아이템/골든타임을 반영한 이번 강화의 실제 확률
+function effectiveOdds(level) {
+  const base = ENHANCE_PROBABILITIES[level];
+  if (!base) return null;
+  // 파괴 확률은 '성공·유지를 뺀 나머지' (예전부터 실제 판정 방식. 표의 숫자 합이 100이 아닌 단계가 있어 보정)
+  let success = base.success, keep = base.keep, brk = Math.max(0, 100 - base.success - base.keep);
+  let mult = 1;
+  if (isGoldenTime()) mult *= GOLDEN_TIME.mult;
+  if (useItem.bless && myItems.bless > 0) mult *= 1.5;
+  if (mult > 1) {
+    // 늘어난 성공 확률은 '유지'에서 먼저, 모자라면 '파괴'에서 가져옴
+    const want = Math.min(100, success * mult) - success;
+    const fromKeep = Math.min(keep, want);
+    keep -= fromKeep;
+    const fromBreak = Math.min(brk, want - fromKeep);
+    brk -= fromBreak;
+    success += fromKeep + fromBreak;
+  }
+  const keepBase = keep; // 방지권 적용 전 '유지' 구간 (그 뒤 구간은 원래 '파괴')
+  const protectedNow = useItem.protect && myItems.protect > 0 && brk > 0;
+  if (protectedNow) { keep += brk; brk = 0; }
+  return { success, keep, keepBase, break: brk, golden: isGoldenTime(), blessed: useItem.bless && myItems.bless > 0, protected: protectedNow };
+}
+
+function buyEnhanceItem(kind) {
+  if (!checkApprovalGuard()) return;
+  const it = ENHANCE_ITEMS[kind];
+  const qty = 1;
+  if (userPoints < it.price * qty) return alert(`❌ 포인트가 부족해요! (${it.name} ${it.price.toLocaleString()}P)`);
+  userPoints -= it.price * qty;
+  myItems[kind] += qty;
+  db.ref(`user_points/${currentUser.nickname}/items/${kind}`).set(myItems[kind]);
+  updatePointsUI();
+  renderEnhanceItems();
+  updateEnhanceUI();
+}
+
+function toggleEnhanceItem(kind) {
+  if (myItems[kind] <= 0) return buyEnhanceItem(kind);
+  useItem[kind] = !useItem[kind];
+  renderEnhanceItems();
+  updateEnhanceUI();
+}
+
+function renderEnhanceItems() {
+  ['protect', 'bless'].forEach(kind => {
+    const btn = document.getElementById(`enhItem_${kind}`);
+    if (!btn) return;
+    const on = useItem[kind] && myItems[kind] > 0;
+    btn.className = `relative py-2 px-2 rounded-xl text-[11px] font-bold border transition-all ${on ? 'bg-amber-500 text-slate-950 border-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.6)]' : 'bg-slate-900 text-slate-300 border-slate-700 hover:border-amber-500/60'}`;
+    btn.innerHTML = `${ENHANCE_ITEMS[kind].name} <span class="font-black">x${myItems[kind]}</span>
+      <span class="block text-[9px] font-medium ${on ? 'text-slate-800' : 'text-slate-500'}">${myItems[kind] > 0 ? (on ? '사용 중 (1회 소모)' : '눌러서 사용') : `없음 · 눌러서 구매 ${ENHANCE_ITEMS[kind].price.toLocaleString()}P`}</span>`;
+  });
+  ['protect', 'bless'].forEach(kind => {
+    const b = document.getElementById(`enhBuy_${kind}`);
+    if (b) b.textContent = `+1 (${ENHANCE_ITEMS[kind].price.toLocaleString()}P)`;
+  });
+  const g = document.getElementById('enhanceGoldenBanner');
+  if (g) g.classList.toggle('hidden', !isGoldenTime());
+}
+
+function consumeUsedItems() {
+  const used = {};
+  ['protect', 'bless'].forEach(kind => {
+    if (useItem[kind] && myItems[kind] > 0) {
+      myItems[kind]--;
+      used[`items/${kind}`] = myItems[kind];
+      if (myItems[kind] === 0) useItem[kind] = false;
+    }
+  });
+  if (Object.keys(used).length && canSyncToCloud()) db.ref(`user_points/${currentUser.nickname}`).update(used);
+  renderEnhanceItems();
 }
 
 function runEnhancement() {
@@ -181,26 +282,50 @@ function runEnhancement() {
   enhanceActionTimestamps.push(now);
   updatePointsUI();
 
-  const nextMeta = ENHANCE_PROBABILITIES[currentEnhanceLevel];
+  const odds = effectiveOdds(currentEnhanceLevel);
   const alertEl = document.getElementById('enhanceStatusAlert');
   const actionBtn = document.getElementById('enhanceActionBtn');
+  const avatar = document.getElementById('enhanceBowlAvatar');
   if (actionBtn) actionBtn.disabled = true;
 
+  const fromLevel = currentEnhanceLevel;
   const roll = Math.random() * 100;
+  const tags = [odds.golden ? '🌞골든타임' : '', odds.blessed ? '✨축복' : '', odds.protected ? '🛡️방지권' : ''].filter(Boolean).join(' ');
+  consumeUsedItems();
 
-  if (roll < nextMeta.success) {
+  let outcome;
+  if (roll < odds.success) {
+    outcome = 'success';
     currentEnhanceLevel++;
     const evolvedBowl = BOWL_EVOLUTION[currentEnhanceLevel];
     if (currentEnhanceLevel >= 15 && window.confetti) confetti({ particleCount: 150 });
-    alertEl.innerHTML = `<span class="text-emerald-400 font-extrabold text-xs">🎉 +${currentEnhanceLevel}강 [${evolvedBowl.name}] 성공! 축하합니다!</span>`;
-  } else if (roll < (nextMeta.success + nextMeta.keep)) {
-    alertEl.innerHTML = `<span class="text-amber-400 font-bold text-xs">⚠️ 강화 실패! 다행히 밥이 타지 않고 유지되었습니다.</span>`;
+    alertEl.innerHTML = `<span class="text-emerald-400 font-extrabold text-xs">🎉 +${currentEnhanceLevel}강 [${esc(evolvedBowl.name)}] 성공! ${tags}</span>`;
+    if (currentEnhanceLevel >= 10) {
+      postFeed('enhance', `+${currentEnhanceLevel}강 [${evolvedBowl.name}] 강화 성공! ${evolvedBowl.icon}`,
+        currentEnhanceLevel >= 17 ? 'legendary' : currentEnhanceLevel >= 13 ? 'big' : 'normal');
+      // 고강화 성공 시 카드 드롭 (높을수록 확률/등급 ↑)
+      maybeDropCard(`+${currentEnhanceLevel}강 성공`, 10 + (currentEnhanceLevel - 10) * 4, (currentEnhanceLevel - 10) * 1.5);
+    }
+  } else if (roll < (odds.success + odds.keep)) {
+    outcome = odds.protected && roll >= (odds.success + odds.keepBase) ? 'saved' : 'keep';
+    alertEl.innerHTML = outcome === 'saved'
+      ? `<span class="text-sky-300 font-black text-xs">🛡️ 방지권 발동! 밥이 탈 뻔했지만 지켜냈어요!</span>`
+      : `<span class="text-amber-400 font-bold text-xs">⚠️ 강화 실패! 다행히 밥이 타지 않고 유지되었습니다. ${tags}</span>`;
   } else {
+    outcome = 'break';
     currentEnhanceLevel = 0;
     alertEl.innerHTML = `<span class="text-rose-500 font-black text-xs">💥 밥이 타버렸습니다! (파괴되어 +0 따스한 햇쌀밥으로 리셋)</span>`;
+    if (fromLevel >= 10) postFeed('enhance', `+${fromLevel}강 밥이 새까맣게 타버렸어요... 💥`, fromLevel >= 14 ? 'big' : 'normal');
   }
 
-  updateEnhanceUI();
+  if (avatar) {
+    avatar.classList.remove('enh-success', 'enh-fail', 'enh-break');
+    void avatar.offsetWidth;
+    avatar.classList.add(outcome === 'success' ? 'enh-success' : outcome === 'break' ? 'enh-break' : 'enh-fail');
+  }
+
+  updateEnhanceUI(); // 새 강화 단계를 먼저 서버에 저장
+  if (outcome === 'success') recordSeasonProgress(currentEnhanceLevel);
   renderEnhanceTable();
   setTimeout(() => { if (actionBtn && currentEnhanceLevel < 20) actionBtn.disabled = false; }, 150);
 }
@@ -220,6 +345,7 @@ function sellEnhancedBowl() {
   renderEnhanceTable();
 
   if (window.confetti) confetti({ particleCount: 100 });
+  if (soldLvl >= 12) postFeed('sell', `+${soldLvl}강 밥을 팔아 ${reward.toLocaleString()}P를 챙겼어요 💰`, soldLvl >= 16 ? 'big' : 'normal');
   alert(`💰 +${soldLvl}강 밥을 판매하여 +${reward.toLocaleString()}P를 획득했습니다!`);
 }
 

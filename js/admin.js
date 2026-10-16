@@ -392,13 +392,15 @@ function handleAdminResetAllPoints() {
   });
 }
 
-function handleAdminResetAllVotes() {
-  if (!confirm('전체 투표수를 리셋하시겠습니까?')) return;
-  db.ref('lobby_votes').remove();
-  db.ref('groups').once('value', snap => {
-    const groups = snap.val() || {};
-    Object.keys(groups).forEach(gid => db.ref(`groups/${gid}/votes`).remove());
+async function handleAdminResetAllVotes() {
+  if (!confirm('오늘 모든 그룹의 투표를 리셋하시겠습니까?\n(투표는 매일 자동으로 새로 시작되므로 보통은 필요 없어요)')) return;
+  const snap = await db.ref('groups').once('value');
+  const updates = { lobby_votes: null };
+  Object.keys(snap.val() || {}).forEach(gid => {
+    updates[`groups/${gid}/votes`] = null;                 // 예전 방식 투표수
+    updates[`groups/${gid}/ballots/${todayKey()}`] = null; // 오늘 투표
   });
+  await db.ref().update(updates);
   alert('투표 리셋 완료');
 }
 

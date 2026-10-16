@@ -17,6 +17,7 @@ let myPointsRef = null;
 let myRequestRef = null;
 let myRequest = null;       // 승인 대기 중인 내 가입/연결 요청
 let presenceRefs = null;
+let onlineNicknames = [];
 
 function isGoogleUser() {
   return !!(authUser && !authUser.isAnonymous);
@@ -150,8 +151,18 @@ function resetToGuestState() {
   myNickColor = '';
   myNickSymbol = '';
   myInventory = { colors: [], bgs: ['nb-none'], symbols: [] };
+  loadGameStateFromUser({});
   updatePointsUI(false);
   if (typeof updateEnhanceUI === 'function') updateEnhanceUI();
+}
+
+// 게임 관련 내 데이터 (카드, 강화 아이템, 시즌 보상, 결투/예측 정산 기록)
+function loadGameStateFromUser(val) {
+  loadCardsFromUser(val);
+  loadItemsFromUser(val);
+  loadSeasonFromUser(val);
+  loadDuelSettlementsFromUser(val);
+  loadBetsFromUser(val);
 }
 
 function bindNickname(nick) {
@@ -335,6 +346,7 @@ function attachUserPointListener() {
     myNickBg = val.badge || 'nb-none';
     myNickColor = val.color || '';
     myNickSymbol = val.symbol || '';
+    loadGameStateFromUser(val);
 
     const firstLoad = !cloudReady;
     cloudReady = true;
@@ -345,6 +357,10 @@ function attachUserPointListener() {
       initPresenceSystem();
       renderRankingsData();
       syncFromGoogleSheet(false);
+      initSeason();
+      settleMyDuels();
+      settleMyBets();
+      renderDuelArena();
     }
   }, onDbError);
 }
@@ -403,6 +419,7 @@ function attachOnlineUsersListener() {
   db.ref('online_users').on('value', (snap) => {
     const userList = Object.values(snap.val() || {});
     const count = userList.length;
+    onlineNicknames = userList.map(u => u && u.nickname).filter(Boolean);
 
     const badge = document.getElementById('onlineCountBadge');
     if (badge) badge.textContent = `${count}명 접속 중`;

@@ -13,10 +13,26 @@
         "password": {
           ".validate": "false"
         },
-        "votes": {
-          "$rid": {
-            ".write": "(auth != null && root.child('user_uids').child(auth.uid).exists() && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('status').val() === 'approved' && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('uid').val() === auth.uid)",
-            ".validate": "newData.isNumber() && newData.val() >= 0"
+        "ballots": {
+          "$date": {
+            "$nick": {
+              ".write": "(auth != null && root.child('user_uids').child(auth.uid).exists() && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('status').val() === 'approved' && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('uid').val() === auth.uid) && $nick === root.child('user_uids').child(auth.uid).val()",
+              ".validate": "newData.child('uid').val() === auth.uid && newData.child('rid').isString() && newData.child('ts').val() === now"
+            }
+          }
+        },
+        "bets": {
+          "$date": {
+            "$nick": {
+              ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || (!data.exists() && (auth != null && root.child('user_uids').child(auth.uid).exists() && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('status').val() === 'approved' && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('uid').val() === auth.uid) && $nick === root.child('user_uids').child(auth.uid).val())",
+              ".validate": "newData.child('uid').val() === auth.uid && newData.child('rid').isString() && newData.child('stake').isNumber() && newData.child('stake').val() >= 100 && newData.child('stake').val() <= 3000 && newData.child('ts').val() === now"
+            }
+          }
+        },
+        "results": {
+          "$date": {
+            ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || (!data.exists() && (auth != null && root.child('user_uids').child(auth.uid).exists() && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('status').val() === 'approved' && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('uid').val() === auth.uid))",
+            ".validate": "newData.child('at').val() === now"
           }
         },
         "messages": {
@@ -81,6 +97,28 @@
         ".validate": "!newData.exists() || (newData.child('uid').val() === $uid && newData.child('nickname').isString() && newData.child('nickname').val().length >= 1 && newData.child('nickname').val().length <= 20 && (newData.child('type').val() === 'new' || newData.child('type').val() === 'claim') && !root.child('banned_users').child(newData.child('nickname').val()).exists())"
       }
     },
+    "game_feed": {
+      ".read": "auth != null",
+      "$id": {
+        ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || (!data.exists() && (auth != null && root.child('user_uids').child(auth.uid).exists() && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('status').val() === 'approved' && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('uid').val() === auth.uid) && newData.child('uid').val() === auth.uid && newData.child('nickname').val() === root.child('user_uids').child(auth.uid).val())",
+        ".validate": "newData.child('text').isString() && newData.child('text').val().length <= 120 && newData.child('ts').val() === now"
+      }
+    },
+    "seasons": {
+      ".read": "auth != null",
+      "$week": {
+        "$nick": {
+          ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || ((auth != null && root.child('user_uids').child(auth.uid).exists() && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('status').val() === 'approved' && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('uid').val() === auth.uid) && $nick === root.child('user_uids').child(auth.uid).val() && (!data.exists() || newData.child('maxLevel').val() > data.child('maxLevel').val()))",
+          ".validate": "newData.child('uid').val() === auth.uid && newData.child('nickname').val() === $nick && newData.child('maxLevel').isNumber() && newData.child('maxLevel').val() >= 1 && newData.child('maxLevel').val() <= 20 && newData.child('maxLevel').val() <= root.child('user_points').child($nick).child('enhanceLevel').val() && newData.child('at').val() === now"
+        }
+      }
+    },
+    "duels": {
+      ".read": "auth != null",
+      "$id": {
+        ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || (!data.exists() && (auth != null && root.child('user_uids').child(auth.uid).exists() && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('status').val() === 'approved' && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('uid').val() === auth.uid) && newData.child('fromUid').val() === auth.uid && newData.child('from').val() === root.child('user_uids').child(auth.uid).val() && newData.child('status').val() === 'open' && newData.child('bet').isNumber() && newData.child('bet').val() >= 100 && newData.child('bet').val() <= 5000 && newData.child('createdAt').val() === now && newData.child('to').isString()) || (data.child('status').val() === 'open' && (auth != null && root.child('user_uids').child(auth.uid).exists() && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('status').val() === 'approved' && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('uid').val() === auth.uid) && data.child('fromUid').val() !== auth.uid && (data.child('to').val() === '' || data.child('to').val() === root.child('user_uids').child(auth.uid).val()) && newData.child('status').val() === 'accepted' && newData.child('acceptorUid').val() === auth.uid && newData.child('acceptor').val() === root.child('user_uids').child(auth.uid).val() && newData.child('acceptedAt').val() === now && newData.child('fromUid').val() === data.child('fromUid').val() && newData.child('from').val() === data.child('from').val() && newData.child('to').val() === data.child('to').val() && newData.child('bet').val() === data.child('bet').val() && newData.child('createdAt').val() === data.child('createdAt').val()) || (data.child('status').val() === 'open' && data.child('fromUid').val() === auth.uid && newData.child('status').val() === 'cancelled' && newData.child('fromUid').val() === data.child('fromUid').val() && newData.child('bet').val() === data.child('bet').val() && !newData.child('acceptorUid').exists())"
+      }
+    },
     "user_points": {
       ".read": "auth != null",
       "$nick": {
@@ -108,6 +146,16 @@
         },
         "passwordHash": {
           ".validate": "false"
+        },
+        "items": {
+          "$item": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 999"
+          }
+        },
+        "cards": {
+          "$card": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 9999"
+          }
         }
       }
     }
