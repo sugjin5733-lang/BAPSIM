@@ -14,6 +14,15 @@ const DICE_FACES = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
 let allDuels = {};
 let mySettledDuels = {};
 let duelSettling = {};
+let acceptingDuels = {}; // 내가 지금 수락 중인 결투 (서버 확정 전)
+
+// 결과 계산은 서버가 확정한 수락 시각으로만 해야 함.
+// 수락한 쪽 브라우저는 서버 응답 전에 '추정 시각'을 잠깐 갖고 있어서, 그 값으로 계산하면
+// 상대와 다른 주사위가 나올 수 있음 → 수락 중이 아니고, 확정 후 4초가 지난 값만 사용
+function isDuelConfirmed(id, d) {
+  return d && d.status === 'accepted' && typeof d.acceptedAt === 'number' && !acceptingDuels[id]
+    && (Date.now() + serverTimeOffset - d.acceptedAt) >= 4000;
+}
 
 function loadDuelSettlementsFromUser(val) {
   mySettledDuels = Object.assign({}, (val && val.settledDuels) || {});
@@ -55,6 +64,7 @@ async function settleMyDuels() {
       continue;
     }
     if (d.status !== 'accepted' || !d.acceptedAt) continue;
+    if (!isDuelConfirmed(id, d)) { setTimeout(() => settleMyDuels(), 4500); continue; }
 
     const r = await duelResult(d, id);
     const iAmFrom = d.fromUid === authUser.uid;
@@ -68,7 +78,7 @@ async function settleMyDuels() {
     if (iWon) {
       updatePointsUI();
       const loser = iAmFrom ? d.acceptor : d.from;
-      postFeed('duel', `⚔️ ${loser}님과의 결투 승리! ${DICE_FACES[(iAmFrom ? r.fromRoll : r.accRoll) - 1]} vs ${DICE_FACES[(iAmFrom ? r.accRoll : r.fromRoll) - 1]} → +${(d.bet * 2).toLocaleString()}P`, d.bet >= 2000 ? 'big' : 'normal');
+      postFeed('duel', `⚔️ ${loser}님과의 결투 승리! ${DICE_FACES[(iAmFrom ? r.fromRoll : r.accRoll) - 1]} vs ${DICE_FACES[(iAmFrom ? r.accRoll : r.fromRoll) - 1]} → +${d.bet.toLocaleString()}P`, d.bet >= 2000 ? 'big' : 'normal');
       maybeDropCard('결투 승리', 12);
     }
     showDuelResult(d, r, iWon);
@@ -103,7 +113,7 @@ function showDuelResult(d, r, iWon) {
         dice[1].textContent = DICE_FACES[theirRoll - 1];
         const v = box.querySelector('.duel-verdict');
         v.className = `duel-verdict text-sm font-black ${iWon ? 'text-amber-500' : 'text-rose-500'}`;
-        v.textContent = iWon ? `🏆 승리! +${(d.bet * 2).toLocaleString()}P` : `😭 패배... -${d.bet.toLocaleString()}P`;
+        v.textContent = iWon ? `🏆 승리! +${d.bet.toLocaleString()}P (건 판돈 포함 ${(d.bet * 2).toLocaleString()}P 받음)` : `😭 패배... -${d.bet.toLocaleString()}P`;
         if (iWon && window.confetti) confetti({ particleCount: 120 });
       }
     }, 70);
@@ -113,7 +123,7 @@ function showDuelResult(d, r, iWon) {
     const el = document.createElement('div');
     el.className = `feed-toast ${iWon ? 'feed-toast-big' : 'feed-toast-lose'}`;
     el.innerHTML = `<div class="text-[10px] font-black opacity-80">⚔️ 결투 결과 · vs ${esc(opp)}</div>
-      <div class="text-sm font-black">${DICE_FACES[myRoll - 1]} vs ${DICE_FACES[theirRoll - 1]} — ${iWon ? `승리! +${(d.bet * 2).toLocaleString()}P` : `패배 -${d.bet.toLocaleString()}P`}</div>`;
+      <div class="text-sm font-black">${DICE_FACES[myRoll - 1]} vs ${DICE_FACES[theirRoll - 1]} — ${iWon ? `승리! +${d.bet.toLocaleString()}P` : `패배 -${d.bet.toLocaleString()}P`}</div>`;
     tbox.appendChild(el);
     setTimeout(() => el.classList.add('feed-toast-out'), 5000);
     setTimeout(() => el.remove(), 5700);
@@ -149,7 +159,8 @@ async function acceptDuel(id) {
   const d = allDuels[id];
   if (!d || d.status !== 'open') return alert('이미 끝난 결투예요.');
   if (userPoints < d.bet) return alert(`❌ 판돈 ${d.bet.toLocaleString()}P가 부족해요!`);
-  if (!confirm(`${d.from}님의 결투를 받을까요?\n판돈 ${d.bet.toLocaleString()}P (이기면 ${(d.bet * 2).toLocaleString()}P)`)) return;
+  if (!confirm(`${d.from}님의 결투를 받을까요?\n판돈 ${d.bet.toLocaleString()}P (이기면 +${d.bet.toLocaleString()}P, 지면 -${d.bet.toLocaleString()}P)`)) return;
+  acceptingDuels[id] = true;
   try {
     await db.ref(`duels/${id}`).update({
       status: 'accepted', acceptor: currentUser.nickname, acceptorUid: authUser.uid,
@@ -159,6 +170,9 @@ async function acceptDuel(id) {
     updatePointsUI();
   } catch (err) {
     alert('한 발 늦었어요! 다른 사람이 먼저 결투를 받았어요.');
+  } finally {
+    // 서버가 확정한 시각을 받은 뒤에 결과 계산
+    setTimeout(() => { delete acceptingDuels[id]; settleMyDuels(); renderDuelArena(); }, 1500);
   }
 }
 
@@ -204,7 +218,7 @@ function renderDuelArena() {
           <div class="p-2.5 rounded-xl border ${mine ? 'bg-slate-50 border-slate-200' : 'bg-rose-50/60 border-rose-200'} flex items-center justify-between gap-2">
             <div class="min-w-0 text-left">
               <div class="text-xs font-black text-slate-800 truncate">⚔️ ${esc(d.from)} ${d.to ? `→ ${esc(d.to)}` : '→ 누구나'}</div>
-              <div class="text-[10px] text-slate-500">판돈 <strong class="text-rose-600">${d.bet.toLocaleString()}P</strong> · 승자 ${(d.bet * 2).toLocaleString()}P · ${mins}분 남음</div>
+              <div class="text-[10px] text-slate-500">판돈 <strong class="text-rose-600">${d.bet.toLocaleString()}P</strong> · 이기면 +${d.bet.toLocaleString()}P · ${mins}분 남음</div>
             </div>
             ${mine ? `<button onclick="cancelDuel(${jsArg(id)})" class="shrink-0 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-2.5 py-1.5 rounded-lg text-[11px]">취소</button>`
               : forOther ? '<span class="shrink-0 text-[10px] font-bold text-slate-400">지정 결투</span>'
@@ -214,12 +228,12 @@ function renderDuelArena() {
 
   const hist = document.getElementById('duelHistoryList');
   if (hist && authUser) {
-    const done = Object.entries(allDuels).filter(([, d]) => d && d.status === 'accepted' && isMyDuel(d)).sort((a, b) => (b[1].acceptedAt || 0) - (a[1].acceptedAt || 0)).slice(0, 5);
+    const done = Object.entries(allDuels).filter(([id, d]) => isMyDuel(d) && isDuelConfirmed(id, d)).sort((a, b) => (b[1].acceptedAt || 0) - (a[1].acceptedAt || 0)).slice(0, 5);
     Promise.all(done.map(async ([id, d]) => {
       const r = await duelResult(d, id);
       const iAmFrom = d.fromUid === authUser.uid;
       const won = (r.winner === 'from') === iAmFrom;
-      return `<div class="flex items-center justify-between text-[11px] px-1"><span class="truncate">vs ${esc(iAmFrom ? d.acceptor : d.from)} ${DICE_FACES[(iAmFrom ? r.fromRoll : r.accRoll) - 1]}:${DICE_FACES[(iAmFrom ? r.accRoll : r.fromRoll) - 1]}</span><span class="font-black ${won ? 'text-amber-600' : 'text-rose-500'}">${won ? '+' + (d.bet * 2).toLocaleString() : '-' + d.bet.toLocaleString()}P</span></div>`;
+      return `<div class="flex items-center justify-between text-[11px] px-1"><span class="truncate">vs ${esc(iAmFrom ? d.acceptor : d.from)} ${DICE_FACES[(iAmFrom ? r.fromRoll : r.accRoll) - 1]}:${DICE_FACES[(iAmFrom ? r.accRoll : r.fromRoll) - 1]}</span><span class="font-black ${won ? 'text-amber-600' : 'text-rose-500'}">${won ? '+' : '-'}${d.bet.toLocaleString()}P</span></div>`;
     })).then(rows => { hist.innerHTML = rows.join('') || '<div class="text-center text-slate-300 text-[11px] py-1">아직 결투 기록이 없어요</div>'; });
   }
 
