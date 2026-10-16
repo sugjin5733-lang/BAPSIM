@@ -331,14 +331,14 @@ function playCoinFlip(userChoice) {
   setTimeout(() => {
     const isFront = Math.random() < 0.5;
     const outcome = isFront ? 'front' : 'back';
-    coinEl.textContent = isFront ? "🪙" : "🔘";
+    coinEl.textContent = isFront ? "🌕" : "🌑";
 
     if (userChoice === outcome) {
       const reward = bet * 2;
       userPoints += reward;
       updatePointsUI();
       maybeDropCard('동전던지기', 6);
-      if (bet >= 5000) postFeed('coin', `🪙 동전던지기 ${bet.toLocaleString()}P 올인 성공! +${reward.toLocaleString()}P`, 'big');
+      if (bet >= 5000) postFeed('coin', `💰 동전던지기 ${bet.toLocaleString()}P 올인 성공! +${reward.toLocaleString()}P`, 'big');
       if (window.confetti) confetti({ particleCount: 60 });
       resultEl.innerHTML = `<span class="text-amber-500 font-black">🎉 예측 적중! (${isFront ? '앞면' : '뒷면'}) +${reward.toLocaleString()}P 획득!</span>`;
     } else {

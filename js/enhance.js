@@ -20,7 +20,7 @@ const BOWL_EVOLUTION = [
   { level: 13, icon: "🍖", name: "육즙 가득 대왕 규동 덮밥" },
   { level: 14, icon: "🦞", name: "황금 랍스터 해물 리조또" },
   { level: 15, icon: "🥟", name: "천하일미 만한전석 볶음밥" },
-  { level: 16, icon: "🪨", name: "천년 묵은 태고의 돌솥 누룽지" },
+  { level: 16, icon: "🥘", name: "천년 묵은 태고의 돌솥 누룽지" },
   { level: 17, icon: "🌀", name: "우주 기운을 품은 오로라 밥" },
   { level: 18, icon: "✨", name: "차원을 초월한 다이아몬드 신선밥" },
   { level: 19, icon: "🪐", name: "무한 에너지를 머금은 성운의 밥" },

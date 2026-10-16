@@ -140,7 +140,7 @@
         </button>
 
         <button onclick="openShopModal()" class="flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200/80 px-2.5 py-1.5 rounded-xl text-xs font-black text-amber-700 transition-colors">
-          <span>🪙</span>
+          <span>💰</span>
           <span id="headerPointDisplay">0P</span>
         </button>
 
@@ -607,13 +607,13 @@
           <span>🎰</span><span>슬롯머신</span>
         </button>
         <button onclick="switchGameTab('coin')" id="tabBtn_coin" class="py-2.5 px-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-white/50 flex items-center justify-center gap-1.5 transition-all">
-          <span>🪙</span><span>동전던지기</span>
-        </button>
-        <button onclick="switchGameTab('duel')" id="tabBtn_duel" class="col-span-3 py-2.5 px-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-white/50 flex items-center justify-center gap-1.5 transition-all">
-          <span>⚔️</span><span>1:1 주사위 결투</span><span id="duelOpenBadge" class="hidden bg-rose-500 text-white text-[10px] font-black rounded-full px-1.5">0</span>
+          <span>💰</span><span>동전던지기</span>
         </button>
         <button onclick="switchGameTab('dice')" id="tabBtn_dice" class="py-2.5 px-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-white/50 flex items-center justify-center gap-1.5 transition-all">
           <span>🎲</span><span>주사위홀짝</span>
+        </button>
+        <button onclick="switchGameTab('duel')" id="tabBtn_duel" class="col-span-3 py-2.5 px-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-white/50 flex items-center justify-center gap-1.5 transition-all">
+          <span>⚔️</span><span>1:1 주사위 결투</span><span id="duelOpenBadge" class="hidden bg-rose-500 text-white text-[10px] font-black rounded-full px-1.5">0</span>
         </button>
       </div>
 
@@ -716,7 +716,7 @@
           <span class="text-xs font-bold text-slate-500">P</span>
         </div>
         <div class="py-6 bg-slate-900 rounded-2xl border-2 border-amber-500 flex items-center justify-center text-5xl shadow-inner">
-          <span id="coinDisplay" class="animate-pulse">🪙</span>
+          <span id="coinDisplay" class="animate-pulse">🌕</span>
         </div>
         <div id="coinResultText" class="text-xs font-bold text-slate-500 h-5">앞면 또는 뒷면을 선택하세요!</div>
         <div class="grid grid-cols-2 gap-3">
@@ -812,7 +812,7 @@
       <!-- 랭킹 탭 전환 -->
       <div class="bg-slate-100 p-1 rounded-2xl grid grid-cols-3 gap-1 text-xs font-bold">
         <button id="rankTab_points" onclick="switchRankTab('points')" class="py-2 rounded-xl bg-white shadow-xs text-slate-900 font-black">
-          🪙 포인트 부자
+          💰 포인트 부자
         </button>
         <button id="rankTab_enhance" onclick="switchRankTab('enhance')" class="py-2 rounded-xl text-slate-500 hover:text-slate-900 font-bold">
           🍚 강화 랭킹
@@ -848,7 +848,7 @@
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
         <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-lg">🪙</div>
+          <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-lg">💰</div>
           <div>
             <h3 class="font-black text-slate-900 text-base">밥심 명품 상점 & 인벤토리</h3>
             <p class="text-[11px] text-slate-400">내 보유: <strong id="shopCurrentPoints" class="text-amber-600">0P</strong> | 밥 등급: <strong id="shopCurrentEnhanceLvl" class="text-orange-600">+0강</strong></p>
