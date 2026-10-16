@@ -9,6 +9,7 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Black+Han+Sans&family=Rubik+Glitch&family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
@@ -1250,6 +1251,42 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // ==========================================
+    // 보안/안정성 헬퍼
+    // ==========================================
+    // HTML 특수문자 이스케이프 (채팅/닉네임/식당명 등에 HTML·스크립트 삽입 차단)
+    function esc(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    // onclick="fn(${jsArg(x)})" 형태로 안전하게 문자열 인자 전달
+    function jsArg(s) { return esc(JSON.stringify(String(s == null ? '' : s))); }
+    // 색상은 #hex 만 허용
+    function safeColor(c) { return /^#[0-9a-fA-F]{3,8}$/.test(c || '') ? c : ''; }
+    // CSS 클래스명은 영문/숫자/-/_ 만 허용
+    function safeClass(c) { return /^[a-zA-Z0-9_-]+$/.test(c || '') ? c : 'nb-none'; }
+    // URL 은 http(s) 만 허용
+    function safeUrl(u) { return /^https?:\/\//i.test(u || '') ? u : ''; }
+    // 배열/문자열 어느 쪽이 와도 배열로 정규화 (시트에서 "A, B" 문자열로 오는 경우 대비)
+    function toArr(v) {
+      if (Array.isArray(v)) return v.map(String);
+      if (v && typeof v === 'object') return Object.values(v).map(String);
+      if (v == null || v === '') return [];
+      return String(v).split(',').map(s => s.trim()).filter(Boolean);
+    }
+    // 닉네임 + 배지/색/칭호 렌더링 공통 함수
+    function nickHTML(u, extraClass = '') {
+      const sym = u.symbol ? esc(u.symbol) : '';
+      const color = safeColor(u.color);
+      return `<span class="${safeClass(u.badge || u.bg)} ${extraClass} inline-block" style="${color ? `color:${color} !important;` : ''}">${sym ? sym + ' ' : ''}${esc(u.nickname)}${sym ? ' ' + sym : ''}</span>`;
+    }
+    // 비밀번호 해시 (DB에 평문 저장 방지)
+    async function sha256(text) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('bapsim:' + text));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
     // 상태 관리
     let restaurants = {};
     let allGroups = {};
@@ -1655,11 +1692,6 @@
       const msgEl = document.createElement('div');
       msgEl.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'} space-y-1 mb-2.5`;
 
-      const sym = msg.symbol ? `${msg.symbol} ` : '';
-      const symEnd = msg.symbol ? ` ${msg.symbol}` : '';
-      const colorStyle = msg.color ? `color: ${msg.color} !important;` : '';
-      const bgClass = msg.bg || 'nb-none';
-
       let bodyContent = '';
       if (msg.sticker) {
         let label = "스티커";
@@ -1670,18 +1702,19 @@
         else if (msg.sticker === 'sticker_admin_ok') label = "🛡️ 관리자 승인 🛡️";
         else if (msg.sticker === 'sticker_admin_warn') label = "⚠️ 운영 경고 ⚠️";
 
-        bodyContent = `<div class="${msg.sticker} my-1">${label}</div>`;
+        bodyContent = `<div class="${safeClass(msg.sticker)} my-1">${esc(label)}</div>`;
       } else if (msg.type === 'system') {
-        bodyContent = `<div class="bg-amber-100 text-amber-900 border border-amber-200 px-3 py-1.5 rounded-xl font-bold text-[11px]">${msg.text}</div>`;
+        bodyContent = `<div class="bg-amber-100 text-amber-900 border border-amber-200 px-3 py-1.5 rounded-xl font-bold text-[11px]">${esc(msg.text)}</div>`;
       } else {
         bodyContent = `<div class="p-2.5 rounded-2xl max-w-[80%] leading-relaxed ${isMe ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none shadow-xs'}">
-          ${msg.text}
+          ${esc(msg.text)}
         </div>`;
       }
 
+      const nickPart = msg.type === 'system' ? '' : nickHTML(msg);
       msgEl.innerHTML = `
         <div class="flex items-center gap-1.5 text-[10px] text-slate-400">
-          <span class="${bgClass}" style="${colorStyle}">${sym}${msg.nickname}${symEnd}</span>
+          ${nickPart}
         </div>
         ${bodyContent}
       `;
@@ -2509,16 +2542,9 @@
         userList.forEach(u => {
           const item = document.createElement('div');
           item.className = "flex items-center gap-1.5 p-1.5 rounded-xl bg-slate-50 border border-slate-100";
-          const sym = u.symbol ? `${u.symbol} ` : '';
-          const symEnd = u.symbol ? ` ${u.symbol}` : '';
-          const colorStyle = u.color ? `color: ${u.color} !important;` : '';
-          const badgeClass = u.badge || 'nb-none';
-
           item.innerHTML = `
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
-            <span class="${badgeClass} text-[11px] truncate inline-block" style="${colorStyle}">
-              ${sym}${u.nickname}${symEnd}
-            </span>
+            ${nickHTML(u, 'text-[11px] truncate')}
           `;
           container.appendChild(item);
         });
@@ -2578,7 +2604,7 @@
           for (const key of Object.keys(sheetData)) {
             const rest = sheetData[key];
 
-            let cleanDate = rest.menuDate || "";
+            let cleanDate = rest.menuDate == null ? "" : String(rest.menuDate);
             if (cleanDate.includes("GMT") || cleanDate.length > 12) {
               const dObj = new Date(cleanDate);
               if (!isNaN(dObj.getTime())) {
@@ -2659,8 +2685,12 @@
     }
     function closeAdminAuthModal() { document.getElementById('adminAuthModal').classList.add('hidden'); }
 
-    function checkAdminPassword() {
-      if (document.getElementById('adminPassInput').value.trim() === '09010') {
+    // 관리자 비밀번호는 소스에 평문으로 두지 않고 해시로만 보관합니다.
+    // 비밀번호를 바꾸려면: 브라우저 콘솔에서 sha256('새비밀번호').then(console.log) 실행 후 나온 값을 아래에 붙여넣기
+    const ADMIN_PASS_HASH = '94aab701b8439ab72db15e01a954856850028c741b4a70874952bf3f9edfa0d7';
+    async function checkAdminPassword() {
+      const h = await sha256(document.getElementById('adminPassInput').value.trim());
+      if (h === ADMIN_PASS_HASH) {
         closeAdminAuthModal();
         openAdminDashboard();
       } else {
@@ -2670,6 +2700,8 @@
 
     function openAdminDashboard() {
       document.getElementById('adminDashboardModal').classList.remove('hidden');
+      if (window.__adminListenersAttached) return; // 열 때마다 리스너가 중복 등록되던 문제 방지
+      window.__adminListenersAttached = true;
       loadPendingPointRequests();
       renderAdminUserList();
       renderAdminGroupList();
@@ -2697,14 +2729,14 @@
           item.className = "p-2.5 bg-white border rounded-xl flex items-center justify-between";
           item.innerHTML = `
             <div class="min-w-0 pr-2">
-              <span class="font-bold text-slate-900 truncate block">${u.nickname}</span>
+              <span class="font-bold text-slate-900 truncate block">${esc(u.nickname)}</span>
               <span class="text-[10px] text-slate-400">가입신청: ${new Date(u.createdAt || Date.now()).toLocaleDateString()}</span>
             </div>
             <div class="flex items-center gap-1.5 shrink-0">
-              <button onclick="adminApproveUser('${u.nickname}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-1 rounded-lg text-[11px] shadow-xs">
+              <button onclick="adminApproveUser(${jsArg(u.nickname)})" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-1 rounded-lg text-[11px] shadow-xs">
                 승인
               </button>
-              <button onclick="adminRejectUser('${u.nickname}')" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-2.5 py-1 rounded-lg text-[11px]">
+              <button onclick="adminRejectUser(${jsArg(u.nickname)})" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-2.5 py-1 rounded-lg text-[11px]">
                 거절
               </button>
             </div>
@@ -2752,7 +2784,7 @@
           const eLvl = u.enhanceLevel || 0;
           item.innerHTML = `
             <div class="flex items-center gap-1.5 min-w-0">
-              <span class="font-bold text-slate-800 truncate">${u.nickname}</span>
+              <span class="font-bold text-slate-800 truncate">${esc(u.nickname)}</span>
               <span class="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.2 rounded font-black shrink-0">
                 ${(u.points || 0).toLocaleString()}P
               </span>
@@ -2761,16 +2793,16 @@
               </span>
             </div>
             <div class="flex items-center gap-1 shrink-0">
-              <button onclick="adminManageUserItems('${u.nickname}')" class="bg-amber-50 text-amber-800 font-bold px-2 py-1 rounded-lg text-[10px]">
+              <button onclick="adminManageUserItems(${jsArg(u.nickname)})" class="bg-amber-50 text-amber-800 font-bold px-2 py-1 rounded-lg text-[10px]">
                 아이템
               </button>
-              <button onclick="adminQuickSetPoint('${u.nickname}')" class="bg-indigo-50 text-indigo-700 font-bold px-2 py-1 rounded-lg text-[10px]">
+              <button onclick="adminQuickSetPoint(${jsArg(u.nickname)})" class="bg-indigo-50 text-indigo-700 font-bold px-2 py-1 rounded-lg text-[10px]">
                 포인트
               </button>
-              <button onclick="adminDeleteUser('${u.nickname}')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-2 py-1 rounded-lg text-[10px]">
+              <button onclick="adminDeleteUser(${jsArg(u.nickname)})" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-2 py-1 rounded-lg text-[10px]">
                 삭제
               </button>
-              <button onclick="adminBanUser('${u.nickname}')" class="bg-rose-500 hover:bg-rose-600 text-white font-bold px-2 py-1 rounded-lg text-[10px]">
+              <button onclick="adminBanUser(${jsArg(u.nickname)})" class="bg-rose-500 hover:bg-rose-600 text-white font-bold px-2 py-1 rounded-lg text-[10px]">
                 차단
               </button>
             </div>
@@ -2944,10 +2976,10 @@
           item.className = "p-2 bg-white border rounded-xl flex items-center justify-between";
           item.innerHTML = `
             <div class="min-w-0 pr-2">
-              <span class="font-bold text-slate-800 truncate block">${g.name}</span>
-              <span class="text-[10px] text-slate-400">방장: ${g.leader} | 암호: ${g.password || '-'}</span>
+              <span class="font-bold text-slate-800 truncate block">${esc(g.name)}</span>
+              <span class="text-[10px] text-slate-400">방장: ${esc(g.leader)}</span>
             </div>
-            <button onclick="adminDeleteGroup('${g.id}', '${g.name}')" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-2 py-1 rounded-lg text-[10px] shrink-0">
+            <button onclick="adminDeleteGroup(${jsArg(g.id)}, ${jsArg(g.name)})" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-2 py-1 rounded-lg text-[10px] shrink-0">
               삭제
             </button>
           `;
@@ -2984,12 +3016,12 @@
           item.className = "p-3 bg-slate-50 border rounded-2xl flex items-center justify-between text-xs";
           item.innerHTML = `
             <div>
-              <div class="font-bold text-slate-800">[${req.restaurantName}] 식단 등록</div>
-              <div class="text-[10px] text-slate-500">신청자: ${req.nickname} · ${req.date}</div>
+              <div class="font-bold text-slate-800">[${esc(req.restaurantName)}] 식단 등록</div>
+              <div class="text-[10px] text-slate-500">신청자: ${esc(req.nickname)} · ${esc(req.date)}</div>
             </div>
             <div class="flex items-center gap-1.5">
-              <button onclick="approvePointRequest('${reqId}', '${req.nickname}', ${req.amount || 50})" class="bg-emerald-600 text-white font-bold px-2.5 py-1.5 rounded-xl text-[11px]">승인 (+${req.amount || 50}P)</button>
-              <button onclick="rejectPointRequest('${reqId}')" class="bg-rose-100 text-rose-700 font-bold px-2.5 py-1.5 rounded-xl text-[11px]">반려</button>
+              <button onclick="approvePointRequest(${jsArg(reqId)}, ${jsArg(req.nickname)}, ${Number(req.amount) || 50})" class="bg-emerald-600 text-white font-bold px-2.5 py-1.5 rounded-xl text-[11px]">승인 (+${Number(req.amount) || 50}P)</button>
+              <button onclick="rejectPointRequest(${jsArg(reqId)})" class="bg-rose-100 text-rose-700 font-bold px-2.5 py-1.5 rounded-xl text-[11px]">반려</button>
             </div>
           `;
           container.appendChild(item);
@@ -3081,9 +3113,7 @@
               item.innerHTML = `
                 <div class="flex items-center gap-1.5 min-w-0">
                   <span class="font-black text-xs shrink-0">${medal}</span>
-                  <span class="${badgeClass} text-xs inline-block truncate" style="${colorStyle}">
-                    ${sym}${user.nickname}${symEnd}
-                  </span>
+                  ${nickHTML(user, 'text-xs truncate')}
                 </div>
                 <span class="font-bold text-amber-700 bg-white border border-amber-100 px-2 py-0.5 rounded-md text-[11px] shrink-0">
                   ${(user.points || 0).toLocaleString()}P
@@ -3133,9 +3163,7 @@
               item.innerHTML = `
                 <div class="flex items-center gap-1.5 min-w-0">
                   <span class="font-black text-xs shrink-0">${medal}</span>
-                  <span class="${badgeClass} text-xs inline-block truncate" style="${colorStyle}">
-                    ${sym}${user.nickname}${symEnd}
-                  </span>
+                  ${nickHTML(user, 'text-xs truncate')}
                 </div>
                 <span class="font-black text-orange-600 bg-white border border-orange-100 px-2 py-0.5 rounded-md text-[11px] shrink-0">
                   ${bObj?.icon || '🍚'} +${eLvl}강
@@ -3174,9 +3202,7 @@
               item.innerHTML = `
                 <div class="flex items-center gap-2">
                   <span class="font-black text-xs ${index === 0 ? 'text-amber-600 text-sm' : 'text-slate-600'}">${rankBadge}</span>
-                  <span class="${badgeClass} text-xs inline-block" style="${colorStyle}">
-                    ${sym}${user.nickname}${symEnd}
-                  </span>
+                  ${nickHTML(user, 'text-xs')}
                 </div>
                 <span class="font-extrabold text-amber-700 bg-white border border-amber-100 px-2.5 py-0.5 rounded-xl shadow-xs">
                   ${(user.points || 0).toLocaleString()}P
@@ -3206,9 +3232,7 @@
               item.innerHTML = `
                 <div class="flex items-center gap-2">
                   <span class="font-black text-xs ${index === 0 ? 'text-orange-600 text-sm' : 'text-slate-600'}">${rankBadge}</span>
-                  <span class="${badgeClass} text-xs inline-block" style="${colorStyle}">
-                    ${sym}${user.nickname}${symEnd}
-                  </span>
+                  ${nickHTML(user, 'text-xs')}
                 </div>
                 <div class="text-right">
                   <span class="font-black text-orange-600 bg-white border border-orange-200 px-2.5 py-0.5 rounded-xl shadow-xs text-xs">
@@ -3248,16 +3272,23 @@
         });
       }
 
-      list.forEach(r => {
+      list.forEach(rRaw => {
+        // 데이터 형식이 섞여 들어와도(숫자 가격, 문자열 메뉴 등) 화면이 통째로 멈추지 않도록 정규화
+        const r = Object.assign({}, rRaw, {
+          id: String(rRaw.id || ''),
+          name: String(rRaw.name || '이름없음'),
+          menuDate: rRaw.menuDate == null ? '' : String(rRaw.menuDate),
+          mains: toArr(rRaw.mains)
+        });
         const votesCount = groupVotesData[r.id] || 0;
         const isVoted = (myVotedId === r.id);
         const isTop = (topId === r.id);
         const percent = totalVotes > 0 ? Math.round((votesCount / totalVotes) * 100) : 0;
         
         const dateInfo = formatPrettyDate(r.menuDate);
-        const mapUrl = r.mapUrl || `https://map.naver.com/p/search/${encodeURIComponent('문정동 ' + r.name)}`;
+        const mapUrl = safeUrl(r.mapUrl) || `https://map.naver.com/p/search/${encodeURIComponent('문정동 ' + r.name)}`;
 
-        let displayPrice = r.price || "가격미정";
+        let displayPrice = String(r.price || "가격미정");
         if (!displayPrice.includes("원") && !displayPrice.includes("₩") && !isNaN(parseInt(displayPrice, 10))) {
           displayPrice = parseInt(displayPrice, 10).toLocaleString() + "원";
         }
@@ -3272,7 +3303,7 @@
         if (isLobby) {
           bottomActionHTML = `
             <div class="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
-              <button onclick="openEditModal('${r.id}')" class="text-[11px] text-slate-400 hover:text-orange-500 font-semibold flex items-center gap-1">
+              <button onclick="openEditModal(${jsArg(r.id)})" class="text-[11px] text-slate-400 hover:text-orange-500 font-semibold flex items-center gap-1">
                 <i data-lucide="settings-2" class="w-3.5 h-3.5"></i>
                 정보 수정
               </button>
@@ -3287,7 +3318,7 @@
             <div class="mt-5 pt-4 border-t border-slate-100">
               <div class="flex items-center justify-between text-xs font-bold mb-1.5">
                 <span class="text-slate-500">${votesCount}표 (${percent}%)</span>
-                <button onclick="openEditModal('${r.id}')" class="text-[11px] text-slate-400 hover:text-orange-500 font-semibold flex items-center gap-1">
+                <button onclick="openEditModal(${jsArg(r.id)})" class="text-[11px] text-slate-400 hover:text-orange-500 font-semibold flex items-center gap-1">
                   <i data-lucide="settings-2" class="w-3.5 h-3.5"></i>
                   수정
                 </button>
@@ -3295,7 +3326,7 @@
               <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-3">
                 <div class="bg-gradient-to-r from-orange-500 to-amber-500 h-full rounded-full transition-all duration-500" style="width: ${percent}%"></div>
               </div>
-              <button onclick="castVote('${r.id}')" class="w-full py-2.5 rounded-2xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 ${isVoted ? 'bg-orange-500 text-white shadow-md hover:bg-orange-600' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">
+              <button onclick="castVote(${jsArg(r.id)})" class="w-full py-2.5 rounded-2xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 ${isVoted ? 'bg-orange-500 text-white shadow-md hover:bg-orange-600' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">
                 <i data-lucide="${isVoted ? 'check' : 'thumbs-up'}" class="w-3.5 h-3.5"></i>
                 <span>${isVoted ? '투표 완료됨 (다시 눌러 취소)' : '여기로 투표'}</span>
               </button>
@@ -3332,7 +3363,7 @@
               <div class="flex flex-wrap gap-1.5">
                 ${(r.mains || []).map(m => `
                   <span class="bg-gradient-to-r from-slate-50 to-slate-100 text-slate-800 border border-slate-200/90 px-2.5 py-1 rounded-xl text-xs font-bold shadow-2xs leading-snug">
-                    ${m}
+                    ${esc(m)}
                   </span>
                 `).join('')}
               </div>
@@ -3341,11 +3372,11 @@
             <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs">
               <div class="flex items-center">
                 <span class="shrink-0 text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 px-1.5 py-0.5 rounded-md mr-2">국/탕</span>
-                <span class="text-slate-700 font-medium truncate">${r.soup || '-'}</span>
+                <span class="text-slate-700 font-medium truncate">${esc(r.soup || '-')}</span>
               </div>
               <div class="flex items-center">
                 <span class="shrink-0 text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-md mr-2">서비스</span>
-                <span class="text-slate-600 font-medium truncate">${r.dessert || '-'}</span>
+                <span class="text-slate-600 font-medium truncate">${esc(r.dessert || '-')}</span>
               </div>
             </div>
           `;
@@ -3362,13 +3393,13 @@
                   </span>
                 </div>
                 <h4 class="font-black text-slate-900 text-lg tracking-tight flex items-center gap-1.5">
-                  <span class="truncate">${r.name}</span>
+                  <span class="truncate">${esc(r.name)}</span>
                   ${isTop ? '<span class="text-[10px] bg-amber-400 text-amber-950 font-black px-1.5 py-0.5 rounded-md shadow-xs shrink-0">👑 1위</span>' : ''}
                 </h4>
               </div>
               <div class="flex flex-col items-end gap-1 shrink-0">
-                <span class="text-xs font-black text-slate-800 bg-slate-100 px-2 py-1 rounded-xl border border-slate-200">${displayPrice}</span>
-                <a href="${mapUrl}" target="_blank" class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200 transition-colors">
+                <span class="text-xs font-black text-slate-800 bg-slate-100 px-2 py-1 rounded-xl border border-slate-200">${esc(displayPrice)}</span>
+                <a href="${esc(mapUrl)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200 transition-colors">
                   <span class="font-black">N</span> 지도
                 </a>
               </div>
@@ -3437,10 +3468,16 @@
       }
     }
 
-    function submitJoinGroup() {
+    async function submitJoinGroup() {
       const pass = document.getElementById('joinGroupPassInput').value.trim();
       const g = allGroups[targetJoinGroupId];
-      if (g && g.password === pass) {
+      const passHash = await sha256(pass);
+      // 신규 그룹은 해시(passwordHash), 기존 그룹은 평문(password) 둘 다 지원
+      const ok = g && ((g.passwordHash && g.passwordHash === passHash) || (!g.passwordHash && g.password === pass));
+      if (ok) {
+        // 기존 평문 비밀번호 그룹은 입장 성공 시 해시로 자동 전환
+        if (!g.passwordHash) db.ref(`groups/${g.id}`).update({ passwordHash: passHash, password: null });
+        document.getElementById('joinGroupPassInput').value = '';
         enterGroup(g.id, g.name);
         closeGroupJoinModal();
         closeGroupModal();
@@ -3453,13 +3490,14 @@
     function closeGroupModal() { document.getElementById('groupModal').classList.add('hidden'); }
     function closeGroupJoinModal() { document.getElementById('groupJoinModal').classList.add('hidden'); }
 
-    function handleCreateGroup(e) {
+    async function handleCreateGroup(e) {
       e.preventDefault();
       if (!checkApprovalGuard()) return;
       const groupName = document.getElementById('createGroupName').value.trim();
       const password = document.getElementById('createGroupPass').value.trim();
       const gid = 'grp_' + Date.now();
-      db.ref(`groups/${gid}`).set({ id: gid, name: groupName, password: password, leader: currentUser.nickname }, () => {
+      const passwordHash = await sha256(password);
+      db.ref(`groups/${gid}`).set({ id: gid, name: groupName, passwordHash: passwordHash, leader: currentUser.nickname }, () => {
         enterGroup(gid, groupName);
         closeGroupModal();
       });
@@ -3475,8 +3513,8 @@
         const item = document.createElement('div');
         item.className = "p-3 rounded-2xl border flex items-center justify-between text-xs";
         item.innerHTML = `
-          <div class="font-bold truncate max-w-[200px]">${g.name}</div>
-          <div>${isCurrent ? '<span class="text-indigo-600 font-bold">참여중</span>' : `<button onclick="promptJoinGroup('${g.id}')" class="bg-indigo-600 text-white px-2.5 py-1 rounded-lg font-bold">입장</button>`}</div>
+          <div class="font-bold truncate max-w-[200px]">${esc(g.name)}</div>
+          <div>${isCurrent ? '<span class="text-indigo-600 font-bold">참여중</span>' : `<button onclick="promptJoinGroup(${jsArg(g.id)})" class="bg-indigo-600 text-white px-2.5 py-1 rounded-lg font-bold">입장</button>`}</div>
         `;
         listEl.appendChild(item);
       });
@@ -3542,8 +3580,33 @@
       });
     }
 
-    db.ref('groups').on('value', snap => { allGroups = snap.val() || {}; renderGroupList(); });
-    db.ref('restaurants').on('value', snap => { restaurants = snap.val() || {}; renderCards(); });
+    function attachGlobalListeners() {
+      db.ref('groups').on('value', snap => { allGroups = snap.val() || {}; renderGroupList(); }, onDbError);
+      db.ref('restaurants').on('value', snap => { restaurants = snap.val() || {}; renderCards(); }, onDbError);
+    }
+
+    // DB 접근 실패 시 조용히 멈추지 않고 화면에 원인을 표시
+    let dbErrorShown = false;
+    function onDbError(err) {
+      console.error('Firebase DB 오류:', err);
+      if (dbErrorShown) return;
+      dbErrorShown = true;
+      showFatalBanner(
+        String(err && err.code || '').includes('PERMISSION_DENIED') || String(err && err.message || '').includes('permission')
+          ? '데이터베이스 접근이 거부되었습니다 (보안 규칙 확인 필요). 잠시 후 다시 시도해주세요.'
+          : '데이터베이스 연결에 문제가 발생했습니다: ' + (err && err.message || err)
+      );
+    }
+    function showFatalBanner(text) {
+      let el = document.getElementById('fatalErrorBanner');
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'fatalErrorBanner';
+        el.className = 'bg-rose-600 text-white px-4 py-2.5 text-center text-xs font-black sticky top-0 z-50 shadow-md';
+        document.body.prepend(el);
+      }
+      el.textContent = '⚠️ ' + text;
+    }
 
     let ladderData = { lines: 4, rungs: [], names: [], results: [] };
     function openLadderModal() {
@@ -3556,7 +3619,7 @@
     function closeLadderModal() { document.getElementById('ladderGameModal').classList.add('hidden'); }
 
     function autoFillLadderWithRestaurants() {
-      const restNames = Object.values(restaurants || {}).map(r => r.name).slice(0, 4);
+      const restNames = Object.values(restaurants || {}).map(r => String(r.name || '')).filter(Boolean).slice(0, 4);
       if (restNames.length >= 2) {
         document.getElementById('ladderInputNames').value = "나, 동료1, 동료2, 동료3".split(',').slice(0, restNames.length).join(', ');
         document.getElementById('ladderInputResults').value = restNames.join(', ');
@@ -3753,7 +3816,7 @@
       document.getElementById('formRestPrice').value = r.price || '';
       document.getElementById('formRestDate').value = r.menuDate || '';
       document.getElementById('formRestMapUrl').value = r.mapUrl || '';
-      document.getElementById('formRestMains').value = (r.mains || []).join(', ');
+      document.getElementById('formRestMains').value = toArr(r.mains).join(', ');
       document.getElementById('formRestSoup').value = r.soup || '';
       document.getElementById('formRestDessert').value = r.dessert || '';
 
@@ -3845,11 +3908,20 @@
         const existingData = snap.val();
 
         if (snap.exists()) {
-          if (existingData.password && existingData.password !== pass) {
+          const passHash = await sha256(pass);
+          const wrongPass = existingData.passwordHash
+            ? existingData.passwordHash !== passHash
+            : (existingData.password && String(existingData.password) !== pass);
+          if (wrongPass) {
             alert("❌ 비밀번호가 일치하지 않습니다. 해당 닉네임의 본인 비밀번호를 입력해주세요.");
             saveBtn.disabled = false;
             saveBtn.textContent = "가입 및 승인 요청";
             return;
+          }
+
+          // 기존 회원의 평문 비밀번호를 해시로 자동 전환 (평문은 DB에서 삭제)
+          if (!existingData.passwordHash) {
+            await db.ref(`user_points/${input}`).update({ passwordHash: passHash, password: null });
           }
 
           currentUser = { nickname: input };
@@ -3881,7 +3953,7 @@
 
         await db.ref(`user_points/${input}`).set({
           nickname: input,
-          password: pass,
+          passwordHash: await sha256(pass),
           points: 30,
           enhanceLevel: currentEnhanceLevel,
           badge: 'nb-none',
@@ -3911,7 +3983,7 @@
         initPresenceSystem();
         closeAuthModal();
 
-        alert(`🎉 [${input}] 님, 회원가입 신청이 성공적으로 접수되었습니다!\n\n설정하신 비밀번호(${pass})를 꼭 기억해주세요. 운영진 승인 후 모든 기능이 활성화됩니다.`);
+        alert(`🎉 [${input}] 님, 회원가입 신청이 성공적으로 접수되었습니다!\n\n설정하신 비밀번호를 꼭 기억해주세요. 운영진 승인 후 모든 기능이 활성화됩니다.`);
       } catch (err) {
         console.error("회원가입 에러:", err);
         alert("가입 처리 중 오류가 발생했습니다: " + err.message);
@@ -3956,18 +4028,39 @@
 
     setInterval(updateCountdown, 1000);
     updateCountdown();
-
-    initPresenceSystem();
-    initNoticeListener();
-    renderRankingsData();
-    attachUserPointListener();
-    updatePointsUI();
-    updateEnhanceUI();
-    updateGroupUI();
-    syncFromGoogleSheet(false);
-    setInterval(() => syncFromGoogleSheet(false), 1000 * 60 * 3);
-    setInterval(() => renderRankingsData(), 1000 * 10);
     lucide.createIcons();
+
+    // 화면은 먼저 그려두고, Firebase 익명 로그인이 끝난 뒤에 DB에 접근합니다.
+    // (보안 규칙이 "로그인한 사용자만 읽기/쓰기"로 바뀌었기 때문)
+    let appStarted = false;
+    function startApp() {
+      if (appStarted) return;
+      appStarted = true;
+      attachGlobalListeners();
+      initPresenceSystem();
+      initNoticeListener();
+      renderRankingsData();
+      attachUserPointListener();
+      updatePointsUI(false); // 시작 시 로컬 값으로 서버 포인트를 덮어쓰지 않도록 (서버 값을 받아옴)
+      updateEnhanceUI();
+      updateGroupUI();
+      syncFromGoogleSheet(false);
+      setInterval(() => syncFromGoogleSheet(false), 1000 * 60 * 3);
+      setInterval(() => renderRankingsData(), 1000 * 10);
+      lucide.createIcons();
+    }
+
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) startApp();
+    });
+    firebase.auth().signInAnonymously().catch(err => {
+      console.error('익명 로그인 실패:', err);
+      showFatalBanner(
+        err && err.code === 'auth/operation-not-allowed'
+          ? '서버 설정 오류: Firebase 콘솔에서 익명 로그인(Anonymous)을 사용 설정해야 합니다.'
+          : '서버 로그인에 실패했습니다: ' + (err && err.message || err)
+      );
+    });
   </script>
 </body>
 </html>

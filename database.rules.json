@@ -1,0 +1,31 @@
+{
+  "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null",
+
+    "user_points": {
+      "$nick": {
+        "points":       { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000000" },
+        "enhanceLevel": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 20" },
+        "password":     { ".validate": "false" }
+      }
+    },
+
+    "lobby_messages": {
+      "$msg": {
+        "text": { ".validate": "newData.isString() && newData.val().length <= 500" }
+      }
+    },
+
+    "groups": {
+      "$gid": {
+        "password": { ".validate": "false" },
+        "messages": {
+          "$msg": {
+            "text": { ".validate": "newData.isString() && newData.val().length <= 500" }
+          }
+        }
+      }
+    }
+  }
+}
