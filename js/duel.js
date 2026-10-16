@@ -28,6 +28,9 @@ function attachDuelListener() {
   }, onDbError);
 }
 
+// 정산 못 한 결투가 남아 있으면 1분마다 다시 시도
+setInterval(() => settleMyDuels(), 60000);
+
 async function duelResult(d, id) {
   const bytes = await seededBytes(`bapsim-duel:${id}:${d.acceptedAt}`);
   for (let i = 0; i + 1 < bytes.length; i += 2) {
@@ -53,10 +56,11 @@ async function settleMyDuels() {
     }
     if (d.status !== 'accepted' || !d.acceptedAt) continue;
 
-    duelSettling[id] = true;
     const r = await duelResult(d, id);
     const iAmFrom = d.fromUid === authUser.uid;
     const iWon = (r.winner === 'from') === iAmFrom;
+    if (iWon && !canGainPoints(d.bet * 2)) continue; // 예산이 차면 다음 확인 때 지급
+    duelSettling[id] = true;
     mySettledDuels[id] = true;
     const updates = { [`settledDuels/${id}`]: true };
     if (iWon) userPoints += d.bet * 2;

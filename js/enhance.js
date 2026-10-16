@@ -334,6 +334,7 @@ function sellEnhancedBowl() {
   if (currentEnhanceLevel <= 0) return alert("현재 +0단계 밥은 판매할 수 없습니다. 강화 후 판매하세요!");
 
   const reward = ENHANCE_PROBABILITIES[currentEnhanceLevel - 1].reward;
+  if (!canGainPoints(reward)) return alert('⏳ ' + budgetWaitText(reward));
   const currentName = BOWL_EVOLUTION[currentEnhanceLevel]?.name || '밥';
   if (!confirm(`+${currentEnhanceLevel}강 [${currentName}]을(를) 판매하고 ${reward.toLocaleString()}P를 획득하시겠습니까?\n판매 후 밥은 +0단계로 리셋됩니다.`)) return;
 

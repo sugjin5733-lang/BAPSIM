@@ -61,6 +61,7 @@ function openAdminDashboard() {
   if (window.__adminListenersAttached) return; // 열 때마다 리스너가 중복 등록되던 문제 방지
   window.__adminListenersAttached = true;
   migrateLegacyData();
+  renderAnomalyPanel();
   loadPendingPointRequests();
   renderAdminUserList();
   renderAdminGroupList();
@@ -486,4 +487,103 @@ function approvePointRequest(reqId, nickname, amount) {
 function rejectPointRequest(reqId) {
   db.ref(`point_requests/${reqId}/status`).set('rejected');
   alert('반려 완료');
+}
+
+// ==========================================
+// 🚨 이상 감지 (스크립트 조작 의심 회원 찾기)
+// - 관리자 대시보드를 열 때 하루 한 번 전체 회원 스냅샷 저장: admin_snapshots/{날짜}
+// - 직전 스냅샷 대비 증가량 + 보유 현황으로 의심 점수 계산
+// ==========================================
+const ANOMALY = {
+  gainSinceSnapshot: 150000, // 직전 스냅샷 이후 순증가
+  points: 1000000,
+  legendCards: 4,
+  totalCards: 150,
+  items: 30,
+  enhance: 18
+};
+
+function legendCount(u) {
+  return Object.entries((u && u.cards) || {}).reduce((a, [id, n]) => a + ((CARD_BY_ID[id] && CARD_BY_ID[id].r === 'L') ? (Number(n) || 0) : 0), 0);
+}
+function cardTotal(u) {
+  return Object.values((u && u.cards) || {}).reduce((a, n) => a + (Number(n) || 0), 0);
+}
+
+async function takeDailySnapshot(users) {
+  const today = todayKey();
+  const ref = db.ref(`admin_snapshots/${today}`);
+  if ((await ref.once('value')).exists()) return;
+  const snap = { at: firebase.database.ServerValue.TIMESTAMP, users: {} };
+  Object.values(users).forEach(u => {
+    if (!u || !u.nickname) return;
+    snap.users[u.nickname] = { points: u.points || 0, enhanceLevel: u.enhanceLevel || 0, cards: cardTotal(u), legend: legendCount(u) };
+  });
+  await ref.set(snap);
+}
+
+async function renderAnomalyPanel() {
+  const box = document.getElementById('adminAnomalyList');
+  if (!box) return;
+  box.innerHTML = '<div class="text-center text-slate-400 py-3">분석 중...</div>';
+  try {
+    const users = (await db.ref('user_points').once('value')).val() || {};
+    await takeDailySnapshot(users);
+    // 오늘 이전의 가장 최근 스냅샷과 비교
+    const snaps = (await db.ref('admin_snapshots').orderByKey().limitToLast(8).once('value')).val() || {};
+    const prevKey = Object.keys(snaps).filter(k => k < todayKey()).sort().pop();
+    const prev = prevKey ? (snaps[prevKey].users || {}) : {};
+    const baseLabel = prevKey ? `${prevKey} 대비` : '비교할 이전 기록 없음 (내일부터 증가량 비교)';
+
+    const rows = Object.values(users).filter(u => u && u.nickname).map(u => {
+      const flags = [];
+      let score = 0;
+      const p = prev[u.nickname];
+      const gain = p ? (u.points || 0) - p.points : null;
+      if (gain !== null && gain >= ANOMALY.gainSinceSnapshot) { flags.push(`📈 +${gain.toLocaleString()}P`); score += 3 + Math.floor(gain / ANOMALY.gainSinceSnapshot); }
+      if ((u.points || 0) >= ANOMALY.points) { flags.push(`💰 ${(u.points).toLocaleString()}P 보유`); score += 3; }
+      const lg = legendCount(u);
+      if (lg >= ANOMALY.legendCards) { flags.push(`🌟 전설 카드 ${lg}장`); score += 2 + (lg - ANOMALY.legendCards); }
+      const ct = cardTotal(u);
+      if (ct >= ANOMALY.totalCards) { flags.push(`🃏 카드 ${ct}장`); score += 1; }
+      const items = Object.values(u.items || {}).reduce((a, n) => a + (Number(n) || 0), 0);
+      if (items >= ANOMALY.items) { flags.push(`🛡️ 아이템 ${items}개`); score += 1; }
+      if ((u.enhanceLevel || 0) >= ANOMALY.enhance) { flags.push(`🍚 +${u.enhanceLevel}강`); score += 1; }
+      if (p && (u.enhanceLevel || 0) >= 15 && p.enhanceLevel <= 5) { flags.push(`⚡ 하루 만에 +${p.enhanceLevel}→+${u.enhanceLevel}강`); score += 2; }
+      if (typeof u.budget === 'number' && u.budget < 3000 && (u.points || 0) > 20000) { flags.push('⏳ 지금 포인트 한도까지 쓰는 중'); score += 1; }
+      return { u, flags, score, gain };
+    }).filter(r => r.score > 0).sort((a, b) => b.score - a.score);
+
+    const head = `<div class="text-[10px] text-slate-500 mb-1">${esc(baseLabel)} · 의심 점수 순</div>`;
+    box.innerHTML = head + (rows.length === 0
+      ? '<div class="text-center text-emerald-600 font-bold py-3">✅ 이상 징후가 있는 회원이 없어요</div>'
+      : rows.map(({ u, flags, score }) => `
+        <div class="p-2.5 bg-white border ${score >= 5 ? 'border-rose-300' : 'border-amber-200'} rounded-xl space-y-1.5">
+          <div class="flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <span class="font-black text-slate-900">${esc(u.nickname)}</span>
+              <span class="text-[10px] font-black ${score >= 5 ? 'text-rose-600' : 'text-amber-600'}">의심 ${score}</span>
+            </div>
+            <div class="flex gap-1 shrink-0">
+              <button onclick="adminQuickSetPoint(${jsArg(u.nickname)})" class="bg-indigo-50 text-indigo-700 font-bold px-2 py-1 rounded-lg text-[10px]">포인트</button>
+              <button onclick="adminConfiscateGameItems(${jsArg(u.nickname)})" class="bg-amber-50 text-amber-800 font-bold px-2 py-1 rounded-lg text-[10px]">카드·아이템 몰수</button>
+              <button onclick="adminBanUser(${jsArg(u.nickname)})" class="bg-rose-500 text-white font-bold px-2 py-1 rounded-lg text-[10px]">차단</button>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-1">${flags.map(f => `<span class="text-[10px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-bold">${esc(f)}</span>`).join('')}</div>
+        </div>`).join(''));
+  } catch (err) {
+    box.innerHTML = `<div class="text-rose-600 py-2">분석 실패: ${esc(err.message)}</div>`;
+  }
+}
+
+async function adminConfiscateGameItems(nick) {
+  if (!confirm(`[${nick}] 회원의 반찬 카드, 강화 아이템, 받은 세트 보상 기록을 모두 몰수할까요?\n(포인트는 [포인트] 버튼으로 따로 조정하세요)`)) return;
+  try {
+    await db.ref(`user_points/${nick}`).update({ cards: null, items: null, setsClaimed: null });
+    alert(`[${nick}] 카드·아이템 몰수 완료`);
+    renderAnomalyPanel();
+  } catch (err) {
+    alert('몰수 실패: ' + err.message);
+  }
 }

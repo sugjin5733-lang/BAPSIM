@@ -127,6 +127,7 @@ async function settleMyBets() {
       if (!result) continue;
       const bets = (await db.ref(`groups/${b.gid}/bets/${b.date}`).once('value')).val() || {};
       const pay = payoutFor(bets, result.winners || {})[currentUser.nickname] || 0;
+      if (pay > 0 && !canGainPoints(pay)) continue; // 예산이 차면 다음 확인 때 지급
       mySettledBets[key] = true;
       delete myPendingBets[key];
       await db.ref(`user_points/${currentUser.nickname}`).update({ [`settledBets/${key}`]: true, [`myBets/${key}`]: null });

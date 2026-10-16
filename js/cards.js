@@ -170,6 +170,7 @@ function claimSetReward(setId) {
   if (!checkApprovalGuard()) return;
   const set = CARD_SETS.find(s => s.id === setId);
   if (!set || mySetsClaimed[setId] || !setProgress(set).done) return;
+  if (!canGainPoints(set.points)) return alert('⏳ ' + budgetWaitText(set.points));
 
   userPoints += set.points;
   mySetsClaimed[setId] = true;
@@ -193,6 +194,7 @@ function dismantleDuplicates() {
     next[id] = Math.min(n, 1);
   });
   if (count === 0) return alert('분해할 중복 카드가 없어요. (각 카드 1장씩은 도감용으로 남겨둬요)');
+  if (!canGainPoints(gain)) return alert('⏳ ' + budgetWaitText(gain));
   if (!confirm(`중복 카드 ${count}장을 분해해서 ${gain.toLocaleString()}P로 바꿀까요?\n(각 카드 1장씩은 남아요)`)) return;
 
   const updates = {};

@@ -146,6 +146,9 @@ function resetToGuestState() {
   currentUser = { nickname: GUEST_NICK };
   isUserApproved = false;
   userPoints = 0;
+  serverPoints = 0;
+  myBudget = 0;
+  myBudgetAt = null;
   currentEnhanceLevel = 0;
   myNickBg = 'nb-none';
   myNickColor = '';
@@ -288,17 +291,74 @@ function updateAccountUI() {
 // ==========================================
 // 내 회원 정보 실시간 동기화
 // ==========================================
+// ==========================================
+// 포인트 순이익 예산 (스크립트로 포인트를 찍어내는 것 방지)
+//  - 예산은 초당 BUDGET_RATE 씩 차오르고 최대 BUDGET_CAP
+//  - 포인트가 순수하게 늘면 그만큼 예산이 줄고, 잃으면 다시 늘어남
+//  - 같은 계산을 Firebase 보안 규칙이 서버 시간으로 검사하므로 콘솔 조작으로 우회 불가
+// ==========================================
+const BUDGET_RATE = 20;        // 초당 P (시간당 72,000)
+const BUDGET_CAP = 300000;     // 최대 예산 (세트 완성 20만P 같은 큰 보상도 통과)
+const BUDGET_INIT = 50000;     // 처음 한 번 주어지는 예산
+let serverPoints = 0;          // 서버에 저장된 마지막 포인트
+let myBudget = 0, myBudgetAt = null;
+let serverTimeOffset = 0;
+db.ref('.info/serverTimeOffset').on('value', s => { serverTimeOffset = s.val() || 0; });
+
+function availableBudget() {
+  if (isAdmin) return Infinity; // 관리자는 규칙에서도 예외
+  if (myBudgetAt == null) return 0;
+  const estNow = Date.now() + serverTimeOffset - 2000; // 서버 시각보다 2초 보수적으로
+  return Math.min(BUDGET_CAP, (myBudget || 0) + BUDGET_RATE * Math.max(0, estNow - myBudgetAt) / 1000);
+}
+
+// 큰 보상을 주기 전에 확인 (세트 보상, 밥 판매, 정산 등)
+function canGainPoints(amount) {
+  return availableBudget() - (userPoints - serverPoints) >= amount;
+}
+function budgetWaitText(amount) {
+  const short = amount - (availableBudget() - (userPoints - serverPoints));
+  const mins = Math.max(1, Math.ceil(short / BUDGET_RATE / 60));
+  return `짧은 시간에 포인트를 너무 많이 얻어서 잠시 보류됐어요. 약 ${mins}분 뒤에 다시 받을 수 있어요.`;
+}
+
+async function initBudgetIfNeeded() {
+  if (myBudgetAt != null || !canSyncToCloud()) return;
+  try {
+    await db.ref(`user_points/${currentUser.nickname}`).update({
+      points: serverPoints, budget: BUDGET_INIT, budgetAt: firebase.database.ServerValue.TIMESTAMP
+    });
+  } catch (err) {
+    console.warn('예산 초기화 실패:', err && err.message);
+  }
+}
+
 function syncUserPointToCloud() {
   if (!canSyncToCloud()) return;
-  db.ref(`user_points/${currentUser.nickname}`).update({
-    points: userPoints,
+  const payload = {
     enhanceLevel: currentEnhanceLevel,
     badge: myNickBg,
     color: myNickColor,
     symbol: myNickSymbol,
     inventory: myInventory,
     updatedAt: Date.now()
-  }).catch(err => console.warn('포인트 저장 거부됨:', err && err.message));
+  };
+  if (userPoints !== serverPoints) {
+    if (myBudgetAt == null && !isAdmin) { initBudgetIfNeeded(); return; }
+    const newBudget = Math.min(BUDGET_CAP, availableBudget() - (userPoints - serverPoints));
+    if (newBudget < 0) {
+      // 한도 초과 → 서버 값으로 되돌림
+      alert('⏳ ' + budgetWaitText(userPoints - serverPoints));
+      userPoints = serverPoints;
+      updatePointsUI(false);
+      return;
+    }
+    payload.points = userPoints;
+    payload.budget = Math.floor(newBudget);
+    payload.budgetAt = firebase.database.ServerValue.TIMESTAMP;
+  }
+  db.ref(`user_points/${currentUser.nickname}`).update(payload)
+    .catch(err => console.warn('포인트 저장 거부됨:', err && err.message));
 }
 
 function attachUserPointListener() {
@@ -342,6 +402,9 @@ function attachUserPointListener() {
     }
 
     userPoints = typeof val.points === 'number' ? val.points : 0;
+    serverPoints = userPoints;
+    myBudget = typeof val.budget === 'number' ? val.budget : 0;
+    myBudgetAt = typeof val.budgetAt === 'number' ? val.budgetAt : null;
     currentEnhanceLevel = typeof val.enhanceLevel === 'number' ? val.enhanceLevel : 0;
     myNickBg = val.badge || 'nb-none';
     myNickColor = val.color || '';
@@ -354,6 +417,7 @@ function attachUserPointListener() {
     updateEnhanceUI();
     updateAccountUI();
     if (firstLoad) {
+      initBudgetIfNeeded();
       initPresenceSystem();
       renderRankingsData();
       syncFromGoogleSheet(false);

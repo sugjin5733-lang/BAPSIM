@@ -54,6 +54,7 @@ async function initSeason() {
     const myRank = ranked.findIndex(e => e.nickname === currentUser.nickname) + 1;
     const reward = SEASON_REWARDS.find(r => r.rank === myRank);
     if (!reward || ranked[myRank - 1].maxLevel <= 0) return;
+    if (!canGainPoints(reward.points)) return; // 예산이 찰 때 다음 접속에서 지급
 
     mySeasonClaims[lastWeek] = true;
     await db.ref(`user_points/${currentUser.nickname}/seasonClaims/${lastWeek}`).set(true);
