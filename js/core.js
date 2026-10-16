@@ -59,23 +59,19 @@ let restaurants = {};
 let allGroups = {};
 let currentGroupId = localStorage.getItem('bapsim_current_group_id') || 'lobby';
 let currentGroupName = localStorage.getItem('bapsim_current_group_name') || '전체 공개 로비';
-let currentUser = JSON.parse(localStorage.getItem('bapsim_user') || '{"nickname":"문정러"}');
+// 계정 관련 상태는 브라우저 저장소가 아니라 서버(user_points)에서만 받아옵니다.
+// (같은 PC를 여러 사람이 써도 이전 사용자의 포인트/아이템이 섞이지 않도록)
+const GUEST_NICK = "문정러";
+let currentUser = { nickname: GUEST_NICK };
 let myVotedId = localStorage.getItem(`bapsim_my_vote_${currentGroupId}`);
 let targetJoinGroupId = null;
 
-let userPoints = parseInt(localStorage.getItem('bapsim_points') || '30', 10);
-let myNickColor = localStorage.getItem('bapsim_custom_color') || '';
-let myNickBg = localStorage.getItem('bapsim_custom_bg') || 'nb-none';
-let myNickSymbol = localStorage.getItem('bapsim_custom_symbol') || '';
-let isUserApproved = (currentUser.nickname === "문정러");
-
-let rawInv = {};
-try { rawInv = JSON.parse(localStorage.getItem('bapsim_inventory') || '{}'); } catch(e) {}
-let myInventory = {
-  colors: Array.isArray(rawInv.colors) ? rawInv.colors : [],
-  bgs: Array.isArray(rawInv.bgs) ? rawInv.bgs : ['nb-none'],
-  symbols: Array.isArray(rawInv.symbols) ? rawInv.symbols : []
-};
+let userPoints = 0;
+let myNickColor = '';
+let myNickBg = 'nb-none';
+let myNickSymbol = '';
+let isUserApproved = false;
+let myInventory = { colors: [], bgs: ['nb-none'], symbols: [] };
 
 let isMenuExpanded = false;
 let groupVotesRef = null;
@@ -101,10 +97,6 @@ let isMemoryGameActive = false;
 const SLOT_ITEMS = ["🍚", "🍗", "🥩", "🍕", "🍜", "👑", "💎"];
 let isSlotSpinning = false;
 let diceExactBetTimestamps = [];
-
-function isValidNickname(nickname) {
-  return /^[가-힣a-zA-Z0-9]+$/.test(nickname);
-}
 
 function formatPrettyDate(dateRaw) {
   if (!dateRaw) return { text: "날짜미지정", isToday: false, iso: "" };

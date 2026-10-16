@@ -59,7 +59,7 @@ function getEnhanceCost(lvl) {
   return 1000;
 }
 
-let currentEnhanceLevel = parseInt(localStorage.getItem('bapsim_enhance_level') || '0', 10);
+let currentEnhanceLevel = 0; // 서버 값으로 채워짐
 let enhanceActionTimestamps = [];
 
 function openEnhanceModal() {
@@ -224,7 +224,7 @@ function sellEnhancedBowl() {
 }
 
 function syncEnhanceToCloud() {
-  if (!currentUser.nickname || currentUser.nickname === "문정러") return;
+  if (!canSyncToCloud()) return;
   db.ref(`user_points/${currentUser.nickname}`).update({
     enhanceLevel: currentEnhanceLevel,
     enhanceUpdated: Date.now()

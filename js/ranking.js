@@ -33,7 +33,7 @@ function switchRankTab(tab) {
 function renderRankingsData() {
   db.ref('user_points').once('value', (snap) => {
     const data = snap.val() || {};
-    const userList = Object.values(data).filter(u => u.status !== 'pending');
+    const userList = Object.values(data).filter(u => u && u.nickname && (u.status === 'approved' || u.approved === true));
 
     // 1) 사이드바 부자 랭킹 (TOP 5)
     const sortedPoints = [...userList].sort((a, b) => (b.points || 0) - (a.points || 0));

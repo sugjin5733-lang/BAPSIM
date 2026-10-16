@@ -28,6 +28,11 @@ async function syncFromGoogleSheet(isManual = false) {
     if (isManual) alert("Google Sheet API URL이 설정되지 않았습니다.");
     return;
   }
+  // 식단 저장은 승인된 회원만 가능 (보안 규칙). 둘러보기 중에는 건너뜀
+  if (!canSyncToCloud()) {
+    if (isManual) checkApprovalGuard();
+    return;
+  }
 
   const syncIcon = document.getElementById('sheetSyncIcon');
   if (syncIcon) syncIcon.classList.add('animate-spin');
@@ -261,6 +266,7 @@ function castVote(id) {
     localStorage.setItem(`bapsim_my_vote_${currentGroupId}`, id);
 
     db.ref(chatPath).push({
+      uid: authUser.uid,
       type: 'system',
       text: `🔔 ${currentUser.nickname}님이 [${restaurants[id]?.name || '식당'}]에 투표하셨습니다!`,
       timestamp: Date.now()
@@ -294,11 +300,9 @@ async function submitJoinGroup() {
   const pass = document.getElementById('joinGroupPassInput').value.trim();
   const g = allGroups[targetJoinGroupId];
   const passHash = await sha256(pass);
-  // 신규 그룹은 해시(passwordHash), 기존 그룹은 평문(password) 둘 다 지원
+  // 그룹 비밀번호는 해시로 비교 (예전 평문 비밀번호는 관리자 대시보드를 열 때 자동으로 해시 전환됨)
   const ok = g && ((g.passwordHash && g.passwordHash === passHash) || (!g.passwordHash && g.password === pass));
   if (ok) {
-    // 기존 평문 비밀번호 그룹은 입장 성공 시 해시로 자동 전환
-    if (!g.passwordHash) db.ref(`groups/${g.id}`).update({ passwordHash: passHash, password: null });
     document.getElementById('joinGroupPassInput').value = '';
     enterGroup(g.id, g.name);
     closeGroupJoinModal();
@@ -319,7 +323,8 @@ async function handleCreateGroup(e) {
   const password = document.getElementById('createGroupPass').value.trim();
   const gid = 'grp_' + Date.now();
   const passwordHash = await sha256(password);
-  db.ref(`groups/${gid}`).set({ id: gid, name: groupName, passwordHash: passwordHash, leader: currentUser.nickname }, () => {
+  db.ref(`groups/${gid}`).set({ id: gid, name: groupName, passwordHash: passwordHash, leader: currentUser.nickname, leaderUid: authUser.uid, createdAt: Date.now() }, (err) => {
+    if (err) return alert('그룹을 만들지 못했어요: ' + err.message);
     enterGroup(gid, groupName);
     closeGroupModal();
   });
@@ -465,8 +470,9 @@ function handleSaveRestaurant(e) {
   };
 
   db.ref(`restaurants/${id}`).set(restData, (err) => {
-    if (err) return alert('저장 오류');
+    if (err) return alert('저장 오류: ' + err.message);
     db.ref('point_requests').push({
+      uid: authUser.uid,
       nickname: currentUser.nickname,
       restaurantName: restData.name,
       date: restData.menuDate,

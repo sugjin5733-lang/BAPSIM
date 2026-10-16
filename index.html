@@ -18,7 +18,7 @@
   <!-- 승인 대기 안내 알림 바 -->
   <div id="pendingApprovalBanner" class="hidden bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-2.5 text-center text-xs font-black sticky top-0 z-50 shadow-md flex items-center justify-center gap-2">
     <i data-lucide="clock" class="w-4 h-4 animate-spin"></i>
-    <span>현재 <strong id="pendingBannerNick" class="underline"></strong> 님의 계정은 <strong>관리자 승인 대기 중</strong>입니다. 승인 후 모든 기능이 활성화됩니다.</span>
+    <span><strong id="pendingBannerNick" class="underline"></strong> 님은 <strong>관리자 승인 대기 중</strong>이에요. 승인되면 자동으로 모든 기능이 열려요.</span>
   </div>
 
   <!-- [좌측 날개 배너] -->
@@ -152,7 +152,7 @@
 
         <button onclick="openAuthModal()" class="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-colors">
           <i data-lucide="user" class="w-3.5 h-3.5"></i>
-          <span id="userProfileText" class="max-w-[70px] truncate">프로필</span>
+          <span id="userProfileText" class="max-w-[70px] truncate">로그인</span>
         </button>
       </div>
     </div>
@@ -781,24 +781,6 @@
     </div>
   </div>
 
-  <!-- 관리자 인증 모달 -->
-  <div id="adminAuthModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-xs rounded-3xl shadow-2xl p-6 space-y-4">
-      <div class="text-center">
-        <div class="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center mx-auto mb-2">
-          <i data-lucide="shield" class="w-6 h-6 text-orange-400"></i>
-        </div>
-        <h3 class="font-black text-slate-900 text-base">관리자 보안 인증</h3>
-        <p class="text-[11px] text-slate-400 mt-0.5">승인된 관리자만 접근할 수 있습니다.</p>
-      </div>
-      <input id="adminPassInput" type="password" placeholder="비밀번호 5자리" class="w-full border rounded-xl p-2.5 text-center text-lg font-black outline-none" autocomplete="off" />
-      <div class="flex gap-2">
-        <button onclick="closeAdminAuthModal()" class="flex-1 bg-slate-100 text-slate-600 font-bold py-2.5 rounded-xl text-xs">취소</button>
-        <button onclick="checkAdminPassword()" class="flex-1 bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs">확인</button>
-      </div>
-    </div>
-  </div>
-
   <!-- 관리자 대시보드 모달 -->
   <div id="adminDashboardModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
@@ -853,7 +835,7 @@
         <div class="flex items-center justify-between">
           <h4 class="font-extrabold text-xs text-slate-800 flex items-center gap-1.5">
             <i data-lucide="user-check" class="w-4 h-4 text-emerald-600"></i>
-            신규 회원 가입 승인 대기 목록
+            가입 · 기존 닉네임 연결 요청
           </h4>
           <span id="pendingUserCount" class="text-[11px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">0명 대기</span>
         </div>
@@ -1057,26 +1039,68 @@
     </div>
   </div>
 
-  <!-- 프로필 설정 모달 -->
+  <!-- 계정 모달: 둘러보기 / 가입·연결 요청 / 승인 대기 / 회원 -->
   <div id="authModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-xs rounded-3xl shadow-2xl p-6 space-y-4 text-xs">
       <div class="flex items-center justify-between border-b pb-2">
-        <h3 class="font-extrabold text-slate-900 text-sm">내 닉네임 & 비밀번호 설정</h3>
+        <h3 class="font-extrabold text-slate-900 text-sm">내 계정</h3>
         <button onclick="closeAuthModal()" class="text-slate-400">✕</button>
       </div>
-      <div class="space-y-3">
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">닉네임 (한글, 영문, 숫자 / 중복 불가)</label>
-          <input id="authNicknameInput" type="text" placeholder="예: 테라타워직장인" class="w-full border rounded-xl p-2.5 font-bold outline-none focus:border-indigo-500" />
-        </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">계정 고유 비밀번호 (숫자 4자리) *</label>
-          <input id="authPasswordInput" type="password" maxlength="4" placeholder="숫자 4자리 입력" class="w-full border rounded-xl p-2.5 font-bold outline-none text-center tracking-widest focus:border-indigo-500" />
-          <p class="text-[10px] text-slate-400 mt-1">※ 다른 기기 접속이나 닉네임 인증 시 본인 확인용으로 사용됩니다.</p>
-        </div>
-        <p class="text-[10px] text-amber-600 font-bold">※ 최초 회원가입 후 관리자 승인이 완료되어야 사이트의 모든 기능을 정상 이용하실 수 있습니다.</p>
+
+      <!-- 1. 로그인 전 -->
+      <div id="authViewGuest" class="space-y-3">
+        <p class="text-slate-600 leading-relaxed">식단은 누구나 볼 수 있어요.<br>투표·채팅·게임은 <strong>구글 계정으로 로그인</strong>한 회원만 이용할 수 있어요.</p>
+        <button onclick="signInWithGoogle()" class="w-full flex items-center justify-center gap-2 bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 font-bold py-2.5 rounded-xl shadow-xs transition-colors">
+          <svg class="w-4 h-4" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+          구글로 로그인
+        </button>
+        <p class="text-[10px] text-slate-400">※ 카카오톡 안에서 열었다면 [다른 브라우저로 열기] 후 로그인해주세요.</p>
       </div>
-      <button id="saveUserBtn" onclick="saveUserProfile()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-2.5 rounded-xl transition-colors">가입 및 승인 요청</button>
+
+      <!-- 2. 구글 로그인은 했지만 닉네임이 없음 -->
+      <div id="authViewSignup" class="hidden space-y-3">
+        <p class="text-slate-500"><span class="authEmailText font-bold text-slate-700"></span> 로 로그인했어요.</p>
+        <div class="grid grid-cols-2 gap-1.5">
+          <label class="flex items-center justify-center gap-1 border rounded-xl py-2 font-bold cursor-pointer has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50 has-[:checked]:text-indigo-700">
+            <input type="radio" name="signupType" value="claim" class="sr-only" checked> 기존 회원이에요
+          </label>
+          <label class="flex items-center justify-center gap-1 border rounded-xl py-2 font-bold cursor-pointer has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50 has-[:checked]:text-indigo-700">
+            <input type="radio" name="signupType" value="new" class="sr-only"> 처음 가입해요
+          </label>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">닉네임</label>
+          <input id="signupNicknameInput" type="text" maxlength="20" placeholder="기존 회원은 쓰던 닉네임 그대로" onkeydown="if(event.key==='Enter') submitSignupRequest()" class="w-full border rounded-xl p-2.5 font-bold outline-none focus:border-indigo-500" />
+          <p class="text-[10px] text-slate-400 mt-1">한글, 영문, 숫자 20자 이내. 기존 회원은 포인트·아이템이 그대로 이어져요.</p>
+        </div>
+        <button id="signupSubmitBtn" onclick="submitSignupRequest()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-2.5 rounded-xl transition-colors">관리자에게 승인 요청</button>
+        <button onclick="signOutUser()" class="w-full text-slate-400 hover:text-slate-600 font-bold py-1">다른 계정으로 로그인</button>
+      </div>
+
+      <!-- 3. 승인 대기 -->
+      <div id="authViewPending" class="hidden space-y-3">
+        <div class="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 space-y-1">
+          <div class="font-black">⏳ 승인 대기 중</div>
+          <div><span id="authPendingType"></span> · <strong id="authPendingNick"></strong></div>
+          <div class="text-[10px] text-amber-700">관리자가 승인하면 자동으로 이용할 수 있어요. 창을 닫아도 돼요.</div>
+        </div>
+        <p class="text-slate-500"><span class="authEmailText font-bold text-slate-700"></span></p>
+        <div class="flex gap-2">
+          <button onclick="cancelSignupRequest()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-xl">요청 취소</button>
+          <button onclick="signOutUser()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-xl">로그아웃</button>
+        </div>
+      </div>
+
+      <!-- 4. 회원 -->
+      <div id="authViewMember" class="hidden space-y-3">
+        <div class="p-3 rounded-2xl bg-slate-50 border space-y-1">
+          <div class="text-[10px] text-slate-400">닉네임</div>
+          <div class="font-black text-slate-900 text-sm" id="authMemberNick"></div>
+          <div class="text-[10px] text-slate-500"><span class="authEmailText"></span> · <span id="authMemberStatus"></span></div>
+        </div>
+        <button id="authAdminBtn" onclick="openAdminDashboard()" class="hidden w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl">🛡️ 관리자 대시보드</button>
+        <button onclick="signOutUser()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl">로그아웃</button>
+      </div>
     </div>
   </div>
 

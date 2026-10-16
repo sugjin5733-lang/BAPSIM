@@ -19,13 +19,14 @@ function handleSendChat(e) {
 
   const chatPath = currentGroupId === 'lobby' ? 'lobby_messages' : `groups/${currentGroupId}/messages`;
   db.ref(chatPath).push({
+    uid: authUser.uid,
     nickname: currentUser.nickname,
     text: text,
     color: myNickColor,
     bg: myNickBg,
     symbol: myNickSymbol,
     timestamp: Date.now()
-  });
+  }).catch(err => alert('메시지를 보내지 못했어요: ' + err.message));
   input.value = '';
 }
 
@@ -37,6 +38,7 @@ function sendSticker(stickerType) {
 
   const chatPath = currentGroupId === 'lobby' ? 'lobby_messages' : `groups/${currentGroupId}/messages`;
   db.ref(chatPath).push({
+    uid: authUser.uid,
     nickname: currentUser.nickname,
     sticker: stickerType,
     color: myNickColor,

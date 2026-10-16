@@ -14,6 +14,7 @@ function adminEquipSelf() {
 function adminSendSpecialSticker(stickerType) {
   const chatPath = currentGroupId === 'lobby' ? 'lobby_messages' : `groups/${currentGroupId}/messages`;
   db.ref(chatPath).push({
+    uid: authUser.uid,
     nickname: `[관리자] ${currentUser.nickname}`,
     sticker: stickerType,
     color: '#ffffff',
@@ -41,104 +42,168 @@ function handleSaveNotice() {
   });
 }
 
-// 관리자 키보드 단축키
+// 관리자 화면 열기: Ctrl+Shift+A 또는 프로필 화면의 [관리자 대시보드] 버튼
+// (관리자 여부는 구글 계정으로 판별하고, 실제 권한은 Firebase 보안 규칙이 막아줍니다)
 window.addEventListener('keydown', (e) => {
   if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
     e.preventDefault();
-    openAdminAuthModal();
+    openAdminDashboard();
   }
 });
 
-function openAdminAuthModal() {
-  document.getElementById('adminPassInput').value = '';
-  document.getElementById('adminAuthModal').classList.remove('hidden');
-  setTimeout(() => document.getElementById('adminPassInput').focus(), 100);
-}
-function closeAdminAuthModal() { document.getElementById('adminAuthModal').classList.add('hidden'); }
-
-// 관리자 비밀번호는 소스에 평문으로 두지 않고 해시로만 보관합니다.
-// 비밀번호를 바꾸려면: 브라우저 콘솔에서 sha256('새비밀번호').then(console.log) 실행 후 나온 값을 아래에 붙여넣기
-const ADMIN_PASS_HASH = '94aab701b8439ab72db15e01a954856850028c741b4a70874952bf3f9edfa0d7';
-async function checkAdminPassword() {
-  const h = await sha256(document.getElementById('adminPassInput').value.trim());
-  if (h === ADMIN_PASS_HASH) {
-    closeAdminAuthModal();
-    openAdminDashboard();
-  } else {
-    alert('비밀번호 불일치');
-  }
-}
-
 function openAdminDashboard() {
+  if (!isAdmin) {
+    alert('관리자 구글 계정으로 로그인해야 열 수 있어요.');
+    return;
+  }
+  closeAuthModal();
   document.getElementById('adminDashboardModal').classList.remove('hidden');
   if (window.__adminListenersAttached) return; // 열 때마다 리스너가 중복 등록되던 문제 방지
   window.__adminListenersAttached = true;
+  migrateLegacyData();
   loadPendingPointRequests();
   renderAdminUserList();
   renderAdminGroupList();
-  renderAdminPendingUsers();
+  renderAdminSignupRequests();
 }
 function closeAdminDashboard() { document.getElementById('adminDashboardModal').classList.add('hidden'); }
 
-function renderAdminPendingUsers() {
-  db.ref('user_points').on('value', (snap) => {
-    const users = snap.val() || {};
+// 예전 방식의 비밀번호 데이터를 정리 (한 번 돌면 이후엔 할 일이 없음)
+//  - 회원의 4자리 비밀번호(평문/해시)는 구글 로그인으로 바뀌어 더 이상 필요 없으므로 삭제
+//  - 그룹 입장 비밀번호 평문은 해시로 전환
+async function migrateLegacyData() {
+  try {
+    const [usersSnap, groupsSnap] = await Promise.all([db.ref('user_points').once('value'), db.ref('groups').once('value')]);
+    const updates = {};
+    Object.entries(usersSnap.val() || {}).forEach(([nick, u]) => {
+      if (u && u.password !== undefined) updates[`user_points/${nick}/password`] = null;
+      if (u && u.passwordHash !== undefined) updates[`user_points/${nick}/passwordHash`] = null;
+    });
+    for (const [gid, g] of Object.entries(groupsSnap.val() || {})) {
+      if (g && g.password !== undefined && g.password !== null) {
+        if (!g.passwordHash) updates[`groups/${gid}/passwordHash`] = await sha256(String(g.password));
+        updates[`groups/${gid}/password`] = null;
+      }
+    }
+    const n = Object.keys(updates).length;
+    if (n === 0) return;
+    await db.ref().update(updates);
+    console.log(`예전 비밀번호 데이터 ${n}건 정리 완료`);
+  } catch (err) {
+    console.error('예전 데이터 정리 실패:', err);
+  }
+}
+
+// ==========================================
+// 가입 / 기존 닉네임 연결 요청 승인
+// ==========================================
+let adminUsersCache = {};
+
+function renderAdminSignupRequests() {
+  const draw = (requests) => {
     const container = document.getElementById('adminPendingUsersContainer');
-    const pendingList = Object.values(users).filter(u => u.status === 'pending');
+    const list = Object.values(requests || {}).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
     const cntEl = document.getElementById('pendingUserCount');
-    if (cntEl) cntEl.textContent = `${pendingList.length}명 대기`;
+    if (cntEl) cntEl.textContent = `${list.length}명 대기`;
     if (!container) return;
     container.innerHTML = '';
 
-    if (pendingList.length === 0) {
-      container.innerHTML = '<div class="text-center text-slate-400 py-3">승인 대기 중인 회원이 없습니다.</div>';
+    if (list.length === 0) {
+      container.innerHTML = '<div class="text-center text-slate-400 py-3">승인 대기 중인 요청이 없습니다.</div>';
       return;
     }
 
-    pendingList.forEach(u => {
+    list.forEach(r => {
+      const existing = adminUsersCache[r.nickname];
+      const isClaim = r.type === 'claim';
+      let warn = '';
+      if (isClaim && !existing) warn = '⚠️ 이 닉네임의 기존 회원 정보가 없어요';
+      else if (!isClaim && existing) warn = '⚠️ 이미 있는 닉네임이에요';
+      else if (isClaim && existing && existing.uid) warn = '⚠️ 이미 다른 구글 계정에 연결된 닉네임 (승인 시 이 계정으로 옮겨짐)';
+
       const item = document.createElement('div');
-      item.className = "p-2.5 bg-white border rounded-xl flex items-center justify-between";
+      item.className = "p-2.5 bg-white border rounded-xl flex items-center justify-between gap-2";
       item.innerHTML = `
-        <div class="min-w-0 pr-2">
-          <span class="font-bold text-slate-900 truncate block">${esc(u.nickname)}</span>
-          <span class="text-[10px] text-slate-400">가입신청: ${new Date(u.createdAt || Date.now()).toLocaleDateString()}</span>
+        <div class="min-w-0">
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] font-black px-1.5 py-0.5 rounded ${isClaim ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'}">${isClaim ? '기존 연결' : '신규 가입'}</span>
+            <span class="font-bold text-slate-900 truncate">${esc(r.nickname)}</span>
+            ${isClaim && existing ? `<span class="text-[10px] text-amber-700 font-bold">${(existing.points || 0).toLocaleString()}P · +${existing.enhanceLevel || 0}강</span>` : ''}
+          </div>
+          <span class="text-[10px] text-slate-500 block truncate">${esc(r.displayName || '')} · ${esc(r.email || '')}</span>
+          ${warn ? `<span class="text-[10px] text-rose-600 font-bold block">${esc(warn)}</span>` : ''}
         </div>
         <div class="flex items-center gap-1.5 shrink-0">
-          <button onclick="adminApproveUser(${jsArg(u.nickname)})" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-1 rounded-lg text-[11px] shadow-xs">
-            승인
-          </button>
-          <button onclick="adminRejectUser(${jsArg(u.nickname)})" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-2.5 py-1 rounded-lg text-[11px]">
-            거절
-          </button>
+          <button onclick="adminApproveRequest(${jsArg(r.uid)})" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-1 rounded-lg text-[11px] shadow-xs">승인</button>
+          <button onclick="adminRejectRequest(${jsArg(r.uid)})" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-2.5 py-1 rounded-lg text-[11px]">거절</button>
         </div>
       `;
       container.appendChild(item);
     });
-  });
+  };
+  let lastRequests = {};
+  db.ref('signup_requests').on('value', snap => { lastRequests = snap.val() || {}; draw(lastRequests); }, onDbError);
+  db.ref('user_points').on('value', snap => { adminUsersCache = snap.val() || {}; draw(lastRequests); });
 }
 
-function adminApproveUser(nick) {
-  db.ref(`user_points/${nick}`).update({ status: 'approved', approved: true }, (err) => {
-    if (err) return alert("오류: " + err.message);
-    alert(`✅ [${nick}] 회원의 가입을 승인했습니다.`);
-  });
+async function adminApproveRequest(uid, silent = false) {
+  try {
+    const reqSnap = await db.ref(`signup_requests/${uid}`).once('value');
+    const r = reqSnap.val();
+    if (!r) return alert('요청을 찾을 수 없어요. (이미 처리되었을 수 있어요)');
+    const nick = r.nickname;
+    const userSnap = await db.ref(`user_points/${nick}`).once('value');
+    const existing = userSnap.val();
+
+    if (r.type === 'claim' && !existing) return alert(`[${nick}] 기존 회원 정보가 없어서 연결할 수 없어요. 거절 후 신규 가입으로 안내해주세요.`);
+    if (r.type !== 'claim' && existing) return alert(`[${nick}] 은(는) 이미 있는 닉네임이라 신규 가입으로 승인할 수 없어요.`);
+    if (!silent && !confirm(r.type === 'claim'
+      ? `[${nick}] 기존 닉네임을 ${r.email} 계정에 연결할까요?\n(포인트 ${(existing.points || 0).toLocaleString()}P, +${existing.enhanceLevel || 0}강 유지)`
+      : `[${nick}] 신규 가입을 승인할까요? (${r.email})`)) return;
+
+    const updates = {};
+    updates[`user_uids/${uid}`] = nick;
+    updates[`signup_requests/${uid}`] = null;
+    if (existing) {
+      // 이 닉네임이 예전에 다른 구글 계정에 연결돼 있었다면 그 연결은 해제
+      if (existing.uid && existing.uid !== uid) updates[`user_uids/${existing.uid}`] = null;
+      updates[`user_points/${nick}/uid`] = uid;
+      updates[`user_points/${nick}/status`] = 'approved';
+      updates[`user_points/${nick}/approved`] = true;
+      updates[`user_points/${nick}/password`] = null;
+      updates[`user_points/${nick}/passwordHash`] = null;
+    } else {
+      updates[`user_points/${nick}`] = {
+        nickname: nick, uid: uid, points: 30, enhanceLevel: 0,
+        badge: 'nb-none', color: '', symbol: '',
+        inventory: { colors: [], bgs: ['nb-none'], symbols: [] },
+        status: 'approved', approved: true,
+        createdAt: Date.now(), updatedAt: Date.now()
+      };
+    }
+    await db.ref().update(updates);
+    if (!silent) alert(`✅ [${nick}] 승인 완료!`);
+  } catch (err) {
+    alert('승인 중 오류: ' + (err.message || err));
+  }
 }
 
-function adminRejectUser(nick) {
-  if (!confirm(`[${nick}] 회원의 가입을 거절하고 삭제하시겠습니까?`)) return;
-  db.ref(`user_points/${nick}`).remove(() => {
-    db.ref(`online_users/${nick}`).remove();
-    alert(`[${nick}] 회원의 가입 신청이 거절되었습니다.`);
-  });
+async function adminRejectRequest(uid) {
+  const snap = await db.ref(`signup_requests/${uid}`).once('value');
+  const r = snap.val();
+  if (!r) return;
+  if (!confirm(`[${r.nickname}] 요청을 거절할까요?`)) return;
+  await db.ref(`signup_requests/${uid}`).remove();
 }
 
 function renderAdminUserList() {
   db.ref('user_points').on('value', (snap) => {
     const users = snap.val() || {};
     const container = document.getElementById('adminUserListContainer');
-    const list = Object.values(users).filter(u => u.status !== 'pending');
+    const list = Object.values(users).filter(u => u && u.nickname);
     const cntEl = document.getElementById('adminTotalUserCount');
-    if (cntEl) cntEl.textContent = `${list.length}명`;
+    const linked = list.filter(u => u.uid).length;
+    if (cntEl) cntEl.textContent = `${list.length}명 · 구글 연결 ${linked}명`;
     if (!container) return;
     container.innerHTML = '';
 
@@ -162,6 +227,9 @@ function renderAdminUserList() {
           <span class="text-[10px] text-orange-700 bg-orange-50 border border-orange-200 px-1 py-0.2 rounded font-black shrink-0">
             +${eLvl}강
           </span>
+          <span class="text-[10px] ${u.uid ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-slate-500 bg-slate-50 border-slate-200'} border px-1 py-0.2 rounded font-bold shrink-0">
+            ${u.uid ? 'G 연결' : '미연결'}
+          </span>
         </div>
         <div class="flex items-center gap-1 shrink-0">
           <button onclick="adminManageUserItems(${jsArg(u.nickname)})" class="bg-amber-50 text-amber-800 font-bold px-2 py-1 rounded-lg text-[10px]">
@@ -183,29 +251,36 @@ function renderAdminUserList() {
   });
 }
 
-function adminDeleteUser(nick) {
-  if (!confirm(`[${nick}] 회원을 삭제하시겠습니까?\n해당 회원의 데이터가 초기화됩니다.`)) return;
-  db.ref(`user_points/${nick}`).remove((err) => {
-    if (err) return alert("회원 삭제 실패: " + err.message);
-    db.ref(`online_users/${nick}`).remove();
-    alert(`✅ [${nick}] 회원이 삭제되었습니다.`);
-  });
+// 회원 삭제/차단 시 닉네임, 구글 연결, 접속 표시를 한 번에 정리
+async function removeUserRecords(nick, extra = {}) {
+  const snap = await db.ref(`user_points/${nick}`).once('value');
+  const u = snap.val() || {};
+  const updates = Object.assign({
+    [`user_points/${nick}`]: null,
+    [`online_users/${nick}`]: null
+  }, extra);
+  if (u.uid) updates[`user_uids/${u.uid}`] = null;
+  await db.ref().update(updates);
 }
 
-function adminBanUser(nick) {
+async function adminDeleteUser(nick) {
+  if (!confirm(`[${nick}] 회원을 삭제하시겠습니까?\n해당 회원의 데이터가 초기화됩니다.`)) return;
+  try {
+    await removeUserRecords(nick);
+    alert(`✅ [${nick}] 회원이 삭제되었습니다.`);
+  } catch (err) {
+    alert("회원 삭제 실패: " + err.message);
+  }
+}
+
+async function adminBanUser(nick) {
   if (!confirm(`🚨 경고: [${nick}] 회원을 영구 차단하시겠습니까?\n차단된 닉네임은 다시는 사용할 수 없으며, 모든 계정 정보가 즉시 삭제됩니다.`)) return;
-
-  db.ref(`banned_users/${nick}`).set({
-    nickname: nick,
-    bannedAt: Date.now()
-  }, (err) => {
-    if (err) return alert("차단 처리 오류: " + err.message);
-
-    db.ref(`user_points/${nick}`).remove();
-    db.ref(`online_users/${nick}`).remove();
-
+  try {
+    await removeUserRecords(nick, { [`banned_users/${nick}`]: { nickname: nick, bannedAt: Date.now() } });
     alert(`⛔ [${nick}] 회원이 영구 차단되었습니다.\n해당 닉네임으로는 앞으로 가입할 수 없습니다.`);
-  });
+  } catch (err) {
+    alert("차단 처리 오류: " + err.message);
+  }
 }
 
 function adminManageUserItems(nick) {

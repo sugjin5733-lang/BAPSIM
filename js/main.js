@@ -19,43 +19,41 @@ function initNoticeListener() {
   });
 }
 
-if (currentUser.nickname && currentUser.nickname !== "문정러") {
-  const pText = document.getElementById('userProfileText');
-  if (pText) pText.textContent = currentUser.nickname;
-}
-
 setInterval(updateCountdown, 1000);
 updateCountdown();
+updateAccountUI();
 lucide.createIcons();
 
-// 화면은 먼저 그려두고, Firebase 익명 로그인이 끝난 뒤에 DB에 접근합니다.
-// (보안 규칙이 "로그인한 사용자만 읽기/쓰기"로 바뀌었기 때문)
+// 공용 데이터(식단, 그룹, 공지, 접속자, 랭킹)는 로그인 종류와 관계없이 한 번만 연결
 let appStarted = false;
 function startApp() {
   if (appStarted) return;
   appStarted = true;
   attachGlobalListeners();
-  initPresenceSystem();
+  attachOnlineUsersListener();
   initNoticeListener();
   renderRankingsData();
-  attachUserPointListener();
-  updatePointsUI(false); // 시작 시 로컬 값으로 서버 포인트를 덮어쓰지 않도록 (서버 값을 받아옴)
   updateEnhanceUI();
   updateGroupUI();
-  syncFromGoogleSheet(false);
   setInterval(() => syncFromGoogleSheet(false), 1000 * 60 * 3);
   setInterval(() => renderRankingsData(), 1000 * 10);
   lucide.createIcons();
 }
 
-firebase.auth().onAuthStateChanged(user => {
-  if (user) startApp();
-});
-firebase.auth().signInAnonymously().catch(err => {
-  console.error('익명 로그인 실패:', err);
-  showFatalBanner(
-    err && err.code === 'auth/operation-not-allowed'
-      ? '서버 설정 오류: Firebase 콘솔에서 익명 로그인(Anonymous)을 사용 설정해야 합니다.'
-      : '서버 로그인에 실패했습니다: ' + (err && err.message || err)
-  );
+// 저장된 구글 로그인이 있으면 그대로 쓰고, 없을 때만 익명으로 "둘러보기" 로그인
+firebase.auth().onAuthStateChanged(async (user) => {
+  if (!user) {
+    firebase.auth().signInAnonymously().catch(err => {
+      console.error('익명 로그인 실패:', err);
+      showFatalBanner(
+        err && err.code === 'auth/operation-not-allowed'
+          ? '서버 설정 오류: Firebase 콘솔에서 익명 로그인(Anonymous)을 사용 설정해야 합니다.'
+          : '서버 연결에 실패했습니다: ' + (err && err.message || err)
+      );
+    });
+    return;
+  }
+  startApp();
+  await handleAuthChange(user);
+  updateGroupUI();
 });

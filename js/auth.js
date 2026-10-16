@@ -1,9 +1,44 @@
 // 밥심 - 로그인, 회원 상태, 포인트 동기화, 접속자
+//
+// 로그인 구조
+//  - 처음 들어오면 익명 로그인 → 식단/랭킹/채팅 "보기"만 가능
+//  - [구글로 로그인] → user_uids/{uid} 에 연결된 닉네임이 있으면 바로 회원으로 접속
+//  - 연결된 닉네임이 없으면 가입(새 닉네임) 또는 기존 닉네임 연결을 "요청"
+//    → signup_requests/{uid} 에 저장 → 관리자가 승인하면 닉네임과 구글 계정이 연결됨
+//  - 관리자는 구글 계정으로 판별 (실제 권한은 Firebase 보안 규칙이 강제)
+
+// 관리자 구글 계정 (공개 저장소에 메일 주소를 그대로 두지 않도록 해시로 보관)
+const ADMIN_EMAIL_HASH = 'd3e12dd650d3b989a22a4d59f6ceb56a9cadfe3e7e3fd5583bc30544d37c8fa5';
+
+let authUser = null;        // 현재 Firebase 사용자 (익명 또는 구글)
+let isAdmin = false;
+let cloudReady = false;     // 내 user_points 첫 값을 받아온 뒤에만 서버에 쓰기
+let myPointsRef = null;
+let myRequestRef = null;
+let myRequest = null;       // 승인 대기 중인 내 가입/연결 요청
+let presenceRefs = null;
+
+function isGoogleUser() {
+  return !!(authUser && !authUser.isAnonymous);
+}
+
+function canSyncToCloud() {
+  return cloudReady && isUserApproved && currentUser.nickname !== GUEST_NICK;
+}
 
 function checkApprovalGuard() {
-  if (currentUser.nickname === "문정러") {
-    alert("닉네임을 설정(회원가입)하고 관리자 승인을 받은 후 이용하실 수 있습니다.");
+  if (!isGoogleUser()) {
+    alert("구글 계정으로 로그인한 회원만 이용할 수 있어요.");
     openAuthModal();
+    return false;
+  }
+  if (currentUser.nickname === GUEST_NICK) {
+    if (myRequest) {
+      alert(`🔒 [${myRequest.nickname}] 승인 대기 중입니다.\n관리자가 승인하면 바로 이용할 수 있어요.`);
+    } else {
+      alert("닉네임 가입(또는 기존 닉네임 연결) 요청을 먼저 보내주세요.");
+      openAuthModal();
+    }
     return false;
   }
   if (!isUserApproved) {
@@ -13,10 +48,238 @@ function checkApprovalGuard() {
   return true;
 }
 
+// ==========================================
+// 로그인 / 로그아웃
+// ==========================================
+function isInAppBrowser() {
+  return /KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line\/|everytimeApp|DaumApps/i.test(navigator.userAgent);
+}
+
+async function signInWithGoogle() {
+  if (isInAppBrowser()) {
+    alert("카카오톡/네이버 등 앱 안의 브라우저에서는 구글이 로그인을 막아요.\n\n오른쪽 위 메뉴에서 [다른 브라우저로 열기](크롬/사파리)를 선택한 뒤 다시 로그인해주세요.");
+    return;
+  }
+  const provider = new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+  try {
+    await firebase.auth().signInWithPopup(provider);
+    closeAuthModal();
+  } catch (err) {
+    console.error('구글 로그인 실패:', err);
+    if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') return;
+    if (err.code === 'auth/popup-blocked') {
+      alert("팝업이 차단되었어요. 주소창 오른쪽의 팝업 차단 아이콘에서 [항상 허용]을 누른 뒤 다시 시도해주세요.");
+    } else if (err.code === 'auth/unauthorized-domain') {
+      alert("이 주소에서는 아직 구글 로그인이 허용되지 않았어요. (관리자: Firebase 승인된 도메인 설정 필요)");
+    } else if (err.code === 'auth/operation-not-allowed') {
+      alert("구글 로그인이 아직 켜져 있지 않아요. (관리자: Firebase 로그인 방법에서 Google 사용 설정 필요)");
+    } else {
+      alert("로그인 중 오류가 발생했어요: " + (err.message || err));
+    }
+  }
+}
+
+async function signOutUser() {
+  if (!confirm("로그아웃 하시겠어요?")) return;
+  await firebase.auth().signOut();
+  closeAuthModal();
+}
+
+// 로그인 상태가 바뀔 때마다 호출 (main.js의 onAuthStateChanged)
+async function handleAuthChange(user) {
+  detachUserListeners();
+  authUser = user;
+  isAdmin = false;
+  myRequest = null;
+  resetToGuestState();
+
+  if (!user || user.isAnonymous) {
+    updateAccountUI();
+    return;
+  }
+
+  isAdmin = !!(user.emailVerified && user.email && (await sha256(user.email.toLowerCase())) === ADMIN_EMAIL_HASH);
+
+  try {
+    const mapSnap = await db.ref(`user_uids/${user.uid}`).once('value');
+    if (mapSnap.exists()) {
+      bindNickname(String(mapSnap.val()));
+      return;
+    }
+    // 아직 닉네임이 연결되지 않은 구글 계정 → 내 요청 상태를 실시간으로 지켜봄
+    myRequestRef = db.ref(`signup_requests/${user.uid}`);
+    myRequestRef.on('value', async (snap) => {
+      myRequest = snap.val();
+      if (!myRequest) {
+        // 요청이 사라짐 = 승인(연결 생성) 또는 거절
+        const again = await db.ref(`user_uids/${user.uid}`).once('value');
+        if (again.exists()) {
+          myRequestRef.off(); myRequestRef = null;
+          bindNickname(String(again.val()));
+          return;
+        }
+      }
+      updateAccountUI();
+    }, onDbError);
+    updateAccountUI();
+    openAuthModal(); // 처음 로그인한 사람에게 가입/연결 화면을 바로 보여줌
+  } catch (err) {
+    onDbError(err);
+  }
+}
+
+function detachUserListeners() {
+  if (myPointsRef) { myPointsRef.off(); myPointsRef = null; }
+  if (myRequestRef) { myRequestRef.off(); myRequestRef = null; }
+  if (presenceRefs) {
+    presenceRefs.connected.off();
+    presenceRefs.mine.onDisconnect().cancel();
+    presenceRefs.mine.remove().catch(() => {});
+    presenceRefs = null;
+  }
+}
+
+function resetToGuestState() {
+  cloudReady = false;
+  currentUser = { nickname: GUEST_NICK };
+  isUserApproved = false;
+  userPoints = 0;
+  currentEnhanceLevel = 0;
+  myNickBg = 'nb-none';
+  myNickColor = '';
+  myNickSymbol = '';
+  myInventory = { colors: [], bgs: ['nb-none'], symbols: [] };
+  updatePointsUI(false);
+  if (typeof updateEnhanceUI === 'function') updateEnhanceUI();
+}
+
+function bindNickname(nick) {
+  currentUser = { nickname: nick };
+  attachUserPointListener();
+  updateAccountUI();
+}
+
+// ==========================================
+// 가입 / 기존 닉네임 연결 요청
+// ==========================================
+function isValidNickname(nickname) {
+  return /^[가-힣a-zA-Z0-9]{1,20}$/.test(nickname);
+}
+
+async function submitSignupRequest() {
+  if (!isGoogleUser()) return signInWithGoogle();
+  const nick = document.getElementById('signupNicknameInput').value.trim();
+  const type = document.querySelector('input[name="signupType"]:checked')?.value || 'new';
+  const btn = document.getElementById('signupSubmitBtn');
+
+  if (!nick) return alert('닉네임을 입력해주세요.');
+  if (!isValidNickname(nick)) return alert('⚠️ 닉네임은 한글, 영문, 숫자로 20자 이내만 가능해요.');
+  if (nick === GUEST_NICK) return alert('사용할 수 없는 닉네임이에요.');
+
+  btn.disabled = true;
+  try {
+    const [banSnap, userSnap] = await Promise.all([
+      db.ref(`banned_users/${nick}`).once('value'),
+      db.ref(`user_points/${nick}`).once('value')
+    ]);
+    if (banSnap.exists()) return alert(`⛔ [${nick}] 은(는) 운영자에 의해 차단된 닉네임입니다.`);
+
+    if (type === 'new' && userSnap.exists()) {
+      return alert(`[${nick}] 은(는) 이미 있는 닉네임이에요.\n본인 닉네임이라면 위에서 [기존 회원이에요]를 선택해주세요.`);
+    }
+    if (type === 'claim' && !userSnap.exists()) {
+      return alert(`[${nick}] 닉네임을 찾을 수 없어요. 철자를 확인하거나 [처음 가입해요]를 선택해주세요.`);
+    }
+
+    await db.ref(`signup_requests/${authUser.uid}`).set({
+      uid: authUser.uid,
+      nickname: nick,
+      type: type,
+      email: authUser.email || '',
+      displayName: authUser.displayName || '',
+      createdAt: Date.now()
+    });
+
+    // 관리자 본인은 바로 승인
+    if (isAdmin) {
+      await adminApproveRequest(authUser.uid, true);
+      return;
+    }
+    alert(type === 'claim'
+      ? `✅ 기존 닉네임 [${nick}] 연결 요청을 보냈어요.\n관리자가 확인하면 기존 포인트·아이템 그대로 이용할 수 있어요.`
+      : `✅ [${nick}] 가입 요청을 보냈어요.\n관리자가 승인하면 바로 이용할 수 있어요.`);
+  } catch (err) {
+    console.error('가입 요청 실패:', err);
+    alert('요청 중 오류가 발생했어요: ' + (err.message || err));
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function cancelSignupRequest() {
+  if (!authUser || !confirm('승인 요청을 취소할까요?')) return;
+  await db.ref(`signup_requests/${authUser.uid}`).remove();
+}
+
+// ==========================================
+// 계정 화면 (프로필 버튼)
+// ==========================================
+function openAuthModal() {
+  updateAccountUI();
+  document.getElementById('authModal').classList.remove('hidden');
+}
+function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
+
+function updateAccountUI() {
+  const views = ['authViewGuest', 'authViewSignup', 'authViewPending', 'authViewMember'];
+  let show = 'authViewGuest';
+  if (isGoogleUser()) {
+    if (currentUser.nickname !== GUEST_NICK) show = 'authViewMember';
+    else if (myRequest) show = 'authViewPending';
+    else show = 'authViewSignup';
+  }
+  views.forEach(v => document.getElementById(v)?.classList.toggle('hidden', v !== show));
+
+  const email = authUser && authUser.email ? authUser.email : '';
+  document.querySelectorAll('.authEmailText').forEach(el => el.textContent = email);
+
+  const pendNick = document.getElementById('authPendingNick');
+  if (pendNick && myRequest) pendNick.textContent = myRequest.nickname;
+  const pendType = document.getElementById('authPendingType');
+  if (pendType && myRequest) pendType.textContent = myRequest.type === 'claim' ? '기존 닉네임 연결' : '신규 가입';
+
+  const memberNick = document.getElementById('authMemberNick');
+  if (memberNick) memberNick.textContent = currentUser.nickname;
+  const memberStatus = document.getElementById('authMemberStatus');
+  if (memberStatus) memberStatus.textContent = isUserApproved ? '승인된 회원' : '승인 대기 중';
+
+  document.getElementById('authAdminBtn')?.classList.toggle('hidden', !isAdmin);
+
+  // 헤더 프로필 버튼
+  const pText = document.getElementById('userProfileText');
+  if (pText) {
+    if (!isGoogleUser()) pText.textContent = '로그인';
+    else if (currentUser.nickname !== GUEST_NICK) pText.textContent = currentUser.nickname;
+    else pText.textContent = myRequest ? '승인 대기' : '가입하기';
+  }
+
+  // 상단 승인 대기 배너
+  const banner = document.getElementById('pendingApprovalBanner');
+  const bannerNick = document.getElementById('pendingBannerNick');
+  const pendingName = myRequest ? myRequest.nickname : (currentUser.nickname !== GUEST_NICK && cloudReady && !isUserApproved ? currentUser.nickname : null);
+  if (banner) {
+    banner.classList.toggle('hidden', !pendingName);
+    if (bannerNick && pendingName) bannerNick.textContent = pendingName;
+  }
+}
+
+// ==========================================
+// 내 회원 정보 실시간 동기화
+// ==========================================
 function syncUserPointToCloud() {
-  if (!currentUser.nickname || currentUser.nickname === "문정러") return;
+  if (!canSyncToCloud()) return;
   db.ref(`user_points/${currentUser.nickname}`).update({
-    nickname: currentUser.nickname,
     points: userPoints,
     enhanceLevel: currentEnhanceLevel,
     badge: myNickBg,
@@ -24,102 +287,66 @@ function syncUserPointToCloud() {
     symbol: myNickSymbol,
     inventory: myInventory,
     updatedAt: Date.now()
-  });
+  }).catch(err => console.warn('포인트 저장 거부됨:', err && err.message));
 }
 
 function attachUserPointListener() {
-  if (!currentUser.nickname || currentUser.nickname === "문정러") {
-    isUserApproved = true;
-    const banner = document.getElementById('pendingApprovalBanner');
-    if (banner) banner.classList.add('hidden');
-    return;
-  }
+  if (myPointsRef) myPointsRef.off();
+  const nick = currentUser.nickname;
+  myPointsRef = db.ref(`user_points/${nick}`);
 
-  db.ref(`user_points/${currentUser.nickname}`).on('value', (snap) => {
+  myPointsRef.on('value', (snap) => {
     const val = snap.val();
-    const banner = document.getElementById('pendingApprovalBanner');
-    const pendingNick = document.getElementById('pendingBannerNick');
 
-    if (val) {
-      if (val.resetInventory === true) {
-        myInventory = { colors: [], bgs: ['nb-none'], symbols: [] };
-        myNickBg = 'nb-none';
-        myNickColor = '';
-        myNickSymbol = '';
-        localStorage.setItem('bapsim_inventory', JSON.stringify(myInventory));
-        localStorage.setItem('bapsim_custom_bg', 'nb-none');
-        localStorage.setItem('bapsim_custom_color', '');
-        localStorage.setItem('bapsim_custom_symbol', '');
-        updatePointsUI(false);
-        renderShopUI();
-        alert("⚠️ 관리자에 의해 보유 중인 모든 치장 아이템이 몰수 및 삭제 처리되었습니다.");
-        db.ref(`user_points/${currentUser.nickname}/resetInventory`).remove();
-        return;
-      }
-
-      if (val.inventory) {
-        myInventory = {
-          colors: Array.isArray(val.inventory.colors) ? val.inventory.colors : [],
-          bgs: Array.isArray(val.inventory.bgs) ? val.inventory.bgs : ['nb-none'],
-          symbols: Array.isArray(val.inventory.symbols) ? val.inventory.symbols : []
-        };
-        localStorage.setItem('bapsim_inventory', JSON.stringify(myInventory));
-      }
-
-      isUserApproved = (val.status === 'approved' || val.approved === true);
-
-      if (!isUserApproved) {
-        if (banner) {
-          if (pendingNick) pendingNick.textContent = currentUser.nickname;
-          banner.classList.remove('hidden');
-        }
-      } else {
-        if (banner) banner.classList.add('hidden');
-
-        const notifyKey = `bapsim_approved_notified_${currentUser.nickname}`;
-        const hasNotified = localStorage.getItem(notifyKey);
-
-        if (!hasNotified && val.status === 'approved') {
-          localStorage.setItem(notifyKey, 'true');
-          if (window.confetti) confetti({ particleCount: 150 });
-          alert(`🎉 [${currentUser.nickname}] 님의 계정이 관리자로부터 최종 승인되었습니다!\n이제 모든 서비스를 자유롭게 이용하실 수 있습니다.`);
-        }
-      }
-
-      if (typeof val.points === 'number' && val.points !== userPoints) {
-        userPoints = val.points;
-        localStorage.setItem('bapsim_points', userPoints.toString());
-        updatePointsUI(false);
-      }
-      if (typeof val.enhanceLevel === 'number' && val.enhanceLevel !== currentEnhanceLevel) {
-        currentEnhanceLevel = val.enhanceLevel;
-        localStorage.setItem('bapsim_enhance_level', currentEnhanceLevel.toString());
-        updateEnhanceUI();
-      }
-      if (val.badge && val.badge !== myNickBg) {
-        myNickBg = val.badge;
-        localStorage.setItem('bapsim_custom_bg', myNickBg);
-        updatePreviewBox();
-      }
-      if (val.color !== undefined && val.color !== myNickColor) {
-        myNickColor = val.color;
-        localStorage.setItem('bapsim_custom_color', myNickColor);
-        updatePreviewBox();
-      }
-      if (val.symbol !== undefined && val.symbol !== myNickSymbol) {
-        myNickSymbol = val.symbol;
-        localStorage.setItem('bapsim_custom_symbol', myNickSymbol);
-        updatePreviewBox();
-      }
-    } else {
-      alert("회원 정보가 삭제되었거나 운영자에 의해 차단되었습니다.");
-      localStorage.removeItem('bapsim_user');
-      currentUser = { nickname: "문정러" };
-      isUserApproved = true;
-      if (banner) banner.classList.add('hidden');
-      location.reload();
+    // 삭제/차단되었거나, 관리자가 다른 구글 계정으로 연결을 옮긴 경우
+    if (!val || (val.uid && authUser && val.uid !== authUser.uid)) {
+      alert("회원 정보가 삭제되었거나 운영자에 의해 연결이 해제되었습니다.");
+      firebase.auth().signOut();
+      return;
     }
-  });
+
+    if (val.resetInventory === true) {
+      myInventory = { colors: [], bgs: ['nb-none'], symbols: [] };
+      myNickBg = 'nb-none';
+      myNickColor = '';
+      myNickSymbol = '';
+      updatePointsUI(false);
+      renderShopUI();
+      alert("⚠️ 관리자에 의해 보유 중인 모든 치장 아이템이 몰수 및 삭제 처리되었습니다.");
+      db.ref(`user_points/${nick}/resetInventory`).remove();
+      return;
+    }
+
+    myInventory = {
+      colors: toArr(val.inventory && val.inventory.colors),
+      bgs: val.inventory && val.inventory.bgs ? toArr(val.inventory.bgs) : ['nb-none'],
+      symbols: toArr(val.inventory && val.inventory.symbols)
+    };
+
+    const wasApproved = isUserApproved;
+    isUserApproved = (val.status === 'approved' || val.approved === true);
+    if (cloudReady && !wasApproved && isUserApproved) {
+      if (window.confetti) confetti({ particleCount: 150 });
+      alert(`🎉 [${nick}] 님의 계정이 승인되었습니다!\n이제 모든 서비스를 자유롭게 이용하실 수 있습니다.`);
+    }
+
+    userPoints = typeof val.points === 'number' ? val.points : 0;
+    currentEnhanceLevel = typeof val.enhanceLevel === 'number' ? val.enhanceLevel : 0;
+    myNickBg = val.badge || 'nb-none';
+    myNickColor = val.color || '';
+    myNickSymbol = val.symbol || '';
+
+    const firstLoad = !cloudReady;
+    cloudReady = true;
+    updatePointsUI(false);
+    updateEnhanceUI();
+    updateAccountUI();
+    if (firstLoad) {
+      initPresenceSystem();
+      renderRankingsData();
+      syncFromGoogleSheet(false);
+    }
+  }, onDbError);
 }
 
 function updatePointsUI(shouldPushToCloud = true) {
@@ -130,12 +357,6 @@ function updatePointsUI(shouldPushToCloud = true) {
   if (headerPoint) headerPoint.textContent = `${userPoints.toLocaleString()}P`;
   if (chatPoint) chatPoint.textContent = `보유: ${userPoints.toLocaleString()}P`;
   if (shopPoint) shopPoint.textContent = `${userPoints.toLocaleString()}P`;
-
-  localStorage.setItem('bapsim_points', userPoints.toString());
-  localStorage.setItem('bapsim_inventory', JSON.stringify(myInventory));
-  localStorage.setItem('bapsim_custom_color', myNickColor);
-  localStorage.setItem('bapsim_custom_bg', myNickBg);
-  localStorage.setItem('bapsim_custom_symbol', myNickSymbol);
 
   updatePreviewBox();
   if (shouldPushToCloud) syncUserPointToCloud();
@@ -150,32 +371,37 @@ function updatePreviewBox() {
     prefixEl.textContent = myNickSymbol ? `${myNickSymbol} ` : '';
     suffixEl.textContent = myNickSymbol ? ` ${myNickSymbol}` : '';
     textEl.textContent = currentUser.nickname;
-    textEl.className = `${myNickBg || 'nb-none'} text-xs inline-block`;
-    textEl.style.color = myNickColor || '';
+    textEl.className = `${safeClass(myNickBg)} text-xs inline-block`;
+    textEl.style.color = safeColor(myNickColor);
   }
 }
 
+// ==========================================
+// 실시간 접속자
+// ==========================================
 function initPresenceSystem() {
-  if (!currentUser.nickname || currentUser.nickname === "문정러") return;
-  const myPresenceRef = db.ref(`online_users/${currentUser.nickname}`);
-  const connectedRef = db.ref('.info/connected');
+  if (!canSyncToCloud()) return;
+  const mine = db.ref(`online_users/${currentUser.nickname}`);
+  const connected = db.ref('.info/connected');
+  presenceRefs = { mine, connected };
 
-  connectedRef.on('value', (snap) => {
+  connected.on('value', (snap) => {
     if (snap.val() === true) {
-      myPresenceRef.onDisconnect().remove();
-      myPresenceRef.set({
+      mine.onDisconnect().remove();
+      mine.set({
         nickname: currentUser.nickname,
         badge: myNickBg,
         symbol: myNickSymbol,
         color: myNickColor,
         lastSeen: Date.now()
-      });
+      }).catch(() => {});
     }
   });
+}
 
+function attachOnlineUsersListener() {
   db.ref('online_users').on('value', (snap) => {
-    const users = snap.val() || {};
-    const userList = Object.values(users);
+    const userList = Object.values(snap.val() || {});
     const count = userList.length;
 
     const badge = document.getElementById('onlineCountBadge');
@@ -201,122 +427,5 @@ function initPresenceSystem() {
       `;
       container.appendChild(item);
     });
-  });
-}
-
-function openAuthModal() {
-  document.getElementById('authNicknameInput').value = (currentUser.nickname !== "문정러" ? currentUser.nickname : '');
-  document.getElementById('authPasswordInput').value = '';
-  document.getElementById('authModal').classList.remove('hidden');
-}
-function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
-
-async function saveUserProfile() {
-  const input = document.getElementById('authNicknameInput').value.trim();
-  const pass = document.getElementById('authPasswordInput').value.trim();
-  const saveBtn = document.getElementById('saveUserBtn');
-
-  if (!input) return alert('닉네임을 입력해주세요.');
-  if (!isValidNickname(input)) return alert('⚠️ 닉네임에는 특수문자를 사용할 수 없습니다! (한글, 영문, 숫자만)');
-  if (!/^\d{4}$/.test(pass)) return alert('⚠️ 비밀번호는 반드시 숫자 4자리로 입력해주세요!');
-
-  saveBtn.disabled = true;
-  saveBtn.textContent = "확인 중...";
-
-  try {
-    const banSnap = await db.ref(`banned_users/${input}`).once('value');
-    if (banSnap.exists()) {
-      alert(`⛔ [${input}] 은(는) 운영자에 의해 영구 차단된 닉네임입니다.\n다른 닉네임으로 신청해주세요.`);
-      saveBtn.disabled = false;
-      saveBtn.textContent = "가입 및 승인 요청";
-      return;
-    }
-
-    const snap = await db.ref(`user_points/${input}`).once('value');
-    const existingData = snap.val();
-
-    if (snap.exists()) {
-      const passHash = await sha256(pass);
-      const wrongPass = existingData.passwordHash
-        ? existingData.passwordHash !== passHash
-        : (existingData.password && String(existingData.password) !== pass);
-      if (wrongPass) {
-        alert("❌ 비밀번호가 일치하지 않습니다. 해당 닉네임의 본인 비밀번호를 입력해주세요.");
-        saveBtn.disabled = false;
-        saveBtn.textContent = "가입 및 승인 요청";
-        return;
-      }
-
-      // 기존 회원의 평문 비밀번호를 해시로 자동 전환 (평문은 DB에서 삭제)
-      if (!existingData.passwordHash) {
-        await db.ref(`user_points/${input}`).update({ passwordHash: passHash, password: null });
-      }
-
-      currentUser = { nickname: input };
-      localStorage.setItem('bapsim_user', JSON.stringify(currentUser));
-      document.getElementById('userProfileText').textContent = input;
-      userPoints = existingData.points || 30;
-      currentEnhanceLevel = existingData.enhanceLevel || 0;
-      localStorage.setItem('bapsim_enhance_level', currentEnhanceLevel.toString());
-
-      myNickBg = existingData.badge || 'nb-none';
-      myNickColor = existingData.color || '';
-      myNickSymbol = existingData.symbol || '';
-      myInventory = existingData.inventory || { colors: [], bgs: ['nb-none'], symbols: [] };
-      isUserApproved = (existingData.status === 'approved' || existingData.approved === true);
-
-      updatePointsUI(false);
-      updateEnhanceUI();
-      attachUserPointListener();
-      initPresenceSystem();
-      closeAuthModal();
-      alert(`🔑 [${input}] 님으로 로그인되었습니다.`);
-      return;
-    }
-
-    const oldNick = currentUser.nickname;
-    currentUser = { nickname: input };
-    localStorage.setItem('bapsim_user', JSON.stringify(currentUser));
-    document.getElementById('userProfileText').textContent = input;
-
-    await db.ref(`user_points/${input}`).set({
-      nickname: input,
-      passwordHash: await sha256(pass),
-      points: 30,
-      enhanceLevel: currentEnhanceLevel,
-      badge: 'nb-none',
-      color: '',
-      symbol: '',
-      inventory: { colors: [], bgs: ['nb-none'], symbols: [] },
-      status: 'pending',
-      approved: false,
-      createdAt: Date.now(),
-      updatedAt: Date.now()
-    });
-
-    if (oldNick && oldNick !== "문정러" && oldNick !== input) {
-      db.ref(`user_points/${oldNick}`).remove().catch(()=>{});
-      db.ref(`online_users/${oldNick}`).remove().catch(()=>{});
-    }
-
-    isUserApproved = false;
-    userPoints = 30;
-    myInventory = { colors: [], bgs: ['nb-none'], symbols: [] };
-    myNickBg = 'nb-none';
-    myNickColor = '';
-    myNickSymbol = '';
-    updatePointsUI(false);
-    updateEnhanceUI();
-    attachUserPointListener();
-    initPresenceSystem();
-    closeAuthModal();
-
-    alert(`🎉 [${input}] 님, 회원가입 신청이 성공적으로 접수되었습니다!\n\n설정하신 비밀번호를 꼭 기억해주세요. 운영진 승인 후 모든 기능이 활성화됩니다.`);
-  } catch (err) {
-    console.error("회원가입 에러:", err);
-    alert("가입 처리 중 오류가 발생했습니다: " + err.message);
-  } finally {
-    saveBtn.disabled = false;
-    saveBtn.textContent = "가입 및 승인 요청";
-  }
+  }, onDbError);
 }
