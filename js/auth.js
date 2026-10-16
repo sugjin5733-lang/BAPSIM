@@ -18,6 +18,7 @@ let myRequestRef = null;
 let myRequest = null;       // 승인 대기 중인 내 가입/연결 요청
 let presenceRefs = null;
 let onlineNicknames = [];
+let lastServerState = {};
 
 function isGoogleUser() {
   return !!(authUser && !authUser.isAnonymous);
@@ -143,6 +144,7 @@ function detachUserListeners() {
 
 function resetToGuestState() {
   cloudReady = false;
+  lastServerState = {};
   currentUser = { nickname: GUEST_NICK };
   isUserApproved = false;
   userPoints = 0;
@@ -388,11 +390,29 @@ function attachUserPointListener() {
       return;
     }
 
-    myInventory = {
+    // ⚠️ 서버 값으로 덮어쓰는 건 "서버에서 그 값이 실제로 바뀌었을 때"만.
+    // (예: 포인트를 더한 직후 카드만 저장하면, 서버가 바뀌기 전 포인트를 다시 알려주는데
+    //  그걸로 덮어쓰면 방금 더한 포인트가 사라지는 버그가 있었음)
+    const firstLoad = !cloudReady;
+    const srvInventory = {
       colors: toArr(val.inventory && val.inventory.colors),
       bgs: val.inventory && val.inventory.bgs ? toArr(val.inventory.bgs) : ['nb-none'],
       symbols: toArr(val.inventory && val.inventory.symbols)
     };
+    const srv = {
+      points: typeof val.points === 'number' ? val.points : 0,
+      enhanceLevel: typeof val.enhanceLevel === 'number' ? val.enhanceLevel : 0,
+      inventory: JSON.stringify(srvInventory),
+      badge: val.badge || 'nb-none', color: val.color || '', symbol: val.symbol || ''
+    };
+    const changed = (k) => firstLoad || lastServerState[k] !== srv[k];
+    if (changed('inventory')) myInventory = srvInventory;
+    if (changed('points')) userPoints = srv.points;
+    if (changed('enhanceLevel')) currentEnhanceLevel = srv.enhanceLevel;
+    if (changed('badge')) myNickBg = srv.badge;
+    if (changed('color')) myNickColor = srv.color;
+    if (changed('symbol')) myNickSymbol = srv.symbol;
+    lastServerState = srv;
 
     const wasApproved = isUserApproved;
     isUserApproved = (val.status === 'approved' || val.approved === true);
@@ -401,19 +421,16 @@ function attachUserPointListener() {
       alert(`🎉 [${nick}] 님의 계정이 승인되었습니다!\n이제 모든 서비스를 자유롭게 이용하실 수 있습니다.`);
     }
 
-    userPoints = typeof val.points === 'number' ? val.points : 0;
-    serverPoints = userPoints;
+    serverPoints = srv.points;
     myBudget = typeof val.budget === 'number' ? val.budget : 0;
     myBudgetAt = typeof val.budgetAt === 'number' ? val.budgetAt : null;
-    currentEnhanceLevel = typeof val.enhanceLevel === 'number' ? val.enhanceLevel : 0;
-    myNickBg = val.badge || 'nb-none';
-    myNickColor = val.color || '';
-    myNickSymbol = val.symbol || '';
     loadGameStateFromUser(val);
 
-    const firstLoad = !cloudReady;
     cloudReady = true;
-    updatePointsUI(false);
+    // 아직 서버에 안 올라간 내 변경(방금 얻은 포인트 등)이 있으면 이어서 저장
+    const pending = userPoints !== srv.points || JSON.stringify(myInventory) !== srv.inventory
+      || myNickBg !== srv.badge || myNickColor !== srv.color || myNickSymbol !== srv.symbol;
+    updatePointsUI(pending);
     updateEnhanceUI();
     updateAccountUI();
     if (firstLoad) {

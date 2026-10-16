@@ -352,6 +352,8 @@ function sellEnhancedBowl() {
 
 function syncEnhanceToCloud() {
   if (!canSyncToCloud()) return;
+  // 서버 값과 같으면 저장하지 않음 (화면 갱신 → 저장 → 서버 응답 → 화면 갱신 ... 무한 반복 방지)
+  if (currentEnhanceLevel === lastServerState.enhanceLevel) return;
   db.ref(`user_points/${currentUser.nickname}`).update({
     enhanceLevel: currentEnhanceLevel,
     enhanceUpdated: Date.now()
