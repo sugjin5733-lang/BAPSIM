@@ -267,3 +267,15 @@ function renderCardBook() {
   const dBtn = document.getElementById('cardDismantleBtn');
   if (dBtn) dBtn.textContent = dupes > 0 ? `♻️ 중복 분해 (+${dupes.toLocaleString()}P)` : '♻️ 중복 분해';
 }
+
+// 받은 세트 보상의 배지/칭호가 인벤토리에 없으면 복구
+// (보상 포인트·배지가 사라지던 버그 때문에 생긴 누락을 자동으로 메꿈)
+function restoreSetCosmetics() {
+  let fixed = false;
+  CARD_SETS.forEach(s => {
+    if (!mySetsClaimed[s.id]) return;
+    if (s.badge && !myInventory.bgs.includes(s.badge)) { myInventory.bgs.push(s.badge); fixed = true; }
+    if (s.symbol && !myInventory.symbols.includes(s.symbol)) { myInventory.symbols.push(s.symbol); fixed = true; }
+  });
+  return fixed;
+}
