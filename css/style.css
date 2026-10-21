@@ -236,7 +236,7 @@ body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 
 }
 @keyframes bsGodInner { 0% { background-position: 150% 0, 0 0, 0 0, 0 0, 0 0; } 100% { background-position: -150% 0, 0 0, 0 0, 0 0, 0 0; } }
 
-/* 🪷 나전칠기 (1억P): 흑단 옻칠 위 자개빛이 아주 천천히 일렁임. 화려함 대신 품격 */
+/* 🐚 나전칠기 (1억P): 흑단 옻칠 위 자개빛이 아주 천천히 일렁임. 화려함 대신 품격 */
 .nb-najeon {
   background: linear-gradient(160deg, #0d0b0a 0%, #1a1513 55%, #0b0908 100%);
   padding: 3px 13px; border-radius: 6px; letter-spacing: .02em;
@@ -248,7 +248,7 @@ body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 
 .nb-najeon::before {
   inset: 0;
   background:
-    linear-gradient(115deg, transparent 18%, rgba(152,236,224,.22) 30%, rgba(196,170,255,.24) 40%, rgba(255,198,226,.2) 50%, rgba(170,214,255,.22) 60%, transparent 74%),
+    linear-gradient(115deg, transparent 16%, rgba(152,236,224,.38) 30%, rgba(196,170,255,.4) 40%, rgba(255,198,226,.34) 50%, rgba(170,214,255,.38) 60%, transparent 76%),
     radial-gradient(1.2px 1.2px at 20% 40%, rgba(220,255,250,.55) 99%, transparent), radial-gradient(1px 1px at 72% 62%, rgba(240,225,255,.5) 99%, transparent);
   background-size: 260% 100%, 100% 100%, 100% 100%;
   mix-blend-mode: screen; animation: bsNajeon 8s ease-in-out infinite alternate;
