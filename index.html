@@ -11,7 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Black+Han+Sans&family=Rubik+Glitch&family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261022b">
+  <link rel="stylesheet" href="css/style.css?v=20261022c">
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white relative">
 
@@ -541,6 +541,22 @@
         <button onclick="closePrestigeModal(); openShopModal()" class="text-slate-300 hover:text-white text-xs font-bold">‹ 일반 상점</button>
         <button onclick="closePrestigeModal()" class="bg-amber-400 text-slate-950 px-4 py-2 rounded-xl text-xs font-black">닫기</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ⏳ 보류 포인트 / 단축 모달 -->
+  <div id="owedModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this) closeOwedModal()">
+    <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-black text-slate-900 text-base">⏳ 보류 포인트</h3>
+        <button onclick="closeOwedModal()" class="text-slate-400 hover:text-slate-700 text-sm p-1">✕</button>
+      </div>
+      <div id="owedSummary" class="text-center"></div>
+      <div class="space-y-2">
+        <span class="text-xs font-extrabold text-slate-800">⏩ 시간 단축 (수수료는 은행 금고로)</span>
+        <div id="owedOptions" class="space-y-1.5"></div>
+      </div>
+      <p class="text-[10px] text-slate-400 leading-relaxed">1시간 단축 = 보류 72,000P 즉시 지급. 24시간 안에서 첫 1시간 20,000P, 한 시간 더할 때마다 4,000P씩 비싸져요 (하루 최대 12시간). 사이트를 꺼 두면 지급이 멈추지만, 한도는 최대 30만P까지 쌓였다가 다시 접속하면 한 번에 들어와요.</p>
     </div>
   </div>
 
@@ -1438,22 +1454,22 @@
     </div>
   </div>
 
-  <script src="js/core.js?v=20261022b"></script>
-  <script src="js/auth.js?v=20261022b"></script>
-  <script src="js/enhance.js?v=20261022b"></script>
-  <script src="js/shop.js?v=20261022b"></script>
-  <script src="js/chat.js?v=20261022b"></script>
-  <script src="js/games.js?v=20261022b"></script>
-  <script src="js/admin.js?v=20261022b"></script>
-  <script src="js/ranking.js?v=20261022b"></script>
-  <script src="js/restaurants.js?v=20261022b"></script>
-  <script src="js/tools.js?v=20261022b"></script>
-  <script src="js/feed.js?v=20261022b"></script>
-  <script src="js/bank.js?v=20261022b"></script>
-  <script src="js/cards.js?v=20261022b"></script>
-  <script src="js/season.js?v=20261022b"></script>
-  <script src="js/duel.js?v=20261022b"></script>
-  <script src="js/predict.js?v=20261022b"></script>
-  <script src="js/main.js?v=20261022b"></script>
+  <script src="js/core.js?v=20261022c"></script>
+  <script src="js/auth.js?v=20261022c"></script>
+  <script src="js/enhance.js?v=20261022c"></script>
+  <script src="js/shop.js?v=20261022c"></script>
+  <script src="js/chat.js?v=20261022c"></script>
+  <script src="js/games.js?v=20261022c"></script>
+  <script src="js/admin.js?v=20261022c"></script>
+  <script src="js/ranking.js?v=20261022c"></script>
+  <script src="js/restaurants.js?v=20261022c"></script>
+  <script src="js/tools.js?v=20261022c"></script>
+  <script src="js/feed.js?v=20261022c"></script>
+  <script src="js/bank.js?v=20261022c"></script>
+  <script src="js/cards.js?v=20261022c"></script>
+  <script src="js/season.js?v=20261022c"></script>
+  <script src="js/duel.js?v=20261022c"></script>
+  <script src="js/predict.js?v=20261022c"></script>
+  <script src="js/main.js?v=20261022c"></script>
 </body>
 </html>

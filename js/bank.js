@@ -451,13 +451,102 @@ function owedEtaText() {
   const sec = owedEtaSeconds();
   return `⏳ 보류 ${myOwed.toLocaleString()}P → ${fmtEtaClock(sec)}쯤 전부 지급 (${fmtDuration(sec)})`;
 }
+// ------------------------------------------------------------------
+// ⏩ 보류 시간 단축 (수수료는 전부 은행 금고로)
+//  - 1시간 단축 = 보류 72,000P 즉시 지급 (한도가 1시간 더 찬 것과 같음)
+//  - 24시간 안에 n번째 시간 가격 = 20,000 + 4,000×(n-1) P, 하루 최대 12시간
+//    (1시간 20,000 → 12번째 시간 64,000: 뒤로 갈수록 이득이 줄어서 큰 포인트일수록 많이 태움)
+//  - 보안 규칙도 같은 공식으로 검사 (boostSince/boostUsed)
+// ------------------------------------------------------------------
+const BOOST_HOUR_P = BUDGET_RATE * 3600;   // 72,000
+const BOOST_BASE_FEE = 20000;
+const BOOST_STEP_FEE = 4000;
+const BOOST_DAILY_MAX = 12;
+let myBoost = { since: 0, used: 0 };
+let boostCredit = 0, boostDirty = false, boostNewWindow = false;
+
+function loadBoostFromUser(val) {
+  if (boostDirty || boostCredit > 0) return; // 아직 안 올라간 내 변경이 있으면 기다림
+  myBoost = { since: Number(val && val.boostSince) || 0, used: Number(val && val.boostUsed) || 0 };
+}
+function boostWindowActive() { return myBoost.since > 0 && myBoost.since > bankNow() - 86400000 + 5000; }
+function boostUsedNow() { return boostWindowActive() ? myBoost.used : 0; }
+function boostLeftToday() { return Math.max(0, BOOST_DAILY_MAX - boostUsedNow()); }
+function boostFee(h) {
+  const u = boostUsedNow();
+  let fee = 0;
+  for (let i = 0; i < h; i++) fee += BOOST_BASE_FEE + BOOST_STEP_FEE * (u + i);
+  return fee;
+}
+function boostHoursNeeded() {
+  if (!(myOwed > 0)) return 0;
+  const room = Math.max(0, availableBudget() - (userPoints - serverPoints));
+  return Math.max(1, Math.ceil(Math.max(0, myOwed - room) / BOOST_HOUR_P));
+}
+
+async function shortenOwed(h) {
+  if (!checkApprovalGuard()) return;
+  h = Math.floor(Number(h) || 0);
+  if (!(myOwed > 0)) return alert('보류 포인트가 없어요.');
+  const left = boostLeftToday();
+  if (left <= 0) return alert(`오늘은 더 단축할 수 없어요. (24시간에 최대 ${BOOST_DAILY_MAX}시간)`);
+  h = Math.max(1, Math.min(h, left, boostHoursNeeded()));
+  const fee = boostFee(h);
+  if (userPoints + myOwed < fee) return alert(`❌ 수수료 ${fmtP(fee)}가 부족해요.`);
+  if (!confirm(`⏩ 보류 ${h}시간 단축\n\n즉시 지급: 최대 ${fmtP(Math.min(myOwed, BOOST_HOUR_P * h))}\n수수료: ${fmtP(fee)} (은행 금고로)\n\n진행할까요?`)) return;
+  if (myBudgetAt == null && !isAdmin) return alert('잠시 후 다시 시도해 주세요.');
+
+  if (!boostWindowActive()) { myBoost = { since: bankNow(), used: 0 }; boostNewWindow = true; }
+  const fromPts = Math.min(fee, userPoints);
+  const fromOwed = fee - fromPts;
+  if (fromPts > 0) addPoints(-fromPts, `⏩ 보류 ${h}시간 단축 수수료`);
+  if (fromOwed > 0) myOwed -= fromOwed; // 포인트가 모자라면 보류분에서 차감
+  myBoost.used += h;
+  boostCredit += BOOST_HOUR_P * h;
+  boostDirty = true;
+
+  const before = myOwed;
+  const room = Math.floor(availableBudget() + boostCredit - (userPoints - serverPoints));
+  const pay = Math.max(0, Math.min(myOwed, room));
+  if (pay > 0) { myOwed -= pay; addPoints(pay, '⏩ 보류 포인트 즉시 지급'); }
+  updatePointsUI();
+  try { await db.ref('bank/balance').transaction(c => (Number(c) || 0) + fee); } catch (e) { console.warn('수수료 입금 실패:', e && e.message); }
+  if (window.confetti) confetti({ particleCount: 80, spread: 70 });
+  bankToast('⏩ 보류 단축 완료', `<strong>${fmtP(pay)}</strong>가 바로 들어왔어요.${myOwed > 0 ? ` 남은 보류 ${fmtP(myOwed)}` : ' 보류 끝!'}`);
+  renderOwedModal();
+}
+
 function showOwedInfo() {
   if (!(myOwed > 0)) return;
-  const sec = owedEtaSeconds();
-  alert(`⏳ 보류 포인트 ${myOwed.toLocaleString()}P\n\n` +
-    `예상 완료: ${fmtEtaClock(sec)} (${fmtDuration(sec)})\n` +
-    `지급 속도: 시간당 ${(BUDGET_RATE * 3600).toLocaleString()}P, 30초마다 자동 지급\n\n` +
-    `※ 사이트를 켜 둔 동안 지급돼요. 꺼져 있는 동안에도 한도는 최대 ${BUDGET_CAP.toLocaleString()}P까지 차올라서, 다시 접속하면 그만큼 한 번에 들어와요.\n` +
-    `※ 그 사이에 또 크게 벌면 완료 시각이 뒤로 밀려요.`);
+  document.getElementById('owedModal').classList.remove('hidden');
+  renderOwedModal();
 }
+function closeOwedModal() { document.getElementById('owedModal').classList.add('hidden'); }
+function renderOwedModal() {
+  const m = document.getElementById('owedModal');
+  if (!m || m.classList.contains('hidden')) return;
+  const set = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+  if (!(myOwed > 0)) {
+    set('owedSummary', '<div class="text-center text-emerald-600 font-black py-2">✅ 보류 포인트를 모두 받았어요!</div>');
+    set('owedOptions', '');
+    return;
+  }
+  const sec = owedEtaSeconds();
+  set('owedSummary', `
+    <div class="text-2xl font-black text-amber-700">⏳ ${fmtP(myOwed)}</div>
+    <div class="text-xs text-slate-600 mt-1">예상 완료 <strong>${fmtEtaClock(sec)}</strong> (${fmtDuration(sec)}) · 시간당 ${fmtP(BOOST_HOUR_P)}씩 30초마다 지급</div>`);
+  const left = boostLeftToday(), need = boostHoursNeeded();
+  const opts = [...new Set([1, 3, 6, Math.min(need, left)])].filter(h => h >= 1 && h <= Math.min(need, left)).sort((a, b) => a - b);
+  set('owedOptions', left <= 0
+    ? `<div class="text-center text-slate-400 text-xs py-2">오늘 단축 한도(${BOOST_DAILY_MAX}시간)를 다 썼어요.</div>`
+    : opts.map(h => {
+        const fee = boostFee(h), got = Math.min(myOwed, BOOST_HOUR_P * h);
+        const all = h === need;
+        return `<button onclick="shortenOwed(${h})" class="w-full flex items-center justify-between gap-2 rounded-xl border ${all ? 'border-amber-400 bg-amber-50' : 'border-slate-200 bg-white'} hover:bg-amber-50 px-3 py-2 text-left">
+          <span class="text-xs font-black text-slate-800">⏩ ${h}시간 단축${all ? ' <span class="text-amber-600">(전부 받기)</span>' : ''}<br><span class="text-[10px] font-bold text-slate-400">즉시 ${fmtP(got)} 지급</span></span>
+          <span class="text-xs font-black text-rose-600 shrink-0">-${fmtP(fee)}</span>
+        </button>`;
+      }).join('') + `<div class="text-[10px] text-slate-400 text-center">오늘 남은 단축 ${left}시간 · 다음 1시간 ${fmtP(boostFee(1))}</div>`);
+}
+
 setInterval(updateOwedEta, 30000);

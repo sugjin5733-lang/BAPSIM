@@ -218,7 +218,7 @@
           ".validate": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || (newData.isNumber() && newData.val() >= 0 && newData.val() <= 300000 && newData.parent().child('budgetAt').val() === now)"
         },
         "budgetAt": {
-          ".validate": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || (newData.val() === now && newData.parent().child('budget').isNumber() && newData.parent().child('budget').val() >= 0 && newData.parent().child('budget').val() <= 300000 && ((data.exists() && newData.parent().child('budget').val() <= data.parent().child('budget').val() + 0.02 * (now - data.val()) - (newData.parent().child('points').val() - data.parent().child('points').val())) || (!data.exists() && newData.parent().child('budget').val() <= 50000 && newData.parent().child('points').val() <= data.parent().child('points').val())))"
+          ".validate": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || (newData.val() === now && newData.parent().child('budget').isNumber() && newData.parent().child('budget').val() >= 0 && newData.parent().child('budget').val() <= 300000 && ((data.exists() && ((newData.parent().child('budget').val() <= data.parent().child('budget').val() + 0.02 * (now - data.val()) - (newData.parent().child('points').val() - data.parent().child('points').val())) || (newData.parent().child('boostSince').val() === data.parent().child('boostSince').val() && newData.parent().child('boostUsed').isNumber() && data.parent().child('boostUsed').isNumber() && newData.parent().child('budget').val() <= data.parent().child('budget').val() + 0.02 * (now - data.val()) - (newData.parent().child('points').val() - data.parent().child('points').val()) + 72000 * (newData.parent().child('boostUsed').val() - data.parent().child('boostUsed').val())) || (newData.parent().child('boostSince').val() === now && newData.parent().child('boostUsed').isNumber() && newData.parent().child('budget').val() <= data.parent().child('budget').val() + 0.02 * (now - data.val()) - (newData.parent().child('points').val() - data.parent().child('points').val()) + 72000 * newData.parent().child('boostUsed').val()))) || (!data.exists() && newData.parent().child('budget').val() <= 50000 && newData.parent().child('points').val() <= data.parent().child('points').val())))"
         },
         "enhanceLevel": {
           ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 20 && ((auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || !data.exists() || newData.val() <= data.val() + 2)"
@@ -233,6 +233,12 @@
           "$item": {
             ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 999"
           }
+        },
+        "boostSince": {
+          ".validate": "newData.isNumber() && (newData.val() === data.val() || (newData.val() === now && (!data.exists() || data.val() <= now - 86400000)))"
+        },
+        "boostUsed": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 12 && (!data.exists() || newData.val() >= data.val() || newData.parent().child('boostSince').val() === now)"
         },
         "owed": {
           ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000000"

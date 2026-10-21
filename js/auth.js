@@ -176,6 +176,7 @@ function loadGameStateFromUser(val) {
   if (typeof loadJackpotFromUser === "function") loadJackpotFromUser(val);
   if (typeof loadPrestigeFromUser === "function") loadPrestigeFromUser(val);
   if (typeof loadBankFromUser === "function") loadBankFromUser(val);
+  if (typeof loadBoostFromUser === "function") loadBoostFromUser(val);
 }
 
 function bindNickname(nick) {
@@ -346,7 +347,7 @@ async function initBudgetIfNeeded() {
 let pendingLog = [];     // 아직 서버에 안 올라간 변동 [{d, r}]
 let myOwed = 0;          // 보류 포인트 (한도 초과분, 자동 지급 대기)
 let myMining = { date: '', earned: 0 };
-const MINING_DAILY_CAP = 5000; // 무료 채굴 게임(광클/스피드/암기) 하루 최대
+const MINING_DAILY_CAP = 30000; // 무료 채굴 게임(광클/스피드/암기) 하루 최대
 
 function addPoints(delta, reason) {
   delta = Math.round(Number(delta) || 0);
@@ -394,7 +395,8 @@ function syncUserPointToCloud() {
 
   if (userPoints !== serverPoints || myOwed !== (lastServerState.owed || 0)) {
     if (myBudgetAt == null && !isAdmin) { initBudgetIfNeeded(); return; }
-    const avail = availableBudget();
+    const credit = (typeof boostCredit === 'number') ? boostCredit : 0; // ⏩ 보류 단축으로 산 한도
+    const avail = availableBudget() + credit;
     let delta = userPoints - serverPoints;
     if (delta > Math.floor(avail)) {
       // 한도 초과분은 버리지 않고 보류 → 자동 지급
@@ -410,6 +412,11 @@ function syncUserPointToCloud() {
     put('budget', Math.floor(Math.min(BUDGET_CAP, avail - delta)));
     put('budgetAt', firebase.database.ServerValue.TIMESTAMP);
     put('owed', myOwed);
+    if (typeof boostDirty !== 'undefined' && boostDirty) {
+      put('boostUsed', myBoost.used);
+      put('boostSince', boostNewWindow ? firebase.database.ServerValue.TIMESTAMP : myBoost.since);
+      boostCredit = 0; boostDirty = false; boostNewWindow = false;
+    }
   }
 
   if (pendingLog.length) {
