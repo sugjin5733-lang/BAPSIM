@@ -132,6 +132,7 @@ async function handleAuthChange(user) {
 }
 
 function detachUserListeners() {
+  if (typeof stopBank === 'function') stopBank();
   if (myPointsRef) { myPointsRef.off(); myPointsRef = null; }
   if (myRequestRef) { myRequestRef.off(); myRequestRef = null; }
   if (typeof renameRef !== 'undefined' && renameRef) { renameRef.off(); renameRef = null; myRenameRequest = null; }
@@ -174,6 +175,7 @@ function loadGameStateFromUser(val) {
   loadBetsFromUser(val);
   if (typeof loadJackpotFromUser === "function") loadJackpotFromUser(val);
   if (typeof loadPrestigeFromUser === "function") loadPrestigeFromUser(val);
+  if (typeof loadBankFromUser === "function") loadBankFromUser(val);
 }
 
 function bindNickname(nick) {
@@ -351,6 +353,7 @@ function addPoints(delta, reason) {
   if (!delta) return;
   userPoints += delta;
   pendingLog.push({ d: delta, r: String(reason || '기타').slice(0, 60) });
+  if (typeof trackDayNet === 'function') trackDayNet(delta, reason);
 }
 
 // 무료 채굴 게임 보상: 하루 한도 안에서만 지급, 실제 지급액을 돌려줌
@@ -386,6 +389,7 @@ function syncUserPointToCloud() {
   put('symbol', myNickSymbol);
   put('inventory', myInventory);
   put('mining', myMining);
+  if (typeof dayNetLoaded !== 'undefined' && dayNetLoaded) put('dayNet', myDayNet);
   put('updatedAt', Date.now());
 
   if (userPoints !== serverPoints || myOwed !== (lastServerState.owed || 0)) {
@@ -485,7 +489,7 @@ async function openPointLog(nick) {
     const mining = u.mining && u.mining.date === todayKey() ? u.mining.earned : 0;
     document.getElementById('pointLogSummary').innerHTML = `
       현재 <strong>${(u.points || 0).toLocaleString()}P</strong>
-      ${owed > 0 ? ` · <span class="text-amber-600 font-black">⏳ 보류 ${owed.toLocaleString()}P (자동 지급 대기)</span>` : ''}
+      ${owed > 0 ? ` · <span class="text-amber-600 font-black">${nick === currentUser.nickname && typeof owedEtaText === 'function' ? esc(owedEtaText()) : `⏳ 보류 ${owed.toLocaleString()}P (자동 지급 대기)`}</span>` : ''}
       · 오늘 무료 채굴 ${mining.toLocaleString()} / ${MINING_DAILY_CAP.toLocaleString()}P`;
     list.innerHTML = rows.length === 0
       ? '<div class="text-center text-slate-400 py-6">아직 기록된 내역이 없어요 (이번 업데이트 이후부터 기록돼요)</div>'
@@ -606,6 +610,7 @@ function attachUserPointListener() {
       settleMyDuels();
       settleMyBets();
       renderDuelArena();
+      if (typeof initBank === 'function') initBank();
     }
   }, onDbError);
 }
@@ -615,7 +620,8 @@ function updatePointsUI(shouldPushToCloud = true) {
   const chatPoint = document.getElementById('chatPointDisplay');
   const shopPoint = document.getElementById('shopCurrentPoints');
 
-  if (headerPoint) headerPoint.textContent = myOwed > 0 ? `${userPoints.toLocaleString()}P ⏳+${myOwed.toLocaleString()}` : `${userPoints.toLocaleString()}P`;
+  if (headerPoint) headerPoint.textContent = `${userPoints.toLocaleString()}P`;
+  if (typeof updateOwedEta === 'function') updateOwedEta();
   if (chatPoint) chatPoint.textContent = `보유: ${userPoints.toLocaleString()}P`;
   if (shopPoint) shopPoint.textContent = `${userPoints.toLocaleString()}P`;
 

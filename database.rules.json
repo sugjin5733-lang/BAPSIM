@@ -141,6 +141,60 @@
         }
       }
     },
+    "transfers": {
+      "$to": {
+        ".read": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || ((auth != null && root.child('user_uids').child(auth.uid).exists() && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('status').val() === 'approved' && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('uid').val() === auth.uid) && $to === root.child('user_uids').child(auth.uid).val())",
+        "$id": {
+          ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || (!data.exists() && (auth != null && root.child('user_uids').child(auth.uid).exists() && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('status').val() === 'approved' && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('uid').val() === auth.uid) && newData.child('from').val() === root.child('user_uids').child(auth.uid).val() && newData.child('fromUid').val() === auth.uid && $to !== root.child('user_uids').child(auth.uid).val() && root.child('user_points').child($to).child('status').val() === 'approved') || (!newData.exists() && (auth != null && root.child('user_uids').child(auth.uid).exists() && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('status').val() === 'approved' && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('uid').val() === auth.uid) && $to === root.child('user_uids').child(auth.uid).val())",
+          ".validate": "!newData.exists() || (newData.child('amount').isNumber() && newData.child('amount').val() >= 100 && newData.child('amount').val() <= 100000000 && newData.child('ts').val() === now && (!newData.child('msg').exists() || (newData.child('msg').isString() && newData.child('msg').val().length <= 50)))"
+        }
+      }
+    },
+    "bank": {
+      ".read": "auth != null",
+      "balance": {
+        ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || (auth != null && root.child('user_uids').child(auth.uid).exists() && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('status').val() === 'approved' && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('uid').val() === auth.uid)",
+        ".validate": "newData.isNumber() && newData.val() >= 0"
+      },
+      "donors": {
+        "$nick": {
+          ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || ((auth != null && root.child('user_uids').child(auth.uid).exists() && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('status').val() === 'approved' && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('uid').val() === auth.uid) && $nick === root.child('user_uids').child(auth.uid).val())",
+          ".validate": "newData.isNumber() && (!data.exists() || newData.val() >= data.val())"
+        }
+      },
+      "days": {
+        "$day": {
+          ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || (!data.exists() && (auth != null && root.child('user_uids').child(auth.uid).exists() && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('status').val() === 'approved' && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('uid').val() === auth.uid))",
+          "taxes": {
+            "$nick": {
+              ".validate": "newData.val() === 30000 || newData.val() === 20000 || newData.val() === 10000"
+            }
+          },
+          "relief": {
+            "$nick": {
+              "amt": {
+                ".validate": "newData.val() === 20000"
+              }
+            }
+          },
+          "createdAt": {
+            ".validate": "newData.val() === now"
+          },
+          "paid": {
+            "$nick": {
+              ".write": "(auth != null && root.child('user_uids').child(auth.uid).exists() && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('status').val() === 'approved' && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('uid').val() === auth.uid) && $nick === root.child('user_uids').child(auth.uid).val() && !data.exists()",
+              ".validate": "newData.isNumber() && newData.val() >= 0"
+            }
+          },
+          "claimed": {
+            "$nick": {
+              ".write": "(auth != null && root.child('user_uids').child(auth.uid).exists() && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('status').val() === 'approved' && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('uid').val() === auth.uid) && $nick === root.child('user_uids').child(auth.uid).val() && (!data.exists() || data.val() === 'pending')",
+              ".validate": "!newData.exists() || newData.val() === 'pending' || newData.val() === 20000"
+            }
+          }
+        }
+      }
+    },
     "user_points": {
       ".read": "auth != null",
       "$nick": {

@@ -11,7 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Black+Han+Sans&family=Rubik+Glitch&family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261021l">
+  <link rel="stylesheet" href="css/style.css?v=20261022a">
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white relative">
 
@@ -144,6 +144,12 @@
           <span id="headerPointDisplay">0P</span>
         </button>
 
+        <button id="headerOwedBtn" onclick="showOwedInfo()" title="보류 포인트 지급 예정 시각" class="hidden flex items-center gap-1 bg-amber-100/70 hover:bg-amber-100 border border-amber-300/80 px-2 py-1.5 rounded-xl text-[11px] font-black text-amber-800 transition-colors">
+          <span>⏳</span>
+          <span id="headerOwedAmount" class="hidden sm:inline"></span>
+          <span id="headerOwedEta" class="text-[10px] font-bold text-amber-700"></span>
+        </button>
+
         <button onclick="openAddModal()" class="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 active:scale-95 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-md shadow-orange-500/20 transition-all">
           <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
           <span class="hidden sm:inline">식당/메뉴 등록</span>
@@ -172,6 +178,17 @@
 
   <!-- 메인 본문 -->
   <main class="max-w-6xl mx-auto px-4 pt-6 space-y-7">
+    <!-- 👑 프레스티지 회원 배너 -->
+    <div id="prestigeMemberBanner" onclick="openPrestigeModal()" class="hidden prestige-member-banner cursor-pointer rounded-2xl px-4 py-2.5 flex items-center gap-3">
+      <div class="shrink-0 text-center leading-tight">
+        <div class="text-[9px] font-black tracking-[0.25em] text-amber-300">PRESTIGE</div>
+        <div class="text-xs font-black text-white">👑 회원 <span id="prestigeMemberCount" class="text-amber-300">0명</span></div>
+      </div>
+      <div class="h-8 w-px bg-amber-400/30 shrink-0"></div>
+      <div id="prestigeMemberList" class="flex-1 min-w-0 flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5"></div>
+      <span class="shrink-0 text-amber-300 font-black">›</span>
+    </div>
+
     <!-- 상단 배너 & 타이머 -->
     <div class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 rounded-3xl p-6 sm:p-7 text-white shadow-xl shadow-slate-900/10 space-y-5">
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -228,6 +245,11 @@
           <button onclick="openShopModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-amber-300 font-bold px-3 py-2 rounded-xl text-xs shadow-md transition-all">
             <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i>
             <span>상점</span>
+          </button>
+
+          <button onclick="openBankModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white font-black px-3 py-2 rounded-xl text-xs shadow-md transition-all">
+            <span>🏦</span>
+            <span>은행</span>
           </button>
 
           <button onclick="openPrestigeModal()" class="prestige-btn flex-1 sm:flex-initial flex items-center justify-center gap-1.5 text-amber-200 font-black px-3 py-2 rounded-xl text-xs shadow-md transition-all">
@@ -501,6 +523,10 @@
       </div>
       <div id="prestigePassBox"></div>
       <div class="space-y-2.5">
+        <span class="text-xs font-extrabold text-sky-100">🎗️ 기부 천사 배지</span>
+        <div id="prestigeDonorBox"></div>
+      </div>
+      <div class="space-y-2.5">
         <div class="flex items-center justify-between">
           <span class="text-xs font-extrabold text-amber-100">✨ 신화 배지</span>
           <span class="text-[10px] text-amber-200/80 font-bold bg-amber-400/10 border border-amber-400/30 px-2 py-0.5 rounded-full">50만~88만P: 12강 · 99만P: 17강 · 1,000만P↑: 20강</span>
@@ -514,6 +540,63 @@
       <div class="pt-2 border-t border-amber-400/20 flex justify-between">
         <button onclick="closePrestigeModal(); openShopModal()" class="text-slate-300 hover:text-white text-xs font-bold">‹ 일반 상점</button>
         <button onclick="closePrestigeModal()" class="bg-amber-400 text-slate-950 px-4 py-2 rounded-xl text-xs font-black">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🏦 밥심 은행 모달 -->
+  <div id="bankModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this) closeBankModal()">
+    <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h3 class="font-black text-slate-900 text-base">🏦 밥심 은행</h3>
+          <p class="text-[11px] text-slate-400">내 보유 <strong id="bankMyPoints" class="text-slate-700">0P</strong></p>
+        </div>
+        <button onclick="closeBankModal()" class="text-slate-400 hover:text-slate-700 text-sm p-1">✕</button>
+      </div>
+
+      <div class="rounded-2xl bg-gradient-to-br from-sky-600 to-indigo-700 text-white p-4">
+        <div class="text-[10px] font-black tracking-widest text-sky-200">은행 금고 (재난지원금 재원)</div>
+        <div id="bankBalance" class="text-2xl font-black mt-0.5">0P</div>
+        <div class="text-[10px] text-sky-100/80 mt-1 leading-relaxed">매일 자산 1·2·3위에게 3만·2만·1만P 부자세 → 자산 최하위 · 어제 가장 많이 잃은 사람에게 2만P씩 재난지원금</div>
+      </div>
+
+      <div class="space-y-2">
+        <span class="text-xs font-extrabold text-slate-800">💸 포인트 보내기</span>
+        <div class="grid grid-cols-2 gap-2">
+          <input id="bankSendTo" list="bankNickList" placeholder="받는 사람 닉네임" class="col-span-2 border border-slate-200 rounded-xl px-3 py-2 text-xs" />
+          <datalist id="bankNickList"></datalist>
+          <input id="bankSendAmount" type="number" min="100" step="100" placeholder="금액 (최소 100P)" class="border border-slate-200 rounded-xl px-3 py-2 text-xs" />
+          <input id="bankSendMsg" maxlength="50" placeholder="메모 (선택)" class="border border-slate-200 rounded-xl px-3 py-2 text-xs" />
+        </div>
+        <button onclick="sendPoints()" class="w-full bg-slate-900 text-white font-black py-2.5 rounded-xl text-xs">보내기</button>
+        <p class="text-[10px] text-slate-400">받는 사람이 접속하면 바로 들어가요. 큰 금액은 받는 사람 한도에 따라 일부가 '⏳ 보류'로 천천히 들어갈 수 있어요.</p>
+      </div>
+
+      <div class="space-y-2">
+        <span class="text-xs font-extrabold text-slate-800">🎗️ 기부하기</span>
+        <div class="flex gap-2">
+          <input id="bankDonateAmount" type="number" min="100" step="100" placeholder="기부 금액" class="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-xs" />
+          <button onclick="donatePoints()" class="bg-sky-600 text-white font-black px-4 rounded-xl text-xs">기부</button>
+        </div>
+        <div class="flex gap-1.5">
+          <button onclick="donatePoints(10000)" class="flex-1 bg-sky-50 border border-sky-200 text-sky-700 font-bold py-1.5 rounded-lg text-[11px]">1만</button>
+          <button onclick="donatePoints(100000)" class="flex-1 bg-sky-50 border border-sky-200 text-sky-700 font-bold py-1.5 rounded-lg text-[11px]">10만</button>
+          <button onclick="donatePoints(999999)" class="flex-1 bg-sky-50 border border-sky-200 text-sky-700 font-bold py-1.5 rounded-lg text-[11px]">999,999</button>
+        </div>
+        <p id="bankMyDonated" class="text-[11px] text-slate-500"></p>
+        <p class="text-[10px] text-slate-400">누적 999,999P 이상 기부하면 프레스티지 상점에서 <span class="nb-angel inline-block text-[10px]">😇 천사의 날개</span> 배지를 받을 수 있어요.</p>
+      </div>
+
+      <div class="space-y-1.5">
+        <span class="text-xs font-extrabold text-slate-800">📅 오늘의 정산</span>
+        <div id="bankToday" class="text-[11px] bg-slate-50 border border-slate-100 rounded-2xl p-3"></div>
+        <p class="text-[10px] text-slate-400">매일 0시(한국 시간) 이후 첫 접속자가 정산표를 만들고, 대상자가 접속하면 자동으로 납부·지급돼요. 금고가 부족하면 채워지는 대로 지급돼요.</p>
+      </div>
+
+      <div class="space-y-1.5">
+        <span class="text-xs font-extrabold text-slate-800">🏆 기부 명예의 전당</span>
+        <div id="bankDonorRank" class="text-xs bg-slate-50 border border-slate-100 rounded-2xl px-3 py-2"></div>
       </div>
     </div>
   </div>
@@ -1355,21 +1438,22 @@
     </div>
   </div>
 
-  <script src="js/core.js?v=20261021l"></script>
-  <script src="js/auth.js?v=20261021l"></script>
-  <script src="js/enhance.js?v=20261021l"></script>
-  <script src="js/shop.js?v=20261021l"></script>
-  <script src="js/chat.js?v=20261021l"></script>
-  <script src="js/games.js?v=20261021l"></script>
-  <script src="js/admin.js?v=20261021l"></script>
-  <script src="js/ranking.js?v=20261021l"></script>
-  <script src="js/restaurants.js?v=20261021l"></script>
-  <script src="js/tools.js?v=20261021l"></script>
-  <script src="js/feed.js?v=20261021l"></script>
-  <script src="js/cards.js?v=20261021l"></script>
-  <script src="js/season.js?v=20261021l"></script>
-  <script src="js/duel.js?v=20261021l"></script>
-  <script src="js/predict.js?v=20261021l"></script>
-  <script src="js/main.js?v=20261021l"></script>
+  <script src="js/core.js?v=20261022a"></script>
+  <script src="js/auth.js?v=20261022a"></script>
+  <script src="js/enhance.js?v=20261022a"></script>
+  <script src="js/shop.js?v=20261022a"></script>
+  <script src="js/chat.js?v=20261022a"></script>
+  <script src="js/games.js?v=20261022a"></script>
+  <script src="js/admin.js?v=20261022a"></script>
+  <script src="js/ranking.js?v=20261022a"></script>
+  <script src="js/restaurants.js?v=20261022a"></script>
+  <script src="js/tools.js?v=20261022a"></script>
+  <script src="js/feed.js?v=20261022a"></script>
+  <script src="js/bank.js?v=20261022a"></script>
+  <script src="js/cards.js?v=20261022a"></script>
+  <script src="js/season.js?v=20261022a"></script>
+  <script src="js/duel.js?v=20261022a"></script>
+  <script src="js/predict.js?v=20261022a"></script>
+  <script src="js/main.js?v=20261022a"></script>
 </body>
 </html>
