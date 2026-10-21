@@ -441,5 +441,5 @@ function unlockJackpotBadge() {
   if (myJackpotUnlocked || !canSyncToCloud()) return;
   myJackpotUnlocked = true;
   db.ref(`user_points/${currentUser.nickname}/jackpotUnlock`).set(true).catch(() => {});
-  setTimeout(() => alert('🎰 축하해요! 이제 명품 상점에서 [잭팟 777 (전설의 손)] 배지를 살 수 있어요.\n(초특급 잭팟을 터뜨린 사람만 살 수 있는 배지예요)'), 1200);
+  setTimeout(() => alert('🎰 축하해요! 이제 상점에서 [잭팟 777 (전설의 손)] 배지를 살 수 있어요.\n(초특급 잭팟을 터뜨린 사람만 살 수 있는 배지예요)'), 1200);
 }

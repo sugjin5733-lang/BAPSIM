@@ -11,7 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Black+Han+Sans&family=Rubik+Glitch&family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261021j">
+  <link rel="stylesheet" href="css/style.css?v=20261021k">
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white relative">
 
@@ -227,7 +227,12 @@
 
           <button onclick="openShopModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-amber-300 font-bold px-3 py-2 rounded-xl text-xs shadow-md transition-all">
             <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i>
-            <span>명품 상점</span>
+            <span>상점</span>
+          </button>
+
+          <button onclick="openPrestigeModal()" class="prestige-btn flex-1 sm:flex-initial flex items-center justify-center gap-1.5 text-amber-200 font-black px-3 py-2 rounded-xl text-xs shadow-md transition-all">
+            <span>👑</span>
+            <span>프레스티지</span>
           </button>
 
           <button onclick="openRankModal('points')" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-3 py-2 rounded-xl text-xs shadow-md transition-all">
@@ -479,6 +484,36 @@
             <tbody id="enhanceProbTableBody" class="divide-y divide-slate-900 font-medium"></tbody>
           </table>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 👑 프레스티지 상점 모달 -->
+  <div id="prestigeModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4" onclick="if(event.target===this) closePrestigeModal()">
+    <div class="prestige-panel w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto text-white">
+      <div class="flex items-center justify-between border-b border-amber-400/25 pb-3">
+        <div>
+          <div class="text-[10px] font-black tracking-[0.3em] text-amber-300">BAPSIM PRESTIGE</div>
+          <h3 class="font-black text-lg text-white">👑 프레스티지 상점</h3>
+          <p class="text-[11px] text-slate-400">내 보유: <strong id="prestigeCurrentPoints" class="text-amber-300">0P</strong> · 입장권이 없어도 구경은 자유</p>
+        </div>
+        <button onclick="closePrestigeModal()" class="text-slate-400 hover:text-white text-sm p-1">✕</button>
+      </div>
+      <div id="prestigePassBox"></div>
+      <div class="space-y-2.5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-extrabold text-amber-100">✨ 신화 배지</span>
+          <span class="text-[10px] text-amber-200/80 font-bold bg-amber-400/10 border border-amber-400/30 px-2 py-0.5 rounded-full">99만P: 17강 · 1,000만P↑: 20강</span>
+        </div>
+        <div class="space-y-2 text-xs" id="prestigeBadgeList"></div>
+      </div>
+      <div class="space-y-2.5">
+        <span class="text-xs font-extrabold text-amber-100">✏️ 닉네임 변경권 (1,000,000P)</span>
+        <div id="renameSection" class="space-y-1.5"></div>
+      </div>
+      <div class="pt-2 border-t border-amber-400/20 flex justify-between">
+        <button onclick="closePrestigeModal(); openShopModal()" class="text-slate-300 hover:text-white text-xs font-bold">‹ 일반 상점</button>
+        <button onclick="closePrestigeModal()" class="bg-amber-400 text-slate-950 px-4 py-2 rounded-xl text-xs font-black">닫기</button>
       </div>
     </div>
   </div>
@@ -866,14 +901,14 @@
     </div>
   </div>
 
-  <!-- 명품 상점 모달 -->
+  <!-- 상점 모달 -->
   <div id="shopModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
         <div class="flex items-center gap-2">
           <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-lg">💰</div>
           <div>
-            <h3 class="font-black text-slate-900 text-base">밥심 명품 상점 & 인벤토리</h3>
+            <h3 class="font-black text-slate-900 text-base">밥심 상점 & 인벤토리</h3>
             <p class="text-[11px] text-slate-400">내 보유: <strong id="shopCurrentPoints" class="text-amber-600">0P</strong> | 밥 등급: <strong id="shopCurrentEnhanceLvl" class="text-orange-600">+0강</strong></p>
           </div>
         </div>
@@ -902,10 +937,14 @@
         <div class="grid grid-cols-2 gap-2 text-xs" id="shopColorList"></div>
       </div>
 
-      <div class="space-y-2.5">
-        <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><span>✏️</span> 닉네임 변경권 (1,000,000P)</span>
-        <div id="renameSection" class="space-y-1.5"></div>
-      </div>
+      <button onclick="openPrestigeModal()" class="prestige-banner w-full rounded-2xl px-4 py-3 flex items-center justify-between text-left">
+        <div>
+          <div class="text-[10px] font-black tracking-widest text-amber-300">PRESTIGE</div>
+          <div class="text-sm font-black text-white">👑 프레스티지 상점 구경하기</div>
+          <div class="text-[10px] text-slate-300">99만P 이상 신화 배지 · 닉네임 변경권</div>
+        </div>
+        <span class="text-amber-300 text-lg font-black">›</span>
+      </button>
 
       <div id="shopOwnedSpecialWrap" class="hidden space-y-2.5">
         <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><span>🏆</span> 내 획득 배지 (세트 완성 · 시즌 보상)</span>
@@ -915,10 +954,10 @@
       <div class="space-y-3">
         <div class="flex items-center justify-between">
           <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5">
-            <span>🏷️</span> 닉네임 명품 & 신화 배지
+            <span>🏷️</span> 닉네임 배지
           </span>
           <span class="text-[10px] text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded-full">
-            5,000P↑: 12강 / 99만P: 17강 / 1,000만P: 20강
+            5,000P↑: 12강 필수
           </span>
         </div>
         <div class="space-y-2 text-xs" id="shopBadgeList"></div>
@@ -1316,21 +1355,21 @@
     </div>
   </div>
 
-  <script src="js/core.js?v=20261021j"></script>
-  <script src="js/auth.js?v=20261021j"></script>
-  <script src="js/enhance.js?v=20261021j"></script>
-  <script src="js/shop.js?v=20261021j"></script>
-  <script src="js/chat.js?v=20261021j"></script>
-  <script src="js/games.js?v=20261021j"></script>
-  <script src="js/admin.js?v=20261021j"></script>
-  <script src="js/ranking.js?v=20261021j"></script>
-  <script src="js/restaurants.js?v=20261021j"></script>
-  <script src="js/tools.js?v=20261021j"></script>
-  <script src="js/feed.js?v=20261021j"></script>
-  <script src="js/cards.js?v=20261021j"></script>
-  <script src="js/season.js?v=20261021j"></script>
-  <script src="js/duel.js?v=20261021j"></script>
-  <script src="js/predict.js?v=20261021j"></script>
-  <script src="js/main.js?v=20261021j"></script>
+  <script src="js/core.js?v=20261021k"></script>
+  <script src="js/auth.js?v=20261021k"></script>
+  <script src="js/enhance.js?v=20261021k"></script>
+  <script src="js/shop.js?v=20261021k"></script>
+  <script src="js/chat.js?v=20261021k"></script>
+  <script src="js/games.js?v=20261021k"></script>
+  <script src="js/admin.js?v=20261021k"></script>
+  <script src="js/ranking.js?v=20261021k"></script>
+  <script src="js/restaurants.js?v=20261021k"></script>
+  <script src="js/tools.js?v=20261021k"></script>
+  <script src="js/feed.js?v=20261021k"></script>
+  <script src="js/cards.js?v=20261021k"></script>
+  <script src="js/season.js?v=20261021k"></script>
+  <script src="js/duel.js?v=20261021k"></script>
+  <script src="js/predict.js?v=20261021k"></script>
+  <script src="js/main.js?v=20261021k"></script>
 </body>
 </html>

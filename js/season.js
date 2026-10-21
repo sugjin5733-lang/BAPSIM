@@ -63,7 +63,7 @@ async function initSeason() {
     updatePointsUI();
     postFeed('season', `지난주 밥키우기 시즌 ${reward.label}! (+${ranked[myRank - 1].maxLevel}강) +${reward.points.toLocaleString()}P`, reward.rank === 1 ? 'legendary' : 'big');
     if (window.confetti) confetti({ particleCount: 250, spread: 140 });
-    alert(`🏆 지난주 밥키우기 시즌 결과: ${reward.label}!\n최고 기록 +${ranked[myRank - 1].maxLevel}강\n\n보상: +${reward.points.toLocaleString()}P + 시즌 배지\n(명품 상점 > 내 획득 배지에서 장착)`);
+    alert(`🏆 지난주 밥키우기 시즌 결과: ${reward.label}!\n최고 기록 +${ranked[myRank - 1].maxLevel}강\n\n보상: +${reward.points.toLocaleString()}P + 시즌 배지\n(상점 > 내 획득 배지에서 장착)`);
   } catch (err) {
     console.warn('시즌 확인 실패:', err);
   }

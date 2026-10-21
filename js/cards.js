@@ -182,7 +182,7 @@ function claimSetReward(setId) {
   updatePointsUI();
   if (set.id === 'all') postFeed('set', `📒 이번 주 반찬 도감을 모두 채웠어요! +${set.points.toLocaleString()}P`, 'legendary', true);
   if (window.confetti) confetti({ particleCount: 180, spread: 120 });
-  alert(`🎉 ${set.name} 완성 보상!\n+${set.points.toLocaleString()}P${set.badge ? '\n+ 전용 배지 (명품 상점 > 내 획득 배지에서 장착)' : ''}${set.symbol ? `\n+ 전용 칭호 ${set.symbol}` : ''}`);
+  alert(`🎉 ${set.name} 완성 보상!\n+${set.points.toLocaleString()}P${set.badge ? '\n+ 전용 배지 (상점 > 내 획득 배지에서 장착)' : ''}${set.symbol ? `\n+ 전용 칭호 ${set.symbol}` : ''}`);
   renderCardBook();
 }
 

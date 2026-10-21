@@ -1,4 +1,13 @@
-// 밥심 - 명품 상점 & 치장
+// 밥심 - 상점 & 치장 (+ 👑 프레스티지 상점)
+//
+// 👑 프레스티지 상점: 999,999P 이상 상품 전용 (입장권 1,000,000P, 영구)
+//  - 입장권이 없어도 구경은 가능, 구매만 막힘
+//  - 이미 가진 프레스티지 배지는 입장권 없이도 장착/해제 가능
+const PRESTIGE_MIN = 999999;
+const PRESTIGE_PASS_PRICE = 1000000;
+let myPrestigePass = false;
+function loadPrestigeFromUser(val) { myPrestigePass = !!(val && val.prestigePass); }
+function isPrestigeItem(cost) { return cost >= PRESTIGE_MIN; }
 
 // ==========================================
 // 4. 상점 메타데이터 및 밥키우기 레벨 제한 (5000P 이상은 12강부터)
@@ -109,10 +118,14 @@ function renderShopUI() {
     });
   }
 
-  const bgContainer = document.getElementById('shopBadgeList');
+  renderBadgeCards(document.getElementById('shopBadgeList'), SHOP_DATA.bgs.filter(b => !isPrestigeItem(b.cost)));
+  renderPrestigeShop();
+}
+
+function renderBadgeCards(bgContainer, list) {
   if (bgContainer) {
     bgContainer.innerHTML = '';
-    SHOP_DATA.bgs.forEach(bg => {
+    list.forEach(bg => {
       const isOwned = (myInventory.bgs || []).includes(bg.class);
       const isEquipped = myNickBg === bg.class;
       const isMythic = bg.cost >= 500000;
@@ -123,7 +136,8 @@ function renderShopUI() {
       const unlockMissing = bg.unlock === 'jackpot' && !myJackpotUnlocked;
       const isUltimate = bg.cost >= 10000000;
 
-      const isLocked = ((currentEnhanceLevel < reqLvl) || unlockMissing) && !isOwned;
+      const needPass = isPrestigeItem(bg.cost) && !myPrestigePass && !isOwned;
+      const isLocked = ((currentEnhanceLevel < reqLvl) || unlockMissing || needPass) && !isOwned;
 
       const card = document.createElement('div');
       card.className = `p-3.5 border rounded-2xl flex items-center justify-between transition-all ${
@@ -141,7 +155,7 @@ function renderShopUI() {
       } else if (isLocked) {
         actionBtnHTML = `
           <button disabled class="bg-slate-800 text-slate-400 font-bold px-3 py-1.5 rounded-xl text-[11px] border border-slate-700 cursor-not-allowed opacity-75">
-            ${unlockMissing ? '🔒 잭팟 달성자 전용' : `🔒 ${reqLvl}강 이상`}
+            ${needPass ? '🔒 입장권 필요' : unlockMissing ? '🔒 잭팟 달성자 전용' : `🔒 ${reqLvl}강 이상`}
           </button>
         `;
       } else {
@@ -231,6 +245,9 @@ function equipColor(hex) { myNickColor = hex; updatePointsUI(); renderShopUI(); 
 function unequipColor() { myNickColor = ''; updatePointsUI(); renderShopUI(); }
 
 function buyBg(bgClass, cost, bgName, reqLvl = 0) {
+  if (isPrestigeItem(cost) && !myPrestigePass) {
+    return alert('👑 프레스티지 상점 상품이에요!\n먼저 프레스티지 상점 입장권(1,000,000P)을 구매해야 살 수 있어요.');
+  }
   const meta = SHOP_DATA.bgs.find(b => b.class === bgClass);
   if (meta && meta.unlock === 'jackpot' && !myJackpotUnlocked) {
     return alert('🔒 이 배지는 💎💎💎 슬롯 초특급 잭팟을 터뜨린 사람만 살 수 있어요!');
@@ -258,4 +275,51 @@ function unequipAll() {
   myNickSymbol = '';
   updatePointsUI();
   renderShopUI();
+}
+
+// ==========================================
+// 👑 프레스티지 상점
+// ==========================================
+function openPrestigeModal() {
+  if (!checkApprovalGuard()) return;
+  renderPrestigeShop();
+  updatePointsUI();
+  document.getElementById('shopModal').classList.add('hidden');
+  document.getElementById('prestigeModal').classList.remove('hidden');
+}
+function closePrestigeModal() { document.getElementById('prestigeModal').classList.add('hidden'); }
+
+function renderPrestigeShop() {
+  const pass = document.getElementById('prestigePassBox');
+  if (pass) {
+    pass.innerHTML = myPrestigePass
+      ? `<div class="prestige-pass-owned rounded-2xl px-4 py-3 text-center">
+           <div class="text-[11px] font-black tracking-widest text-amber-200">PRESTIGE MEMBER</div>
+           <div class="text-sm font-black text-white mt-0.5">👑 입장권 보유 중 · 모든 상품 구매 가능</div>
+         </div>`
+      : `<div class="rounded-2xl border border-amber-400/50 bg-gradient-to-br from-amber-500/15 to-transparent px-4 py-3 flex items-center justify-between gap-3">
+           <div>
+             <div class="text-xs font-black text-amber-200">👑 프레스티지 상점 입장권</div>
+             <div class="text-[10px] text-slate-400">한 번 사면 영구 · 99만P 이상 배지와 닉네임 변경권을 살 수 있어요</div>
+           </div>
+           <button onclick="buyPrestigePass()" class="shrink-0 bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 font-black px-3 py-2 rounded-xl text-xs shadow-lg hover:brightness-105 active:scale-95">${PRESTIGE_PASS_PRICE.toLocaleString()}P</button>
+         </div>`;
+  }
+  const pts = document.getElementById('prestigeCurrentPoints');
+  if (pts) pts.textContent = `${userPoints.toLocaleString()}P`;
+  renderBadgeCards(document.getElementById('prestigeBadgeList'), SHOP_DATA.bgs.filter(b => isPrestigeItem(b.cost)));
+  renderRenameSection();
+}
+
+function buyPrestigePass() {
+  if (!checkApprovalGuard()) return;
+  if (myPrestigePass) return;
+  if (userPoints < PRESTIGE_PASS_PRICE) return alert(`❌ 포인트가 부족해요! (입장권 ${PRESTIGE_PASS_PRICE.toLocaleString()}P)`);
+  if (!confirm(`👑 프레스티지 상점 입장권을 ${PRESTIGE_PASS_PRICE.toLocaleString()}P에 구매할까요?\n(한 번 사면 영구로 입장할 수 있어요)`)) return;
+  addPoints(-PRESTIGE_PASS_PRICE, '👑 프레스티지 상점 입장권');
+  myPrestigePass = true;
+  db.ref(`user_points/${currentUser.nickname}/prestigePass`).set(true);
+  updatePointsUI();
+  renderPrestigeShop();
+  if (window.confetti) confetti({ particleCount: 160, spread: 110, colors: ['#fde047', '#f59e0b', '#ffffff'] });
 }

@@ -173,6 +173,7 @@ function loadGameStateFromUser(val) {
   loadDuelSettlementsFromUser(val);
   loadBetsFromUser(val);
   if (typeof loadJackpotFromUser === "function") loadJackpotFromUser(val);
+  if (typeof loadPrestigeFromUser === "function") loadPrestigeFromUser(val);
 }
 
 function bindNickname(nick) {
@@ -716,6 +717,12 @@ function renderRenameSection() {
       <span class="text-[10px] text-amber-700">승인되면 포인트·아이템·기록이 모두 새 닉네임으로 옮겨져요. 거절되면 1,000,000P가 환불돼요.</span></div>`;
     return;
   }
+  if (typeof myPrestigePass !== 'undefined' && !myPrestigePass) {
+    box.innerHTML = `<div class="flex items-center justify-between gap-2 p-3 rounded-2xl border border-slate-700 bg-slate-900/60 text-xs">
+      <span class="text-slate-300">원하는 닉네임으로 바꿀 수 있어요. 포인트·강화·아이템·내역 그대로 이전</span>
+      <button disabled class="shrink-0 bg-slate-800 text-slate-400 font-bold px-3 py-1.5 rounded-xl text-[11px] border border-slate-700 opacity-75">🔒 입장권 필요</button></div>`;
+    return;
+  }
   box.innerHTML = `
     <div class="flex gap-1.5">
       <input id="renameInput" type="text" maxlength="20" placeholder="새 닉네임 (한글·영문·숫자 20자 이내)" class="flex-1 min-w-0 border rounded-xl p-2 text-xs font-bold outline-none focus:border-indigo-500" />
@@ -731,6 +738,7 @@ async function buyRenameTicket() {
   if (!to) return alert('새 닉네임을 입력해주세요.');
   if (!isValidNickname(to) || to === GUEST_NICK) return alert('⚠️ 닉네임은 한글, 영문, 숫자로 20자 이내만 가능해요.');
   if (to === currentUser.nickname) return alert('지금 닉네임과 같아요.');
+  if (typeof myPrestigePass !== 'undefined' && !myPrestigePass) return alert('👑 닉네임 변경권은 프레스티지 상점 상품이에요!\n먼저 프레스티지 상점 입장권(1,000,000P)을 구매해주세요.');
   if (userPoints < RENAME_PRICE) return alert(`❌ 포인트가 부족해요! (닉네임 변경권 ${RENAME_PRICE.toLocaleString()}P)`);
   try {
     const [exist, banned] = await Promise.all([db.ref(`user_points/${to}`).once('value'), db.ref(`banned_users/${to}`).once('value')]);
