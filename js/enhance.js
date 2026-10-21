@@ -131,6 +131,7 @@ function updateEnhanceUI() {
       actionBtn.textContent = "20강 최고등급 달성!";
     }
   } else {
+    applyAutoItems();
     const nextMeta = effectiveOdds(currentEnhanceLevel);
     const nextCost = currentAttemptCost();
     if (costText) costText.textContent = `강화비: ${nextCost}P`;
@@ -231,6 +232,7 @@ function effectiveOdds(level) {
   // 파괴 확률은 '성공·유지를 뺀 나머지' (예전부터 실제 판정 방식. 표의 숫자 합이 100이 아닌 단계가 있어 보정)
   let success = base.success, keep = base.keep, brk = Math.max(0, 100 - base.success - base.keep);
   let mult = 1;
+  const successBeforeBless = success;
   if (isGoldenTime()) mult *= GOLDEN_TIME.mult;
   if (useItem.bless && myItems.bless > 0) mult *= 1.5;
   if (mult > 1) {
@@ -251,7 +253,7 @@ function effectiveOdds(level) {
   const keepBase = keep; // 방지권 적용 전 '유지' 구간 (그 뒤 구간은 원래 '파괴')
   const protectedNow = !gambleMode && useItem.protect && myItems.protect > 0 && brk > 0;
   if (protectedNow) { keep += brk; brk = 0; }
-  return { success, keep, keepBase, break: brk, golden: isGoldenTime(), blessed: useItem.bless && myItems.bless > 0, protected: protectedNow, gamble: gambleMode };
+  return { success, keep, keepBase, break: brk, golden: isGoldenTime(), blessed: useItem.bless && myItems.bless > 0, blessGain: Math.min(100, successBeforeBless * 1.5) - successBeforeBless, protected: protectedNow, gamble: gambleMode };
 }
 
 function buyEnhanceItem(kind) {
@@ -269,9 +271,41 @@ function buyEnhanceItem(kind) {
 
 function toggleEnhanceItem(kind) {
   if (myItems[kind] <= 0) return buyEnhanceItem(kind);
+  if (autoUse[kind]) { autoUse[kind] = false; saveAutoUse(); } // 직접 누르면 자동 적용은 해제
   useItem[kind] = !useItem[kind];
   renderEnhanceItems();
   updateEnhanceUI();
+}
+
+// ==========================================
+// ✅ 아이템 자동 적용 (이 기기에 저장되는 개인 설정)
+//  - 체크하면 강화할 때마다 보유 중인 아이템을 자동으로 사용
+//  - '추천 단계에서만'을 켜면 💡 추천 조합에 포함된 단계에서만 사용
+//  - 효과가 없는 단계(이미 100% 성공, 파괴 확률 0%)에서는 아이템을 아끼고 쓰지 않음
+// ==========================================
+let autoUse = { protect: false, bless: false, recOnly: false };
+try { autoUse = Object.assign(autoUse, JSON.parse(localStorage.getItem('bapsim_auto_items') || '{}')); } catch (e) {}
+function saveAutoUse() { try { localStorage.setItem('bapsim_auto_items', JSON.stringify(autoUse)); } catch (e) {} }
+
+function setAutoUse(kind, on) {
+  autoUse[kind] = !!on;
+  saveAutoUse();
+  applyAutoItems();
+  renderEnhanceItems();
+  updateEnhanceUI();
+}
+
+function applyAutoItems() {
+  if (currentEnhanceLevel >= 20) return;
+  const rec = ENHANCE_RECOMMEND[currentEnhanceLevel] || '';
+  const base = ENHANCE_PROBABILITIES[currentEnhanceLevel];
+  const breakBase = base ? Math.max(0, 100 - base.success - base.keep) : 0;
+  if (autoUse.bless) {
+    useItem.bless = myItems.bless > 0 && base && base.success < 100 && (!autoUse.recOnly || rec.includes('축복'));
+  }
+  if (autoUse.protect) {
+    useItem.protect = myItems.protect > 0 && !gambleMode && breakBase > 0 && (!autoUse.recOnly || rec.includes('방지권'));
+  }
 }
 
 function renderEnhanceItems() {
@@ -281,8 +315,14 @@ function renderEnhanceItems() {
     const on = useItem[kind] && myItems[kind] > 0;
     btn.className = `relative py-2 px-2 rounded-xl text-[11px] font-bold border transition-all ${on ? 'bg-amber-500 text-slate-950 border-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.6)]' : 'bg-slate-900 text-slate-300 border-slate-700 hover:border-amber-500/60'}`;
     btn.innerHTML = `${ENHANCE_ITEMS[kind].name} <span class="font-black">x${myItems[kind]}</span>
-      <span class="block text-[9px] font-medium ${on ? 'text-slate-800' : 'text-slate-500'}">${myItems[kind] > 0 ? (on ? '사용 중 (1회 소모)' : '눌러서 사용') : `없음 · 눌러서 구매 ${ENHANCE_ITEMS[kind].price.toLocaleString()}P`}</span>`;
+      <span class="block text-[9px] font-medium ${on ? 'text-slate-800' : 'text-slate-500'}">${myItems[kind] > 0 ? (autoUse[kind] ? (on ? '🤖 자동 적용 중' : '🤖 자동 (이번 단계는 아낌)') : on ? '사용 중 (1회 소모)' : '눌러서 사용') : `없음 · 눌러서 구매 ${ENHANCE_ITEMS[kind].price.toLocaleString()}P`}</span>`;
   });
+  ['protect', 'bless', 'recOnly'].forEach(k => {
+    const cb = document.getElementById(`autoUse_${k}`);
+    if (cb) cb.checked = !!autoUse[k];
+  });
+  const recWrap = document.getElementById('autoUse_recOnly_wrap');
+  if (recWrap) recWrap.classList.toggle('opacity-40', !(autoUse.protect || autoUse.bless));
   ['protect', 'bless'].forEach(kind => {
     const b = document.getElementById(`enhBuy_${kind}`);
     if (b) b.textContent = `+1 (${ENHANCE_ITEMS[kind].price.toLocaleString()}P)`;
@@ -298,16 +338,20 @@ function renderEnhanceItems() {
   }
 }
 
-function consumeUsedItems() {
+function consumeUsedItems(odds) {
   const used = {};
   ['protect', 'bless'].forEach(kind => {
     if (kind === 'protect' && gambleMode) return;
+    // 효과가 없었던 아이템은 소모하지 않음 (파괴 0% 단계의 방지권, 이미 100% 성공인 단계의 축복서)
+    if (odds && kind === 'protect' && !odds.protected) return;
+    if (odds && kind === 'bless' && !(odds.blessed && odds.blessGain > 0)) return;
     if (useItem[kind] && myItems[kind] > 0) {
       myItems[kind]--;
       used[`items/${kind}`] = myItems[kind];
       if (myItems[kind] === 0) useItem[kind] = false;
     }
   });
+  applyAutoItems();
   if (Object.keys(used).length && canSyncToCloud()) db.ref(`user_points/${currentUser.nickname}`).update(used);
   renderEnhanceItems();
 }
@@ -335,6 +379,7 @@ function runEnhancement() {
   enhanceActionTimestamps.push(now);
   updatePointsUI();
 
+  applyAutoItems();
   const odds = effectiveOdds(currentEnhanceLevel);
   const alertEl = document.getElementById('enhanceStatusAlert');
   const actionBtn = document.getElementById('enhanceActionBtn');
@@ -344,7 +389,7 @@ function runEnhancement() {
   const fromLevel = currentEnhanceLevel;
   const roll = Math.random() * 100;
   const tags = [odds.gamble ? '🎲도박' : '', odds.golden ? '🌞골든타임' : '', odds.blessed ? '✨축복' : '', odds.protected ? '🛡️방지권' : ''].filter(Boolean).join(' ');
-  consumeUsedItems();
+  consumeUsedItems(odds);
 
   // 결과는 바로 확정·저장하고, 화면 공개만 연출로 늦춤 (창을 닫아도 결과는 그대로)
   let outcome, msg, jumped = false;
@@ -406,10 +451,10 @@ function runEnhancement() {
 }
 
 // ==========================================
-// 📈 오늘의 밥 시세: 20분마다 바뀌는 판매가 배율 (모든 회원 동일)
+// 📈 오늘의 밥 시세: 1분마다 바뀌는 판매가 배율 (모든 회원 동일)
 // 평균은 약 1.0배. 상승·폭등 때 팔면 이득, 하락·폭락 때 팔면 손해 → 언제 팔지가 승부
 // ==========================================
-const MARKET_SLOT_MS = 20 * 60 * 1000;
+const MARKET_SLOT_MS = 60 * 1000; // 1분마다 시세 변동
 function seeded01(seed) {
   let t = (seed + 0x6D2B79F5) | 0;
   t = Math.imul(t ^ (t >>> 15), t | 1);
