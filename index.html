@@ -11,7 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Black+Han+Sans&family=Rubik+Glitch&family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261022d">
+  <link rel="stylesheet" href="css/style.css?v=20261022e">
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white relative">
 
@@ -574,7 +574,8 @@
       <div class="rounded-2xl bg-gradient-to-br from-sky-600 to-indigo-700 text-white p-4">
         <div class="text-[10px] font-black tracking-widest text-sky-200">은행 금고 (재난지원금 재원)</div>
         <div id="bankBalance" class="text-2xl font-black mt-0.5">0P</div>
-        <div class="text-[10px] text-sky-100/80 mt-1 leading-relaxed">매일 자산 1·2·3위에게 3만·2만·1만P 부자세 → 자산 최하위 · 어제 가장 많이 잃은 사람에게 2만P씩 재난지원금</div>
+        <div id="bankFeeTotal" class="text-[10px] font-bold text-sky-200"></div>
+        <div class="text-[10px] text-sky-100/80 mt-1 leading-relaxed">재원: 부자세(매일 1·2·3위 3만·2만·1만P) + 수수료(밥 판매 10% · 강화 아이템 10% · 보류 단축) + 기부 → 매일 자산 3만P 이하 회원 모두에게 2만P씩 재난지원금</div>
       </div>
 
       <div class="space-y-2">
@@ -598,10 +599,10 @@
         <div class="flex gap-1.5">
           <button onclick="donatePoints(10000)" class="flex-1 bg-sky-50 border border-sky-200 text-sky-700 font-bold py-1.5 rounded-lg text-[11px]">1만</button>
           <button onclick="donatePoints(100000)" class="flex-1 bg-sky-50 border border-sky-200 text-sky-700 font-bold py-1.5 rounded-lg text-[11px]">10만</button>
-          <button onclick="donatePoints(999999)" class="flex-1 bg-sky-50 border border-sky-200 text-sky-700 font-bold py-1.5 rounded-lg text-[11px]">999,999</button>
+          <button onclick="donatePoints(1000000)" class="flex-1 bg-sky-50 border border-sky-200 text-sky-700 font-bold py-1.5 rounded-lg text-[11px]">100만</button>
         </div>
         <p id="bankMyDonated" class="text-[11px] text-slate-500"></p>
-        <p class="text-[10px] text-slate-400">누적 999,999P 이상 기부하면 프레스티지 상점에서 <span class="nb-angel inline-block text-[10px]">😇 천사의 날개</span> 배지를 받을 수 있어요.</p>
+        <p class="text-[10px] text-slate-400">누적 10,000,000P 이상 기부하면 프레스티지 상점에서 <span class="nb-angel inline-block text-[10px]">😇 대천사의 날개</span> 배지를 받을 수 있어요.</p>
       </div>
 
       <div class="space-y-1.5">
@@ -1454,22 +1455,22 @@
     </div>
   </div>
 
-  <script src="js/core.js?v=20261022d"></script>
-  <script src="js/auth.js?v=20261022d"></script>
-  <script src="js/enhance.js?v=20261022d"></script>
-  <script src="js/shop.js?v=20261022d"></script>
-  <script src="js/chat.js?v=20261022d"></script>
-  <script src="js/games.js?v=20261022d"></script>
-  <script src="js/admin.js?v=20261022d"></script>
-  <script src="js/ranking.js?v=20261022d"></script>
-  <script src="js/restaurants.js?v=20261022d"></script>
-  <script src="js/tools.js?v=20261022d"></script>
-  <script src="js/feed.js?v=20261022d"></script>
-  <script src="js/bank.js?v=20261022d"></script>
-  <script src="js/cards.js?v=20261022d"></script>
-  <script src="js/season.js?v=20261022d"></script>
-  <script src="js/duel.js?v=20261022d"></script>
-  <script src="js/predict.js?v=20261022d"></script>
-  <script src="js/main.js?v=20261022d"></script>
+  <script src="js/core.js?v=20261022e"></script>
+  <script src="js/auth.js?v=20261022e"></script>
+  <script src="js/enhance.js?v=20261022e"></script>
+  <script src="js/shop.js?v=20261022e"></script>
+  <script src="js/chat.js?v=20261022e"></script>
+  <script src="js/games.js?v=20261022e"></script>
+  <script src="js/admin.js?v=20261022e"></script>
+  <script src="js/ranking.js?v=20261022e"></script>
+  <script src="js/restaurants.js?v=20261022e"></script>
+  <script src="js/tools.js?v=20261022e"></script>
+  <script src="js/feed.js?v=20261022e"></script>
+  <script src="js/bank.js?v=20261022e"></script>
+  <script src="js/cards.js?v=20261022e"></script>
+  <script src="js/season.js?v=20261022e"></script>
+  <script src="js/duel.js?v=20261022e"></script>
+  <script src="js/predict.js?v=20261022e"></script>
+  <script src="js/main.js?v=20261022e"></script>
 </body>
 </html>

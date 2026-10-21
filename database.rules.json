@@ -156,6 +156,10 @@
         ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || (auth != null && root.child('user_uids').child(auth.uid).exists() && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('status').val() === 'approved' && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('uid').val() === auth.uid)",
         ".validate": "newData.isNumber() && newData.val() >= 0"
       },
+      "fees": {
+        ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || (auth != null && root.child('user_uids').child(auth.uid).exists() && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('status').val() === 'approved' && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('uid').val() === auth.uid)",
+        ".validate": "newData.isNumber() && newData.val() >= data.val()"
+      },
       "donors": {
         "$nick": {
           ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || ((auth != null && root.child('user_uids').child(auth.uid).exists() && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('status').val() === 'approved' && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('uid').val() === auth.uid) && $nick === root.child('user_uids').child(auth.uid).val())",

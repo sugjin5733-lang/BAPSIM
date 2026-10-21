@@ -500,33 +500,47 @@ body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
-/* 😇 천사의 날개 (누적 기부 999,999P) */
+/* 😇 대천사의 날개 · 세라핌 (누적 기부 10,000,000P)
+   - 회전하는 백금·금·하늘빛 고리 테두리
+   - 새벽 하늘 그라데이션 판 위로 성광이 훑고 지나감
+   - 세 겹 깃털 날개가 양쪽에서 천천히 날갯짓, 위로 후광 */
+@property --angel-a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
 .nb-angel {
-  position: relative; isolation: isolate;
+  position: relative;
+  margin-inline: 1.25em;
+  padding: 3px 18px; border-radius: 999px; font-weight: 900; letter-spacing: .02em;
+  color: #fffbeb !important;
+  border: 2px solid transparent;
   background:
-    radial-gradient(ellipse 60% 120% at 50% -30%, rgba(255,255,255,.95), transparent 60%),
-    linear-gradient(110deg, #e0f2fe 0%, #ffffff 30%, #fef3c7 50%, #ffffff 70%, #e0f2fe 100%);
-  background-size: 100% 100%, 250% 100%;
-  animation: shimmerSweep 3s linear infinite, angelGlow 2.4s ease-in-out infinite alternate;
-  color: #0c4a6e !important; border: 1.5px solid #fde68a;
-  padding: 2px 16px; border-radius: 999px; font-weight: 900; margin-inline: .6em;
-  text-shadow: 0 0 6px rgba(255,255,255,.9);
+    linear-gradient(105deg, transparent 35%, rgba(255,255,255,.9) 50%, transparent 65%) padding-box,
+    radial-gradient(ellipse 90% 160% at 50% -20%, #fff7d6 0%, #fbbf24 30%, #6d28d9 70%, #1e1b4b 100%) padding-box,
+    conic-gradient(from var(--angel-a), #ffffff, #fde68a, #f59e0b, #ffffff, #bae6fd, #ffffff, #fde68a, #f59e0b, #ffffff, #bae6fd, #ffffff) border-box;
+  background-size: 260% 100%, 100% 100%, 100% 100%;
+  background-repeat: no-repeat;
+  animation: angelSweep 2.8s linear infinite, angelSpin 3.5s linear infinite, angelGlow 2.2s ease-in-out infinite alternate;
+  text-shadow: 0 0 3px #fff, 0 0 10px #fde68a, 0 1px 1px #78350f;
 }
 .nb-angel::before, .nb-angel::after {
-  content: ''; position: absolute; top: 50%; width: .95em; height: .7em;
-  background: linear-gradient(180deg, #ffffff 0%, #e0f2fe 55%, #bae6fd 100%);
-  border: 1px solid #fde68a;
-  box-shadow: 0 0 6px rgba(186,230,253,.9);
-  animation: angelFlap 1.6s ease-in-out infinite;
+  content: ''; position: absolute; top: 50%; width: 1.7em; height: 1.25em; pointer-events: none;
+  background:
+    radial-gradient(ellipse 100% 42% at 100% 18%, #ffffff 62%, transparent 64%),
+    radial-gradient(ellipse 88% 38% at 100% 48%, #e0f2fe 62%, transparent 64%),
+    radial-gradient(ellipse 70% 34% at 100% 78%, #fde68a 62%, transparent 64%);
+  filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 6px rgba(253,230,138,.95)) drop-shadow(0 0 10px rgba(186,230,253,.8));
 }
-.nb-angel::before { left: -0.6em; border-radius: 100% 0 60% 40%; transform-origin: right center; }
-.nb-angel::after { right: -0.6em; border-radius: 0 100% 40% 60%; transform-origin: left center; }
+.nb-angel::before { right: calc(100% - .25em); transform-origin: 100% 50%; animation: angelWingL 1.5s ease-in-out infinite; }
+.nb-angel::after  { left: calc(100% - .25em);  transform-origin: 0% 50%;   animation: angelWingR 1.5s ease-in-out infinite; }
+@keyframes angelWingL {
+  0%, 100% { transform: translateY(-50%) rotate(4deg); }
+  50%      { transform: translateY(-64%) rotate(-16deg); }
+}
+@keyframes angelWingR {
+  0%, 100% { transform: translateY(-50%) scaleX(-1) rotate(4deg); }
+  50%      { transform: translateY(-64%) scaleX(-1) rotate(-16deg); }
+}
+@keyframes angelSweep { from { background-position: 160% 0, 0 0, 0 0; } to { background-position: -160% 0, 0 0, 0 0; } }
+@keyframes angelSpin { to { --angel-a: 360deg; } }
 @keyframes angelGlow {
-  from { box-shadow: 0 0 6px rgba(253,230,138,.6), 0 0 14px rgba(186,230,253,.5); }
-  to   { box-shadow: 0 0 12px rgba(253,230,138,.95), 0 0 26px rgba(186,230,253,.85), 0 -6px 18px rgba(255,255,255,.8); }
+  from { box-shadow: 0 0 6px rgba(253,230,138,.7), 0 0 16px rgba(186,230,253,.45), 0 -8px 14px -6px rgba(255,255,255,.6); }
+  to   { box-shadow: 0 0 12px rgba(253,230,138,1), 0 0 30px rgba(186,230,253,.85), 0 -14px 22px -6px rgba(255,251,235,.95); }
 }
-@keyframes angelFlap {
-  0%, 100% { transform: translateY(-60%) rotate(0deg); }
-  50% { transform: translateY(-75%) rotate(var(--flap, -14deg)); }
-}
-.nb-angel::after { --flap: 14deg; }

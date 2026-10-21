@@ -116,7 +116,7 @@ function updateEnhanceUI() {
   const mk = riceMarket();
   const baseSell = currentEnhanceLevel > 0 ? ENHANCE_PROBABILITIES[currentEnhanceLevel - 1].reward : 0;
   if (sellText) sellText.innerHTML = baseSell > 0
-    ? `<span class="text-slate-500 text-[10px] font-bold">${baseSell.toLocaleString()} × ${mk.mult.toFixed(2)} =</span> ${Math.round(baseSell * mk.mult).toLocaleString()}P`
+    ? `<span class="text-slate-500 text-[10px] font-bold">${baseSell.toLocaleString()} × ${mk.mult.toFixed(2)} − 수수료 10% =</span> ${(Math.round(baseSell * mk.mult) - Math.round(Math.round(baseSell * mk.mult) * SELL_FEE_RATE)).toLocaleString()}P`
     : '0P';
   renderRiceMarket();
   renderEnhanceRecommend();
@@ -183,6 +183,11 @@ function toggleEnhanceProbTable() {
 // ==========================================
 // 강화 아이템 & 골든타임
 // ==========================================
+// 🏦 수수료 (전부 은행 금고로): 아이템 구매 10%, 밥 판매 10%
+const ITEM_FEE_RATE = 0.1;
+const SELL_FEE_RATE = 0.1;
+function itemFee(kind) { return Math.round(ENHANCE_ITEMS[kind].price * ITEM_FEE_RATE); }
+function itemTotal(kind) { return ENHANCE_ITEMS[kind].price + itemFee(kind); }
 const ENHANCE_ITEMS = {
   protect: { name: '🛡️ 파괴 방지권', price: 600, desc: '이번 강화에서 밥이 타면 대신 유지돼요' },
   bless:   { name: '✨ 축복 주문서', price: 300, desc: '이번 강화 성공 확률 1.5배' }
@@ -263,8 +268,10 @@ function buyEnhanceItem(kind) {
   if (!checkApprovalGuard()) return;
   const it = ENHANCE_ITEMS[kind];
   const qty = 1;
-  if (userPoints < it.price * qty) return alert(`❌ 포인트가 부족해요! (${it.name} ${it.price.toLocaleString()}P)`);
-  addPoints(-it.price * qty, `${it.name} 구매`);
+  const total = itemTotal(kind) * qty, fee = itemFee(kind) * qty;
+  if (userPoints < total) return alert(`❌ 포인트가 부족해요! (${it.name} ${total.toLocaleString()}P · 수수료 포함)`);
+  addPoints(-total, `${it.name} 구매 (수수료 ${fee}P 포함)`);
+  if (typeof payFee === 'function') payFee(fee);
   myItems[kind] += qty;
   db.ref(`user_points/${currentUser.nickname}/items/${kind}`).set(myItems[kind]);
   updatePointsUI();
@@ -326,10 +333,11 @@ function autoBuyForAttempt(attemptCost) {
   let budget = userPoints - attemptCost;
   ['bless', 'protect'].forEach(kind => {
     if (!want[kind] || myItems[kind] > 0) return;
-    const price = ENHANCE_ITEMS[kind].price;
+    const price = itemTotal(kind);
     if (budget < price) { useItem[kind] = false; return; }
     budget -= price;
-    addPoints(-price, `${ENHANCE_ITEMS[kind].name} 자동 구매`);
+    addPoints(-price, `${ENHANCE_ITEMS[kind].name} 자동 구매 (수수료 포함)`);
+    if (typeof payFee === 'function') payFee(itemFee(kind));
     myItems[kind] += 1;
     bought.push(kind);
   });
@@ -344,7 +352,7 @@ function autoBuyForAttempt(attemptCost) {
 // 이번 시도에 자동 구매로 추가될 금액 (버튼 표시용)
 function autoBuyExtraCost() {
   const want = autoWanted();
-  return ['bless', 'protect'].reduce((a, k) => a + (want[k] && myItems[k] <= 0 ? ENHANCE_ITEMS[k].price : 0), 0);
+  return ['bless', 'protect'].reduce((a, k) => a + (want[k] && myItems[k] <= 0 ? itemTotal(k) : 0), 0);
 }
 
 function renderEnhanceItems() {
@@ -354,7 +362,7 @@ function renderEnhanceItems() {
     const on = useItem[kind] && (myItems[kind] > 0 || (autoUse[kind] && autoWanted()[kind]));
     btn.className = `relative py-2 px-2 rounded-xl text-[11px] font-bold border transition-all ${on ? 'bg-amber-500 text-slate-950 border-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.6)]' : 'bg-slate-900 text-slate-300 border-slate-700 hover:border-amber-500/60'}`;
     btn.innerHTML = `${ENHANCE_ITEMS[kind].name} <span class="font-black">x${myItems[kind]}</span>
-      <span class="block text-[9px] font-medium ${on ? 'text-slate-800' : 'text-slate-500'}">${autoUse[kind] ? (on ? (myItems[kind] > 0 ? '🤖 자동 적용 중' : `🤖 자동 구매+적용 (${ENHANCE_ITEMS[kind].price}P)`) : '🤖 자동 (이번 단계는 아낌)') : myItems[kind] > 0 ? (on ? '사용 중 (1회 소모)' : '눌러서 사용') : `없음 · 눌러서 구매 ${ENHANCE_ITEMS[kind].price.toLocaleString()}P`}</span>`;
+      <span class="block text-[9px] font-medium ${on ? 'text-slate-800' : 'text-slate-500'}">${autoUse[kind] ? (on ? (myItems[kind] > 0 ? '🤖 자동 적용 중' : `🤖 자동 구매+적용 (${itemTotal(kind)}P)`) : '🤖 자동 (이번 단계는 아낌)') : myItems[kind] > 0 ? (on ? '사용 중 (1회 소모)' : '눌러서 사용') : `없음 · 눌러서 구매 ${itemTotal(kind).toLocaleString()}P`}</span>`;
   });
   ['protect', 'bless', 'recOnly'].forEach(k => {
     const cb = document.getElementById(`autoUse_${k}`);
@@ -364,7 +372,7 @@ function renderEnhanceItems() {
   if (recWrap) recWrap.classList.toggle('opacity-40', !(autoUse.protect || autoUse.bless));
   ['protect', 'bless'].forEach(kind => {
     const b = document.getElementById(`enhBuy_${kind}`);
-    if (b) b.textContent = `+1 (${ENHANCE_ITEMS[kind].price.toLocaleString()}P)`;
+    if (b) b.textContent = `+1 (${itemTotal(kind).toLocaleString()}P)`;
   });
   const g = document.getElementById('enhanceGoldenBanner');
   if (g) g.classList.toggle('hidden', !isGoldenTime());
@@ -424,8 +432,6 @@ function runEnhancement() {
   const alertEl = document.getElementById('enhanceStatusAlert');
   const actionBtn = document.getElementById('enhanceActionBtn');
   const avatar = document.getElementById('enhanceBowlAvatar');
-  if (actionBtn) actionBtn.disabled = true;
-
   const fromLevel = currentEnhanceLevel;
   const roll = Math.random() * 100;
   const tags = [autoBought.length ? '🛒자동구매' : '', odds.gamble ? '🎲도박' : '', odds.golden ? '🌞골든타임' : '', odds.blessed ? '✨축복' : '', odds.protected ? '🛡️방지권' : ''].filter(Boolean).join(' ');
@@ -477,18 +483,11 @@ function runEnhancement() {
     }
     updateEnhanceUI();
     renderEnhanceTable();
-    setTimeout(() => { if (actionBtn && currentEnhanceLevel < 20) actionBtn.disabled = false; }, 150);
+    if (actionBtn) actionBtn.disabled = currentEnhanceLevel >= 20;
   };
 
-  // +12강 이상 시도는 두근두근 연출 (0.9초)
-  if (fromLevel >= 12) {
-    enhanceRevealing = true;
-    alertEl.innerHTML = `<span class="text-amber-200 font-black text-xs animate-pulse">🔥 두근두근... +${fromLevel + 1}강 운명의 순간!</span>`;
-    if (avatar) { avatar.classList.remove('enh-success', 'enh-fail', 'enh-break'); void avatar.offsetWidth; avatar.classList.add('enh-suspense'); }
-    setTimeout(reveal, 900);
-  } else {
-    reveal();
-  }
+  // 딜레이 없이 결과 바로 공개 (예전 +12강 이상 0.9초 두근두근 연출 제거)
+  reveal();
 }
 
 // ==========================================
@@ -580,13 +579,17 @@ function sellEnhancedBowl() {
   const base = ENHANCE_PROBABILITIES[currentEnhanceLevel - 1].reward;
   const reward = Math.round(base * mk.mult);
   const currentName = BOWL_EVOLUTION[currentEnhanceLevel]?.name || '밥';
-  if (!confirm(`+${currentEnhanceLevel}강 [${currentName}] 판매\n\n기본 ${base.toLocaleString()}P × 시세 ${mk.label} x${mk.mult.toFixed(2)} = ${reward.toLocaleString()}P\n\n판매 후 밥은 +0단계로 리셋됩니다. 판매할까요?`)) return;
+  const fee0 = Math.round(reward * SELL_FEE_RATE);
+  if (!confirm(`+${currentEnhanceLevel}강 [${currentName}] 판매\n\n기본 ${base.toLocaleString()}P × 시세 ${mk.label} x${mk.mult.toFixed(2)} = ${reward.toLocaleString()}P\n🏦 판매 수수료 10%: -${fee0.toLocaleString()}P (은행 금고로)\n받는 금액: ${(reward - fee0).toLocaleString()}P\n\n판매 후 밥은 +0단계로 리셋됩니다. 판매할까요?`)) return;
 
   // 🎉 대박 손님: 5% 확률로 판매금 2배
   const lucky = Math.random() < 0.05;
-  const paid = lucky ? reward * 2 : reward;
+  const gross = lucky ? reward * 2 : reward;
+  const sellFee = Math.round(gross * SELL_FEE_RATE);
+  const paid = gross - sellFee;
   const owedBefore = myOwed;
-  addPoints(paid, `+${currentEnhanceLevel}강 밥 판매 (시세 x${mk.mult.toFixed(2)}${lucky ? ' · 대박 손님 x2' : ''})`);
+  addPoints(paid, `+${currentEnhanceLevel}강 밥 판매 (시세 x${mk.mult.toFixed(2)}${lucky ? ' · 대박 손님 x2' : ''} · 수수료 ${sellFee.toLocaleString()}P 제외)`);
+  if (typeof payFee === 'function') payFee(sellFee);
   const soldLvl = currentEnhanceLevel;
   currentEnhanceLevel = 0;
   updatePointsUI();

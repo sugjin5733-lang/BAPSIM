@@ -1,9 +1,10 @@
 // 밥심 - 🏦 밥심 은행
 //
 //  💸 송금: 다른 회원에게 포인트 보내기 (transfers/{받는사람}/{id} → 받는 사람 화면이 열리면 자동 수령)
-//  🎗️ 기부: 은행 금고에 기부, 누적 999,999P 이상이면 '천사의 날개' 배지 (프레스티지 상점에서 수령)
+//  🎗️ 기부: 은행 금고에 기부, 누적 10,000,000P 이상이면 '대천사의 날개' 배지 (프레스티지 상점에서 수령)
+//  🧾 수수료: 밥 판매·강화 아이템·보류 단축 수수료는 전부 금고로 (payFee)
 //  🏛️ 부자세: 매일(KST) 자산 1·2·3위에게 30,000 / 20,000 / 10,000P
-//  🆘 재난지원금: 매일 '자산 최하위'(최근 3일 활동자)와 '전날 가장 많이 잃은 사람'에게 20,000P씩 (금고에서)
+//  🆘 재난지원금: 매일 자산(포인트+보류) 3만P 이하인 회원(최근 3일 활동) 모두에게 20,000P씩 (금고에서)
 //
 //  서버가 없으므로: 그날 첫 접속자가 정산표(bank/days/{날짜})를 한 번만 만들고,
 //  각자 접속하면 자기 몫(세금 납부 / 지원금 수령)을 자동 처리함.
@@ -11,11 +12,12 @@
 //  ⏳ 보류 포인트 지급 예정 시각도 여기서 계산해 헤더에 표시.
 
 const TRANSFER_MIN = 100;
-const DONOR_BADGE_GOAL = 999999;
+const DONOR_BADGE_GOAL = 10000000;
 const DONOR_BADGE = 'nb-angel';
 const TAX_TABLE = [30000, 20000, 10000];
 const RELIEF_AMOUNT = 20000;
 const RELIEF_ACTIVE_DAYS = 3;
+const RELIEF_LIMIT = 30000; // 자산(포인트+보류) 3만P 이하면 누구나 지원
 // '잃은 금액' 계산에서 빼는 항목 (게임이 아닌 소비/이동)
 const NET_EXCLUDE = /상점|입장권|변경권|송금|기부|부자세|재난지원금|보류|환불|관리자|배지/;
 
@@ -79,6 +81,7 @@ function initBank() {
     renderBankModal();
     scheduleBankDues(1500); // 금고가 채워지면 밀린 지원금 다시 시도
   });
+  on(db.ref('bank/fees'), 'value', s => { bankState.fees = Number(s.val()) || 0; renderBankModal(); });
   on(db.ref('bank/donors'), 'value', s => { bankState.donors = s.val() || {}; renderBankModal(); renderDonorBadgeBox(); });
   on(db.ref('bank/days').limitToLast(7), 'value', s => { bankState.days = s.val() || {}; renderBankModal(); scheduleBankDues(800); });
   on(db.ref(`transfers/${me}`), 'child_added', s => claimTransfer(s.ref));
@@ -166,12 +169,37 @@ async function donatePoints(preset) {
   const after = before + amount;
   if (before < DONOR_BADGE_GOAL && after >= DONOR_BADGE_GOAL) {
     if (window.confetti) confetti({ particleCount: 200, spread: 120, colors: ['#ffffff', '#fde68a', '#bae6fd'] });
-    alert('😇 누적 기부 999,999P 달성!\n프레스티지 상점에서 [천사의 날개] 배지를 받을 수 있어요.');
-    if (typeof postFeed === 'function') postFeed('donate', '😇 누적 기부 999,999P를 넘겨 천사의 날개를 얻었어요!', 'legendary', true);
+    alert(`😇 누적 기부 ${fmtP(DONOR_BADGE_GOAL)} 달성!\n프레스티지 상점에서 [대천사의 날개] 배지를 받을 수 있어요.`);
+    if (typeof postFeed === 'function') postFeed('donate', `😇 누적 기부 ${fmtP(DONOR_BADGE_GOAL)}를 넘겨 대천사의 날개를 얻었어요!`, 'legendary', true);
   } else {
     bankToast('🎗️ 기부 감사합니다', `${fmtP(amount)} 기부 · 누적 ${fmtP(after)}`);
   }
 }
+
+// ------------------------------------------------------------------
+// 🧾 수수료 → 금고 (자잘한 수수료는 모아서 2초마다 한 번에 입금)
+// ------------------------------------------------------------------
+let pendingFees = 0, feeTimer = null;
+function payFee(amount) {
+  amount = Math.round(Number(amount) || 0);
+  if (amount <= 0 || !canSyncToCloud()) return;
+  pendingFees += amount;
+  if (!feeTimer) feeTimer = setTimeout(flushFees, 2000);
+}
+async function flushFees() {
+  feeTimer = null;
+  const amt = pendingFees;
+  if (amt <= 0) return;
+  pendingFees = 0;
+  try {
+    await db.ref('bank/balance').transaction(c => (Number(c) || 0) + amt);
+    await db.ref('bank/fees').transaction(c => (Number(c) || 0) + amt);
+  } catch (err) {
+    pendingFees += amt; // 실패하면 다음에 다시
+    if (!feeTimer) feeTimer = setTimeout(flushFees, 10000);
+  }
+}
+window.addEventListener('beforeunload', () => { if (pendingFees > 0) flushFees(); });
 
 function myDonated() { return Number(bankState.donors[currentUser.nickname]) || 0; }
 
@@ -186,7 +214,7 @@ function renderDonorBadgeBox() {
     <div class="rounded-2xl border border-sky-200/40 bg-gradient-to-br from-sky-300/10 to-transparent p-3 space-y-2">
       <div class="flex items-center justify-between gap-2">
         <div class="min-w-0">
-          <span class="${DONOR_BADGE} text-xs inline-block">😇 천사의 날개 (기부 천사)</span>
+          <span class="${DONOR_BADGE} text-xs inline-block">😇 대천사의 날개 (세라핌)</span>
           <p class="text-[10px] text-slate-300 mt-1">돈으로는 살 수 없는 배지 · 은행 누적 기부 ${fmtP(DONOR_BADGE_GOAL)} 이상이면 무료 수령</p>
         </div>
         ${equipped
@@ -231,14 +259,7 @@ function computeSettlement(users, day) {
 
   const relief = {};
   const active = list.filter(x => !taxes[x.nick] && (Number(x.u.updatedAt) || 0) >= now - RELIEF_ACTIVE_DAYS * 86400000);
-  const poorest = [...active].sort((a, b) => a.total - b.total)[0];
-  if (poorest) relief[poorest.nick] = { amt: RELIEF_AMOUNT, why: 'poorest', v: poorest.total };
-  const loser = active
-    .filter(x => !relief[x.nick])
-    .map(x => ({ nick: x.nick, net: netOnDay(x.u, yday) }))
-    .filter(x => x.net < 0)
-    .sort((a, b) => a.net - b.net)[0];
-  if (loser) relief[loser.nick] = { amt: RELIEF_AMOUNT, why: 'loser', v: loser.net };
+  active.filter(x => x.total <= RELIEF_LIMIT).forEach(x => { relief[x.nick] = { amt: RELIEF_AMOUNT, why: 'under', v: x.total }; });
 
   return { createdAt: firebase.database.ServerValue.TIMESTAMP, by: currentUser.nickname, taxes, relief };
 }
@@ -304,7 +325,7 @@ async function processMyBankDues() {
         await base.child(`claimed/${me}`).set(amt);
         addPoints(amt, `🆘 재난지원금 (${day})`);
         updatePointsUI();
-        bankToast('🆘 재난지원금 도착', `${rel.why === 'loser' ? '어제 가장 많이 잃으셨네요.' : '자산이 가장 적은 회원이라'} <strong>${fmtP(amt)}</strong>를 받았어요. 힘내세요!`);
+        bankToast('🆘 재난지원금 도착', `${rel.why === 'loser' ? '어제 가장 많이 잃으셨네요.' : rel.why === 'under' ? `자산이 ${fmtP(RELIEF_LIMIT)} 이하라` : '자산이 가장 적은 회원이라'} <strong>${fmtP(amt)}</strong>를 받았어요. 힘내세요!`);
         if (window.confetti) confetti({ particleCount: 90, spread: 80 });
       }
     }
@@ -346,9 +367,10 @@ function renderBankModal() {
   const set = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
 
   set('bankBalance', fmtP(bankState.balance));
+  set('bankFeeTotal', `누적 수수료 수입 ${fmtP(bankState.fees || 0)}`);
   set('bankMyPoints', fmtP(userPoints));
   const mine = myDonated();
-  set('bankMyDonated', `내 누적 기부 <strong>${fmtP(mine)}</strong>${mine >= DONOR_BADGE_GOAL ? ' · 😇 천사의 날개 획득 가능' : ` · 천사의 날개까지 ${fmtP(DONOR_BADGE_GOAL - mine)}`}`);
+  set('bankMyDonated', `내 누적 기부 <strong>${fmtP(mine)}</strong>${mine >= DONOR_BADGE_GOAL ? ' · 😇 대천사의 날개 획득 가능' : ` · 대천사의 날개까지 ${fmtP(DONOR_BADGE_GOAL - mine)}`}`);
 
   const donors = Object.entries(bankState.donors || {}).sort((a, b) => b[1] - a[1]).slice(0, 5);
   set('bankDonorRank', donors.length === 0
@@ -369,7 +391,7 @@ function renderBankModal() {
       const st = typeof c === 'number' ? '<span class="text-emerald-600">지급 완료</span>'
         : bankState.balance < (r.amt || RELIEF_AMOUNT) ? '<span class="text-amber-600">금고 부족 · 대기</span>'
         : '<span class="text-slate-400">접속 시 지급</span>';
-      const why = r.why === 'loser' ? `어제 ${fmtP(-r.v)} 잃음` : `자산 최하위 (${fmtP(r.v)})`;
+      const why = r.why === 'loser' ? `어제 ${fmtP(-r.v)} 잃음` : r.why === 'under' ? `자산 ${fmtP(r.v)}` : `자산 최하위 (${fmtP(r.v)})`;
       return `<div class="flex justify-between gap-2 py-1"><span class="min-w-0 truncate">🆘 <strong>${esc(n)}</strong>${n === me ? ' (나)' : ''} <span class="text-slate-400">${why}</span></span><span class="shrink-0 font-bold">+${fmtP(r.amt)} · ${st}</span></div>`;
     }).join('') || '<div class="text-slate-400">오늘 대상 없음 (어제 손실 기록은 오늘부터 쌓여요)</div>';
     set('bankToday', `<div class="space-y-0.5">${taxRows}</div><div class="border-t border-slate-200 my-1.5"></div><div class="space-y-0.5">${relRows}</div>`);
@@ -510,7 +532,7 @@ async function shortenOwed(h) {
   const pay = Math.max(0, Math.min(myOwed, room));
   if (pay > 0) { myOwed -= pay; addPoints(pay, '⏩ 보류 포인트 즉시 지급'); }
   updatePointsUI();
-  try { await db.ref('bank/balance').transaction(c => (Number(c) || 0) + fee); } catch (e) { console.warn('수수료 입금 실패:', e && e.message); }
+  payFee(fee);
   if (window.confetti) confetti({ particleCount: 80, spread: 70 });
   bankToast('⏩ 보류 단축 완료', `<strong>${fmtP(pay)}</strong>가 바로 들어왔어요.${myOwed > 0 ? ` 남은 보류 ${fmtP(myOwed)}` : ' 보류 끝!'}`);
   renderOwedModal();
