@@ -27,27 +27,30 @@ const BOWL_EVOLUTION = [
   { level: 20, icon: "👑", name: "태초의 천상 만다라 불멸 영생밥" }
 ];
 
+// 판매가 기준: 축복서·방지권·도박 모드를 단계마다 가장 잘 골랐을 때의 '평균 강화 비용'
+// 기대 회수율(시세 평균 + 대박 손님 포함): +1~4강 약 92% · +5~9강 약 101% · +10~14강 약 103% · +15~20강 약 105%
+// → 잘 하면 항상 조금씩 남고, 시세 폭등·대박 손님·대박 점프가 겹치면 크게 터짐
 const ENHANCE_PROBABILITIES = [
-  { level: 1,  success: 100.0, keep: 0.0,  break: 0.0,  reward: 50 },
-  { level: 2,  success: 90.6,  keep: 9.4,  break: 0.0,  reward: 120 },
-  { level: 3,  success: 79.8,  keep: 20.2, break: 0.0,  reward: 220 },
-  { level: 4,  success: 70.1,  keep: 27.9, break: 2.1,  reward: 300 },
-  { level: 5,  success: 59.9,  keep: 35.0, break: 5.1,  reward: 420 },
-  { level: 6,  success: 50.1,  keep: 39.7, break: 10.2, reward: 590 },
-  { level: 7,  success: 45.4,  keep: 44.1, break: 10.5, reward: 790 },
-  { level: 8,  success: 40.2,  keep: 49.6, break: 10.3, reward: 1040 },
-  { level: 9,  success: 33.6,  keep: 56.6, break: 9.8,  reward: 1320 },
-  { level: 10, success: 29.3,  keep: 61.4, break: 9.5,  reward: 1700 },
-  { level: 11, success: 25.5,  keep: 64.5, break: 10.1, reward: 2200 },
-  { level: 12, success: 23.6,  keep: 65.9, break: 10.6, reward: 2900 },
-  { level: 13, success: 19.3,  keep: 70.2, break: 10.5, reward: 3950 },
-  { level: 14, success: 18.1,  keep: 72.3, break: 9.7,  reward: 5400 },
-  { level: 15, success: 14.8,  keep: 75.5, break: 9.9,  reward: 7800 },
-  { level: 16, success: 13.1,  keep: 78.0, break: 9.8,  reward: 9400 },
-  { level: 17, success: 10.9,  keep: 76.8, break: 12.6, reward: 12400 },
-  { level: 18, success: 9.9,   keep: 79.9, break: 10.7, reward: 19500 },
-  { level: 19, success: 4.7,   keep: 86.2, break: 10.6, reward: 40000 },
-  { level: 20, success: 3.3,   keep: 90.3, break: 9.9,  reward: 75000 }
+  { level: 1,  success: 100.0, keep: 0.0,  break: 0.0,  reward: 90 },
+  { level: 2,  success: 90.6,  keep: 9.4,  break: 0.0,  reward: 180 },
+  { level: 3,  success: 79.8,  keep: 20.2, break: 0.0,  reward: 290 },
+  { level: 4,  success: 70.1,  keep: 27.9, break: 2.1,  reward: 420 },
+  { level: 5,  success: 59.9,  keep: 35.0, break: 5.1,  reward: 660 },
+  { level: 6,  success: 50.1,  keep: 39.7, break: 10.2, reward: 940 },
+  { level: 7,  success: 45.4,  keep: 44.1, break: 10.5, reward: 1250 },
+  { level: 8,  success: 40.2,  keep: 49.6, break: 10.3, reward: 1750 },
+  { level: 9,  success: 33.6,  keep: 56.6, break: 9.8,  reward: 2350 },
+  { level: 10, success: 29.3,  keep: 61.4, break: 9.5,  reward: 3250 },
+  { level: 11, success: 25.5,  keep: 64.5, break: 10.1, reward: 4150 },
+  { level: 12, success: 23.6,  keep: 65.9, break: 10.6, reward: 5500 },
+  { level: 13, success: 19.3,  keep: 70.2, break: 10.5, reward: 7850 },
+  { level: 14, success: 18.1,  keep: 72.3, break: 9.7,  reward: 11000 },
+  { level: 15, success: 14.8,  keep: 75.5, break: 9.9,  reward: 16500 },
+  { level: 16, success: 13.1,  keep: 78.0, break: 9.8,  reward: 19000 },
+  { level: 17, success: 10.9,  keep: 76.8, break: 12.6, reward: 24500 },
+  { level: 18, success: 9.9,   keep: 79.9, break: 10.7, reward: 35500 },
+  { level: 19, success: 4.7,   keep: 86.2, break: 10.6, reward: 58000 },
+  { level: 20, success: 3.3,   keep: 90.3, break: 9.9,  reward: 94000 }
 ];
 
 // 안전 구간: 한 번 도달한 5/10/15강 아래로는 떨어지지 않음
@@ -116,6 +119,7 @@ function updateEnhanceUI() {
     ? `<span class="text-slate-500 text-[10px] font-bold">${baseSell.toLocaleString()} × ${mk.mult.toFixed(2)} =</span> ${Math.round(baseSell * mk.mult).toLocaleString()}P`
     : '0P';
   renderRiceMarket();
+  renderEnhanceRecommend();
 
   if (currentEnhanceLevel >= 20) {
     if (costText) costText.textContent = "최대 강화 달성";
@@ -178,8 +182,8 @@ function toggleEnhanceProbTable() {
 // 강화 아이템 & 골든타임
 // ==========================================
 const ENHANCE_ITEMS = {
-  protect: { name: '🛡️ 파괴 방지권', price: 1500, desc: '이번 강화에서 밥이 타면 대신 유지돼요' },
-  bless:   { name: '✨ 축복 주문서', price: 800,  desc: '이번 강화 성공 확률 1.5배' }
+  protect: { name: '🛡️ 파괴 방지권', price: 600, desc: '이번 강화에서 밥이 타면 대신 유지돼요' },
+  bless:   { name: '✨ 축복 주문서', price: 300, desc: '이번 강화 성공 확률 1.5배' }
 };
 // 평일 점심시간(11:30~13:00) 성공 확률 보너스
 const GOLDEN_TIME = { start: 11 * 60 + 30, end: 13 * 60, mult: 1.5 };
@@ -187,6 +191,17 @@ const GOLDEN_TIME = { start: 11 * 60 + 30, end: 13 * 60, mult: 1.5 };
 let myItems = { protect: 0, bless: 0 };
 let gambleMode = false; // 🎲 도박 강화: 비용 2배 · 성공 확률 2배(최대 95%) · 실패하면 무조건 파괴
 const JUMP_CHANCE = 0.05; // +5강 이상에서 성공하면 5% 확률로 한 번에 +2 (대박 점프)
+
+const ENHANCE_RECOMMEND = ['기본','기본','기본','기본','기본','기본','도박','도박','축복+도박','축복+도박',
+  '도박','기본','기본','축복','축복+방지권','축복+도박','축복','축복+방지권','축복+방지권','축복+방지권'];
+function renderEnhanceRecommend() {
+  const el = document.getElementById('enhanceRecommend');
+  if (!el) return;
+  if (currentEnhanceLevel >= 20) { el.textContent = ''; return; }
+  const rec = ENHANCE_RECOMMEND[currentEnhanceLevel];
+  const mine = [useItem.bless && myItems.bless > 0 ? '축복' : '', !gambleMode && useItem.protect && myItems.protect > 0 ? '방지권' : '', gambleMode ? '도박' : ''].filter(Boolean).join('+') || '기본';
+  el.innerHTML = `💡 +${currentEnhanceLevel}→+${currentEnhanceLevel + 1} 추천: <strong class="text-amber-300">${rec}</strong>${mine === rec ? ' <span class="text-emerald-400">✓ 지금 설정과 같아요</span>' : ` <span class="text-slate-500">(지금: ${mine})</span>`}`;
+}
 
 function currentAttemptCost() {
   return getEnhanceCost(currentEnhanceLevel) * (gambleMode ? 2 : 1);
@@ -206,10 +221,8 @@ function loadItemsFromUser(val) {
   renderEnhanceItems();
 }
 
-function isGoldenTime() {
-  const m = kstMinutesOfDay();
-  return isWeekdayKST() && m >= GOLDEN_TIME.start && m < GOLDEN_TIME.end;
-}
+// 골든타임은 폐지 (언제 해도 같은 조건). 예전 코드 호환용으로 함수만 남김
+function isGoldenTime() { return false; }
 
 // 아이템/골든타임을 반영한 이번 강화의 실제 확률
 function effectiveOdds(level) {
@@ -458,16 +471,20 @@ function sellEnhancedBowl() {
   const currentName = BOWL_EVOLUTION[currentEnhanceLevel]?.name || '밥';
   if (!confirm(`+${currentEnhanceLevel}강 [${currentName}] 판매\n\n기본 ${base.toLocaleString()}P × 시세 ${mk.label} x${mk.mult.toFixed(2)} = ${reward.toLocaleString()}P\n\n판매 후 밥은 +0단계로 리셋됩니다. 판매할까요?`)) return;
 
-  addPoints(reward, `+${currentEnhanceLevel}강 밥 판매 (시세 x${mk.mult.toFixed(2)})`);
+  // 🎉 대박 손님: 5% 확률로 판매금 2배
+  const lucky = Math.random() < 0.05;
+  const paid = lucky ? reward * 2 : reward;
+  addPoints(paid, `+${currentEnhanceLevel}강 밥 판매 (시세 x${mk.mult.toFixed(2)}${lucky ? ' · 대박 손님 x2' : ''})`);
   const soldLvl = currentEnhanceLevel;
   currentEnhanceLevel = 0;
   updatePointsUI();
   updateEnhanceUI();
   renderEnhanceTable();
 
-  if (window.confetti) confetti({ particleCount: 100 });
-  if (soldLvl >= 12) postFeed('sell', `+${soldLvl}강 밥을 ${mk.label} 시세(x${mk.mult.toFixed(2)})에 팔아 ${reward.toLocaleString()}P 💰`, soldLvl >= 16 || mk.mult >= 1.5 ? 'big' : 'normal');
-  startDoubleUp(reward, soldLvl);
+  if (window.confetti) confetti({ particleCount: lucky ? 250 : 100, spread: lucky ? 130 : 70 });
+  if (lucky && soldLvl >= 8) postFeed('sell', `🎉 대박 손님 등장! +${soldLvl}강 밥이 2배 값에 팔렸어요 → ${paid.toLocaleString()}P`, paid >= 50000 ? 'legendary' : 'big');
+  else if (soldLvl >= 12) postFeed('sell', `+${soldLvl}강 밥을 ${mk.label} 시세(x${mk.mult.toFixed(2)})에 팔아 ${paid.toLocaleString()}P 💰`, soldLvl >= 16 || mk.mult >= 1.5 ? 'big' : 'normal');
+  startDoubleUp(paid, soldLvl, lucky);
 }
 
 // ==========================================
@@ -477,9 +494,11 @@ function sellEnhancedBowl() {
 let doubleUp = null;
 const DOUBLE_UP_MAX = 3;
 
-function startDoubleUp(amount, soldLvl) {
+function startDoubleUp(amount, soldLvl, lucky = false) {
   doubleUp = { amount, round: 0, soldLvl, original: amount };
-  renderDoubleUp(`💰 +${soldLvl}강 밥을 팔아 <strong>${amount.toLocaleString()}P</strong>를 받았어요!`);
+  renderDoubleUp(lucky
+    ? `🎉 <strong class="text-amber-300">대박 손님 등장!</strong> 2배 값으로 팔려서 <strong>${amount.toLocaleString()}P</strong>를 받았어요!`
+    : `💰 +${soldLvl}강 밥을 팔아 <strong>${amount.toLocaleString()}P</strong>를 받았어요!`, lucky ? 'win' : 'normal');
 }
 
 function renderDoubleUp(headline, tone = 'normal') {

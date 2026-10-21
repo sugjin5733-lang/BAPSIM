@@ -502,7 +502,7 @@ const ANOMALY = {
   points: 500000,
   legendCards: 4,
   totalCards: 150,
-  items: 30,
+  items: 100,
   enhance: 18
 };
 
