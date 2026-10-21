@@ -27,14 +27,15 @@ const SHOP_DATA = {
     { id: "col_dark", name: "다크 나이트", hex: "#0f172a", cost: 300 }
   ],
   bgs: [
-    { id: "nb-cosmic", name: "🌌 코스믹 레인보우 (태초 신화)", class: "nb-cosmic", cost: 999999, reqLvl: 17, desc: "찬란하게 요동치는 무지개 홀로그램 오라 [17강 필요]" },
-    { id: "nb-solar", name: "☀️ 태양의 겁화 (솔라 플레어)", class: "nb-solar", cost: 999999, reqLvl: 17, desc: "타오르는 붉은 태양 홍염 애니메이션 [17강 필요]" },
-    { id: "nb-abyss", name: "🌋 심연의 지옥염화 (헬파이어)", class: "nb-abyss", cost: 999999, reqLvl: 17, desc: "심연의 마그마와 핏빛 불길이 일렁이는 궁극의 배지 [17강 필요]" },
-    { id: "nb-cyberaurora", name: "💎 사이버 네온 프리즘 (환상)", class: "nb-cyberaurora", cost: 999999, reqLvl: 17, desc: "초고주파 프리즘 레이저와 청록빛 오로라 발광 [17강 필요]" },
-    { id: "nb-infinity", name: "♾️ 영겁의 인피니티 (절대자)", class: "nb-infinity", cost: 999999, reqLvl: 17, desc: "황금빛 차원문과 시공간 왜곡 절대자의 상징 [17강 필요]" },
-    { id: "nb-blackhole", name: "🕳️ 심연의 블랙홀 (시공 왜곡)", class: "nb-blackhole", cost: 888888, reqLvl: 12, desc: "보랏빛 중력장과 암흑 물질 발광 [12강 필요]" },
-    { id: "nb-matrix", name: "🟢 사이버 매트릭스 (디지털 네오)", class: "nb-matrix", cost: 777777, reqLvl: 12, desc: "초록빛 디지털 비가 흐르는 해커 플레이트 [12강 필요]" },
-    { id: "nb-universe", name: "🪐 다크 유니버스 (신화)", class: "nb-universe", cost: 500000, reqLvl: 12, desc: "심오하고 묵직한 심우주 성운 워프 오라 [12강 필요]" },
+    { id: "nb-ricegod", name: "🍚 천상의 밥신 (창세)", class: "nb-ricegod", cost: 10000000, reqLvl: 20, desc: "무지개·황금 오라가 회전하고 쌀알 별빛이 흩날리는 밥심 최고의 상징 [20강 필요]" },
+    { id: "nb-cosmic", name: "🌌 코스믹 레인보우 (태초 신화)", class: "nb-cosmic", cost: 999999, reqLvl: 17, desc: "흐르는 무지개 홀로그램 위로 빛줄기가 스치는 오라 [17강 필요]" },
+    { id: "nb-solar", name: "☀️ 태양의 겁화 (솔라 플레어)", class: "nb-solar", cost: 999999, reqLvl: 17, desc: "아래에서 솟구치는 불꽃과 흩날리는 불티 [17강 필요]" },
+    { id: "nb-abyss", name: "🌋 심연의 지옥염화 (헬파이어)", class: "nb-abyss", cost: 999999, reqLvl: 17, desc: "갈라진 땅 사이로 흐르는 용암과 숨 쉬는 핏빛 열기 [17강 필요]" },
+    { id: "nb-cyberaurora", name: "💎 사이버 네온 프리즘 (환상)", class: "nb-cyberaurora", cost: 999999, reqLvl: 17, desc: "레이저 스캔과 주사선, 색이 갈라지는 네온 글자 [17강 필요]" },
+    { id: "nb-infinity", name: "♾️ 영겁의 인피니티 (절대자)", class: "nb-infinity", cost: 999999, reqLvl: 17, desc: "회전하는 황금 고리 안의 보랏빛 차원문 [17강 필요]" },
+    { id: "nb-blackhole", name: "🕳️ 심연의 블랙홀 (시공 왜곡)", class: "nb-blackhole", cost: 888888, reqLvl: 12, desc: "빙글빙글 도는 강착 원반과 칠흑의 사건 지평선 [12강 필요]" },
+    { id: "nb-matrix", name: "🟢 사이버 매트릭스 (디지털 네오)", class: "nb-matrix", cost: 777777, reqLvl: 12, desc: "쏟아지는 초록 코드 비와 발광 터미널 글자 [12강 필요]" },
+    { id: "nb-universe", name: "🪐 다크 유니버스 (신화)", class: "nb-universe", cost: 500000, reqLvl: 12, desc: "반짝이는 별과 천천히 도는 성운 [12강 필요]" },
     { id: "nb-gold", name: "👑 황금빛 골드 배지 (10만P 이상)", class: "nb-gold", cost: 100000, reqLvl: 12, desc: "럭셔리 쉬머 반사광이 감도는 최상위 부자의 상징 [12강 필요]" },
     { id: "nb-darkvip", name: "💳 블랙 VIP 카드 배지", class: "nb-darkvip", cost: 50000, reqLvl: 12, desc: "문정 VVIP 전용 블랙 플레이트 [12강 필요]" },
     { id: "nb-aurora", name: "🌠 에메랄드 오로라 배지", class: "nb-aurora", cost: 35000, reqLvl: 12, desc: "북극광처럼 일렁이는 청록빛 섬광 [12강 필요]" },
@@ -114,14 +115,14 @@ function renderShopUI() {
       const isMythic = bg.cost >= 500000;
       const isGold = bg.cost >= 100000 && !isMythic;
 
-      let reqLvl = bg.reqLvl || 0;
-      if (bg.cost >= 999999) reqLvl = 17;
-      else if (bg.cost >= 5000) reqLvl = 12;
+      const reqLvl = Math.max(bg.reqLvl || 0, bg.cost >= 999999 ? 17 : bg.cost >= 5000 ? 12 : 0);
+      const isUltimate = bg.cost >= 10000000;
 
       const isLocked = (currentEnhanceLevel < reqLvl) && !isOwned;
 
       const card = document.createElement('div');
       card.className = `p-3.5 border rounded-2xl flex items-center justify-between transition-all ${
+        isUltimate ? 'ultimate-card text-white shadow-2xl' :
         isMythic ? 'border-2 border-purple-500 bg-slate-950 text-white shadow-xl' :
         isGold ? 'border-2 border-amber-400 bg-amber-50/50 shadow-md' : 'bg-slate-50'
       }`;

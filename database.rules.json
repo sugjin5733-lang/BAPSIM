@@ -160,7 +160,7 @@
           ".validate": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || (newData.val() === now && newData.parent().child('budget').isNumber() && newData.parent().child('budget').val() >= 0 && newData.parent().child('budget').val() <= 300000 && ((data.exists() && newData.parent().child('budget').val() <= data.parent().child('budget').val() + 0.02 * (now - data.val()) - (newData.parent().child('points').val() - data.parent().child('points').val())) || (!data.exists() && newData.parent().child('budget').val() <= 50000 && newData.parent().child('points').val() <= data.parent().child('points').val())))"
         },
         "enhanceLevel": {
-          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 20 && ((auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || !data.exists() || newData.val() <= data.val() + 1)"
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 20 && ((auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || !data.exists() || newData.val() <= data.val() + 2)"
         },
         "password": {
           ".validate": "false"

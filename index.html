@@ -427,10 +427,14 @@
           <button onclick="buyEnhanceItem('protect')" class="text-sky-300 hover:underline font-bold">🛡️ <span id="enhBuy_protect"></span></button>
           <button onclick="buyEnhanceItem('bless')" class="text-amber-300 hover:underline font-bold">✨ <span id="enhBuy_bless"></span></button>
         </div>
+        <button id="enhGambleBtn" onclick="toggleGambleMode()"></button>
+
+        <!-- 오늘의 밥 시세 -->
+        <div id="riceMarketPanel" class="p-3 bg-slate-900/80 rounded-xl border border-slate-700/80 text-left"></div>
 
         <!-- 판매 수익 안내 -->
         <div class="flex items-center justify-between p-3 bg-slate-900/60 rounded-xl border border-slate-800/80 text-xs">
-          <span class="text-slate-400 font-medium">지금 판매 시 수익:</span>
+          <span class="text-slate-400 font-medium">지금 판매 시 수익 <span class="text-[10px] text-slate-500">(기본가 × 시세)</span>:</span>
           <span id="enhanceSellValueText" class="font-black text-amber-400 text-sm">0P</span>
         </div>
 
@@ -447,6 +451,7 @@
             강화 시도 (100P)
           </button>
         </div>
+        <div id="doubleUpPanel" class="hidden"></div>
       </div>
 
       <!-- 강화 안내 및 확률표 펼치기 버튼 -->
@@ -903,7 +908,7 @@
             <span>🏷️</span> 닉네임 명품 & 신화 배지
           </span>
           <span class="text-[10px] text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded-full">
-            5,000P↑: 12강 / 99만P: 17강 필수
+            5,000P↑: 12강 / 99만P: 17강 / 1,000만P: 20강
           </span>
         </div>
         <div class="space-y-2 text-xs" id="shopBadgeList"></div>
