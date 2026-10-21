@@ -94,7 +94,10 @@ let memorySequence = [];
 let memoryUserStep = 0;
 let isMemoryGameActive = false;
 
-// 💎 는 초특급 잭팟(1,000,000P) 전용 그림이라 일반 그림에는 넣지 않음 (일반 💎💎💎 트리플이 초대박으로 오해받던 문제)
+// 슬롯 초특급 잭팟 (💎💎💎): 상금/확률
+const SLOT_MEGA_PRIZE = 300000;
+const SLOT_MEGA_CHANCE = 0.000001; // 100만 분의 1
+// 💎 는 초특급 잭팟 전용 그림이라 일반 그림에는 넣지 않음 (일반 💎💎💎 트리플이 초대박으로 오해받던 문제)
 const SLOT_ITEMS = ["🍚", "🍗", "🥩", "🍕", "🍜", "👑", "🥟"];
 let isSlotSpinning = false;
 let diceExactBetTimestamps = [];

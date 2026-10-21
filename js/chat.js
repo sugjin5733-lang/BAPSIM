@@ -33,7 +33,7 @@ function handleSendChat(e) {
 function sendSticker(stickerType) {
   if (!checkApprovalGuard()) return;
   if (userPoints < 10) return alert("❌ 이모티콘 전송에는 10P가 필요합니다!");
-  userPoints -= 10;
+  addPoints(-10, '채팅 이모티콘');
   updatePointsUI();
 
   const chatPath = currentGroupId === 'lobby' ? 'lobby_messages' : `groups/${currentGroupId}/messages`;

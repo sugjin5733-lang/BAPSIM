@@ -200,7 +200,7 @@ function closeShopModal() { document.getElementById('shopModal').classList.add('
 function buySymbol(char, cost) {
   if (userPoints < cost) return alert(`❌ 포인트가 부족합니다!`);
   if (!confirm(`${cost}P로 [${char}] 심볼을 구매하시겠습니까?`)) return;
-  userPoints -= cost;
+  addPoints(-cost, '상점 구매');
   if (!myInventory.symbols) myInventory.symbols = [];
   myInventory.symbols.push(char);
   myNickSymbol = char;
@@ -213,7 +213,7 @@ function unequipSymbol() { myNickSymbol = ''; updatePointsUI(); renderShopUI(); 
 function buyColor(hex, cost) {
   if (userPoints < cost) return alert(`❌ 포인트가 부족합니다!`);
   if (!confirm(`${cost}P로 해당 색상을 구매하시겠습니까?`)) return;
-  userPoints -= cost;
+  addPoints(-cost, '상점 구매');
   if (!myInventory.colors) myInventory.colors = [];
   myInventory.colors.push(hex);
   myNickColor = hex;
@@ -229,7 +229,7 @@ function buyBg(bgClass, cost, bgName, reqLvl = 0) {
   }
   if (userPoints < cost) return alert(`❌ 포인트가 부족합니다!`);
   if (!confirm(`정말로 ${cost.toLocaleString()}P로 [${bgName}] 배지를 구매하시겠습니까?`)) return;
-  userPoints -= cost;
+  addPoints(-cost, '상점 구매');
   if (!myInventory.bgs) myInventory.bgs = ['nb-none'];
   myInventory.bgs.push(bgClass);
   myNickBg = bgClass;

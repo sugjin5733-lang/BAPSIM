@@ -87,7 +87,7 @@ async function placeBet() {
     });
     myPendingBets[`${gid}__${date}`] = { gid, date, rid, stake };
     await db.ref(`user_points/${currentUser.nickname}/myBets/${gid}__${date}`).set({ gid, date, rid, stake });
-    userPoints -= stake;
+    addPoints(-stake, `점심 1위 예측 베팅 (${restaurants[rid].name})`);
     updatePointsUI();
     postFeed('bet', `[${currentGroupName}] 오늘 1위는 ${restaurants[rid].name}! 에 ${stake.toLocaleString()}P 베팅 🔮`, 'normal');
   } catch (err) {
@@ -132,7 +132,7 @@ async function settleMyBets() {
       delete myPendingBets[key];
       await db.ref(`user_points/${currentUser.nickname}`).update({ [`settledBets/${key}`]: true, [`myBets/${key}`]: null });
       if (pay > 0) {
-        userPoints += pay;
+        addPoints(pay, `점심 1위 예측 정산 (${b.date})`);
         updatePointsUI();
       }
       const winnerNames = Object.keys(result.winners || {}).map(id => restaurants[id]?.name || '?').join(', ') || '투표 없음';

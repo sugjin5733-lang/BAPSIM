@@ -149,6 +149,9 @@ function resetToGuestState() {
   isUserApproved = false;
   userPoints = 0;
   serverPoints = 0;
+  myOwed = 0;
+  pendingLog = [];
+  myMining = { date: '', earned: 0 };
   myBudget = 0;
   myBudgetAt = null;
   currentEnhanceLevel = 0;
@@ -314,15 +317,10 @@ function availableBudget() {
   return Math.min(BUDGET_CAP, (myBudget || 0) + BUDGET_RATE * Math.max(0, estNow - myBudgetAt) / 1000);
 }
 
-// 큰 보상을 주기 전에 확인 (세트 보상, 밥 판매, 정산 등)
-function canGainPoints(amount) {
-  return availableBudget() - (userPoints - serverPoints) >= amount;
-}
-function budgetWaitText(amount) {
-  const short = amount - (availableBudget() - (userPoints - serverPoints));
-  const mins = Math.max(1, Math.ceil(short / BUDGET_RATE / 60));
-  return `짧은 시간에 포인트를 너무 많이 얻어서 잠시 보류됐어요. 약 ${mins}분 뒤에 다시 받을 수 있어요.`;
-}
+// 예전엔 한도를 넘으면 보상을 통째로 되돌렸는데(= 미지급), 이제는 넘친 만큼 '보류 포인트'로
+// 서버에 저장해두고 한도가 차는 대로 자동 지급하므로 항상 true
+function canGainPoints(amount) { return true; }
+function budgetWaitText(amount) { return ''; }
 
 async function initBudgetIfNeeded() {
   if (myBudgetAt != null || !canSyncToCloud()) return;
@@ -335,33 +333,174 @@ async function initBudgetIfNeeded() {
   }
 }
 
+// ==========================================
+// 포인트 변동은 전부 addPoints 로 → 내역(point_logs)에 기록되어
+// "포인트 안 들어왔다" 같은 문의를 회원/관리자가 직접 확인할 수 있음
+// ==========================================
+let pendingLog = [];     // 아직 서버에 안 올라간 변동 [{d, r}]
+let myOwed = 0;          // 보류 포인트 (한도 초과분, 자동 지급 대기)
+let myMining = { date: '', earned: 0 };
+const MINING_DAILY_CAP = 5000; // 무료 채굴 게임(광클/스피드/암기) 하루 최대
+
+function addPoints(delta, reason) {
+  delta = Math.round(Number(delta) || 0);
+  if (!delta) return;
+  userPoints += delta;
+  pendingLog.push({ d: delta, r: String(reason || '기타').slice(0, 60) });
+}
+
+// 무료 채굴 게임 보상: 하루 한도 안에서만 지급, 실제 지급액을 돌려줌
+function grantMining(amount, reason) {
+  const today = todayKey();
+  if (myMining.date !== today) myMining = { date: today, earned: 0 };
+  const got = Math.max(0, Math.min(Math.round(amount), MINING_DAILY_CAP - myMining.earned));
+  myMining.earned += got;
+  if (got > 0) addPoints(got, reason);
+  const ml = document.getElementById('miningLeftText');
+  if (ml && ml.textContent) ml.textContent = `⛏️ 오늘 무료 채굴 남은 한도 ${miningLeftToday().toLocaleString()}P`;
+  return got;
+}
+function miningLeftToday() {
+  return myMining.date === todayKey() ? Math.max(0, MINING_DAILY_CAP - myMining.earned) : MINING_DAILY_CAP;
+}
+function miningNote(asked, got) {
+  if (got >= asked) return '';
+  return got === 0
+    ? `\n⛏️ 오늘 무료 채굴 한도(${MINING_DAILY_CAP.toLocaleString()}P)를 다 채웠어요. 내일 다시 도전하세요!`
+    : `\n⛏️ 오늘 채굴 한도(${MINING_DAILY_CAP.toLocaleString()}P)에 도달해서 ${got}P만 지급됐어요.`;
+}
+
 function syncUserPointToCloud() {
   if (!canSyncToCloud()) return;
-  const payload = {
-    enhanceLevel: currentEnhanceLevel,
-    badge: myNickBg,
-    color: myNickColor,
-    symbol: myNickSymbol,
-    inventory: myInventory,
-    updatedAt: Date.now()
-  };
-  if (userPoints !== serverPoints) {
+  const nick = currentUser.nickname;
+  const base = `user_points/${nick}`;
+  const updates = {};
+  const put = (k, v) => { updates[`${base}/${k}`] = v; };
+  put('enhanceLevel', currentEnhanceLevel);
+  put('badge', myNickBg);
+  put('color', myNickColor);
+  put('symbol', myNickSymbol);
+  put('inventory', myInventory);
+  put('mining', myMining);
+  put('updatedAt', Date.now());
+
+  if (userPoints !== serverPoints || myOwed !== (lastServerState.owed || 0)) {
     if (myBudgetAt == null && !isAdmin) { initBudgetIfNeeded(); return; }
-    const newBudget = Math.min(BUDGET_CAP, availableBudget() - (userPoints - serverPoints));
-    if (newBudget < 0) {
-      // 한도 초과 → 서버 값으로 되돌림
-      alert('⏳ ' + budgetWaitText(userPoints - serverPoints));
-      userPoints = serverPoints;
+    const avail = availableBudget();
+    let delta = userPoints - serverPoints;
+    if (delta > Math.floor(avail)) {
+      // 한도 초과분은 버리지 않고 보류 → 자동 지급
+      const excess = delta - Math.floor(avail);
+      userPoints -= excess;
+      myOwed += excess;
+      pendingLog.push({ d: -excess, r: '⏳ 보류 (한도 초과분, 자동 지급 예정)' });
+      showOwedToast(excess);
+      delta = userPoints - serverPoints;
       updatePointsUI(false);
-      return;
     }
-    payload.points = userPoints;
-    payload.budget = Math.floor(newBudget);
-    payload.budgetAt = firebase.database.ServerValue.TIMESTAMP;
+    put('points', userPoints);
+    put('budget', Math.floor(Math.min(BUDGET_CAP, avail - delta)));
+    put('budgetAt', firebase.database.ServerValue.TIMESTAMP);
+    put('owed', myOwed);
   }
-  db.ref(`user_points/${currentUser.nickname}`).update(payload)
-    .catch(err => console.warn('포인트 저장 거부됨:', err && err.message));
+
+  if (pendingLog.length) {
+    // 같은 사유는 하나로 합쳐서 기록
+    const merged = [];
+    pendingLog.forEach(e => {
+      const last = merged[merged.length - 1];
+      if (last && last.r === e.r) last.d += e.d; else merged.push({ d: e.d, r: e.r });
+    });
+    merged.filter(e => e.d !== 0).forEach(e => {
+      const key = db.ref(`point_logs/${nick}`).push().key;
+      updates[`point_logs/${nick}/${key}`] = { d: e.d, r: e.r, bal: userPoints, ts: firebase.database.ServerValue.TIMESTAMP };
+    });
+    pendingLog = [];
+    maybePruneLogs(nick);
+  }
+  db.ref().update(updates).catch(err => console.warn('포인트 저장 거부됨:', err && err.message));
 }
+
+// 2주 지난 내역은 가끔 정리 (DB 용량 관리)
+let logWrites = 0;
+function maybePruneLogs(nick) {
+  if (++logWrites % 40 !== 1) return;
+  const cutoff = Date.now() + serverTimeOffset - 15 * 86400000;
+  db.ref(`point_logs/${nick}`).orderByChild('ts').endAt(cutoff).limitToFirst(100).once('value').then(snap => {
+    const del = {};
+    snap.forEach(c => { del[c.key] = null; });
+    if (Object.keys(del).length) db.ref(`point_logs/${nick}`).update(del).catch(() => {});
+  }).catch(() => {});
+}
+
+// 보류 포인트를 한도가 차는 대로 지급 (30초마다)
+setInterval(() => {
+  if (!canSyncToCloud() || myOwed <= 0 || (myBudgetAt == null && !isAdmin)) return;
+  const room = Math.floor(availableBudget() - (userPoints - serverPoints));
+  const pay = Math.min(myOwed, room);
+  if (pay < Math.min(myOwed, 300)) return; // 너무 잘게 쪼개지 않기
+  myOwed -= pay;
+  addPoints(pay, '⏳ 보류 포인트 지급');
+  updatePointsUI();
+}, 30000);
+
+function showOwedToast(excess) {
+  const box = document.getElementById('feedToastContainer');
+  if (!box) return;
+  const el = document.createElement('div');
+  el.className = 'feed-toast feed-toast-plain';
+  const hours = excess / BUDGET_RATE / 3600;
+  el.innerHTML = `<div class="text-[10px] font-black text-slate-500">⏳ 보류 포인트</div>
+    <div class="text-xs font-bold">짧은 시간에 너무 많이 벌어서 <strong>${excess.toLocaleString()}P</strong>는 보류됐어요.<br>
+    ${hours < 1 ? `약 ${Math.max(1, Math.ceil(hours * 60))}분` : `약 ${Math.ceil(hours)}시간`} 안에 자동으로 들어와요. (사라지지 않아요!)</div>`;
+  box.appendChild(el);
+  setTimeout(() => el.classList.add('feed-toast-out'), 7000);
+  setTimeout(() => el.remove(), 7700);
+}
+
+// ==========================================
+// 포인트 내역 보기 (회원: 자기 것 / 관리자: 아무나)
+// ==========================================
+async function openPointLog(nick) {
+  nick = nick || currentUser.nickname;
+  const modal = document.getElementById('pointLogModal');
+  const list = document.getElementById('pointLogList');
+  document.getElementById('pointLogTitle').textContent = `📜 ${nick} 포인트 내역`;
+  list.innerHTML = '<div class="text-center text-slate-400 py-6">불러오는 중...</div>';
+  modal.classList.remove('hidden');
+  try {
+    const [logSnap, userSnap] = await Promise.all([
+      db.ref(`point_logs/${nick}`).limitToLast(80).once('value'),
+      db.ref(`user_points/${nick}`).once('value')
+    ]);
+    const u = userSnap.val() || {};
+    const rows = [];
+    logSnap.forEach(c => { rows.push(c.val()); });
+    rows.reverse();
+    const owed = Number(u.owed) || 0;
+    const mining = u.mining && u.mining.date === todayKey() ? u.mining.earned : 0;
+    document.getElementById('pointLogSummary').innerHTML = `
+      현재 <strong>${(u.points || 0).toLocaleString()}P</strong>
+      ${owed > 0 ? ` · <span class="text-amber-600 font-black">⏳ 보류 ${owed.toLocaleString()}P (자동 지급 대기)</span>` : ''}
+      · 오늘 무료 채굴 ${mining.toLocaleString()} / ${MINING_DAILY_CAP.toLocaleString()}P`;
+    list.innerHTML = rows.length === 0
+      ? '<div class="text-center text-slate-400 py-6">아직 기록된 내역이 없어요 (이번 업데이트 이후부터 기록돼요)</div>'
+      : rows.map(e => `
+        <div class="flex items-center justify-between gap-2 py-1.5 border-b border-slate-100 text-xs">
+          <div class="min-w-0">
+            <div class="font-bold text-slate-800 truncate">${esc(e.r)}</div>
+            <div class="text-[10px] text-slate-400">${e.ts ? new Date(e.ts).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : ''}</div>
+          </div>
+          <div class="text-right shrink-0">
+            <div class="font-black ${e.d >= 0 ? 'text-emerald-600' : 'text-rose-500'}">${e.d >= 0 ? '+' : ''}${Number(e.d).toLocaleString()}P</div>
+            <div class="text-[10px] text-slate-400">잔액 ${Number(e.bal || 0).toLocaleString()}</div>
+          </div>
+        </div>`).join('');
+  } catch (err) {
+    list.innerHTML = `<div class="text-center text-rose-500 py-6">내역을 불러오지 못했어요: ${esc(err.message)}</div>`;
+  }
+}
+function closePointLog() { document.getElementById('pointLogModal').classList.add('hidden'); }
 
 function attachUserPointListener() {
   if (myPointsRef) myPointsRef.off();
@@ -403,7 +542,9 @@ function attachUserPointListener() {
       points: typeof val.points === 'number' ? val.points : 0,
       enhanceLevel: typeof val.enhanceLevel === 'number' ? val.enhanceLevel : 0,
       inventory: JSON.stringify(srvInventory),
-      badge: val.badge || 'nb-none', color: val.color || '', symbol: val.symbol || ''
+      badge: val.badge || 'nb-none', color: val.color || '', symbol: val.symbol || '',
+      owed: Math.max(0, Number(val.owed) || 0),
+      mining: JSON.stringify(val.mining || {})
     };
     const changed = (k) => firstLoad || lastServerState[k] !== srv[k];
     if (changed('inventory')) myInventory = srvInventory;
@@ -412,6 +553,8 @@ function attachUserPointListener() {
     if (changed('badge')) myNickBg = srv.badge;
     if (changed('color')) myNickColor = srv.color;
     if (changed('symbol')) myNickSymbol = srv.symbol;
+    if (changed('owed')) myOwed = srv.owed;
+    if (changed('mining')) myMining = Object.assign({ date: '', earned: 0 }, val.mining || {});
     lastServerState = srv;
 
     const wasApproved = isUserApproved;
@@ -429,7 +572,7 @@ function attachUserPointListener() {
 
     cloudReady = true;
     // 아직 서버에 안 올라간 내 변경(방금 얻은 포인트 등)이 있으면 이어서 저장
-    const pending = userPoints !== srv.points || JSON.stringify(myInventory) !== srv.inventory
+    const pending = userPoints !== srv.points || myOwed !== srv.owed || JSON.stringify(myInventory) !== srv.inventory
       || myNickBg !== srv.badge || myNickColor !== srv.color || myNickSymbol !== srv.symbol;
     updatePointsUI(pending);
     updateEnhanceUI();
@@ -452,7 +595,7 @@ function updatePointsUI(shouldPushToCloud = true) {
   const chatPoint = document.getElementById('chatPointDisplay');
   const shopPoint = document.getElementById('shopCurrentPoints');
 
-  if (headerPoint) headerPoint.textContent = `${userPoints.toLocaleString()}P`;
+  if (headerPoint) headerPoint.textContent = myOwed > 0 ? `${userPoints.toLocaleString()}P ⏳+${myOwed.toLocaleString()}` : `${userPoints.toLocaleString()}P`;
   if (chatPoint) chatPoint.textContent = `보유: ${userPoints.toLocaleString()}P`;
   if (shopPoint) shopPoint.textContent = `${userPoints.toLocaleString()}P`;
 

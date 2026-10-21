@@ -409,7 +409,7 @@
             <span id="probKeep" class="font-black text-amber-300 text-sm">0.0%</span>
           </div>
           <div>
-            <span class="text-[10px] text-rose-400 block font-bold">파괴 확률</span>
+            <span class="text-[10px] text-rose-400 block font-bold">파괴 확률 <span class="font-medium text-rose-300/80">(5·10·15강 안전구간)</span></span>
             <span id="probBreak" class="font-black text-rose-300 text-sm">0.0%</span>
           </div>
         </div>
@@ -517,6 +517,19 @@
     </div>
   </div>
 
+  <!-- 포인트 내역 -->
+  <div id="pointLogModal" class="hidden fixed inset-0 z-[55] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this) closePointLog()">
+    <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-5 space-y-3 max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between border-b pb-2 shrink-0">
+        <h3 id="pointLogTitle" class="font-black text-slate-900 text-base">📜 포인트 내역</h3>
+        <button onclick="closePointLog()" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
+      </div>
+      <div id="pointLogSummary" class="text-[11px] text-slate-600 bg-slate-50 rounded-xl p-2.5 shrink-0"></div>
+      <div id="pointLogList" class="overflow-y-auto min-h-0"></div>
+      <div class="text-[10px] text-slate-400 shrink-0">최근 80건 · 15일 지난 내역은 자동 정리돼요</div>
+    </div>
+  </div>
+
   <!-- 전광판 전체 보기 -->
   <div id="feedHistoryModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this) closeFeedHistory()">
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-5 space-y-3 max-h-[80vh] overflow-y-auto">
@@ -587,7 +600,7 @@
           </div>
           <div>
             <h3 class="font-extrabold text-slate-900 text-lg tracking-tight">밥심 포인트 게임장</h3>
-            <p class="text-xs text-slate-400">포인트를 베팅하거나 노력으로 채굴하세요!</p>
+            <p class="text-xs text-slate-400">포인트를 베팅하거나 노력으로 채굴하세요! <span id="miningLeftText" class="font-bold text-emerald-600"></span></p>
           </div>
         </div>
         <button onclick="closeMiniGameModal()" class="text-slate-400 hover:text-slate-600 text-base font-bold p-1">✕</button>
@@ -682,7 +695,7 @@
         <div class="p-3.5 bg-indigo-50/80 rounded-2xl border border-indigo-100 text-xs text-indigo-800 leading-relaxed font-medium">
           <strong>1회당 50P 베팅!</strong><br/>
           3개 일치: <strong>500P</strong> | 2개 일치: <strong>100P</strong><br/>
-          <span class="text-rose-600 font-black">🌟 0.00001% 확률 초특급 잭팟: 1,000,000P (다이아몬드 3개)</span>
+          <span class="text-rose-600 font-black">🌟 100만 분의 1 확률 초특급 잭팟: 300,000P (💎💎💎)</span>
         </div>
         <div class="py-6 bg-slate-900 rounded-2xl border-2 border-indigo-500 flex items-center justify-center gap-4 text-4xl shadow-inner">
           <div id="slot1" class="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center border border-slate-700 shadow-md">🍚</div>
@@ -756,7 +769,7 @@
       <div id="gameView_dice" class="hidden space-y-4 text-center pt-1">
         <div class="p-3 bg-purple-50/80 rounded-2xl border border-purple-100 text-xs text-purple-800 leading-relaxed font-medium">
           <strong>주사위 승부!</strong> 홀/짝 적중 시 <strong>2배</strong> 지급!<br/>
-          <span class="text-rose-600 font-extrabold">🌟 숫자 단일 적중 시 베팅액의 8배 지급! (최대 500P / 1분당 10회 제한)</span>
+          <span class="text-rose-600 font-extrabold">🌟 숫자 단일 적중 시 베팅액의 5배 지급! (최대 500P / 1분당 10회 제한)</span>
         </div>
         <div class="flex items-center justify-center gap-2">
           <span class="text-xs font-bold text-slate-600">베팅액:</span>
@@ -779,7 +792,7 @@
 
         <div class="space-y-1.5 pt-1">
           <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 px-1">
-            <span>🎯 숫자 단일 예측 (8배 배당)</span>
+            <span>🎯 숫자 단일 예측 (5배 배당)</span>
             <span class="text-rose-600 font-extrabold text-[10px]">최대 500P · 1분 10회</span>
           </div>
           <div class="grid grid-cols-6 gap-1">
@@ -1228,6 +1241,7 @@
           <div class="font-black text-slate-900 text-sm" id="authMemberNick"></div>
           <div class="text-[10px] text-slate-500"><span class="authEmailText"></span> · <span id="authMemberStatus"></span></div>
         </div>
+        <button onclick="openPointLog()" class="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold py-2.5 rounded-xl">📜 내 포인트 내역</button>
         <button id="authAdminBtn" onclick="openAdminDashboard()" class="hidden w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl">🛡️ 관리자 대시보드</button>
         <button onclick="signOutUser()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl">로그아웃</button>
       </div>

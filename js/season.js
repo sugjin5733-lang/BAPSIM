@@ -58,7 +58,7 @@ async function initSeason() {
 
     mySeasonClaims[lastWeek] = true;
     await db.ref(`user_points/${currentUser.nickname}/seasonClaims/${lastWeek}`).set(true);
-    userPoints += reward.points;
+    addPoints(reward.points, `주간 시즌 ${reward.label}`);
     if (!myInventory.bgs.includes(reward.badge)) myInventory.bgs.push(reward.badge);
     updatePointsUI();
     postFeed('season', `지난주 밥키우기 시즌 ${reward.label}! (+${ranked[myRank - 1].maxLevel}강) +${reward.points.toLocaleString()}P`, reward.rank === 1 ? 'legendary' : 'big');

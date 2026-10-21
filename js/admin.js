@@ -233,6 +233,9 @@ function renderAdminUserList() {
           </span>
         </div>
         <div class="flex items-center gap-1 shrink-0">
+          <button onclick="openPointLog(${jsArg(u.nickname)})" class="bg-slate-50 text-slate-700 font-bold px-2 py-1 rounded-lg text-[10px]">
+            내역
+          </button>
           <button onclick="adminManageUserItems(${jsArg(u.nickname)})" class="bg-amber-50 text-amber-800 font-bold px-2 py-1 rounded-lg text-[10px]">
             아이템
           </button>
@@ -496,7 +499,7 @@ function rejectPointRequest(reqId) {
 // ==========================================
 const ANOMALY = {
   gainSinceSnapshot: 150000, // 직전 스냅샷 이후 순증가
-  points: 1000000,
+  points: 500000,
   legendCards: 4,
   totalCards: 150,
   items: 30,
@@ -565,6 +568,7 @@ async function renderAnomalyPanel() {
               <span class="text-[10px] font-black ${score >= 5 ? 'text-rose-600' : 'text-amber-600'}">의심 ${score}</span>
             </div>
             <div class="flex gap-1 shrink-0">
+              <button onclick="openPointLog(${jsArg(u.nickname)})" class="bg-slate-50 text-slate-700 font-bold px-2 py-1 rounded-lg text-[10px]">내역</button>
               <button onclick="adminQuickSetPoint(${jsArg(u.nickname)})" class="bg-indigo-50 text-indigo-700 font-bold px-2 py-1 rounded-lg text-[10px]">포인트</button>
               <button onclick="adminConfiscateGameItems(${jsArg(u.nickname)})" class="bg-amber-50 text-amber-800 font-bold px-2 py-1 rounded-lg text-[10px]">카드·아이템 몰수</button>
               <button onclick="adminBanUser(${jsArg(u.nickname)})" class="bg-rose-500 text-white font-bold px-2 py-1 rounded-lg text-[10px]">차단</button>

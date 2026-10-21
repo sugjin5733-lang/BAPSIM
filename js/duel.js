@@ -73,7 +73,7 @@ async function settleMyDuels() {
     duelSettling[id] = true;
     mySettledDuels[id] = true;
     const updates = { [`settledDuels/${id}`]: true };
-    if (iWon) userPoints += d.bet * 2;
+    if (iWon) addPoints(d.bet * 2, `결투 승리 vs ${iAmFrom ? d.acceptor : d.from} (판돈 포함)`);
     await db.ref(`user_points/${currentUser.nickname}`).update(updates).catch(() => {});
     if (iWon) {
       updatePointsUI();
@@ -146,7 +146,7 @@ async function createDuel() {
       to: target, bet: bet, status: 'open',
       createdAt: firebase.database.ServerValue.TIMESTAMP
     });
-    userPoints -= bet;
+    addPoints(-bet, '결투 판돈');
     updatePointsUI();
     postFeed('duel', target ? `${target}님에게 ${bet.toLocaleString()}P 결투를 신청했어요! ⚔️` : `${bet.toLocaleString()}P 걸고 결투장을 열었어요! 누구든 덤벼라 ⚔️`, 'normal');
   } catch (err) {
@@ -166,7 +166,7 @@ async function acceptDuel(id) {
       status: 'accepted', acceptor: currentUser.nickname, acceptorUid: authUser.uid,
       acceptedAt: firebase.database.ServerValue.TIMESTAMP
     });
-    userPoints -= d.bet;
+    addPoints(-d.bet, `결투 수락 판돈 vs ${d.from}`);
     updatePointsUI();
   } catch (err) {
     alert('한 발 늦었어요! 다른 사람이 먼저 결투를 받았어요.');
@@ -183,7 +183,7 @@ async function cancelDuel(id, silent = false) {
   try {
     await db.ref(`duels/${id}`).update({ status: 'cancelled' });
     mySettledDuels[id] = true;
-    userPoints += d.bet;
+    addPoints(d.bet, '결투 취소 환불');
     await db.ref(`user_points/${currentUser.nickname}/settledDuels/${id}`).set(true);
     updatePointsUI();
   } catch (err) {

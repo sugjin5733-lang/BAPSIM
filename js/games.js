@@ -12,6 +12,8 @@ function switchGameTab(tabName) {
         : "py-2.5 px-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-white/50 flex items-center justify-center gap-1.5 transition-all");
     }
   });
+  const ml = document.getElementById('miningLeftText');
+  if (ml) ml.textContent = ['clicker', 'speed', 'memory'].includes(tabName) ? `⛏️ 오늘 무료 채굴 남은 한도 ${miningLeftToday().toLocaleString()}P` : '';
   if (tabName === 'duel') {
     document.getElementById('duelResultStage')?.classList.add('hidden');
     renderDuelArena();
@@ -81,12 +83,18 @@ function finishMiniGame() {
     isCapped = true;
   }
 
-  userPoints += earned;
+  // 사람 손으로 불가능한 속도(10초에 200번 초과 = 초당 20번)는 매크로로 보고 보상 없음
+  if (gameClicks > 200) {
+    alert(`🤖 비정상적으로 빠른 입력이 감지되어 보상이 지급되지 않았어요. (${gameClicks}회 / 10초)`);
+    return;
+  }
+  const askedClick = earned;
+  earned = grantMining(earned, '밥알광클');
   updatePointsUI();
   if (earned >= 200) maybeDropCard('밥알광클', 8);
 
   if (window.confetti) confetti({ particleCount: 80, spread: 60 });
-  alert(`🍚 미니게임 종료!\n총 클릭 수: ${gameClicks}회\n🎉 +${earned.toLocaleString()}P 적립 완료! ${isCapped ? '(한판 최대 상한 500P 적용)' : ''}`);
+  alert(`🍚 미니게임 종료!\n총 클릭 수: ${gameClicks}회\n🎉 +${earned.toLocaleString()}P 적립 완료! ${isCapped ? '(한판 최대 상한 500P 적용)' : ''}${miningNote(askedClick, earned)}`);
 }
 
 function startSpeedGame() {
@@ -119,18 +127,22 @@ function startSpeedGame() {
 
       let reward = 0;
       let isCapped = false;
-      if (speedHits >= 30) {
+      if (speedHits > 100) {
+        // 5초에 100타 초과(초당 20타) = 매크로
+        alert(`🤖 비정상적으로 빠른 입력이 감지되어 보상이 지급되지 않았어요. (${speedHits}타 / 5초)`);
+      } else if (speedHits >= 30) {
         reward = 150 + (speedHits - 30) * 2;
         if (reward > 500) {
           reward = 500;
           isCapped = true;
         }
-        userPoints += reward;
+        const askedSpeed = reward;
+        reward = grantMining(reward, '스피드 연타');
         updatePointsUI();
         maybeDropCard('스피드 연타', 10);
         if (speedHits >= 70) postFeed('game', `⚡ 스피드 연타 ${speedHits}타 신기록급!`, 'normal');
         if (window.confetti) confetti({ particleCount: 120 });
-        alert(`⚡ 미션 성공!\n기록: ${speedHits}타!\n🎉 보너스 +${reward}P 지급 완료! ${isCapped ? '(한판 최대 상한 500P 적용)' : ''}`);
+        alert(`⚡ 미션 성공!\n기록: ${speedHits}타!\n🎉 보너스 +${reward}P 지급 완료! ${isCapped ? '(한판 최대 상한 500P 적용)' : ''}${miningNote(askedSpeed, reward)}`);
       } else {
         alert(`😢 아쉽습니다! ${speedHits}타 기록.\n30타 이상을 달성해야 150P 보너스를 획득할 수 있습니다.`);
       }
@@ -188,12 +200,12 @@ function pickMemoryMenu(menuName) {
     if (memoryUserStep === memorySequence.length) {
       isMemoryGameActive = false;
       document.querySelectorAll('.mem-btn').forEach(b => b.disabled = true);
-      userPoints += 80;
+      const gotMem = grantMining(80, '식단암기');
       updatePointsUI();
       maybeDropCard('식단암기', 12);
       if (window.confetti) confetti({ particleCount: 120 });
-      display.innerHTML = `<span class="text-emerald-400 font-black">🎉 암기 완벽 성공! (+80P 지급)</span>`;
-      progText.textContent = "축하합니다! 80P를 획득했습니다.";
+      display.innerHTML = `<span class="text-emerald-400 font-black">🎉 암기 완벽 성공! (+${gotMem}P 지급)</span>`;
+      progText.textContent = gotMem < 80 ? `오늘 채굴 한도에 도달했어요 (+${gotMem}P)` : "축하합니다! 80P를 획득했습니다.";
     }
   } else {
     isMemoryGameActive = false;
@@ -210,7 +222,7 @@ function spinSlotMachine(times = 1) {
     return alert(`❌ 베팅할 포인트가 부족합니다!\n필요 포인트: ${totalCost.toLocaleString()}P (현재: ${userPoints.toLocaleString()}P)`);
   }
 
-  userPoints -= totalCost;
+  addPoints(-totalCost, `슬롯 ${times}회`);
   updatePointsUI();
 
   const resultText = document.getElementById('slotResultText');
@@ -219,13 +231,13 @@ function spinSlotMachine(times = 1) {
   if (times === 1) {
     isSlotSpinning = true;
     spinBtn.disabled = true;
-    resultText.textContent = "슬롯 회전 중... 과연 1,000,000P 잭팟은?!";
+    resultText.textContent = "슬롯 회전 중... 과연 💎💎💎 초특급 잭팟은?!";
 
     const slot1 = document.getElementById('slot1');
     const slot2 = document.getElementById('slot2');
     const slot3 = document.getElementById('slot3');
 
-    const isMegaJackpot = Math.random() < 0.0000001;
+    const isMegaJackpot = Math.random() < SLOT_MEGA_CHANCE;
 
     let counter = 0;
     const spinTimer = setInterval(() => {
@@ -243,12 +255,12 @@ function spinSlotMachine(times = 1) {
           slot1.textContent = "💎";
           slot2.textContent = "💎";
           slot3.textContent = "💎";
-          userPoints += 1000000;
+          addPoints(SLOT_MEGA_PRIZE, '슬롯 초특급 잭팟');
           updatePointsUI();
-          postFeed('slot', '💎💎💎 슬롯 초특급 잭팟!!! 1,000,000P 당첨!!!', 'legendary');
+          postFeed('slot', `💎💎💎 슬롯 초특급 잭팟!!! ${SLOT_MEGA_PRIZE.toLocaleString()}P 당첨!!!`, 'legendary');
           addCardsToCollection([drawRandomCard(60)], '초특급 잭팟');
           if (window.confetti) confetti({ particleCount: 400, spread: 140 });
-          resultText.innerHTML = `<span class="text-rose-500 font-black text-sm animate-bounce">🌟 0.00001% 초특급 잭팟! 1,000,000P 획득!! 🌟</span>`;
+          resultText.innerHTML = `<span class="text-rose-500 font-black text-sm animate-bounce">🌟 초특급 잭팟! ${SLOT_MEGA_PRIZE.toLocaleString()}P 획득!! 🌟</span>`;
           return;
         }
 
@@ -257,14 +269,14 @@ function spinSlotMachine(times = 1) {
         const r3 = slot3.textContent;
 
         if (r1 === r2 && r2 === r3) {
-          userPoints += 500;
+          addPoints(500, '슬롯 트리플');
           updatePointsUI();
           maybeDropCard('슬롯 트리플', 25);
           if (r1 === '👑') postFeed('slot', `🎰 슬롯 ${r1}${r1}${r1} 트리플 잭팟!`, 'normal');
           if (window.confetti) confetti({ particleCount: 120 });
           resultText.innerHTML = `<span class="text-amber-500 font-black">🎉 ${r1}${r1}${r1} 트리플! (+500P 획득) · 초특급 잭팟은 💎💎💎</span>`;
         } else if (r1 === r2 || r2 === r3 || r1 === r3) {
-          userPoints += 100;
+          addPoints(100, '슬롯 2개 일치');
           updatePointsUI();
           maybeDropCard('슬롯', 3);
           resultText.innerHTML = `<span class="text-indigo-600 font-black">👍 2개 일치! (+100P 획득)</span>`;
@@ -280,9 +292,9 @@ function spinSlotMachine(times = 1) {
     let totalWon = 0;
 
     for (let i = 0; i < times; i++) {
-      if (Math.random() < 0.0000001) {
+      if (Math.random() < SLOT_MEGA_CHANCE) {
         megaJackpots++;
-        totalWon += 1000000;
+        totalWon += SLOT_MEGA_PRIZE;
         continue;
       }
       const r1 = SLOT_ITEMS[Math.floor(Math.random() * SLOT_ITEMS.length)];
@@ -298,9 +310,9 @@ function spinSlotMachine(times = 1) {
       }
     }
 
-    userPoints += totalWon;
+    addPoints(totalWon, `슬롯 ${times}회 당첨금`);
     updatePointsUI();
-    if (megaJackpots > 0) postFeed('slot', `💎💎💎 슬롯 ${times}연속 돌리다 초특급 잭팟!!! +${(megaJackpots * 1000000).toLocaleString()}P`, 'legendary');
+    if (megaJackpots > 0) postFeed('slot', `💎💎💎 슬롯 ${times}연속 돌리다 초특급 잭팟!!! +${(megaJackpots * SLOT_MEGA_PRIZE).toLocaleString()}P`, 'legendary');
     if (triples > 0) maybeDropCard(`슬롯 ${times}연속`, Math.min(60, triples * 15));
     if (times >= 100 && totalWon - totalCost >= 3000) postFeed('slot', `🎰 슬롯 100연속으로 +${(totalWon - totalCost).toLocaleString()}P 순이익!`, 'normal');
 
@@ -310,7 +322,7 @@ function spinSlotMachine(times = 1) {
 
     resultText.innerHTML = `
       <span class="${net >= 0 ? 'text-amber-500' : 'text-rose-500'} font-bold">
-        ${times}회 정산: ${megaJackpots > 0 ? `💎초특급 ${megaJackpots}회(+${(megaJackpots * 1000000).toLocaleString()}P)! ` : ''}트리플 ${triples}회 | 더블 ${doubles}회 (순수익: ${net >= 0 ? '+' : ''}${net.toLocaleString()}P)
+        ${times}회 정산: ${megaJackpots > 0 ? `💎초특급 ${megaJackpots}회(+${(megaJackpots * SLOT_MEGA_PRIZE).toLocaleString()}P)! ` : ''}트리플 ${triples}회 | 더블 ${doubles}회 (순수익: ${net >= 0 ? '+' : ''}${net.toLocaleString()}P)
       </span>
     `;
   }
@@ -321,7 +333,7 @@ function playCoinFlip(userChoice) {
   const bet = Math.min(Math.max(betInput || 50, 50), 10000);
 
   if (userPoints < bet) return alert(`❌ 베팅할 포인트가 부족합니다! (필요: ${bet.toLocaleString()}P)`);
-  userPoints -= bet;
+  addPoints(-bet, '동전던지기 베팅');
   updatePointsUI();
 
   const coinEl = document.getElementById('coinDisplay');
@@ -335,7 +347,7 @@ function playCoinFlip(userChoice) {
 
     if (userChoice === outcome) {
       const reward = bet * 2;
-      userPoints += reward;
+      addPoints(reward, '동전던지기 적중');
       updatePointsUI();
       maybeDropCard('동전던지기', 6);
       if (bet >= 5000) postFeed('coin', `💰 동전던지기 ${bet.toLocaleString()}P 올인 성공! +${reward.toLocaleString()}P`, 'big');
@@ -375,7 +387,7 @@ function playDiceBet(userChoice) {
 
   if (userPoints < bet) return alert(`❌ 베팅할 포인트가 부족합니다! (필요: ${bet.toLocaleString()}P)`);
 
-  userPoints -= bet;
+  addPoints(-bet, '주사위 베팅');
   updatePointsUI();
 
   if (isExactNumberBet) {
@@ -404,16 +416,16 @@ function playDiceBet(userChoice) {
       multiplier = 2;
     } else if (userChoice === rollStr) {
       won = true;
-      multiplier = 8;
+      multiplier = 5;
     }
 
     if (won) {
       const reward = bet * multiplier;
-      userPoints += reward;
+      addPoints(reward, `주사위 적중 x${multiplier}`);
       updatePointsUI();
-      maybeDropCard('주사위', multiplier === 8 ? 20 : 6);
-      if (multiplier === 8 && bet >= 300) postFeed('dice', `🎲 주사위 숫자 [${roll}] 정확히 적중! x8 → +${reward.toLocaleString()}P`, 'normal');
-      if (window.confetti) confetti({ particleCount: multiplier === 8 ? 200 : 80 });
+      maybeDropCard('주사위', multiplier === 5 ? 20 : 6);
+      if (multiplier === 5 && bet >= 300) postFeed('dice', `🎲 주사위 숫자 [${roll}] 정확히 적중! x5 → +${reward.toLocaleString()}P`, 'normal');
+      if (window.confetti) confetti({ particleCount: multiplier === 5 ? 200 : 80 });
       resultEl.innerHTML = `<span class="text-amber-500 font-black">🎉 대박 적중! [${roll}나옴] +${reward.toLocaleString()}P (${multiplier}배) 획득!</span>`;
     } else {
       resultEl.innerHTML = `<span class="text-rose-500 font-bold">낙첨! [${roll}나옴] -${bet.toLocaleString()}P</span>`;

@@ -4,10 +4,10 @@
 // 받은 세트 보상: user_points/{닉네임}/setsClaimed = { 세트ID: true }
 
 const CARD_RARITY = {
-  C: { name: '일반', color: 'text-slate-600', ring: 'border-slate-300 bg-white', chance: 68, dust: 30 },
-  R: { name: '희귀', color: 'text-sky-600', ring: 'border-sky-400 bg-sky-50', chance: 24, dust: 100 },
-  E: { name: '영웅', color: 'text-violet-600', ring: 'border-violet-500 bg-violet-50', chance: 7, dust: 400 },
-  L: { name: '전설', color: 'text-amber-600', ring: 'border-amber-400 bg-gradient-to-br from-amber-50 to-yellow-100', chance: 1, dust: 2000 }
+  C: { name: '일반', color: 'text-slate-600', ring: 'border-slate-300 bg-white', chance: 68, dust: 20 },
+  R: { name: '희귀', color: 'text-sky-600', ring: 'border-sky-400 bg-sky-50', chance: 24, dust: 60 },
+  E: { name: '영웅', color: 'text-violet-600', ring: 'border-violet-500 bg-violet-50', chance: 7, dust: 250 },
+  L: { name: '전설', color: 'text-amber-600', ring: 'border-amber-400 bg-gradient-to-br from-amber-50 to-yellow-100', chance: 1, dust: 1500 }
 };
 
 const CARDS = [
@@ -45,10 +45,10 @@ const CARD_BY_ID = Object.fromEntries(CARDS.map(c => [c.id, c]));
 const CARD_SETS = [
   { id: 'basic',  name: '🥢 기본 반찬 세트', cards: ['kimchi', 'gyeran', 'kongnamul', 'sigeumchi', 'myeolchi'], points: 1000, symbol: '🥢' },
   { id: 'bunsik', name: '🌶️ 분식 세트', cards: ['tteokbokki', 'sundae', 'eomuk'], points: 1500 },
-  { id: 'buffet', name: '🍱 한식뷔페 메인 세트', cards: ['jeyuk', 'donkkas', 'dakgang', 'kimchijjim', 'japchae'], points: 5000, badge: 'nb-buffet' },
-  { id: 'feast',  name: '🎊 잔칫상 세트', cards: ['galbijjim', 'bossam', 'pajeon', 'japchae'], points: 15000 },
-  { id: 'royal',  name: '👑 임금님 수라상', cards: ['yukhoe', 'gejang', 'sinseollo'], points: 50000, badge: 'nb-royal' },
-  { id: 'all',    name: '📒 반찬 도감 완성', cards: CARDS.map(c => c.id), points: 200000, badge: 'nb-collector' }
+  { id: 'buffet', name: '🍱 한식뷔페 메인 세트', cards: ['jeyuk', 'donkkas', 'dakgang', 'kimchijjim', 'japchae'], points: 4000, badge: 'nb-buffet' },
+  { id: 'feast',  name: '🎊 잔칫상 세트', cards: ['galbijjim', 'bossam', 'pajeon', 'japchae'], points: 8000 },
+  { id: 'royal',  name: '👑 임금님 수라상', cards: ['yukhoe', 'gejang', 'sinseollo'], points: 25000, badge: 'nb-royal' },
+  { id: 'all',    name: '📒 반찬 도감 완성', cards: CARDS.map(c => c.id), points: 30000, badge: 'nb-collector' }
 ];
 
 const CARD_PACK_PRICE = 500;
@@ -131,7 +131,7 @@ async function buyCardPack() {
   if (!checkApprovalGuard() || packOpening) return;
   if (userPoints < CARD_PACK_PRICE) return alert(`❌ 포인트가 부족해요! (카드팩 ${CARD_PACK_PRICE}P)`);
   packOpening = true;
-  userPoints -= CARD_PACK_PRICE;
+  addPoints(-CARD_PACK_PRICE, '카드팩 구매');
   updatePointsUI();
 
   const pulled = Array.from({ length: CARD_PACK_SIZE }, () => drawRandomCard());
@@ -172,13 +172,13 @@ function claimSetReward(setId) {
   if (!set || mySetsClaimed[setId] || !setProgress(set).done) return;
   if (!canGainPoints(set.points)) return alert('⏳ ' + budgetWaitText(set.points));
 
-  userPoints += set.points;
+  addPoints(set.points, `세트 보상: ${set.name}`);
   mySetsClaimed[setId] = true;
   if (set.badge && !myInventory.bgs.includes(set.badge)) myInventory.bgs.push(set.badge);
   if (set.symbol && !myInventory.symbols.includes(set.symbol)) myInventory.symbols.push(set.symbol);
   db.ref(`user_points/${currentUser.nickname}/setsClaimed/${setId}`).set(true);
   updatePointsUI();
-  postFeed('set', `${set.name} 완성! +${set.points.toLocaleString()}P 획득`, set.points >= 50000 ? 'legendary' : 'big');
+  postFeed('set', `${set.name} 완성! +${set.points.toLocaleString()}P 획득`, set.points >= 25000 ? 'legendary' : 'big');
   if (window.confetti) confetti({ particleCount: 180, spread: 120 });
   alert(`🎉 ${set.name} 완성 보상!\n+${set.points.toLocaleString()}P${set.badge ? '\n+ 전용 배지 (명품 상점 > 내 획득 배지에서 장착)' : ''}${set.symbol ? `\n+ 전용 칭호 ${set.symbol}` : ''}`);
   renderCardBook();
@@ -200,7 +200,7 @@ function dismantleDuplicates() {
   const updates = {};
   Object.entries(next).forEach(([id, n]) => { updates[`cards/${id}`] = n; });
   myCards = next;
-  userPoints += gain;
+  addPoints(gain, `중복 카드 분해 ${count}장`);
   db.ref(`user_points/${currentUser.nickname}`).update(updates);
   updatePointsUI();
   renderCardBook();

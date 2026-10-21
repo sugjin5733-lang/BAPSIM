@@ -30,25 +30,31 @@ const BOWL_EVOLUTION = [
 const ENHANCE_PROBABILITIES = [
   { level: 1,  success: 100.0, keep: 0.0,  break: 0.0,  reward: 50 },
   { level: 2,  success: 90.6,  keep: 9.4,  break: 0.0,  reward: 120 },
-  { level: 3,  success: 79.8,  keep: 20.2, break: 0.0,  reward: 200 },
-  { level: 4,  success: 70.1,  keep: 27.9, break: 2.1,  reward: 320 },
-  { level: 5,  success: 59.9,  keep: 35.0, break: 5.1,  reward: 480 },
-  { level: 6,  success: 50.1,  keep: 39.7, break: 10.2, reward: 700 },
-  { level: 7,  success: 45.4,  keep: 44.1, break: 10.5, reward: 1000 },
-  { level: 8,  success: 40.2,  keep: 49.6, break: 10.3, reward: 1450 },
-  { level: 9,  success: 33.6,  keep: 56.6, break: 9.8,  reward: 2000 },
-  { level: 10, success: 29.3,  keep: 61.4, break: 9.5,  reward: 3000 },
-  { level: 11, success: 25.5,  keep: 64.5, break: 10.1, reward: 4200 },
-  { level: 12, success: 23.6,  keep: 65.9, break: 10.6, reward: 5800 },
-  { level: 13, success: 19.3,  keep: 70.2, break: 10.5, reward: 8000 },
-  { level: 14, success: 18.1,  keep: 72.3, break: 9.7,  reward: 11000 },
-  { level: 15, success: 14.8,  keep: 75.5, break: 9.9,  reward: 15000 },
-  { level: 16, success: 13.1,  keep: 78.0, break: 9.8,  reward: 18500 },
-  { level: 17, success: 10.9,  keep: 76.8, break: 12.6, reward: 22000 },
-  { level: 18, success: 9.9,   keep: 79.9, break: 10.7, reward: 26000 },
-  { level: 19, success: 4.7,   keep: 86.2, break: 10.6, reward: 30000 },
-  { level: 20, success: 3.3,   keep: 90.3, break: 9.9,  reward: 100000 }
+  { level: 3,  success: 79.8,  keep: 20.2, break: 0.0,  reward: 220 },
+  { level: 4,  success: 70.1,  keep: 27.9, break: 2.1,  reward: 300 },
+  { level: 5,  success: 59.9,  keep: 35.0, break: 5.1,  reward: 420 },
+  { level: 6,  success: 50.1,  keep: 39.7, break: 10.2, reward: 580 },
+  { level: 7,  success: 45.4,  keep: 44.1, break: 10.5, reward: 780 },
+  { level: 8,  success: 40.2,  keep: 49.6, break: 10.3, reward: 1050 },
+  { level: 9,  success: 33.6,  keep: 56.6, break: 9.8,  reward: 1400 },
+  { level: 10, success: 29.3,  keep: 61.4, break: 9.5,  reward: 1900 },
+  { level: 11, success: 25.5,  keep: 64.5, break: 10.1, reward: 2400 },
+  { level: 12, success: 23.6,  keep: 65.9, break: 10.6, reward: 3100 },
+  { level: 13, success: 19.3,  keep: 70.2, break: 10.5, reward: 4200 },
+  { level: 14, success: 18.1,  keep: 72.3, break: 9.7,  reward: 5800 },
+  { level: 15, success: 14.8,  keep: 75.5, break: 9.9,  reward: 8500 },
+  { level: 16, success: 13.1,  keep: 78.0, break: 9.8,  reward: 10000 },
+  { level: 17, success: 10.9,  keep: 76.8, break: 12.6, reward: 13000 },
+  { level: 18, success: 9.9,   keep: 79.9, break: 10.7, reward: 21000 },
+  { level: 19, success: 4.7,   keep: 86.2, break: 10.6, reward: 46000 },
+  { level: 20, success: 3.3,   keep: 90.3, break: 9.9,  reward: 85000 }
 ];
+
+// 안전 구간: 한 번 도달한 5/10/15강 아래로는 떨어지지 않음
+// (예전엔 +19에서 타면 0강부터 다시 → +20 도달 기대 비용이 약 400만P라 사실상 불가능했음)
+function enhanceCheckpoint(level) {
+  return level >= 15 ? 15 : level >= 10 ? 10 : level >= 5 ? 5 : 0;
+}
 
 function getEnhanceCost(lvl) {
   if (lvl < 5) return 100;
@@ -217,7 +223,7 @@ function buyEnhanceItem(kind) {
   const it = ENHANCE_ITEMS[kind];
   const qty = 1;
   if (userPoints < it.price * qty) return alert(`❌ 포인트가 부족해요! (${it.name} ${it.price.toLocaleString()}P)`);
-  userPoints -= it.price * qty;
+  addPoints(-it.price * qty, `${it.name} 구매`);
   myItems[kind] += qty;
   db.ref(`user_points/${currentUser.nickname}/items/${kind}`).set(myItems[kind]);
   updatePointsUI();
@@ -278,7 +284,7 @@ function runEnhancement() {
     return alert(`❌ 강화 비용이 부족합니다! (필요: ${cost}P / 보유: ${userPoints}P)`);
   }
 
-  userPoints -= cost;
+  addPoints(-cost, `강화 시도 +${currentEnhanceLevel}→+${currentEnhanceLevel + 1}`);
   enhanceActionTimestamps.push(now);
   updatePointsUI();
 
@@ -313,8 +319,8 @@ function runEnhancement() {
       : `<span class="text-amber-400 font-bold text-xs">⚠️ 강화 실패! 다행히 밥이 타지 않고 유지되었습니다. ${tags}</span>`;
   } else {
     outcome = 'break';
-    currentEnhanceLevel = 0;
-    alertEl.innerHTML = `<span class="text-rose-500 font-black text-xs">💥 밥이 타버렸습니다! (파괴되어 +0 따스한 햇쌀밥으로 리셋)</span>`;
+    currentEnhanceLevel = enhanceCheckpoint(fromLevel);
+    alertEl.innerHTML = `<span class="text-rose-500 font-black text-xs">💥 밥이 타버렸습니다! ${currentEnhanceLevel > 0 ? `(안전 구간 +${currentEnhanceLevel}강으로 내려감)` : '(+0 따스한 햇쌀밥으로 리셋)'}</span>`;
     if (fromLevel >= 10) postFeed('enhance', `+${fromLevel}강 밥이 새까맣게 타버렸어요... 💥`, fromLevel >= 14 ? 'big' : 'normal');
   }
 
@@ -338,7 +344,7 @@ function sellEnhancedBowl() {
   const currentName = BOWL_EVOLUTION[currentEnhanceLevel]?.name || '밥';
   if (!confirm(`+${currentEnhanceLevel}강 [${currentName}]을(를) 판매하고 ${reward.toLocaleString()}P를 획득하시겠습니까?\n판매 후 밥은 +0단계로 리셋됩니다.`)) return;
 
-  userPoints += reward;
+  addPoints(reward, `+${currentEnhanceLevel}강 밥 판매`);
   const soldLvl = currentEnhanceLevel;
   currentEnhanceLevel = 0;
   updatePointsUI();
