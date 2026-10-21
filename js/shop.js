@@ -27,7 +27,7 @@ const SHOP_DATA = {
     { id: "col_dark", name: "다크 나이트", hex: "#0f172a", cost: 300 }
   ],
   bgs: [
-    { id: "nb-najeon", name: "🐚 나전칠기 (명장)", class: "nb-najeon", cost: 100000000, reqLvl: 20, desc: "옻칠한 흑단 위로 자개빛이 천천히 일렁이는 장인의 명패 · 단 하나의 품격 [20강 필요]" },
+    { id: "nb-najeon", name: "🐚 나전칠기 (명장)", class: "nb-najeon", cost: 100000000, reqLvl: 20, desc: "황금 섬광이 섞인 무지개 고리가 질주하고, 색이 흐르는 자개판 위로 금박 빛줄기와 별가루가 쏟아지는 밥심 최후의 전설 [20강 필요]" },
     { id: "nb-ricegod", name: "🍚 천상의 밥신 (창세)", class: "nb-ricegod", cost: 10000000, reqLvl: 20, desc: "금빛 고리가 천천히 돌고 쌀알 별빛이 은은하게 빛나는 밥심의 상징 [20강 필요]" },
     { id: "nb-cosmic", name: "🌌 코스믹 레인보우 (태초 신화)", class: "nb-cosmic", cost: 999999, reqLvl: 17, desc: "흐르는 무지개 홀로그램 위로 빛줄기가 스치는 오라 [17강 필요]" },
     { id: "nb-solar", name: "☀️ 태양의 겁화 (솔라 플레어)", class: "nb-solar", cost: 999999, reqLvl: 17, desc: "아래에서 솟구치는 불꽃과 흩날리는 불티 [17강 필요]" },
@@ -123,7 +123,7 @@ function renderShopUI() {
 
       const card = document.createElement('div');
       card.className = `p-3.5 border rounded-2xl flex items-center justify-between transition-all ${
-        isUltimate ? 'ultimate-card text-white shadow-2xl' :
+        isUltimate ? `ultimate-card ${bg.cost >= 100000000 ? 'ultra' : ''} text-white shadow-2xl` :
         isMythic ? 'border-2 border-purple-500 bg-slate-950 text-white shadow-xl' :
         isGold ? 'border-2 border-amber-400 bg-amber-50/50 shadow-md' : 'bg-slate-50'
       }`;
