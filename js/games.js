@@ -260,9 +260,9 @@ function spinSlotMachine(times = 1) {
           userPoints += 500;
           updatePointsUI();
           maybeDropCard('슬롯 트리플', 25);
-          if (r1 === '👑' || r1 === '💎') postFeed('slot', `🎰 슬롯 ${r1}${r1}${r1} 트리플 잭팟!`, 'normal');
+          if (r1 === '👑') postFeed('slot', `🎰 슬롯 ${r1}${r1}${r1} 트리플 잭팟!`, 'normal');
           if (window.confetti) confetti({ particleCount: 120 });
-          resultText.innerHTML = `<span class="text-amber-500 font-black">🎉 트리플 잭팟 달성!! (+500P 획득)</span>`;
+          resultText.innerHTML = `<span class="text-amber-500 font-black">🎉 ${r1}${r1}${r1} 트리플! (+500P 획득) · 초특급 잭팟은 💎💎💎</span>`;
         } else if (r1 === r2 || r2 === r3 || r1 === r3) {
           userPoints += 100;
           updatePointsUI();

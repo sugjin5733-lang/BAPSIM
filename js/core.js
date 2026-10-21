@@ -94,7 +94,8 @@ let memorySequence = [];
 let memoryUserStep = 0;
 let isMemoryGameActive = false;
 
-const SLOT_ITEMS = ["🍚", "🍗", "🥩", "🍕", "🍜", "👑", "💎"];
+// 💎 는 초특급 잭팟(1,000,000P) 전용 그림이라 일반 그림에는 넣지 않음 (일반 💎💎💎 트리플이 초대박으로 오해받던 문제)
+const SLOT_ITEMS = ["🍚", "🍗", "🥩", "🍕", "🍜", "👑", "🥟"];
 let isSlotSpinning = false;
 let diceExactBetTimestamps = [];
 
