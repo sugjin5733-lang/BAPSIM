@@ -27,7 +27,8 @@ const SHOP_DATA = {
     { id: "col_dark", name: "다크 나이트", hex: "#0f172a", cost: 300 }
   ],
   bgs: [
-    { id: "nb-ricegod", name: "🍚 천상의 밥신 (창세)", class: "nb-ricegod", cost: 10000000, reqLvl: 20, desc: "무지개·황금 오라가 회전하고 쌀알 별빛이 흩날리는 밥심 최고의 상징 [20강 필요]" },
+    { id: "nb-najeon", name: "🪷 나전칠기 (명장)", class: "nb-najeon", cost: 100000000, reqLvl: 20, desc: "옻칠한 흑단 위로 자개빛이 천천히 일렁이는 장인의 명패 · 단 하나의 품격 [20강 필요]" },
+    { id: "nb-ricegod", name: "🍚 천상의 밥신 (창세)", class: "nb-ricegod", cost: 10000000, reqLvl: 20, desc: "금빛 고리가 천천히 돌고 쌀알 별빛이 은은하게 빛나는 밥심의 상징 [20강 필요]" },
     { id: "nb-cosmic", name: "🌌 코스믹 레인보우 (태초 신화)", class: "nb-cosmic", cost: 999999, reqLvl: 17, desc: "흐르는 무지개 홀로그램 위로 빛줄기가 스치는 오라 [17강 필요]" },
     { id: "nb-solar", name: "☀️ 태양의 겁화 (솔라 플레어)", class: "nb-solar", cost: 999999, reqLvl: 17, desc: "아래에서 솟구치는 불꽃과 흩날리는 불티 [17강 필요]" },
     { id: "nb-abyss", name: "🌋 심연의 지옥염화 (헬파이어)", class: "nb-abyss", cost: 999999, reqLvl: 17, desc: "갈라진 땅 사이로 흐르는 용암과 숨 쉬는 핏빛 열기 [17강 필요]" },
@@ -237,6 +238,7 @@ function buyBg(bgClass, cost, bgName, reqLvl = 0) {
   updatePointsUI();
   renderShopUI();
   if (window.confetti) confetti({ particleCount: 120, spread: 80 });
+  if (cost >= 100000000) postFeed('badge', `🪷 ${bgName} 배지를 손에 넣었어요!`, 'legendary', true);
 }
 function equipBg(bgClass) { myNickBg = bgClass; updatePointsUI(); renderShopUI(); }
 function unequipBg() { myNickBg = 'nb-none'; updatePointsUI(); renderShopUI(); }

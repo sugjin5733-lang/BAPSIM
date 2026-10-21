@@ -583,6 +583,7 @@ function attachUserPointListener() {
       renderRankingsData();
       syncFromGoogleSheet(false);
       initSeason();
+      checkWeeklyCardReset();
       settleMyDuels();
       settleMyBets();
       renderDuelArena();

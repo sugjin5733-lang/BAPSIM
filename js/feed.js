@@ -8,8 +8,11 @@ let feedStartedAt = Date.now();
 let feedItems = [];
 let feedTickerIdx = 0;
 
-// 전광판에 올리기 (회원만, 본인 이름으로만 — 보안 규칙이 강제)
-function postFeed(kind, text, level = 'normal') {
+// 전광판에는 '중요한 소식'만 올림 (important = true 인 것만)
+//  - +20강 달성, 반찬 도감 완성, 슬롯 초특급 잭팟, 1억 배지 구매
+//  나머지 호출은 조용히 무시 (예전 코드 호환)
+function postFeed(kind, text, level = 'normal', important = false) {
+  if (!important) return;
   if (!canSyncToCloud()) return;
   db.ref('game_feed').push({
     uid: authUser.uid,
@@ -17,6 +20,7 @@ function postFeed(kind, text, level = 'normal') {
     kind: kind,
     text: String(text).slice(0, 120),
     level: level,
+    important: true,
     badge: myNickBg,
     color: myNickColor,
     symbol: myNickSymbol,
@@ -27,7 +31,7 @@ function postFeed(kind, text, level = 'normal') {
 function attachFeedListener() {
   db.ref('game_feed').limitToLast(30).on('child_added', snap => {
     const f = snap.val();
-    if (!f || !f.text) return;
+    if (!f || !f.text || f.important !== true) return; // 예전 잡다한 소식은 표시 안 함
     feedItems.push(f);
     if (feedItems.length > 30) feedItems.shift();
     renderFeedTicker(f);

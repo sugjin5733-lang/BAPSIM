@@ -467,6 +467,7 @@ function runEnhancement() {
     if (outcome === 'success') {
       const evolvedBowl = BOWL_EVOLUTION[currentEnhanceLevel];
       if ((currentEnhanceLevel >= 15 || jumped) && window.confetti) confetti({ particleCount: jumped ? 220 : 150, spread: jumped ? 120 : 70 });
+      if (currentEnhanceLevel === 20) postFeed('enhance', `👑 +20강 [${evolvedBowl.name}] 달성!! ${evolvedBowl.icon}`, 'legendary', true);
       if (jumped) postFeed('enhance', `🌟 대박 점프! +${fromLevel} → +${currentEnhanceLevel}강 [${evolvedBowl.name}] ${evolvedBowl.icon}`, currentEnhanceLevel >= 15 ? 'big' : 'normal');
       else if (currentEnhanceLevel >= 10) postFeed('enhance', `${odds.gamble ? '🎲 도박 강화로 ' : ''}+${currentEnhanceLevel}강 [${evolvedBowl.name}] 강화 성공! ${evolvedBowl.icon}`,
         currentEnhanceLevel >= 17 ? 'legendary' : currentEnhanceLevel >= 13 ? 'big' : 'normal');
@@ -544,7 +545,7 @@ function checkMarketSpikeAlert() {
   if (lastSpikeAlertSlot === null) { lastSpikeAlertSlot = mk.slot; return; } // 처음 접속한 순간은 알리지 않음
   if (mk.slot === lastSpikeAlertSlot) return;
   lastSpikeAlertSlot = mk.slot;
-  if (mk.tone !== 'up2' && mk.tone !== 'up3') return;
+  if (mk.tone !== 'up3') return; // 알림은 초폭등(x2.5)만
   if (typeof canSyncToCloud === 'function' && !canSyncToCloud()) return;
   const box = document.getElementById('feedToastContainer');
   if (!box) return;

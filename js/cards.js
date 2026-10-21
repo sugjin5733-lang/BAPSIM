@@ -56,12 +56,14 @@ const CARD_PACK_SIZE = 3;
 
 let myCards = {};
 let mySetsClaimed = {};
+let myCardsWeek = null; // 이 도감이 어느 주의 것인지 (weekKey)
 
 // auth.js 의 회원 정보 리스너가 호출
 function loadCardsFromUser(val) {
   myCards = {};
   Object.entries((val && val.cards) || {}).forEach(([k, v]) => { if (CARD_BY_ID[k] && v > 0) myCards[k] = Number(v) || 0; });
   mySetsClaimed = Object.assign({}, (val && val.setsClaimed) || {});
+  myCardsWeek = (val && val.cardsWeek) || null;
   const cnt = document.getElementById('headerCardCount');
   if (cnt) cnt.textContent = `${ownedCardKinds()}/${CARDS.length}`;
   if (!document.getElementById('cardModal')?.classList.contains('hidden')) renderCardBook();
@@ -178,7 +180,7 @@ function claimSetReward(setId) {
   if (set.symbol && !myInventory.symbols.includes(set.symbol)) myInventory.symbols.push(set.symbol);
   db.ref(`user_points/${currentUser.nickname}/setsClaimed/${setId}`).set(true);
   updatePointsUI();
-  postFeed('set', `${set.name} 완성! +${set.points.toLocaleString()}P 획득`, set.points >= 25000 ? 'legendary' : 'big');
+  if (set.id === 'all') postFeed('set', `📒 이번 주 반찬 도감을 모두 채웠어요! +${set.points.toLocaleString()}P`, 'legendary', true);
   if (window.confetti) confetti({ particleCount: 180, spread: 120 });
   alert(`🎉 ${set.name} 완성 보상!\n+${set.points.toLocaleString()}P${set.badge ? '\n+ 전용 배지 (명품 상점 > 내 획득 배지에서 장착)' : ''}${set.symbol ? `\n+ 전용 칭호 ${set.symbol}` : ''}`);
   renderCardBook();
@@ -225,6 +227,8 @@ function renderCardBook() {
 
   const owned = ownedCardKinds();
   if (prog) prog.innerHTML = `<span class="font-black">${owned}</span> / ${CARDS.length}종 수집 <span class="text-slate-400">(${Math.round(owned / CARDS.length * 100)}%)</span>`;
+  const wk = document.getElementById('cardWeekInfo');
+  if (wk) wk.textContent = `🗓️ 이번 주 도감 · 월요일 0시 초기화까지 ${seasonTimeLeftText()} · 세트 보상은 매주 다시 받을 수 있어요 (배지·칭호는 유지)`;
   const bar = document.getElementById('cardBookBar');
   if (bar) bar.style.width = `${owned / CARDS.length * 100}%`;
 
@@ -279,3 +283,44 @@ function restoreSetCosmetics() {
   });
   return fixed;
 }
+
+// ==========================================
+// 📒 반찬 도감 주간 초기화 (매주 월요일 0시, 한국 시간)
+// - 카드와 '받은 세트 보상' 기록만 초기화 → 세트 보상은 매주 다시 받을 수 있음
+// - 이미 받은 세트 배지·칭호(치장)는 계속 유지
+// ==========================================
+let cardResetRunning = false;
+async function checkWeeklyCardReset() {
+  if (!canSyncToCloud() || cardResetRunning) return;
+  const wk = weekKey();
+  if (myCardsWeek === wk) return;
+  // 이 기능 도입 전부터 있던 도감은 '이번 주 것'으로 인정 (첫 초기화는 다음 월요일)
+  if (!myCardsWeek) {
+    myCardsWeek = wk;
+    db.ref(`user_points/${currentUser.nickname}/cardsWeek`).set(wk).catch(() => {});
+    return;
+  }
+  cardResetRunning = true;
+  const hadAny = Object.keys(myCards).length > 0 || Object.keys(mySetsClaimed).length > 0;
+  try {
+    myCards = {}; mySetsClaimed = {}; myCardsWeek = wk;
+    await db.ref(`user_points/${currentUser.nickname}`).update({ cards: null, setsClaimed: null, cardsWeek: wk });
+    loadCardsFromUser({ cards: {}, setsClaimed: {}, cardsWeek: wk });
+    if (hadAny) {
+      const box = document.getElementById('feedToastContainer');
+      if (box) {
+        const el = document.createElement('div');
+        el.className = 'feed-toast feed-toast-plain';
+        el.innerHTML = '<div class="text-[10px] font-black text-slate-500">📒 새 주 시작</div><div class="text-xs font-bold">반찬 도감이 초기화됐어요! 이번 주에도 도감을 채워서 세트 보상을 받아보세요.<br><span class="text-slate-500">(지난번에 받은 세트 배지·칭호는 그대로예요)</span></div>';
+        box.appendChild(el);
+        setTimeout(() => el.classList.add('feed-toast-out'), 8000);
+        setTimeout(() => el.remove(), 8700);
+      }
+    }
+  } catch (err) {
+    console.warn('도감 초기화 실패:', err && err.message);
+  } finally {
+    cardResetRunning = false;
+  }
+}
+setInterval(checkWeeklyCardReset, 60000);
