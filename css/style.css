@@ -50,7 +50,7 @@ body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 
 .nb-cosmic, .nb-solar, .nb-abyss, .nb-cyberaurora, .nb-infinity,
 .nb-blackhole, .nb-matrix, .nb-universe, .nb-ricegod {
   position: relative; isolation: isolate; overflow: hidden; display: inline-block; vertical-align: middle;
-  padding: 2px 10px; border-radius: 9px; font-weight: 900; letter-spacing: -0.01em; line-height: 1.5;
+  padding: 2px 10px; border-radius: 9px; font-weight: 900; letter-spacing: -0.01em; line-height: 1.5; white-space: nowrap;
 }
 .nb-cosmic::before, .nb-cosmic::after, .nb-solar::before, .nb-solar::after, .nb-abyss::before, .nb-abyss::after,
 .nb-cyberaurora::before, .nb-cyberaurora::after, .nb-infinity::before, .nb-infinity::after,
@@ -131,7 +131,7 @@ body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 
 }
 .nb-cyberaurora::before {
   top: 0; bottom: 0; width: 30%; left: -40%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
   animation: bsLaser 1.9s ease-in-out infinite;
 }
 .nb-cyberaurora::after {
@@ -211,36 +211,38 @@ body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 
 }
 @keyframes bsTwinkle { 0% { opacity: .35; } 100% { opacity: 1; } }
 
-/* 🍚 천상의 밥신 (1,000만P): 무지개·황금 회전 오라 + 쌀알 별빛 + 빛줄기 */
+/* 🍚 천상의 밥신 (1,000만P): 두꺼운 무지개·황금 회전 고리 + 금빛 후광 + 반짝이는 쌀알 + 빛줄기 */
 .nb-ricegod {
-  background: #0b0710; padding: 3px 12px; border-radius: 10px;
-  color: #fff3c4 !important;
-  text-shadow: 0 0 3px #fff, 0 0 8px #ffd84d, 0 0 16px #ff9f1c, 0 0 24px rgba(236,72,153,.7);
+  background: #0b0710; padding: 3px 13px; border-radius: 11px;
+  color: #fff6d1 !important;
+  text-shadow: 0 0 2px #fff, 0 0 6px #ffe066, 0 0 12px #ffb000, 0 0 22px rgba(255,45,149,.75);
   animation: bsGodGlow 3s linear infinite;
 }
 .nb-ricegod::before {
-  inset: -170%;
-  background: conic-gradient(from 0deg, #fff6c2, #ffd23f, #ff7a00, #ff2d95, #8b5cf6, #22c3ff, #2bea8a, #ffd23f, #fff6c2);
-  animation: bsSpin 2.2s linear infinite;
+  inset: -200%;
+  background: conic-gradient(from 0deg, #fff6c2, #ffd23f, #ff7a00, #ff2d95, #b04bff, #22c3ff, #2bea8a, #ffe14d, #fff6c2);
+  animation: bsSpin 2s linear infinite;
 }
 .nb-ricegod::after {
-  inset: 2px; border-radius: 8px;
+  inset: 3px; border-radius: 8px;
   background:
-    linear-gradient(105deg, transparent 40%, rgba(255,250,220,.55) 50%, transparent 60%),
-    radial-gradient(2px 1.2px at 14% 30%, #fffbe6 99%, transparent), radial-gradient(1.6px 1px at 34% 78%, #ffe9a8 99%, transparent),
-    radial-gradient(2px 1.2px at 58% 22%, #fffbe6 99%, transparent), radial-gradient(1.6px 1px at 78% 70%, #ffe9a8 99%, transparent),
-    radial-gradient(2px 1.2px at 92% 35%, #fffbe6 99%, transparent),
-    radial-gradient(120% 160% at 50% 120%, #4a2c00 0%, #1c0f05 45%, #0b0710 100%);
-  background-size: 300% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
-  animation: bsGodInner 2.8s ease-in-out infinite;
+    linear-gradient(105deg, transparent 40%, rgba(255,250,220,.6) 50%, transparent 60%),
+    radial-gradient(2.4px 1.4px at 10% 30%, #fffbe6 99%, transparent), radial-gradient(2px 1.2px at 30% 78%, #ffe9a8 99%, transparent),
+    radial-gradient(2.4px 1.4px at 55% 18%, #fffbe6 99%, transparent), radial-gradient(2px 1.2px at 76% 74%, #ffe9a8 99%, transparent),
+    radial-gradient(2.4px 1.4px at 93% 32%, #fffbe6 99%, transparent),
+    radial-gradient(70% 120% at 50% 50%, rgba(255,196,0,.45) 0%, transparent 70%),
+    linear-gradient(180deg, #3a2200 0%, #170b02 55%, #2a1400 100%);
+  background-size: 300% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+  animation: bsGodInner 2.6s ease-in-out infinite, bsGodSparkle 1.4s ease-in-out infinite alternate;
 }
 @keyframes bsGodGlow {
-  0%   { box-shadow: 0 0 12px rgba(255,210,63,.9), 0 0 26px rgba(255,45,149,.5); }
-  33%  { box-shadow: 0 0 16px rgba(139,92,246,.9), 0 0 30px rgba(34,195,255,.55); }
-  66%  { box-shadow: 0 0 16px rgba(43,234,138,.85), 0 0 30px rgba(255,210,63,.6); }
-  100% { box-shadow: 0 0 12px rgba(255,210,63,.9), 0 0 26px rgba(255,45,149,.5); }
+  0%   { box-shadow: 0 0 14px rgba(255,210,63,1), 0 0 30px rgba(255,45,149,.6), 0 0 44px rgba(255,210,63,.35); }
+  33%  { box-shadow: 0 0 16px rgba(176,75,255,1), 0 0 32px rgba(34,195,255,.65), 0 0 46px rgba(176,75,255,.35); }
+  66%  { box-shadow: 0 0 16px rgba(43,234,138,.95), 0 0 32px rgba(255,210,63,.7), 0 0 46px rgba(43,234,138,.3); }
+  100% { box-shadow: 0 0 14px rgba(255,210,63,1), 0 0 30px rgba(255,45,149,.6), 0 0 44px rgba(255,210,63,.35); }
 }
-@keyframes bsGodInner { 0% { background-position: 150% 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; } 100% { background-position: -150% 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; } }
+@keyframes bsGodInner { 0% { background-position: 150% 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; } 100% { background-position: -150% 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; } }
+@keyframes bsGodSparkle { 0% { filter: brightness(1); } 100% { filter: brightness(1.35); } }
 
 @keyframes bsHue { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
 @keyframes bsSweep { 0% { background-position: 150% 0; } 100% { background-position: -150% 0; } }
