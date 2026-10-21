@@ -599,11 +599,14 @@ function sellEnhancedBowl() {
 }
 
 // ==========================================
-// 🎲 더블 오어 낫싱: 판매 대금을 걸고 50% 확률로 2배 (최대 3번 = 8배)
-// 기대값은 정확히 본전. 순수한 배짱 승부
+// 🎲 더블 오어 낫싱: 판매 대금을 걸고 2배 도전 (최대 3번 = 8배)
+// 성공 확률은 단계마다 낮아짐 (50% → 40% → 30%)
 // ==========================================
 let doubleUp = null;
 const DOUBLE_UP_MAX = 3;
+// 단계가 올라갈수록 성공 확률 하락: 1단계 50% · 2단계 40% · 3단계 30% (3연속 성공 6%)
+// 1단계는 본전 게임, 2·3단계는 손해 쪽 (기대값 80% · 60%)
+const DOUBLE_UP_CHANCES = [0.5, 0.4, 0.3];
 
 function startDoubleUp(amount, soldLvl, lucky = false) {
   doubleUp = { amount, round: 0, soldLvl, original: amount };
@@ -622,7 +625,7 @@ function renderDoubleUp(headline, tone = 'normal') {
   box.innerHTML = `
     <div class="text-slate-200 font-bold">${headline}</div>
     ${canGo ? `
-      <div class="text-[11px] text-fuchsia-200">🎲 <strong>더블 오어 낫싱?</strong> 50% 확률로 <strong class="text-emerald-300">${(doubleUp.amount * 2).toLocaleString()}P</strong>, 실패하면 <strong class="text-rose-300">0P</strong> (${doubleUp.round + 1}/${DOUBLE_UP_MAX}단계)</div>
+      <div class="text-[11px] text-fuchsia-200">🎲 <strong>더블 오어 낫싱?</strong> <strong class="text-amber-300">${Math.round(DOUBLE_UP_CHANCES[doubleUp.round] * 100)}%</strong> 확률로 <strong class="text-emerald-300">${(doubleUp.amount * 2).toLocaleString()}P</strong>, 실패하면 <strong class="text-rose-300">0P</strong> (${doubleUp.round + 1}/${DOUBLE_UP_MAX}단계)</div>
       <div class="grid grid-cols-2 gap-2">
         <button onclick="stopDoubleUp()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-2 rounded-xl">✋ 여기서 챙기기</button>
         <button onclick="doDoubleUp()" class="gamble-on text-white font-black py-2 rounded-xl">🎲 더블 도전!</button>
@@ -638,7 +641,7 @@ function doDoubleUp() {
   doubleUp.busy = true;
   const box = document.getElementById('doubleUpPanel');
   if (box) box.innerHTML = `<div class="text-center py-3 text-2xl font-black text-fuchsia-200 animate-pulse">🎲 ... 🎲</div>`;
-  const win = Math.random() < 0.5;
+  const win = Math.random() < DOUBLE_UP_CHANCES[doubleUp.round];
   // 결과는 바로 반영 (연출 중 창을 닫아도 동일)
   const stake = doubleUp.amount;
   if (win) addPoints(stake, `더블업 ${doubleUp.round + 1}단계 성공`);
