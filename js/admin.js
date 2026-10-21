@@ -66,6 +66,7 @@ function openAdminDashboard() {
   renderAdminUserList();
   renderAdminGroupList();
   renderAdminSignupRequests();
+  renderAdminRenameRequests();
 }
 function closeAdminDashboard() { document.getElementById('adminDashboardModal').classList.add('hidden'); }
 
@@ -589,5 +590,81 @@ async function adminConfiscateGameItems(nick) {
     renderAnomalyPanel();
   } catch (err) {
     alert('몰수 실패: ' + err.message);
+  }
+}
+
+// ==========================================
+// ✏️ 닉네임 변경 요청 승인/거절
+// 승인: user_points / user_uids / 포인트 내역 / 이번 주 시즌 기록을 새 닉네임으로 한 번에 이전
+// 거절: 낸 금액 환불
+// ==========================================
+function renderAdminRenameRequests() {
+  db.ref('rename_requests').on('value', snap => {
+    const list = Object.values(snap.val() || {}).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+    const box = document.getElementById('adminRenameList');
+    const cnt = document.getElementById('adminRenameCount');
+    if (cnt) cnt.textContent = `${list.length}건 대기`;
+    if (!box) return;
+    box.innerHTML = list.length === 0 ? '<div class="text-center text-slate-400 py-2">대기 중인 요청이 없어요.</div>' : list.map(r => `
+      <div class="p-2.5 bg-white border rounded-xl flex items-center justify-between gap-2">
+        <div class="min-w-0"><span class="font-bold text-slate-800">${esc(r.from)}</span> → <span class="font-black text-indigo-700">${esc(r.to)}</span>
+          <span class="block text-[10px] text-slate-400">${(r.paid || 0).toLocaleString()}P 결제 · ${r.createdAt ? new Date(r.createdAt).toLocaleString('ko-KR') : ''}</span></div>
+        <div class="flex gap-1 shrink-0">
+          <button onclick="adminApproveRename(${jsArg(r.uid)})" class="bg-emerald-600 text-white font-bold px-2.5 py-1 rounded-lg text-[11px]">승인</button>
+          <button onclick="adminRejectRename(${jsArg(r.uid)})" class="bg-rose-50 text-rose-600 font-bold px-2.5 py-1 rounded-lg text-[11px]">거절·환불</button>
+        </div>
+      </div>`).join('');
+  }, onDbError);
+}
+
+async function adminApproveRename(uid) {
+  try {
+    const r = (await db.ref(`rename_requests/${uid}`).once('value')).val();
+    if (!r) return alert('요청을 찾을 수 없어요.');
+    const { from, to } = r;
+    const [oldSnap, newSnap, banSnap, logSnap, seasonSnap] = await Promise.all([
+      db.ref(`user_points/${from}`).once('value'), db.ref(`user_points/${to}`).once('value'),
+      db.ref(`banned_users/${to}`).once('value'), db.ref(`point_logs/${from}`).once('value'),
+      db.ref(`seasons/${weekKey()}/${from}`).once('value')
+    ]);
+    const u = oldSnap.val();
+    if (!u || u.uid !== uid) return alert('기존 회원 정보가 없거나 계정이 달라요. 거절·환불로 처리해주세요.');
+    if (newSnap.exists()) return alert(`[${to}] 은(는) 그 사이 다른 회원이 쓰고 있어요. 거절·환불로 처리해주세요.`);
+    if (banSnap.exists()) return alert(`[${to}] 은(는) 차단된 닉네임이에요. 거절·환불로 처리해주세요.`);
+    if (!confirm(`[${from}] → [${to}] 닉네임 변경을 승인할까요?`)) return;
+
+    const updates = {};
+    updates[`user_points/${to}`] = Object.assign({}, u, { nickname: to, updatedAt: Date.now() });
+    updates[`user_points/${from}`] = null;
+    updates[`user_uids/${uid}`] = to;
+    updates[`online_users/${from}`] = null;
+    updates[`rename_requests/${uid}`] = null;
+    if (logSnap.exists()) { updates[`point_logs/${to}`] = logSnap.val(); updates[`point_logs/${from}`] = null; }
+    if (seasonSnap.exists()) {
+      updates[`seasons/${weekKey()}/${to}`] = Object.assign({}, seasonSnap.val(), { nickname: to });
+      updates[`seasons/${weekKey()}/${from}`] = null;
+    }
+    const key = db.ref(`point_logs/${to}`).push().key;
+    updates[`point_logs/${to}/${key}`] = { d: 0, r: `닉네임 변경: ${from} → ${to}`, bal: u.points || 0, ts: firebase.database.ServerValue.TIMESTAMP };
+    await db.ref().update(updates);
+    alert(`✅ [${from}] → [${to}] 변경 완료!`);
+  } catch (err) {
+    alert('변경 중 오류: ' + err.message);
+  }
+}
+
+async function adminRejectRename(uid) {
+  const r = (await db.ref(`rename_requests/${uid}`).once('value')).val();
+  if (!r) return;
+  if (!confirm(`[${r.from}] → [${r.to}] 요청을 거절하고 ${(r.paid || 0).toLocaleString()}P를 환불할까요?`)) return;
+  try {
+    const tx = await db.ref(`user_points/${r.from}/points`).transaction(v => (typeof v === 'number' ? v : 0) + (r.paid || 0));
+    await db.ref().update({
+      [`rename_requests/${uid}`]: null,
+      [`point_logs/${r.from}/${db.ref(`point_logs/${r.from}`).push().key}`]: { d: r.paid || 0, r: `닉네임 변경 거절 환불 (→ ${r.to})`, bal: tx.snapshot.val(), ts: firebase.database.ServerValue.TIMESTAMP }
+    });
+    alert('환불 완료');
+  } catch (err) {
+    alert('환불 중 오류: ' + err.message);
   }
 }

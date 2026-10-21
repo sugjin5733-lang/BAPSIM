@@ -27,6 +27,7 @@ const SHOP_DATA = {
     { id: "col_dark", name: "다크 나이트", hex: "#0f172a", cost: 300 }
   ],
   bgs: [
+    { id: "nb-jackpot", name: "🎰 잭팟 777 (전설의 손)", class: "nb-jackpot", cost: 777777, unlock: 'jackpot', desc: "카지노 전광 전구가 질주하고 금빛 릴이 돌아가는 배지 · 💎💎💎 슬롯 초특급 잭팟을 터뜨린 사람만 구매 가능" },
     { id: "nb-najeon", name: "🐚 나전칠기 (명장)", class: "nb-najeon", cost: 100000000, reqLvl: 20, desc: "황금 섬광이 섞인 무지개 고리가 질주하고, 색이 흐르는 자개판 위로 금박 빛줄기와 별가루가 쏟아지는 밥심 최후의 전설 [20강 필요]" },
     { id: "nb-ricegod", name: "🍚 천상의 밥신 (창세)", class: "nb-ricegod", cost: 10000000, reqLvl: 20, desc: "금빛 고리가 천천히 돌고 쌀알 별빛이 은은하게 빛나는 밥심의 상징 [20강 필요]" },
     { id: "nb-cosmic", name: "🌌 코스믹 레인보우 (태초 신화)", class: "nb-cosmic", cost: 999999, reqLvl: 17, desc: "흐르는 무지개 홀로그램 위로 빛줄기가 스치는 오라 [17강 필요]" },
@@ -55,6 +56,7 @@ const SHOP_DATA = {
 // 상점 및 치장 렌더링 (5000P 이상은 12강 이상 필수 적용)
 function renderShopUI() {
   renderOwnedSpecialBadges();
+  renderRenameSection();
   const symContainer = document.getElementById('shopSymbolList');
   if (symContainer) {
     symContainer.innerHTML = '';
@@ -116,13 +118,16 @@ function renderShopUI() {
       const isMythic = bg.cost >= 500000;
       const isGold = bg.cost >= 100000 && !isMythic;
 
-      const reqLvl = Math.max(bg.reqLvl || 0, bg.cost >= 999999 ? 17 : bg.cost >= 5000 ? 12 : 0);
+      // 잭팟 전용 배지는 강화 단계 대신 '슬롯 초특급 잭팟 달성' 조건
+      const reqLvl = bg.unlock ? 0 : Math.max(bg.reqLvl || 0, bg.cost >= 999999 ? 17 : bg.cost >= 5000 ? 12 : 0);
+      const unlockMissing = bg.unlock === 'jackpot' && !myJackpotUnlocked;
       const isUltimate = bg.cost >= 10000000;
 
-      const isLocked = (currentEnhanceLevel < reqLvl) && !isOwned;
+      const isLocked = ((currentEnhanceLevel < reqLvl) || unlockMissing) && !isOwned;
 
       const card = document.createElement('div');
       card.className = `p-3.5 border rounded-2xl flex items-center justify-between transition-all ${
+        bg.unlock ? 'ultimate-card ultra text-white shadow-2xl' :
         isUltimate ? `ultimate-card ${bg.cost >= 100000000 ? 'ultra' : ''} text-white shadow-2xl` :
         isMythic ? 'border-2 border-purple-500 bg-slate-950 text-white shadow-xl' :
         isGold ? 'border-2 border-amber-400 bg-amber-50/50 shadow-md' : 'bg-slate-50'
@@ -136,7 +141,7 @@ function renderShopUI() {
       } else if (isLocked) {
         actionBtnHTML = `
           <button disabled class="bg-slate-800 text-slate-400 font-bold px-3 py-1.5 rounded-xl text-[11px] border border-slate-700 cursor-not-allowed opacity-75">
-            🔒 ${reqLvl}강 이상
+            ${unlockMissing ? '🔒 잭팟 달성자 전용' : `🔒 ${reqLvl}강 이상`}
           </button>
         `;
       } else {
@@ -226,6 +231,10 @@ function equipColor(hex) { myNickColor = hex; updatePointsUI(); renderShopUI(); 
 function unequipColor() { myNickColor = ''; updatePointsUI(); renderShopUI(); }
 
 function buyBg(bgClass, cost, bgName, reqLvl = 0) {
+  const meta = SHOP_DATA.bgs.find(b => b.class === bgClass);
+  if (meta && meta.unlock === 'jackpot' && !myJackpotUnlocked) {
+    return alert('🔒 이 배지는 💎💎💎 슬롯 초특급 잭팟을 터뜨린 사람만 살 수 있어요!');
+  }
   if (reqLvl > 0 && currentEnhanceLevel < reqLvl) {
     return alert(`🔒 구매 불가!\n이 배지는 [밥키우기 ${reqLvl}강] 이상을 달성해야만 구매할 수 있습니다.\n(현재 내 강화 레벨: +${currentEnhanceLevel}강)`);
   }

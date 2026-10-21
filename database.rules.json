@@ -86,6 +86,13 @@
         ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || (!data.exists() && (auth != null && root.child('user_uids').child(auth.uid).exists() && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('status').val() === 'approved' && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('uid').val() === auth.uid) && newData.child('uid').val() === auth.uid && newData.child('nickname').val() === root.child('user_uids').child(auth.uid).val() && newData.child('status').val() === 'pending' && newData.child('amount').val() === 50)"
       }
     },
+    "rename_requests": {
+      ".read": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true)",
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || (!data.exists() && (auth != null && root.child('user_uids').child(auth.uid).exists() && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('status').val() === 'approved' && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('uid').val() === auth.uid) && auth.uid === $uid && newData.child('uid').val() === auth.uid && newData.child('from').val() === root.child('user_uids').child(auth.uid).val() && newData.child('paid').val() === 1000000 && newData.child('to').isString() && newData.child('to').val().length >= 1 && newData.child('to').val().length <= 20 && newData.child('createdAt').val() === now)"
+      }
+    },
     "user_uids": {
       ".read": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true)",
       "$uid": {

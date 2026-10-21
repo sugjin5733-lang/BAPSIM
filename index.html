@@ -11,7 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Black+Han+Sans&family=Rubik+Glitch&family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261021g">
+  <link rel="stylesheet" href="css/style.css?v=20261021h">
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white relative">
 
@@ -902,6 +902,11 @@
         <div class="grid grid-cols-2 gap-2 text-xs" id="shopColorList"></div>
       </div>
 
+      <div class="space-y-2.5">
+        <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><span>✏️</span> 닉네임 변경권 (1,000,000P)</span>
+        <div id="renameSection" class="space-y-1.5"></div>
+      </div>
+
       <div id="shopOwnedSpecialWrap" class="hidden space-y-2.5">
         <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><span>🏆</span> 내 획득 배지 (세트 완성 · 시즌 보상)</span>
         <div class="space-y-2 text-xs" id="shopOwnedSpecialList"></div>
@@ -981,6 +986,15 @@
           <button onclick="renderAnomalyPanel()" class="text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded-lg">다시 분석</button>
         </div>
         <div id="adminAnomalyList" class="space-y-1.5 max-h-60 overflow-y-auto border rounded-2xl p-2 bg-slate-50 text-xs"></div>
+      </div>
+
+      <!-- 닉네임 변경 요청 -->
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <h4 class="font-extrabold text-xs text-slate-800">✏️ 닉네임 변경 요청</h4>
+          <span id="adminRenameCount" class="text-[11px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-full">0건 대기</span>
+        </div>
+        <div id="adminRenameList" class="space-y-1.5 max-h-40 overflow-y-auto border rounded-2xl p-2 bg-slate-50 text-xs"></div>
       </div>
 
       <!-- 신규 회원가입 승인 대기 목록 -->
@@ -1302,21 +1316,21 @@
     </div>
   </div>
 
-  <script src="js/core.js?v=20261021g"></script>
-  <script src="js/auth.js?v=20261021g"></script>
-  <script src="js/enhance.js?v=20261021g"></script>
-  <script src="js/shop.js?v=20261021g"></script>
-  <script src="js/chat.js?v=20261021g"></script>
-  <script src="js/games.js?v=20261021g"></script>
-  <script src="js/admin.js?v=20261021g"></script>
-  <script src="js/ranking.js?v=20261021g"></script>
-  <script src="js/restaurants.js?v=20261021g"></script>
-  <script src="js/tools.js?v=20261021g"></script>
-  <script src="js/feed.js?v=20261021g"></script>
-  <script src="js/cards.js?v=20261021g"></script>
-  <script src="js/season.js?v=20261021g"></script>
-  <script src="js/duel.js?v=20261021g"></script>
-  <script src="js/predict.js?v=20261021g"></script>
-  <script src="js/main.js?v=20261021g"></script>
+  <script src="js/core.js?v=20261021h"></script>
+  <script src="js/auth.js?v=20261021h"></script>
+  <script src="js/enhance.js?v=20261021h"></script>
+  <script src="js/shop.js?v=20261021h"></script>
+  <script src="js/chat.js?v=20261021h"></script>
+  <script src="js/games.js?v=20261021h"></script>
+  <script src="js/admin.js?v=20261021h"></script>
+  <script src="js/ranking.js?v=20261021h"></script>
+  <script src="js/restaurants.js?v=20261021h"></script>
+  <script src="js/tools.js?v=20261021h"></script>
+  <script src="js/feed.js?v=20261021h"></script>
+  <script src="js/cards.js?v=20261021h"></script>
+  <script src="js/season.js?v=20261021h"></script>
+  <script src="js/duel.js?v=20261021h"></script>
+  <script src="js/predict.js?v=20261021h"></script>
+  <script src="js/main.js?v=20261021h"></script>
 </body>
 </html>

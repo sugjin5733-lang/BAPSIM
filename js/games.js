@@ -258,6 +258,7 @@ function spinSlotMachine(times = 1) {
           addPoints(SLOT_MEGA_PRIZE, '슬롯 초특급 잭팟');
           updatePointsUI();
           postFeed('slot', `💎💎💎 슬롯 초특급 잭팟!!! ${SLOT_MEGA_PRIZE.toLocaleString()}P 당첨!!!`, 'legendary', true);
+          unlockJackpotBadge();
           addCardsToCollection([drawRandomCard(60)], '초특급 잭팟');
           if (window.confetti) confetti({ particleCount: 400, spread: 140 });
           resultText.innerHTML = `<span class="text-rose-500 font-black text-sm animate-bounce">🌟 초특급 잭팟! ${SLOT_MEGA_PRIZE.toLocaleString()}P 획득!! 🌟</span>`;
@@ -312,7 +313,7 @@ function spinSlotMachine(times = 1) {
 
     addPoints(totalWon, `슬롯 ${times}회 당첨금`);
     updatePointsUI();
-    if (megaJackpots > 0) postFeed('slot', `💎💎💎 슬롯 ${times}연속 돌리다 초특급 잭팟!!! +${(megaJackpots * SLOT_MEGA_PRIZE).toLocaleString()}P`, 'legendary', true);
+    if (megaJackpots > 0) { postFeed('slot', `💎💎💎 슬롯 ${times}연속 돌리다 초특급 잭팟!!! +${(megaJackpots * SLOT_MEGA_PRIZE).toLocaleString()}P`, 'legendary', true); unlockJackpotBadge(); }
     if (triples > 0) maybeDropCard(`슬롯 ${times}연속`, Math.min(60, triples * 15));
     if (times >= 100 && totalWon - totalCost >= 3000) postFeed('slot', `🎰 슬롯 100연속으로 +${(totalWon - totalCost).toLocaleString()}P 순이익!`, 'normal');
 
@@ -431,4 +432,14 @@ function playDiceBet(userChoice) {
       resultEl.innerHTML = `<span class="text-rose-500 font-bold">낙첨! [${roll}나옴] -${bet.toLocaleString()}P</span>`;
     }
   }, 400);
+}
+
+// 💎💎💎 초특급 잭팟 달성 → 🎰 잭팟 777 배지 구매 자격 (영구)
+let myJackpotUnlocked = false;
+function loadJackpotFromUser(val) { myJackpotUnlocked = !!(val && val.jackpotUnlock); }
+function unlockJackpotBadge() {
+  if (myJackpotUnlocked || !canSyncToCloud()) return;
+  myJackpotUnlocked = true;
+  db.ref(`user_points/${currentUser.nickname}/jackpotUnlock`).set(true).catch(() => {});
+  setTimeout(() => alert('🎰 축하해요! 이제 명품 상점에서 [잭팟 777 (전설의 손)] 배지를 살 수 있어요.\n(초특급 잭팟을 터뜨린 사람만 살 수 있는 배지예요)'), 1200);
 }

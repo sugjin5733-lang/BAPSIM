@@ -134,6 +134,7 @@ async function handleAuthChange(user) {
 function detachUserListeners() {
   if (myPointsRef) { myPointsRef.off(); myPointsRef = null; }
   if (myRequestRef) { myRequestRef.off(); myRequestRef = null; }
+  if (typeof renameRef !== 'undefined' && renameRef) { renameRef.off(); renameRef = null; myRenameRequest = null; }
   if (presenceRefs) {
     presenceRefs.connected.off();
     presenceRefs.mine.onDisconnect().cancel();
@@ -171,11 +172,13 @@ function loadGameStateFromUser(val) {
   loadSeasonFromUser(val);
   loadDuelSettlementsFromUser(val);
   loadBetsFromUser(val);
+  if (typeof loadJackpotFromUser === "function") loadJackpotFromUser(val);
 }
 
 function bindNickname(nick) {
   currentUser = { nickname: nick };
   attachUserPointListener();
+  attachRenameRequestListener();
   updateAccountUI();
 }
 
@@ -512,8 +515,23 @@ function attachUserPointListener() {
 
     // 삭제/차단되었거나, 관리자가 다른 구글 계정으로 연결을 옮긴 경우
     if (!val || (val.uid && authUser && val.uid !== authUser.uid)) {
-      alert("회원 정보가 삭제되었거나 운영자에 의해 연결이 해제되었습니다.");
-      firebase.auth().signOut();
+      if (myPointsRef) { myPointsRef.off(); myPointsRef = null; } // 같은 알림이 여러 번 처리되지 않도록 바로 끊음
+      // 닉네임 변경 승인으로 데이터가 새 닉네임으로 옮겨진 경우면 그대로 다시 연결
+      db.ref(`user_uids/${authUser.uid}`).once('value').then(m => {
+        const newNick = m.val();
+        if (!val && newNick && newNick !== nick) {
+          detachUserListeners();
+          cloudReady = false;
+          lastServerState = {};
+          bindNickname(String(newNick));
+          attachRenameRequestListener();
+          if (window.confetti) confetti({ particleCount: 120 });
+          alert(`✏️ 닉네임이 [${nick}] → [${newNick}] 로 바뀌었어요!`);
+        } else {
+          alert("회원 정보가 삭제되었거나 운영자에 의해 연결이 해제되었습니다.");
+          firebase.auth().signOut();
+        }
+      }).catch(() => firebase.auth().signOut());
       return;
     }
 
@@ -671,4 +689,65 @@ function attachOnlineUsersListener() {
       container.appendChild(item);
     });
   }, onDbError);
+}
+
+// ==========================================
+// ✏️ 닉네임 변경권 (1,000,000P)
+// 구매 즉시 포인트 차감 → rename_requests/{uid} 에 요청 → 관리자 승인 시 데이터 전체 이전
+// (거절되면 관리자 쪽에서 1,000,000P 환불)
+// ==========================================
+const RENAME_PRICE = 1000000;
+let myRenameRequest = null;
+let renameRef = null;
+
+function attachRenameRequestListener() {
+  if (renameRef) renameRef.off();
+  if (!authUser || authUser.isAnonymous) return;
+  renameRef = db.ref(`rename_requests/${authUser.uid}`);
+  renameRef.on('value', s => { myRenameRequest = s.val(); renderRenameSection(); }, () => {});
+}
+
+function renderRenameSection() {
+  const box = document.getElementById('renameSection');
+  if (!box) return;
+  if (myRenameRequest) {
+    box.innerHTML = `<div class="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900">
+      ⏳ <strong>${esc(myRenameRequest.from)} → ${esc(myRenameRequest.to)}</strong> 변경 요청이 관리자 승인 대기 중이에요.<br>
+      <span class="text-[10px] text-amber-700">승인되면 포인트·아이템·기록이 모두 새 닉네임으로 옮겨져요. 거절되면 1,000,000P가 환불돼요.</span></div>`;
+    return;
+  }
+  box.innerHTML = `
+    <div class="flex gap-1.5">
+      <input id="renameInput" type="text" maxlength="20" placeholder="새 닉네임 (한글·영문·숫자 20자 이내)" class="flex-1 min-w-0 border rounded-xl p-2 text-xs font-bold outline-none focus:border-indigo-500" />
+      <button onclick="buyRenameTicket()" class="shrink-0 bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-black px-3 py-2 rounded-xl text-[11px] shadow-sm">1,000,000P 구매</button>
+    </div>
+    <p class="text-[10px] text-slate-400">구매하면 관리자 승인 후 바뀌어요. 포인트·강화·아이템·카드·내역이 그대로 옮겨져요.</p>`;
+}
+
+async function buyRenameTicket() {
+  if (!checkApprovalGuard()) return;
+  if (myRenameRequest) return alert('이미 승인 대기 중인 변경 요청이 있어요.');
+  const to = (document.getElementById('renameInput')?.value || '').trim();
+  if (!to) return alert('새 닉네임을 입력해주세요.');
+  if (!isValidNickname(to) || to === GUEST_NICK) return alert('⚠️ 닉네임은 한글, 영문, 숫자로 20자 이내만 가능해요.');
+  if (to === currentUser.nickname) return alert('지금 닉네임과 같아요.');
+  if (userPoints < RENAME_PRICE) return alert(`❌ 포인트가 부족해요! (닉네임 변경권 ${RENAME_PRICE.toLocaleString()}P)`);
+  try {
+    const [exist, banned] = await Promise.all([db.ref(`user_points/${to}`).once('value'), db.ref(`banned_users/${to}`).once('value')]);
+    if (exist.exists()) return alert(`[${to}] 은(는) 이미 누군가 쓰고 있는 닉네임이에요.`);
+    if (banned.exists()) return alert(`[${to}] 은(는) 사용할 수 없는 닉네임이에요.`);
+  } catch (e) { /* 확인 실패 시에도 관리자가 승인 단계에서 다시 확인 */ }
+  if (!confirm(`닉네임을 [${currentUser.nickname}] → [${to}] 로 바꿀까요?\n\n닉네임 변경권 ${RENAME_PRICE.toLocaleString()}P가 바로 차감되고, 관리자가 승인하면 바뀌어요.\n(거절되면 전액 환불)`)) return;
+  addPoints(-RENAME_PRICE, `닉네임 변경권 구매 (→ ${to})`);
+  updatePointsUI();
+  try {
+    await db.ref(`rename_requests/${authUser.uid}`).set({
+      uid: authUser.uid, from: currentUser.nickname, to, paid: RENAME_PRICE, createdAt: firebase.database.ServerValue.TIMESTAMP
+    });
+    alert('✅ 변경 요청을 보냈어요! 관리자 승인 후 새 닉네임으로 바뀌어요.');
+  } catch (err) {
+    addPoints(RENAME_PRICE, '닉네임 변경권 환불 (요청 실패)');
+    updatePointsUI();
+    alert('요청을 보내지 못했어요: ' + err.message);
+  }
 }
