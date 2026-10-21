@@ -410,7 +410,9 @@ function renderPrestigeBanner() {
     ? '<span class="text-[11px] text-amber-100/70">아직 아무도 없어요 · 첫 번째 프레스티지 회원의 자리가 비어 있어요</span>'
     : prestigeMembers.map(u => `<span class="prestige-member-chip">${nickHTML(u, 'text-[11px]')}</span>`).join('');
 }
-setInterval(() => { if (canSyncToCloud()) loadPrestigeMembers(); }, 5 * 60 * 1000);
+// 로그인 안 한 사람도 배너는 볼 수 있게 (구경도 구매욕구!)
+setTimeout(loadPrestigeMembers, 3000);
+setInterval(loadPrestigeMembers, 5 * 60 * 1000);
 
 // ------------------------------------------------------------------
 // ⏳ 보류 포인트 지급 예정 시각
