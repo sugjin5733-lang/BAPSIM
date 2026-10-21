@@ -585,6 +585,7 @@ function sellEnhancedBowl() {
   // 🎉 대박 손님: 5% 확률로 판매금 2배
   const lucky = Math.random() < 0.05;
   const paid = lucky ? reward * 2 : reward;
+  const owedBefore = myOwed;
   addPoints(paid, `+${currentEnhanceLevel}강 밥 판매 (시세 x${mk.mult.toFixed(2)}${lucky ? ' · 대박 손님 x2' : ''})`);
   const soldLvl = currentEnhanceLevel;
   currentEnhanceLevel = 0;
@@ -595,7 +596,7 @@ function sellEnhancedBowl() {
   if (window.confetti) confetti({ particleCount: lucky ? 250 : 100, spread: lucky ? 130 : 70 });
   if (lucky && soldLvl >= 8) postFeed('sell', `🎉 대박 손님 등장! +${soldLvl}강 밥이 2배 값에 팔렸어요 → ${paid.toLocaleString()}P`, paid >= 50000 ? 'legendary' : 'big');
   else if (soldLvl >= 12) postFeed('sell', `+${soldLvl}강 밥을 ${mk.label} 시세(x${mk.mult.toFixed(2)})에 팔아 ${paid.toLocaleString()}P 💰`, mk.mult >= 2 ? 'legendary' : soldLvl >= 16 || mk.mult >= 1.5 ? 'big' : 'normal');
-  startDoubleUp(paid, soldLvl, lucky);
+  startDoubleUp(paid, soldLvl, lucky, Math.max(0, myOwed - owedBefore));
 }
 
 // ==========================================
@@ -611,9 +612,9 @@ const DOUBLE_UP_CHANCES = [0.5, 0.4, 0.3];
 // → +20강 판매금(약 10만P)을 통째로 8배 하던 문제(한 번에 +70만P) 방지
 const DOUBLE_UP_STAKE_CAP = 10000;
 
-function startDoubleUp(amount, soldLvl, lucky = false) {
+function startDoubleUp(amount, soldLvl, lucky = false, held = 0) {
   const stake = Math.min(amount, DOUBLE_UP_STAKE_CAP);
-  doubleUp = { amount: stake, round: 0, soldLvl, original: stake, sale: amount };
+  doubleUp = { amount: stake, round: 0, soldLvl, original: stake, sale: amount, held };
   renderDoubleUp(lucky
     ? `🎉 <strong class="text-amber-300">대박 손님 등장!</strong> 2배 값으로 팔려서 <strong>${amount.toLocaleString()}P</strong>를 받았어요!`
     : `💰 +${soldLvl}강 밥을 팔아 <strong>${amount.toLocaleString()}P</strong>를 받았어요!`, lucky ? 'win' : 'normal');
@@ -628,9 +629,10 @@ function renderDoubleUp(headline, tone = 'normal') {
   box.className = `p-3 rounded-2xl border-2 text-xs space-y-2 ${tone === 'win' ? 'border-emerald-400 bg-emerald-950/40' : 'border-fuchsia-500/70 bg-fuchsia-950/30'}`;
   box.innerHTML = `
     <div class="text-slate-200 font-bold">${headline}</div>
+    ${doubleUp.held > 0 ? `<div class="text-[10px] text-amber-300 font-bold">⏳ 이 중 ${doubleUp.held.toLocaleString()}P는 최근 수입이 많아 '보류'로 들어갔어요 (사라진 게 아니에요${typeof owedEtaSeconds === 'function' ? ` · ${fmtEtaClock(owedEtaSeconds())}쯤 다 들어와요` : ''}). 더블업 판돈은 지금 가진 포인트에서 나가요.</div>` : ''}
     ${canGo ? `
-      ${doubleUp.round === 0 && doubleUp.sale > doubleUp.amount ? `<div class="text-[10px] text-slate-400">판매금 중 최대 ${DOUBLE_UP_STAKE_CAP.toLocaleString()}P까지만 걸 수 있어요 (나머지 ${(doubleUp.sale - doubleUp.amount).toLocaleString()}P는 이미 내 것)</div>` : ''}
-      <div class="text-[11px] text-fuchsia-200">🎲 <strong>더블 오어 낫싱?</strong> <strong class="text-amber-300">${Math.round(DOUBLE_UP_CHANCES[doubleUp.round] * 100)}%</strong> 확률로 <strong class="text-emerald-300">${(doubleUp.amount * 2).toLocaleString()}P</strong>, 실패하면 <strong class="text-rose-300">0P</strong> (${doubleUp.round + 1}/${DOUBLE_UP_MAX}단계)</div>
+      ${doubleUp.round === 0 && doubleUp.sale > doubleUp.amount ? `<div class="text-[10px] text-slate-400">판매금 중 최대 ${DOUBLE_UP_STAKE_CAP.toLocaleString()}P까지만 걸 수 있어요 (나머지 ${(doubleUp.sale - doubleUp.amount).toLocaleString()}P는 이미 내 것 · 실패해도 안전)</div>` : ''}
+      <div class="text-[11px] text-fuchsia-200">🎲 <strong>더블 오어 낫싱?</strong> <strong class="text-amber-300">${Math.round(DOUBLE_UP_CHANCES[doubleUp.round] * 100)}%</strong> 확률로 건 돈이 <strong class="text-emerald-300">${(doubleUp.amount * 2).toLocaleString()}P</strong>로, 실패하면 건 <strong class="text-rose-300">${doubleUp.amount.toLocaleString()}P</strong>만 잃어요 (${doubleUp.round + 1}/${DOUBLE_UP_MAX}단계)</div>
       <div class="grid grid-cols-2 gap-2">
         <button onclick="stopDoubleUp()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-2 rounded-xl">✋ 여기서 챙기기</button>
         <button onclick="doDoubleUp()" class="gamble-on text-white font-black py-2 rounded-xl">🎲 더블 도전!</button>
@@ -664,11 +666,12 @@ function doDoubleUp() {
     } else {
       if (stake >= 30000) postFeed('doubleup', `🎲 더블업 실패... ${stake.toLocaleString()}P가 한순간에 사라졌어요 😭`, 'normal');
       const lost = stake;
+      const safeRest = Math.max(0, (doubleUp.sale || 0) - (doubleUp.original || 0));
       doubleUp = null;
       const b = document.getElementById('doubleUpPanel');
       if (b) {
         b.className = 'p-3 rounded-2xl border-2 border-rose-500/70 bg-rose-950/40 text-xs';
-        b.innerHTML = `<div class="text-rose-300 font-black">💸 실패! ${lost.toLocaleString()}P를 잃었어요... 다음엔 꼭!</div>`;
+        b.innerHTML = `<div class="text-rose-300 font-black">💸 실패! 건 ${lost.toLocaleString()}P를 잃었어요... 다음엔 꼭!</div>${safeRest > 0 ? `<div class="text-[10px] text-slate-400 mt-1">판매금 나머지 ${safeRest.toLocaleString()}P는 그대로 있어요</div>` : ''}`;
         setTimeout(() => { if (!doubleUp) b.classList.add('hidden'); }, 3500);
       }
     }
