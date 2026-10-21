@@ -140,7 +140,8 @@ function updateEnhanceUI() {
     if (probB) probB.textContent = `${nextMeta.break.toFixed(1)}%`;
     if (actionBtn) {
       actionBtn.disabled = false;
-      actionBtn.textContent = `${gambleMode ? '🎲 ' : ''}+${currentEnhanceLevel + 1} 강화 시도 (${nextCost}P)`;
+      const extra = autoBuyExtraCost();
+      actionBtn.textContent = `${gambleMode ? '🎲 ' : ''}+${currentEnhanceLevel + 1} 강화 시도 (${nextCost}P${extra ? ` + 🛒${extra}P` : ''})`;
     }
   }
 
@@ -217,8 +218,8 @@ let useItem = { protect: false, bless: false };
 function loadItemsFromUser(val) {
   const it = (val && val.items) || {};
   myItems = { protect: Math.max(0, Number(it.protect) || 0), bless: Math.max(0, Number(it.bless) || 0) };
-  if (myItems.protect === 0) useItem.protect = false;
-  if (myItems.bless === 0) useItem.bless = false;
+  if (myItems.protect === 0 && !autoUse.protect) useItem.protect = false;
+  if (myItems.bless === 0 && !autoUse.bless) useItem.bless = false;
   renderEnhanceItems();
 }
 
@@ -230,11 +231,13 @@ function effectiveOdds(level) {
   const base = ENHANCE_PROBABILITIES[level];
   if (!base) return null;
   // 파괴 확률은 '성공·유지를 뺀 나머지' (예전부터 실제 판정 방식. 표의 숫자 합이 100이 아닌 단계가 있어 보정)
-  let success = base.success, keep = base.keep, brk = Math.max(0, 100 - base.success - base.keep);
+  // 소수점 오차(예: 100 - 79.8 - 20.2 = 0.0000000000000142) 때문에 파괴 0% 단계가 0이 아닌 것으로 계산되던 문제 방지
+  let success = base.success, keep = base.keep, brk = Math.max(0, Math.round((100 - base.success - base.keep) * 1000) / 1000);
   let mult = 1;
   const successBeforeBless = success;
   if (isGoldenTime()) mult *= GOLDEN_TIME.mult;
-  if (useItem.bless && myItems.bless > 0) mult *= 1.5;
+  const blessOn = useItem.bless && (myItems.bless > 0 || autoWanted().bless);
+  if (blessOn) mult *= 1.5;
   if (mult > 1) {
     // 늘어난 성공 확률은 '유지'에서 먼저, 모자라면 '파괴'에서 가져옴
     const want = Math.min(100, success * mult) - success;
@@ -251,9 +254,9 @@ function effectiveOdds(level) {
     brk = 100 - success;
   }
   const keepBase = keep; // 방지권 적용 전 '유지' 구간 (그 뒤 구간은 원래 '파괴')
-  const protectedNow = !gambleMode && useItem.protect && myItems.protect > 0 && brk > 0;
+  const protectedNow = !gambleMode && useItem.protect && (myItems.protect > 0 || autoWanted().protect) && brk > 0;
   if (protectedNow) { keep += brk; brk = 0; }
-  return { success, keep, keepBase, break: brk, golden: isGoldenTime(), blessed: useItem.bless && myItems.bless > 0, blessGain: Math.min(100, successBeforeBless * 1.5) - successBeforeBless, protected: protectedNow, gamble: gambleMode };
+  return { success, keep, keepBase, break: brk, golden: isGoldenTime(), blessed: blessOn, blessGain: Math.min(100, successBeforeBless * 1.5) - successBeforeBless, protected: protectedNow, gamble: gambleMode };
 }
 
 function buyEnhanceItem(kind) {
@@ -295,27 +298,63 @@ function setAutoUse(kind, on) {
   updateEnhanceUI();
 }
 
-function applyAutoItems() {
-  if (currentEnhanceLevel >= 20) return;
+// 이번 단계에서 자동으로 쓰고 싶은 아이템 (보유 여부와 무관)
+function autoWanted() {
+  const want = { protect: false, bless: false };
+  if (currentEnhanceLevel >= 20) return want;
   const rec = ENHANCE_RECOMMEND[currentEnhanceLevel] || '';
   const base = ENHANCE_PROBABILITIES[currentEnhanceLevel];
-  const breakBase = base ? Math.max(0, 100 - base.success - base.keep) : 0;
-  if (autoUse.bless) {
-    useItem.bless = myItems.bless > 0 && base && base.success < 100 && (!autoUse.recOnly || rec.includes('축복'));
+  if (!base) return want;
+  const breakBase = Math.max(0, Math.round((100 - base.success - base.keep) * 1000) / 1000);
+  want.bless = autoUse.bless && base.success < 100 && (!autoUse.recOnly || rec.includes('축복'));
+  want.protect = autoUse.protect && !gambleMode && breakBase > 0 && (!autoUse.recOnly || rec.includes('방지권'));
+  return want;
+}
+
+// 자동 적용: 확률 표시는 '자동 구매까지 해서 쓸 것'을 기준으로 보여줌
+function applyAutoItems() {
+  const want = autoWanted();
+  if (autoUse.bless) useItem.bless = want.bless;
+  if (autoUse.protect) useItem.protect = want.protect;
+}
+
+// 자동 구매: 쓰려는 아이템이 없으면 강화 직전에 1개 사서 바로 사용
+// (강화비까지 낼 포인트가 있을 때만. 부족하면 아이템 없이 강화)
+function autoBuyForAttempt(attemptCost) {
+  const want = autoWanted();
+  const bought = [];
+  let budget = userPoints - attemptCost;
+  ['bless', 'protect'].forEach(kind => {
+    if (!want[kind] || myItems[kind] > 0) return;
+    const price = ENHANCE_ITEMS[kind].price;
+    if (budget < price) { useItem[kind] = false; return; }
+    budget -= price;
+    addPoints(-price, `${ENHANCE_ITEMS[kind].name} 자동 구매`);
+    myItems[kind] += 1;
+    bought.push(kind);
+  });
+  if (bought.length && canSyncToCloud()) {
+    const upd = {};
+    bought.forEach(k => { upd[`items/${k}`] = myItems[k]; });
+    db.ref(`user_points/${currentUser.nickname}`).update(upd);
   }
-  if (autoUse.protect) {
-    useItem.protect = myItems.protect > 0 && !gambleMode && breakBase > 0 && (!autoUse.recOnly || rec.includes('방지권'));
-  }
+  return bought;
+}
+
+// 이번 시도에 자동 구매로 추가될 금액 (버튼 표시용)
+function autoBuyExtraCost() {
+  const want = autoWanted();
+  return ['bless', 'protect'].reduce((a, k) => a + (want[k] && myItems[k] <= 0 ? ENHANCE_ITEMS[k].price : 0), 0);
 }
 
 function renderEnhanceItems() {
   ['protect', 'bless'].forEach(kind => {
     const btn = document.getElementById(`enhItem_${kind}`);
     if (!btn) return;
-    const on = useItem[kind] && myItems[kind] > 0;
+    const on = useItem[kind] && (myItems[kind] > 0 || (autoUse[kind] && autoWanted()[kind]));
     btn.className = `relative py-2 px-2 rounded-xl text-[11px] font-bold border transition-all ${on ? 'bg-amber-500 text-slate-950 border-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.6)]' : 'bg-slate-900 text-slate-300 border-slate-700 hover:border-amber-500/60'}`;
     btn.innerHTML = `${ENHANCE_ITEMS[kind].name} <span class="font-black">x${myItems[kind]}</span>
-      <span class="block text-[9px] font-medium ${on ? 'text-slate-800' : 'text-slate-500'}">${myItems[kind] > 0 ? (autoUse[kind] ? (on ? '🤖 자동 적용 중' : '🤖 자동 (이번 단계는 아낌)') : on ? '사용 중 (1회 소모)' : '눌러서 사용') : `없음 · 눌러서 구매 ${ENHANCE_ITEMS[kind].price.toLocaleString()}P`}</span>`;
+      <span class="block text-[9px] font-medium ${on ? 'text-slate-800' : 'text-slate-500'}">${autoUse[kind] ? (on ? (myItems[kind] > 0 ? '🤖 자동 적용 중' : `🤖 자동 구매+적용 (${ENHANCE_ITEMS[kind].price}P)`) : '🤖 자동 (이번 단계는 아낌)') : myItems[kind] > 0 ? (on ? '사용 중 (1회 소모)' : '눌러서 사용') : `없음 · 눌러서 구매 ${ENHANCE_ITEMS[kind].price.toLocaleString()}P`}</span>`;
   });
   ['protect', 'bless', 'recOnly'].forEach(k => {
     const cb = document.getElementById(`autoUse_${k}`);
@@ -348,7 +387,7 @@ function consumeUsedItems(odds) {
     if (useItem[kind] && myItems[kind] > 0) {
       myItems[kind]--;
       used[`items/${kind}`] = myItems[kind];
-      if (myItems[kind] === 0) useItem[kind] = false;
+      if (myItems[kind] === 0 && !autoUse[kind]) useItem[kind] = false;
     }
   });
   applyAutoItems();
@@ -375,11 +414,12 @@ function runEnhancement() {
     return alert(`❌ 강화 비용이 부족합니다! (필요: ${cost}P / 보유: ${userPoints}P)`);
   }
 
+  applyAutoItems();
+  const autoBought = autoBuyForAttempt(cost);
   addPoints(-cost, `${gambleMode ? '도박 ' : ''}강화 시도 +${currentEnhanceLevel}→+${currentEnhanceLevel + 1}`);
   enhanceActionTimestamps.push(now);
   updatePointsUI();
 
-  applyAutoItems();
   const odds = effectiveOdds(currentEnhanceLevel);
   const alertEl = document.getElementById('enhanceStatusAlert');
   const actionBtn = document.getElementById('enhanceActionBtn');
@@ -388,7 +428,7 @@ function runEnhancement() {
 
   const fromLevel = currentEnhanceLevel;
   const roll = Math.random() * 100;
-  const tags = [odds.gamble ? '🎲도박' : '', odds.golden ? '🌞골든타임' : '', odds.blessed ? '✨축복' : '', odds.protected ? '🛡️방지권' : ''].filter(Boolean).join(' ');
+  const tags = [autoBought.length ? '🛒자동구매' : '', odds.gamble ? '🎲도박' : '', odds.golden ? '🌞골든타임' : '', odds.blessed ? '✨축복' : '', odds.protected ? '🛡️방지권' : ''].filter(Boolean).join(' ');
   consumeUsedItems(odds);
 
   // 결과는 바로 확정·저장하고, 화면 공개만 연출로 늦춤 (창을 닫아도 결과는 그대로)
@@ -466,8 +506,9 @@ function riceMarket(ts) {
   const slot = Math.floor(ts / MARKET_SLOT_MS);
   const u = seeded01(slot * 7919 + 13), v = seeded01(slot * 104729 + 7);
   let mult, label, tone;
-  if (u < 0.04)      { mult = 1.5;              label = '🚀 폭등'; tone = 'up2'; }
-  else if (u < 0.14) { mult = 1.2 + 0.1 * v;    label = '📈 상승'; tone = 'up'; }
+  if (u < 0.003)      { mult = 2.5;              label = '💥 초폭등'; tone = 'up3'; } // 0.3% (평균 약 5.5시간에 1번)
+  else if (u < 0.015) { mult = 1.6 + 0.6 * v;    label = '🚀 폭등'; tone = 'up2'; }  // 1.2% (x1.6~2.2)
+  else if (u < 0.12)  { mult = 1.15 + 0.15 * v;  label = '📈 상승'; tone = 'up'; }
   else if (u < 0.76) { mult = 0.95 + 0.15 * v;  label = '➖ 보합'; tone = 'flat'; }
   else if (u < 0.94) { mult = 0.8 + 0.1 * v;    label = '📉 하락'; tone = 'down'; }
   else               { mult = 0.65;             label = '💀 폭락'; tone = 'down2'; }
@@ -484,20 +525,44 @@ function renderRiceMarket() {
   const mm = Math.floor(left / 60000), ss = Math.floor((left % 60000) / 1000);
   const hist = [];
   for (let i = 8; i >= 0; i--) hist.push(riceMarket(nowTs - i * MARKET_SLOT_MS));
-  const color = { up2: 'text-fuchsia-300', up: 'text-emerald-300', flat: 'text-slate-300', down: 'text-sky-300', down2: 'text-rose-400' }[mk.tone];
+  const color = { up3: 'text-amber-300', up2: 'text-fuchsia-300', up: 'text-emerald-300', flat: 'text-slate-300', down: 'text-sky-300', down2: 'text-rose-400' }[mk.tone];
   box.innerHTML = `
     <div class="flex items-center justify-between">
       <span class="text-[11px] font-black text-slate-300">오늘의 밥 시세</span>
       <span class="text-[10px] text-slate-500">다음 변동 ${mm}:${String(ss).padStart(2, '0')}</span>
     </div>
     <div class="flex items-end justify-between gap-2 mt-1">
-      <div class="${color} font-black text-lg leading-none ${mk.tone === 'up2' ? 'animate-pulse' : ''}">${mk.label} x${mk.mult.toFixed(2)}</div>
+      <div class="${color} font-black text-lg leading-none ${mk.tone === 'up2' || mk.tone === 'up3' ? 'animate-pulse' : ''}">${mk.label} x${mk.mult.toFixed(2)}</div>
       <div class="flex items-end gap-0.5 h-7">
-        ${hist.map((h, i) => `<div title="x${h.mult.toFixed(2)}" class="w-2 rounded-sm ${h.mult >= 1.2 ? 'bg-emerald-400' : h.mult >= 0.95 ? 'bg-slate-500' : 'bg-rose-400'} ${i === hist.length - 1 ? 'ring-1 ring-amber-300' : 'opacity-70'}" style="height:${Math.round((h.mult - 0.5) / 1.0 * 100)}%"></div>`).join('')}
+        ${hist.map((h, i) => `<div title="x${h.mult.toFixed(2)}" class="w-2 rounded-sm ${h.mult >= 1.6 ? 'bg-fuchsia-400' : h.mult >= 1.15 ? 'bg-emerald-400' : h.mult >= 0.95 ? 'bg-slate-500' : 'bg-rose-400'} ${i === hist.length - 1 ? 'ring-1 ring-amber-300' : 'opacity-70'}" style="height:${Math.min(100, Math.round((h.mult - 0.5) / 2.0 * 100))}%"></div>`).join('')}
       </div>
     </div>`;
 }
+let lastSpikeAlertSlot = null;
+function checkMarketSpikeAlert() {
+  const mk = riceMarket();
+  if (lastSpikeAlertSlot === null) { lastSpikeAlertSlot = mk.slot; return; } // 처음 접속한 순간은 알리지 않음
+  if (mk.slot === lastSpikeAlertSlot) return;
+  lastSpikeAlertSlot = mk.slot;
+  if (mk.tone !== 'up2' && mk.tone !== 'up3') return;
+  if (typeof canSyncToCloud === 'function' && !canSyncToCloud()) return;
+  const box = document.getElementById('feedToastContainer');
+  if (!box) return;
+  const el = document.createElement('div');
+  el.className = `feed-toast ${mk.tone === 'up3' ? 'feed-toast-legendary' : 'feed-toast-big'}`;
+  el.innerHTML = `<div class="text-[10px] font-black opacity-80">📈 밥 시세 알림</div>
+    <div class="text-sm font-black">${mk.label}! 지금 1분 동안 판매가 x${mk.mult.toFixed(2)}</div>
+    <div class="text-[11px] font-bold text-slate-600">${currentEnhanceLevel > 0 ? `내 +${currentEnhanceLevel}강 밥을 지금 팔면 약 ${Math.round(ENHANCE_PROBABILITIES[currentEnhanceLevel - 1].reward * mk.mult).toLocaleString()}P` : '밥키우기에서 확인하세요'}</div>`;
+  el.style.cursor = 'pointer';
+  el.onclick = () => { if (typeof openEnhanceModal === 'function') openEnhanceModal(); el.remove(); };
+  box.appendChild(el);
+  if (mk.tone === 'up3' && window.confetti) confetti({ particleCount: 150, spread: 120, origin: { y: 0.2 } });
+  setTimeout(() => el.classList.add('feed-toast-out'), 9000);
+  setTimeout(() => el.remove(), 9700);
+}
+
 setInterval(() => {
+  checkMarketSpikeAlert();
   const m = document.getElementById('enhanceModal');
   if (m && !m.classList.contains('hidden')) {
     const prevSlot = renderRiceMarket.lastSlot;
@@ -528,7 +593,7 @@ function sellEnhancedBowl() {
 
   if (window.confetti) confetti({ particleCount: lucky ? 250 : 100, spread: lucky ? 130 : 70 });
   if (lucky && soldLvl >= 8) postFeed('sell', `🎉 대박 손님 등장! +${soldLvl}강 밥이 2배 값에 팔렸어요 → ${paid.toLocaleString()}P`, paid >= 50000 ? 'legendary' : 'big');
-  else if (soldLvl >= 12) postFeed('sell', `+${soldLvl}강 밥을 ${mk.label} 시세(x${mk.mult.toFixed(2)})에 팔아 ${paid.toLocaleString()}P 💰`, soldLvl >= 16 || mk.mult >= 1.5 ? 'big' : 'normal');
+  else if (soldLvl >= 12) postFeed('sell', `+${soldLvl}강 밥을 ${mk.label} 시세(x${mk.mult.toFixed(2)})에 팔아 ${paid.toLocaleString()}P 💰`, mk.mult >= 2 ? 'legendary' : soldLvl >= 16 || mk.mult >= 1.5 ? 'big' : 'normal');
   startDoubleUp(paid, soldLvl, lucky);
 }
 
