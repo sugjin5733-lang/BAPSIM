@@ -1,9 +1,9 @@
 // 밥심 - 상점 & 치장 (+ 👑 프레스티지 상점)
 //
-// 👑 프레스티지 상점: 999,999P 이상 상품 전용 (입장권 1,000,000P, 영구)
+// 👑 프레스티지 상점: 500,000P 이상 상품 전용 (입장권 1,000,000P, 영구)
 //  - 입장권이 없어도 구경은 가능, 구매만 막힘
 //  - 이미 가진 프레스티지 배지는 입장권 없이도 장착/해제 가능
-const PRESTIGE_MIN = 999999;
+const PRESTIGE_MIN = 500000;
 const PRESTIGE_PASS_PRICE = 1000000;
 let myPrestigePass = false;
 function loadPrestigeFromUser(val) { myPrestigePass = !!(val && val.prestigePass); }
@@ -300,7 +300,7 @@ function renderPrestigeShop() {
       : `<div class="rounded-2xl border border-amber-400/50 bg-gradient-to-br from-amber-500/15 to-transparent px-4 py-3 flex items-center justify-between gap-3">
            <div>
              <div class="text-xs font-black text-amber-200">👑 프레스티지 상점 입장권</div>
-             <div class="text-[10px] text-slate-400">한 번 사면 영구 · 99만P 이상 배지와 닉네임 변경권을 살 수 있어요</div>
+             <div class="text-[10px] text-slate-400">한 번 사면 영구 · 50만P 이상 배지와 닉네임 변경권을 살 수 있어요</div>
            </div>
            <button onclick="buyPrestigePass()" class="shrink-0 bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 font-black px-3 py-2 rounded-xl text-xs shadow-lg hover:brightness-105 active:scale-95">${PRESTIGE_PASS_PRICE.toLocaleString()}P</button>
          </div>`;

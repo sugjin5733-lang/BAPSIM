@@ -324,21 +324,10 @@ body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 
 /* ==========================================
    게임 개편: 특별 배지 (세트 완성 · 시즌 보상)
    ========================================== */
-.nb-buffet {
-  background: linear-gradient(135deg, #f97316, #facc15, #f97316); background-size: 200% 200%;
-  animation: cosmicShift 4s ease infinite;
-  color: #431407 !important; border: 1.5px solid #fff7ed; padding: 2px 8px; border-radius: 8px; font-weight: 900;
-}
-.nb-royal {
-  background: linear-gradient(135deg, #7f1d1d, #b91c1c 40%, #ca8a04 70%, #7f1d1d); background-size: 200% 200%;
-  animation: cosmicShift 3s ease infinite, infinityGlow 2s ease-in-out infinite alternate;
-  color: #fef3c7 !important; border: 2px solid #fcd34d; padding: 2px 9px; border-radius: 8px; font-weight: 900;
-}
-.nb-collector {
-  background: linear-gradient(90deg, #8b5cf6, #ec4899, #f59e0b, #10b981, #3b82f6, #8b5cf6); background-size: 400% 100%;
-  animation: cosmicShift 5s linear infinite, cosmicGlow 2s alternate infinite;
-  color: #ffffff !important; border: 1.5px solid #ffffff; padding: 2px 9px; border-radius: 8px; font-weight: 900;
-}
+/* 반찬 도감 배지: 일부러 소박하게 — 바탕 없이 선 색만 */
+.nb-buffet { background: transparent; color: #64748b !important; border: 1px solid #f97316; padding: 1px 6px; border-radius: 4px; font-weight: 600; }
+.nb-royal { background: transparent; color: #64748b !important; border: 1px solid #b91c1c; padding: 1px 6px; border-radius: 4px; font-weight: 600; }
+.nb-collector { background: transparent; color: #64748b !important; border: 1px solid #8b5cf6; padding: 1px 6px; border-radius: 4px; font-weight: 600; }
 .nb-season-1 {
   background: linear-gradient(110deg, #a16207 0%, #fde047 35%, #fffbeb 50%, #fde047 65%, #a16207 100%); background-size: 250% 100%;
   animation: shimmerSweep 2.2s linear infinite, infinityGlow 1.8s ease-in-out infinite alternate;
