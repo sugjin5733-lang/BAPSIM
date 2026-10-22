@@ -46,7 +46,11 @@ function toArr(v) {
 function nickHTML(u, extraClass = '') {
   const sym = u.symbol ? esc(u.symbol) : '';
   const color = safeColor(u.color);
-  return `<span class="${safeClass(u.badge || u.bg)} ${extraClass} inline-block" style="${color ? `color:${color} !important;` : ''}">${sym ? sym + ' ' : ''}${esc(u.nickname)}${sym ? ' ' + sym : ''}</span>`;
+  let badge = u.badge || u.bg;
+  // 대천사의 날개는 현재 주인(기부 1위)만 표시
+  if (badge === 'nb-angel' && typeof angelHolderKnown !== 'undefined' && angelHolderKnown && u.nickname !== angelHolderNick) badge = 'nb-none';
+  if (badge === 'nb-season-1' || badge === 'nb-season-2' || badge === 'nb-season-3') badge = 'nb-none';
+  return `<span class="${safeClass(badge)} ${extraClass} inline-block" style="${color ? `color:${color} !important;` : ''}">${sym ? sym + ' ' : ''}${esc(u.nickname)}${sym ? ' ' + sym : ''}</span>`;
 }
 // 비밀번호 해시 (DB에 평문 저장 방지)
 async function sha256(text) {

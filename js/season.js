@@ -8,9 +8,9 @@
 // 받은 보상: user_points/{닉네임}/seasonClaims/{주차} = true
 
 const SEASON_REWARDS = [
-  { rank: 1, points: 30000, badge: 'nb-season-1', label: '🥇 시즌 챔피언' },
-  { rank: 2, points: 15000, badge: 'nb-season-2', label: '🥈 시즌 준우승' },
-  { rank: 3, points: 7000,  badge: 'nb-season-3', label: '🥉 시즌 3위' }
+  { rank: 1, points: 30000, label: '🥇 시즌 챔피언' },
+  { rank: 2, points: 15000, label: '🥈 시즌 준우승' },
+  { rank: 3, points: 7000,  label: '🥉 시즌 3위' }
 ];
 
 let mySeasonBest = 0;
@@ -59,11 +59,10 @@ async function initSeason() {
     mySeasonClaims[lastWeek] = true;
     await db.ref(`user_points/${currentUser.nickname}/seasonClaims/${lastWeek}`).set(true);
     addPoints(reward.points, `주간 시즌 ${reward.label}`);
-    if (!myInventory.bgs.includes(reward.badge)) myInventory.bgs.push(reward.badge);
     updatePointsUI();
     postFeed('season', `지난주 밥키우기 시즌 ${reward.label}! (+${ranked[myRank - 1].maxLevel}강) +${reward.points.toLocaleString()}P`, reward.rank === 1 ? 'legendary' : 'big');
     if (window.confetti) confetti({ particleCount: 250, spread: 140 });
-    alert(`🏆 지난주 밥키우기 시즌 결과: ${reward.label}!\n최고 기록 +${ranked[myRank - 1].maxLevel}강\n\n보상: +${reward.points.toLocaleString()}P + 시즌 배지\n(상점 > 내 획득 배지에서 장착)`);
+    alert(`🏆 지난주 밥키우기 시즌 결과: ${reward.label}!\n최고 기록 +${ranked[myRank - 1].maxLevel}강\n\n보상: +${reward.points.toLocaleString()}P`);
   } catch (err) {
     console.warn('시즌 확인 실패:', err);
   }
@@ -103,3 +102,32 @@ async function renderSeasonRanking(container, summaryEl, myPointEl) {
             </div>`;
         }).join(''));
 }
+
+// ==========================================
+// 🏅 시즌 배지 도감: 시즌마다 한정 배지가 생기면 여기에 등록
+//  { id, cls, name, season, desc } — 지금은 아직 없음
+// ==========================================
+const SEASON_BADGE_BOOK = [];
+function openSeasonBadgeBook() {
+  const box = document.getElementById('seasonBadgeBookList');
+  const owned = new Set((myInventory && myInventory.bgs) || []);
+  const got = SEASON_BADGE_BOOK.filter(b => owned.has(b.cls)).length;
+  const cnt = document.getElementById('seasonBadgeBookCount');
+  if (cnt) cnt.textContent = `${got} / ${SEASON_BADGE_BOOK.length}`;
+  if (box) box.innerHTML = SEASON_BADGE_BOOK.length === 0
+    ? `<div class="col-span-full text-center py-10 space-y-2">
+         <div class="text-4xl opacity-40">🏅</div>
+         <div class="text-sm font-black text-slate-500">아직 등록된 시즌 배지가 없어요</div>
+         <div class="text-[11px] text-slate-400">새 시즌이 열리면 그 시즌에만 얻을 수 있는 한정 배지가 이곳에 채워져요</div>
+       </div>`
+    : SEASON_BADGE_BOOK.map(b => {
+        const has = owned.has(b.cls);
+        return `<div class="p-3 rounded-2xl border ${has ? 'bg-white border-amber-300' : 'bg-slate-50 border-slate-200'} text-center space-y-1.5">
+          <div class="text-[10px] font-black text-slate-400">${esc(b.season)}</div>
+          <span class="${has ? safeClass(b.cls) : ''} text-xs inline-block ${has ? '' : 'text-slate-300 font-black'}">${has ? esc(b.name) : '???'}</span>
+          <div class="text-[10px] text-slate-400">${esc(b.desc || '')}</div>
+        </div>`;
+      }).join('');
+  document.getElementById('seasonBadgeBookModal').classList.remove('hidden');
+}
+function closeSeasonBadgeBook() { document.getElementById('seasonBadgeBookModal').classList.add('hidden'); }

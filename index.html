@@ -11,7 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Black+Han+Sans&family=Rubik+Glitch&family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261022i">
+  <link rel="stylesheet" href="css/style.css?v=20261022j">
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white relative">
 
@@ -23,6 +23,18 @@
 
   <!-- [좌측 날개 배너] -->
   <aside class="hidden 2xl:block fixed left-4 top-20 z-30 w-64 space-y-4">
+    <!-- 👑 프레스티지 회원 (넓은 화면에서는 왼쪽에) -->
+    <div id="prestigeSideCard" onclick="openPrestigeModal()" class="hidden prestige-member-banner cursor-pointer rounded-3xl p-4 shadow-xl space-y-2.5">
+      <div class="flex items-center justify-between border-b border-amber-400/25 pb-2">
+        <div>
+          <div class="text-[9px] font-black tracking-[0.25em] text-amber-300">PRESTIGE</div>
+          <div class="text-xs font-black text-white">👑 프레스티지 회원</div>
+        </div>
+        <span id="prestigeSideCount" class="text-[10px] font-black bg-amber-400/15 text-amber-200 border border-amber-400/40 px-2 py-0.5 rounded-full">0명</span>
+      </div>
+      <div id="prestigeSideList" class="flex flex-col items-start gap-1.5 max-h-56 overflow-y-auto no-scrollbar"></div>
+    </div>
+
     <div class="bg-white/95 backdrop-blur-md rounded-3xl p-4 border border-slate-200 shadow-xl space-y-3">
       <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
         <div class="flex items-center gap-2">
@@ -179,7 +191,7 @@
   <!-- 메인 본문 -->
   <main class="max-w-6xl mx-auto px-4 pt-6 space-y-7">
     <!-- 👑 프레스티지 회원 배너 -->
-    <div id="prestigeMemberBanner" onclick="openPrestigeModal()" class="hidden prestige-member-banner cursor-pointer rounded-2xl px-4 py-2.5 flex items-center gap-3">
+    <div id="prestigeMemberBanner" onclick="openPrestigeModal()" class="hidden 2xl:!hidden prestige-member-banner cursor-pointer rounded-2xl px-4 py-2.5 flex items-center gap-3">
       <div class="shrink-0 text-center leading-tight">
         <div class="text-[9px] font-black tracking-[0.25em] text-amber-300">PRESTIGE</div>
         <div class="text-xs font-black text-white">👑 회원 <span id="prestigeMemberCount" class="text-amber-300">0명</span></div>
@@ -257,25 +269,18 @@
             <span>프레스티지</span>
           </button>
 
+          <button onclick="openSeasonBadgeBook()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-amber-200 font-bold px-3 py-2 rounded-xl text-xs border border-slate-700 transition-all">
+            <span>🏅</span>
+            <span>시즌 도감</span>
+          </button>
+
           <button onclick="openRankModal('points')" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-3 py-2 rounded-xl text-xs shadow-md transition-all">
             <i data-lucide="award" class="w-3.5 h-3.5"></i>
             <span>랭킹 전당</span>
           </button>
 
-          <button onclick="openRouletteModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-3 py-2 rounded-xl text-xs border border-slate-700 transition-all">
-            <i data-lucide="disc" class="w-3.5 h-3.5 text-orange-400"></i>
-            <span>룰렛</span>
-          </button>
 
-          <button onclick="openLadderModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-teal-700 hover:bg-teal-800 text-teal-100 font-bold px-3 py-2 rounded-xl text-xs shadow-md transition-all">
-            <i data-lucide="git-merge" class="w-3.5 h-3.5 text-teal-300"></i>
-            <span>사다리타기</span>
-          </button>
 
-          <button onclick="openDutchModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-3 py-2 rounded-xl text-xs border border-slate-700 transition-all">
-            <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
-            <span>N빵</span>
-          </button>
         </div>
       </div>
       <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -560,6 +565,20 @@
     </div>
   </div>
 
+  <!-- 🏅 시즌 배지 도감 모달 -->
+  <div id="seasonBadgeBookModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this) closeSeasonBadgeBook()">
+    <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h3 class="font-black text-slate-900 text-base">🏅 시즌 배지 도감</h3>
+          <p class="text-[11px] text-slate-400">시즌마다 한정으로만 얻을 수 있는 배지 · 수집 <strong id="seasonBadgeBookCount" class="text-slate-700">0 / 0</strong></p>
+        </div>
+        <button onclick="closeSeasonBadgeBook()" class="text-slate-400 hover:text-slate-700 text-sm p-1">✕</button>
+      </div>
+      <div id="seasonBadgeBookList" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+    </div>
+  </div>
+
   <!-- 🏦 밥심 은행 모달 -->
   <div id="bankModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this) closeBankModal()">
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
@@ -602,7 +621,7 @@
           <button onclick="donatePoints(1000000)" class="flex-1 bg-sky-50 border border-sky-200 text-sky-700 font-bold py-1.5 rounded-lg text-[11px]">100만</button>
         </div>
         <p id="bankMyDonated" class="text-[11px] text-slate-500"></p>
-        <p class="text-[10px] text-slate-400">누적 10,000,000P 이상 기부하면 프레스티지 상점에서 <span class="nb-angel inline-block text-[10px]">😇 대천사의 날개</span> 배지를 받을 수 있어요.</p>
+        <p class="text-[10px] text-slate-400">누적 기부 1위(최소 10,000,000P) <strong>단 한 명</strong>만 <span class="nb-angel inline-block text-[10px]">😇 대천사의 날개</span>를 가질 수 있어요. 더 많이 기부하면 빼앗아 올 수 있어요!</p>
       </div>
 
       <div class="space-y-1.5">
@@ -686,54 +705,6 @@
     </div>
   </div>
 
-  <!-- 사다리타기 모달 -->
-  <div id="ladderGameModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-      <div class="flex items-center justify-between border-b pb-3">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center font-bold">
-            <i data-lucide="git-merge" class="w-4 h-4"></i>
-          </div>
-          <div>
-            <h3 class="font-black text-slate-900 text-base">밥심 실시간 사다리타기</h3>
-            <p class="text-[11px] text-slate-400">참여자를 입력하고 사다리를 타서 점심/커피를 결정하세요!</p>
-          </div>
-        </div>
-        <button onclick="closeLadderModal()" class="text-slate-400 hover:text-slate-600 text-xs">✕</button>
-      </div>
-
-      <div class="space-y-2.5 text-xs">
-        <div>
-          <label class="font-bold text-slate-700 block mb-1">1. 참여자 이름 (쉼표로 구분, 2~6명)</label>
-          <input id="ladderInputNames" type="text" placeholder="예: 김대리, 이과장, 박팀장, 최사원" class="w-full border rounded-xl p-2.5 font-bold outline-none focus:border-teal-500 bg-slate-50" />
-        </div>
-        <div>
-          <label class="font-bold text-slate-700 block mb-1">2. 결과 항목 (쉼표로 구분, 참여자 수와 동일하게)</label>
-          <input id="ladderInputResults" type="text" placeholder="예: 당첨(커피쏘기), 통과, 통과, 통과" class="w-full border rounded-xl p-2.5 font-bold outline-none focus:border-teal-500 bg-slate-50" />
-        </div>
-        <div class="flex gap-2">
-          <button onclick="autoFillLadderWithRestaurants()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-xl text-[11px] transition-colors">
-            🍽️ 오늘 식당들로 자동 채우기
-          </button>
-          <button onclick="buildLadderCanvas()" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded-xl text-[11px] transition-colors shadow-sm">
-            🪜 사다리 생성하기
-          </button>
-        </div>
-      </div>
-
-      <div class="relative bg-slate-900 rounded-2xl p-2 flex flex-col items-center justify-center border-2 border-teal-500 overflow-hidden min-h-[260px]">
-        <canvas id="ladderCanvas" width="440" height="240" class="max-w-full"></canvas>
-      </div>
-
-      <div id="ladderResultAnnounce" class="p-3 bg-teal-50 text-teal-900 rounded-xl font-bold text-xs text-center min-h-[42px] flex items-center justify-center">
-        사다리를 생성한 후 [사다리 타기 시작!]을 눌러주세요.
-      </div>
-
-      <button id="startLadderBtn" onclick="runLadderAnimation()" disabled class="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-black py-3 rounded-xl text-xs shadow-md transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-        사다리 타기 시작! (결과 추첨)
-      </button>
-    </div>
-  </div>
 
   <!-- 포인트 게임장 모달 -->
   <div id="miniGameModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
@@ -1270,41 +1241,7 @@
     </div>
   </div>
 
-  <!-- 결정장애 룰렛 모달 -->
-  <div id="rouletteModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 text-center space-y-4">
-      <div class="flex items-center justify-between border-b pb-2">
-        <h3 class="font-black text-slate-900 text-base">결정장애 점심 룰렛</h3>
-        <button onclick="closeRouletteModal()" class="text-slate-400">✕</button>
-      </div>
-      <div class="py-8 bg-slate-900 rounded-2xl border-2 border-orange-500">
-        <div id="rouletteSlotText" class="text-xl font-black text-white px-4 truncate">???</div>
-        <div class="text-[11px] text-slate-400 mt-1" id="rouletteSubText">룰렛을 돌려보세요!</div>
-      </div>
-      <button id="spinBtn" onclick="spinRoulette()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 rounded-xl text-xs shadow-lg">
-        오늘 메뉴 강제 낙점!
-      </button>
-    </div>
-  </div>
 
-  <!-- N빵 모달 -->
-  <div id="dutchModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4">
-      <div class="flex items-center justify-between border-b pb-2">
-        <h3 class="font-black text-slate-900 text-base">N빵 & 커피 사다리</h3>
-        <button onclick="closeDutchModal()" class="text-slate-400">✕</button>
-      </div>
-      <div class="p-4 bg-slate-50 rounded-2xl space-y-2 text-xs">
-        <span class="font-bold text-slate-800">💸 점심값 N빵</span>
-        <div class="grid grid-cols-2 gap-2">
-          <input id="nTotalAmount" type="number" placeholder="총 금액" class="border rounded-xl p-2 bg-white" />
-          <input id="nPeopleCount" type="number" placeholder="인원 수" class="border rounded-xl p-2 bg-white" />
-        </div>
-        <button onclick="calcDutchPay()" class="w-full bg-emerald-600 text-white font-bold py-2 rounded-xl">계산하기</button>
-        <div id="dutchResultBox" class="hidden text-center p-2 bg-emerald-50 text-emerald-800 rounded-xl font-bold"></div>
-      </div>
-    </div>
-  </div>
 
   <!-- 그룹 모달 -->
   <div id="groupModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
@@ -1455,22 +1392,22 @@
     </div>
   </div>
 
-  <script src="js/core.js?v=20261022i"></script>
-  <script src="js/auth.js?v=20261022i"></script>
-  <script src="js/enhance.js?v=20261022i"></script>
-  <script src="js/shop.js?v=20261022i"></script>
-  <script src="js/chat.js?v=20261022i"></script>
-  <script src="js/games.js?v=20261022i"></script>
-  <script src="js/admin.js?v=20261022i"></script>
-  <script src="js/ranking.js?v=20261022i"></script>
-  <script src="js/restaurants.js?v=20261022i"></script>
-  <script src="js/tools.js?v=20261022i"></script>
-  <script src="js/feed.js?v=20261022i"></script>
-  <script src="js/bank.js?v=20261022i"></script>
-  <script src="js/cards.js?v=20261022i"></script>
-  <script src="js/season.js?v=20261022i"></script>
-  <script src="js/duel.js?v=20261022i"></script>
-  <script src="js/predict.js?v=20261022i"></script>
-  <script src="js/main.js?v=20261022i"></script>
+  <script src="js/core.js?v=20261022j"></script>
+  <script src="js/auth.js?v=20261022j"></script>
+  <script src="js/enhance.js?v=20261022j"></script>
+  <script src="js/shop.js?v=20261022j"></script>
+  <script src="js/chat.js?v=20261022j"></script>
+  <script src="js/games.js?v=20261022j"></script>
+  <script src="js/admin.js?v=20261022j"></script>
+  <script src="js/ranking.js?v=20261022j"></script>
+  <script src="js/restaurants.js?v=20261022j"></script>
+  <script src="js/tools.js?v=20261022j"></script>
+  <script src="js/feed.js?v=20261022j"></script>
+  <script src="js/bank.js?v=20261022j"></script>
+  <script src="js/cards.js?v=20261022j"></script>
+  <script src="js/season.js?v=20261022j"></script>
+  <script src="js/duel.js?v=20261022j"></script>
+  <script src="js/predict.js?v=20261022j"></script>
+  <script src="js/main.js?v=20261022j"></script>
 </body>
 </html>

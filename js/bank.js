@@ -28,6 +28,37 @@ let bankRefs = [];
 let bankTimer = null;
 let bankBusy = false;
 let prestigeMembers = [];
+// 😇 대천사의 날개는 단 한 명만: 누적 기부 1위이면서 1,000만P 이상인 사람
+//  - 누가 더 많이 기부해서 1위가 바뀌면 배지가 그 사람에게 넘어감 (이전 주인은 자동 반납)
+let angelHolderNick = null, angelHolderKnown = false;
+const REMOVED_BADGES = ['nb-season-1', 'nb-season-2', 'nb-season-3']; // 폐지된 배지 (각자 접속 시 정리)
+function computeAngelHolder(donors) {
+  let best = null, bv = 0;
+  Object.entries(donors || {}).forEach(([n, v]) => { v = Number(v) || 0; if (v >= DONOR_BADGE_GOAL && v > bv) { best = n; bv = v; } });
+  return best;
+}
+function setDonors(donors) {
+  bankState.donors = donors || {};
+  const prev = angelHolderNick, wasKnown = angelHolderKnown;
+  angelHolderNick = computeAngelHolder(bankState.donors);
+  angelHolderKnown = true;
+  if (wasKnown && prev !== angelHolderNick && angelHolderNick && typeof currentUser !== 'undefined') {
+    if (angelHolderNick === currentUser.nickname) bankToast('😇 대천사의 날개', '기부 1위가 되었어요! 프레스티지 상점에서 날개를 받으세요.');
+    else if (prev === currentUser.nickname) bankToast('😇 대천사의 날개', `[${esc(angelHolderNick)}] 님이 더 많이 기부해서 날개가 넘어갔어요. 되찾으려면 더 기부하세요!`);
+  }
+  if (typeof canSyncToCloud === 'function' && canSyncToCloud() && purgeBadges()) { updatePointsUI(); if (typeof renderShopUI === 'function') renderShopUI(); }
+  renderPrestigeBanner();
+}
+// 폐지 배지 + (주인이 아니게 된) 대천사의 날개 정리. 바뀌었으면 true
+function purgeBadges() {
+  if (!myInventory || !Array.isArray(myInventory.bgs)) return false;
+  const drop = new Set(REMOVED_BADGES);
+  if (angelHolderKnown && angelHolderNick !== currentUser.nickname) drop.add(DONOR_BADGE);
+  const before = myInventory.bgs.length;
+  myInventory.bgs = myInventory.bgs.filter(c => !drop.has(c));
+  if (drop.has(myNickBg)) myNickBg = 'nb-none';
+  return myInventory.bgs.length !== before;
+}
 
 function bankNow() { return Date.now() + (typeof serverTimeOffset === 'number' ? serverTimeOffset : 0); }
 function bankToday() { return todayKey(bankNow()); }
@@ -82,7 +113,7 @@ function initBank() {
     scheduleBankDues(1500); // 금고가 채워지면 밀린 지원금 다시 시도
   });
   on(db.ref('bank/fees'), 'value', s => { bankState.fees = Number(s.val()) || 0; renderBankModal(); });
-  on(db.ref('bank/donors'), 'value', s => { bankState.donors = s.val() || {}; renderBankModal(); renderDonorBadgeBox(); });
+  on(db.ref('bank/donors'), 'value', s => { setDonors(s.val()); renderBankModal(); renderDonorBadgeBox(); });
   on(db.ref('bank/days').limitToLast(7), 'value', s => { bankState.days = s.val() || {}; renderBankModal(); scheduleBankDues(800); });
   on(db.ref(`transfers/${me}`), 'child_added', s => claimTransfer(s.ref));
 
@@ -167,10 +198,12 @@ async function donatePoints(preset) {
     console.warn('기부 기록 실패:', err && err.message);
   }
   const after = before + amount;
-  if (before < DONOR_BADGE_GOAL && after >= DONOR_BADGE_GOAL) {
+  const wasHolder = angelHolderNick === me;
+  const others = Math.max(0, ...Object.entries(bankState.donors || {}).filter(([n]) => n !== me).map(([, v]) => Number(v) || 0));
+  if (!wasHolder && after >= DONOR_BADGE_GOAL && after > others) {
     if (window.confetti) confetti({ particleCount: 200, spread: 120, colors: ['#ffffff', '#fde68a', '#bae6fd'] });
-    alert(`😇 누적 기부 ${fmtP(DONOR_BADGE_GOAL)} 달성!\n프레스티지 상점에서 [대천사의 날개] 배지를 받을 수 있어요.`);
-    if (typeof postFeed === 'function') postFeed('donate', `😇 누적 기부 ${fmtP(DONOR_BADGE_GOAL)}를 넘겨 대천사의 날개를 얻었어요!`, 'legendary', true);
+    alert(`😇 기부 1위 달성! (누적 ${fmtP(after)})\n대천사의 날개는 단 한 명만 가질 수 있어요. 프레스티지 상점에서 받으세요.`);
+    if (typeof postFeed === 'function') postFeed('donate', `😇 누적 기부 ${fmtP(after)}로 단 하나뿐인 대천사의 날개의 주인이 되었어요!`, 'legendary', true);
   } else {
     bankToast('🎗️ 기부 감사합니다', `${fmtP(amount)} 기부 · 누적 ${fmtP(after)}`);
   }
@@ -208,31 +241,36 @@ function renderDonorBadgeBox() {
   if (!box) return;
   const total = canSyncToCloud() ? myDonated() : 0;
   const owned = (myInventory.bgs || []).includes(DONOR_BADGE);
+  const holder = angelHolderNick, me = typeof currentUser !== 'undefined' ? currentUser.nickname : '';
+  const holderAmt = holder ? Number(bankState.donors[holder]) || 0 : 0;
+  const target = holder && holder !== me ? holderAmt + 1 : DONOR_BADGE_GOAL;
+  const isHolder = holder && holder === me;
   const equipped = myNickBg === DONOR_BADGE;
-  const pct = Math.min(100, total / DONOR_BADGE_GOAL * 100);
+  const pct = Math.min(100, total / target * 100);
   box.innerHTML = `
     <div class="rounded-2xl border border-sky-200/40 bg-gradient-to-br from-sky-300/10 to-transparent p-3 space-y-2">
       <div class="flex items-center justify-between gap-2">
         <div class="min-w-0">
           <span class="${DONOR_BADGE} text-xs inline-block">😇 대천사의 날개 (세라핌)</span>
-          <p class="text-[10px] text-slate-300 mt-1">돈으로는 살 수 없는 배지 · 은행 누적 기부 ${fmtP(DONOR_BADGE_GOAL)} 이상이면 무료 수령</p>
+          <p class="text-[10px] text-slate-300 mt-1">세상에 단 하나 · 누적 기부 1위(최소 ${fmtP(DONOR_BADGE_GOAL)})만 가질 수 있어요. 더 많이 기부한 사람이 나오면 넘어가요.</p>
+          <p class="text-[10px] mt-1 font-bold ${holder ? 'text-amber-200' : 'text-slate-400'}">${holder ? `👑 현재 주인: ${esc(holder)} (누적 ${fmtP(holderAmt)})` : '👑 현재 주인: 없음 — 첫 주인이 되어보세요'}</p>
         </div>
         ${equipped
           ? `<button onclick="unequipBg(); renderDonorBadgeBox()" class="shrink-0 bg-rose-500 text-white font-bold px-3 py-1.5 rounded-xl text-[11px]">해제</button>`
           : owned
             ? `<button onclick="equipBg('${DONOR_BADGE}'); renderDonorBadgeBox()" class="shrink-0 bg-indigo-600 text-white font-bold px-3 py-1.5 rounded-xl text-[11px]">장착</button>`
-            : total >= DONOR_BADGE_GOAL
+            : isHolder
               ? `<button onclick="claimDonorBadge()" class="shrink-0 bg-sky-300 text-slate-950 font-black px-3 py-1.5 rounded-xl text-[11px]">받기</button>`
               : `<button onclick="openBankModal('donate')" class="shrink-0 bg-white/10 border border-white/20 text-sky-100 font-bold px-3 py-1.5 rounded-xl text-[11px]">기부하러 가기</button>`}
       </div>
       ${owned ? '' : `<div class="h-1.5 rounded-full bg-white/10 overflow-hidden"><div class="h-full bg-sky-300" style="width:${pct.toFixed(1)}%"></div></div>
-      <div class="text-[10px] text-sky-100/80 text-right">내 누적 기부 ${fmtP(total)} / ${fmtP(DONOR_BADGE_GOAL)}</div>`}
+      <div class="text-[10px] text-sky-100/80 text-right">내 누적 기부 ${fmtP(total)} / ${holder && holder !== me ? `빼앗기까지 ${fmtP(Math.max(0, target - total))}` : fmtP(DONOR_BADGE_GOAL)}</div>`}
     </div>`;
 }
 
 function claimDonorBadge() {
   if (!checkApprovalGuard()) return;
-  if (myDonated() < DONOR_BADGE_GOAL) return alert('아직 누적 기부가 부족해요.');
+  if (angelHolderNick !== currentUser.nickname) return alert(`대천사의 날개는 누적 기부 1위(최소 ${fmtP(DONOR_BADGE_GOAL)}) 한 명만 가질 수 있어요.`);
   if (!myInventory.bgs) myInventory.bgs = ['nb-none'];
   if (!myInventory.bgs.includes(DONOR_BADGE)) myInventory.bgs.push(DONOR_BADGE);
   myNickBg = DONOR_BADGE;
@@ -370,7 +408,10 @@ function renderBankModal() {
   set('bankFeeTotal', `누적 수수료 수입 ${fmtP(bankState.fees || 0)}`);
   set('bankMyPoints', fmtP(userPoints));
   const mine = myDonated();
-  set('bankMyDonated', `내 누적 기부 <strong>${fmtP(mine)}</strong>${mine >= DONOR_BADGE_GOAL ? ' · 😇 대천사의 날개 획득 가능' : ` · 대천사의 날개까지 ${fmtP(DONOR_BADGE_GOAL - mine)}`}`);
+  const h = angelHolderNick, hAmt = h ? Number(bankState.donors[h]) || 0 : 0;
+  set('bankMyDonated', `내 누적 기부 <strong>${fmtP(mine)}</strong>` + (h === me ? ' · 😇 대천사의 날개 주인!'
+    : h ? ` · 😇 날개 주인 ${esc(h)}(${fmtP(hAmt)}) — 빼앗기까지 ${fmtP(hAmt + 1 - mine)}`
+    : ` · 😇 첫 주인까지 ${fmtP(Math.max(0, DONOR_BADGE_GOAL - mine))}`));
 
   const donors = Object.entries(bankState.donors || {}).sort((a, b) => b[1] - a[1]).slice(0, 5);
   set('bankDonorRank', donors.length === 0
@@ -414,6 +455,9 @@ function bankToast(title, html) {
 // ------------------------------------------------------------------
 async function loadPrestigeMembers() {
   try {
+    if (!bankRefs.length) { // 로그인 전(실시간 구독 없음)에도 날개 주인은 알 수 있게
+      try { setDonors((await db.ref('bank/donors').once('value')).val()); } catch (e) {}
+    }
     const users = (await db.ref('user_points').once('value')).val() || {};
     prestigeMembers = Object.values(users)
       .filter(u => u && u.nickname && u.prestigePass === true && (u.status === 'approved' || u.approved === true))
@@ -422,15 +466,16 @@ async function loadPrestigeMembers() {
   renderPrestigeBanner();
 }
 function renderPrestigeBanner() {
-  const wrap = document.getElementById('prestigeMemberBanner');
-  const list = document.getElementById('prestigeMemberList');
-  const count = document.getElementById('prestigeMemberCount');
-  if (!wrap || !list) return;
-  wrap.classList.remove('hidden');
-  if (count) count.textContent = `${prestigeMembers.length}명`;
-  list.innerHTML = prestigeMembers.length === 0
-    ? '<span class="text-[11px] text-amber-100/70">아직 아무도 없어요 · 첫 번째 프레스티지 회원의 자리가 비어 있어요</span>'
-    : prestigeMembers.map(u => `<span class="prestige-member-chip">${nickHTML(u, 'text-[11px]')}</span>`).join('');
+  // 넓은 화면: 왼쪽 사이드 카드 / 좁은 화면: 본문 위 띠 배너
+  const empty = '<span class="text-[11px] text-amber-100/70">아직 아무도 없어요 · 첫 번째 프레스티지 회원의 자리가 비어 있어요</span>';
+  const chips = prestigeMembers.map(u => `<span class="prestige-member-chip">${nickHTML(u, 'text-[11px]')}</span>`).join('');
+  [['prestigeMemberBanner', 'prestigeMemberList', 'prestigeMemberCount'], ['prestigeSideCard', 'prestigeSideList', 'prestigeSideCount']].forEach(([w, l, c]) => {
+    const wrap = document.getElementById(w), list = document.getElementById(l), count = document.getElementById(c);
+    if (!wrap || !list) return;
+    wrap.classList.remove('hidden');
+    if (count) count.textContent = `${prestigeMembers.length}명`;
+    list.innerHTML = prestigeMembers.length === 0 ? empty : chips;
+  });
 }
 // 로그인 안 한 사람도 배너는 볼 수 있게 (구경도 구매욕구!)
 setTimeout(loadPrestigeMembers, 3000);

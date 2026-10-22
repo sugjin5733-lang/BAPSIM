@@ -32,11 +32,19 @@ body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 
 
 .nb-none { background: transparent; padding: 0; }
 .nb-admin {
-  background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 50%, #991b1b 100%);
-  color: #ffffff !important; border: 2px solid #facc15;
-  box-shadow: 0 0 16px rgba(239, 68, 68, 0.9), inset 0 0 8px #fde047;
-  animation: adminPulseGlow 1.8s infinite alternate ease-in-out;
-  padding: 2px 9px; border-radius: 8px; font-weight: 900; letter-spacing: -0.02em;
+  /* 🛡️ GM: 검은 운영자 명판 + 빨간 GM 태그 + 얇은 금테 (움직임 없음) */
+  background: linear-gradient(180deg, #1f1f23 0%, #0b0b0d 100%);
+  color: #ffffff !important;
+  border: 1px solid #d4a72c;
+  box-shadow: inset 0 0 0 1px #000, 0 1px 3px rgba(0,0,0,.35);
+  padding: 1px 8px 1px 3px; border-radius: 5px; font-weight: 900; letter-spacing: 0;
+  animation: none !important;
+}
+.nb-admin::before {
+  content: 'GM'; display: inline-block; vertical-align: 1px;
+  margin-right: 6px; padding: 0 4px; border-radius: 3px;
+  background: #dc2626; color: #fff; font-size: .72em; font-weight: 900; letter-spacing: .06em; line-height: 1.5;
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,.35);
 }
 @keyframes adminPulseGlow {
   0% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.7), inset 0 0 4px #fde047; }
@@ -328,21 +336,7 @@ body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 
 .nb-buffet { background: transparent; color: #64748b !important; border: 1px solid #f97316; padding: 1px 6px; border-radius: 4px; font-weight: 600; }
 .nb-royal { background: transparent; color: #64748b !important; border: 1px solid #b91c1c; padding: 1px 6px; border-radius: 4px; font-weight: 600; }
 .nb-collector { background: transparent; color: #64748b !important; border: 1px solid #8b5cf6; padding: 1px 6px; border-radius: 4px; font-weight: 600; }
-.nb-season-1 {
-  background: linear-gradient(110deg, #a16207 0%, #fde047 35%, #fffbeb 50%, #fde047 65%, #a16207 100%); background-size: 250% 100%;
-  animation: shimmerSweep 2.2s linear infinite, infinityGlow 1.8s ease-in-out infinite alternate;
-  color: #422006 !important; border: 2px solid #fef08a; padding: 2px 9px; border-radius: 8px; font-weight: 900;
-}
-.nb-season-2 {
-  background: linear-gradient(110deg, #64748b 0%, #e2e8f0 35%, #ffffff 50%, #e2e8f0 65%, #64748b 100%); background-size: 250% 100%;
-  animation: shimmerSweep 2.5s linear infinite;
-  color: #0f172a !important; border: 1.5px solid #f8fafc; padding: 2px 9px; border-radius: 8px; font-weight: 900;
-}
-.nb-season-3 {
-  background: linear-gradient(110deg, #7c2d12 0%, #fdba74 35%, #ffedd5 50%, #fdba74 65%, #7c2d12 100%); background-size: 250% 100%;
-  animation: shimmerSweep 2.8s linear infinite;
-  color: #431407 !important; border: 1.5px solid #fed7aa; padding: 2px 9px; border-radius: 8px; font-weight: 900;
-}
+/* 시즌 1·2·3위 배지는 폐지 (시즌 배지 도감으로 대체 예정) */
 @keyframes shimmerSweep { 0% { background-position: 100% 0; } 100% { background-position: -150% 0; } }
 
 /* 전광판 */

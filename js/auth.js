@@ -599,6 +599,7 @@ function attachUserPointListener() {
     myBudgetAt = typeof val.budgetAt === 'number' ? val.budgetAt : null;
     loadGameStateFromUser(val);
     restoreSetCosmetics(); // 놓친 세트 배지/칭호 복구 → 아래 pending 검사에서 자동 저장
+    if (typeof purgeBadges === 'function') purgeBadges(); // 폐지 배지·넘어간 대천사의 날개 정리
 
     cloudReady = true;
     // 아직 서버에 안 올라간 내 변경(방금 얻은 포인트 등)이 있으면 이어서 저장
