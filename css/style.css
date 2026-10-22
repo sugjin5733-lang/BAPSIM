@@ -530,14 +530,18 @@ body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 
   filter: drop-shadow(0 0 3px rgba(255,255,255,.95)) drop-shadow(0 0 5px rgba(253,230,138,.8));
 }
 .nb-angel::before { right: calc(100% + 1px); transform-origin: 100% 50%; animation: angelWingL 1.8s ease-in-out infinite; }
-.nb-angel::after  { left: calc(100% + 1px);  transform-origin: 0% 50%;   animation: angelWingR 1.8s ease-in-out infinite; }
+.nb-angel::after  { left: calc(100% + 1px);  transform-origin: 0% 50%;   animation: angelWingR 1.8s ease-in-out infinite;
+  background:
+    radial-gradient(ellipse 95% 30% at 0% 14%, #ffffff 60%, #f3d27a 64%, transparent 67%),
+    radial-gradient(ellipse 100% 30% at 0% 50%, #ffffff 60%, #f3d27a 64%, transparent 67%),
+    radial-gradient(ellipse 80% 28% at 0% 86%, #f0f9ff 60%, #a5d8f3 64%, transparent 67%); }
 @keyframes angelWingL {
   0%, 100% { transform: translateY(-50%) rotate(0deg) scaleY(1); }
   50%      { transform: translateY(-56%) rotate(-10deg) scaleY(1.12); }
 }
 @keyframes angelWingR {
-  0%, 100% { transform: translateY(-50%) scaleX(-1) rotate(0deg) scaleY(1); }
-  50%      { transform: translateY(-56%) scaleX(-1) rotate(-10deg) scaleY(1.12); }
+  0%, 100% { transform: translateY(-50%) rotate(0deg) scaleY(1); }
+  50%      { transform: translateY(-56%) rotate(10deg) scaleY(1.12); }
 }
 @keyframes angelSweep { from { background-position: 160% 0, 0 0, 0 0, 0 0; } to { background-position: -160% 0, 0 0, 0 0, 0 0; } }
 @keyframes angelSpin { to { --angel-a: 360deg; } }
