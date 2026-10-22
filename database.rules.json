@@ -70,6 +70,13 @@
       ".read": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true)",
       ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true)"
     },
+    "tamper_reports": {
+      ".read": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true)",
+      "$id": {
+        ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || (auth != null && !data.exists() && newData.child('uid').val() === auth.uid)",
+        ".validate": "!newData.exists() || (newData.child('what').isString() && newData.child('what').val().length <= 40 && newData.child('ts').val() === now)"
+      }
+    },
     "banned_users": {
       ".read": "auth != null",
       ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true)"

@@ -1,6 +1,55 @@
 // 밥심 - 설정, 공통 헬퍼, 전역 상태
 
 // ==========================================
+// 🔒 난수·시계 잠금 (확률 조작 방지)
+//  - 게임의 모든 확률은 Math.random 을 쓰는데, 예전엔 콘솔에 한 줄만 치면
+//    "항상 0" 으로 바꿔서 강화·점프·대박 손님·더블업·주사위를 전부 이길 수 있었음 (BMO 사건)
+//  - 이제 Math.random 은 브라우저 암호 난수(crypto)로 고정되고 바꿀 수 없음
+//  - 바꾸려고 시도하면 무시하고, 누가 언제 시도했는지 관리자에게 기록됨
+// ==========================================
+const tamperAttempts = [];
+(function lockRandomAndClock() {
+  const getRand = crypto.getRandomValues.bind(crypto);
+  const buf = new Uint32Array(128);
+  let idx = buf.length;
+  function secureRandom() {
+    if (idx >= buf.length) { getRand(buf); idx = 0; }
+    return buf[idx++] / 4294967296;
+  }
+  const realNow = Date.now.bind(Date);
+  const guard = (obj, key, impl, label) => {
+    try {
+      Object.defineProperty(obj, key, {
+        configurable: false, enumerable: false,
+        get() { return impl; },
+        set() { tamperAttempts.push({ what: label, at: realNow() }); if (typeof reportTamper === 'function') reportTamper(label); }
+      });
+    } catch (e) { /* 이미 잠겨 있으면 그대로 */ }
+  };
+  guard(Math, 'random', secureRandom, 'Math.random');
+  guard(Date, 'now', realNow, 'Date.now');
+  guard(crypto, 'getRandomValues', crypto.getRandomValues.bind(crypto), 'crypto.getRandomValues');
+  try { Object.freeze(Math); } catch (e) {} // Math.floor 등 다른 함수도 못 바꾸게
+})();
+// 조작 시도 → tamper_reports 에 기록 (관리자만 읽음). 같은 종류는 1분에 한 번만
+let lastTamperReport = {};
+function reportTamper(what) {
+  try {
+    const now = Date.now();
+    if (now - (lastTamperReport[what] || 0) < 60000) return;
+    lastTamperReport[what] = now;
+    if (typeof db === 'undefined' || typeof authUser === 'undefined' || !authUser) return;
+    db.ref('tamper_reports').push({
+      uid: authUser.uid,
+      nickname: (typeof currentUser !== 'undefined' && currentUser.nickname) || '?',
+      what: String(what).slice(0, 40),
+      ua: String(navigator.userAgent || '').slice(0, 120),
+      ts: firebase.database.ServerValue.TIMESTAMP
+    }).catch(() => {});
+  } catch (e) {}
+}
+
+// ==========================================
 // Core Configuration & Database
 // ==========================================
 const GOOGLE_SHEET_API_URL = "https://script.google.com/macros/s/AKfycbxzRrg_ZZrdJGs6ps4ZRdgaNv3XG8g_CQT0376hbhV_oJt0AYe40Smkcl_0gIfwJM6WIQ/exec";

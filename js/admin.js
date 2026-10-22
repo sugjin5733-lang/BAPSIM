@@ -526,6 +526,56 @@ async function takeDailySnapshot(users) {
   await ref.set(snap);
 }
 
+// ==========================================
+// 🎲 운 조작 검사: 포인트 내역으로 "이만큼 운이 좋을 확률"을 계산
+//  - 대박 점프(5%), 대박 손님(5%), 더블업, 주사위·동전 적중률
+//  - 회원에게 최대한 유리하게 계산 (더블업·주사위·동전은 모두 50%로, 강화는 축복+도박 가정)
+//  - 우연일 확률이 100만 분의 1 아래면 🚨 조작 의심
+// ==========================================
+function luckTail(ps, k) {
+  if (k <= 0) return 1;
+  const dp = new Float64Array(ps.length + 2); dp[0] = 1;
+  for (const p of ps) { for (let j = dp.length - 1; j > 0; j--) dp[j] = dp[j] * (1 - p) + dp[j - 1] * p; dp[0] *= (1 - p); }
+  let s = 0; for (let j = k; j < dp.length; j++) s += dp[j];
+  return Math.min(1, s);
+}
+function luckReport(logsObj) {
+  const rows = Object.values(logsObj || {}).filter(r => r && typeof r.ts === 'number' && typeof r.r === 'string').sort((a, b) => a.ts - b.ts);
+  const t = {};
+  const sales = rows.filter(r => /밥 판매/.test(r.r)), lucky = sales.filter(r => /대박 손님/.test(r.r)).length;
+  t['대박 손님'] = { n: sales.length, k: lucky, p: luckTail(sales.map(() => 0.05), lucky) };
+  const du = rows.filter(r => /더블업/.test(r.r)), duW = du.filter(r => /성공/.test(r.r)).length;
+  t['더블업'] = { n: du.length, k: duW, p: luckTail(du.map(() => 0.5), duW) };
+  const dB = rows.filter(r => /주사위 베팅/.test(r.r)).length, dH = rows.filter(r => /주사위 적중/.test(r.r)).length;
+  t['주사위'] = { n: dB, k: dH, p: luckTail(Array(dB).fill(0.5), dH) };
+  const cB = rows.filter(r => /동전던지기 베팅/.test(r.r)).length, cH = rows.filter(r => /동전던지기 적중/.test(r.r)).length;
+  t['동전'] = { n: cB, k: cH, p: luckTail(Array(cB).fill(0.5), cH) };
+  // 대박 점프: 다음 강화 시도의 시작 단계로 결과 추정 (+5강 이상 성공 중 +2가 된 비율)
+  const seq = rows.filter(r => /강화 시도 \+\d+→/.test(r.r));
+  const jp = []; let jumps = 0;
+  for (let i = 0; i < seq.length - 1; i++) {
+    const a = seq[i], b = seq[i + 1];
+    if (b.ts - a.ts > 3600e3) continue;
+    const L = +a.r.match(/\+(\d+)→/)[1], N = +b.r.match(/\+(\d+)→/)[1];
+    if (L >= 5 && (N === L + 1 || N === L + 2)) { jp.push(JUMP_CHANCE); if (N === L + 2) jumps++; }
+  }
+  t['대박 점프'] = { n: jp.length, k: jumps, p: luckTail(jp, jumps) };
+  const sec = {};
+  rows.filter(r => /베팅/.test(r.r)).forEach(r => { const k = Math.floor(r.ts / 1000); sec[k] = (sec[k] || 0) + 1; });
+  const maxSec = Math.max(0, ...Object.values(sec));
+  const minP = Math.min(...Object.values(t).map(x => x.p));
+  const worst = Object.entries(t).sort((a, b) => a[1].p - b[1].p)[0];
+  return { minP, maxSec, worst, tests: t };
+}
+function oneInText(p) {
+  if (p <= 0) return '사실상 0';
+  const n = 1 / p;
+  if (n >= 1e12) return `${(n / 1e12).toFixed(0)}조 분의 1`;
+  if (n >= 1e8) return `${(n / 1e8).toFixed(0)}억 분의 1`;
+  if (n >= 1e4) return `${(n / 1e4).toFixed(0)}만 분의 1`;
+  return `${Math.round(n).toLocaleString()} 분의 1`;
+}
+
 async function renderAnomalyPanel() {
   const box = document.getElementById('adminAnomalyList');
   if (!box) return;
@@ -533,6 +583,13 @@ async function renderAnomalyPanel() {
   try {
     const users = (await db.ref('user_points').once('value')).val() || {};
     await takeDailySnapshot(users);
+    // 운 조작 검사용 포인트 내역 + 난수 조작 시도 기록
+    let allLogs = {}, tamper = {};
+    try { allLogs = (await db.ref('point_logs').once('value')).val() || {}; } catch (e) {}
+    try {
+      const tr = (await db.ref('tamper_reports').limitToLast(300).once('value')).val() || {};
+      Object.values(tr).forEach(x => { if (!x) return; const k = x.nickname || '?'; (tamper[k] = tamper[k] || []).push(x); });
+    } catch (e) {}
     // 오늘 이전의 가장 최근 스냅샷과 비교
     const snaps = (await db.ref('admin_snapshots').orderByKey().limitToLast(8).once('value')).val() || {};
     const prevKey = Object.keys(snaps).filter(k => k < todayKey()).sort().pop();
@@ -555,6 +612,12 @@ async function renderAnomalyPanel() {
       if ((u.enhanceLevel || 0) >= ANOMALY.enhance) { flags.push(`🍚 +${u.enhanceLevel}강`); score += 1; }
       if (p && (u.enhanceLevel || 0) >= 15 && p.enhanceLevel <= 5) { flags.push(`⚡ 하루 만에 +${p.enhanceLevel}→+${u.enhanceLevel}강`); score += 2; }
       if (typeof u.budget === 'number' && u.budget < 3000 && (u.points || 0) > 20000) { flags.push('⏳ 지금 포인트 한도까지 쓰는 중'); score += 1; }
+      const luck = allLogs[u.nickname] ? luckReport(allLogs[u.nickname]) : null;
+      if (luck && luck.minP < 1e-6) { const [name, x] = luck.worst; flags.push(`🚨 확률 조작 의심: ${name} ${x.k}/${x.n} (우연일 확률 ${oneInText(x.p)})`); score += 20; }
+      else if (luck && luck.minP < 1e-3) { const [name, x] = luck.worst; flags.push(`🎲 운이 너무 좋음: ${name} ${x.k}/${x.n} (${oneInText(x.p)})`); score += 4; }
+      if (luck && luck.maxSec >= 6) { flags.push(`🖐️ 1초에 베팅 ${luck.maxSec}번 (매크로 의심)`); score += 5; }
+      const tp = tamper[u.nickname];
+      if (tp && tp.length) { flags.push(`🔒 난수/시계 조작 시도 ${tp.length}회 (${[...new Set(tp.map(x => x.what))].join(', ')})`); score += 30; }
       return { u, flags, score, gain };
     }).filter(r => r.score > 0).sort((a, b) => b.score - a.score);
 

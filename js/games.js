@@ -329,13 +329,17 @@ function spinSlotMachine(times = 1) {
   }
 }
 
+let coinBusy = false, diceBusy = false;
 function playCoinFlip(userChoice) {
+  if (coinBusy) return; // 결과가 나오기 전에는 다음 베팅 불가 (매크로 연타 방지)
   const betInput = parseInt(document.getElementById('coinBetInput').value, 10);
   const bet = Math.min(Math.max(betInput || 50, 50), 10000);
 
   if (userPoints < bet) return alert(`❌ 베팅할 포인트가 부족합니다! (필요: ${bet.toLocaleString()}P)`);
   addPoints(-bet, '동전던지기 베팅');
   updatePointsUI();
+  coinBusy = true;
+  setTimeout(() => { coinBusy = false; }, 450);
 
   const coinEl = document.getElementById('coinDisplay');
   const resultEl = document.getElementById('coinResultText');
@@ -362,6 +366,7 @@ function playCoinFlip(userChoice) {
 
 const DICE_ICONS = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
 function playDiceBet(userChoice) {
+  if (diceBusy) return; // 결과가 나오기 전에는 다음 베팅 불가 (매크로 연타 방지)
   const rawBet = parseInt(document.getElementById('diceBetInput').value, 10) || 50;
   const isExactNumberBet = ['1', '2', '3', '4', '5', '6'].includes(userChoice);
 
@@ -390,6 +395,8 @@ function playDiceBet(userChoice) {
 
   addPoints(-bet, '주사위 베팅');
   updatePointsUI();
+  diceBusy = true;
+  setTimeout(() => { diceBusy = false; }, 450);
 
   if (isExactNumberBet) {
     diceExactBetTimestamps.push(Date.now());
