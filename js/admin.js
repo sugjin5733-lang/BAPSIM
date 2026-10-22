@@ -570,6 +570,7 @@ function luckReport(logsObj) {
 function oneInText(p) {
   if (p <= 0) return '사실상 0';
   const n = 1 / p;
+  if (n >= 1e16) return '1경 분의 1 미만 (사실상 불가능)';
   if (n >= 1e12) return `${(n / 1e12).toFixed(0)}조 분의 1`;
   if (n >= 1e8) return `${(n / 1e8).toFixed(0)}억 분의 1`;
   if (n >= 1e4) return `${(n / 1e4).toFixed(0)}만 분의 1`;
