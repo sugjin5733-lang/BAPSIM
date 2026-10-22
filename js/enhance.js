@@ -64,7 +64,7 @@ const ENHANCE_PROBABILITIES = [
   { level: 18, success: 9.9,   keep: 79.9, break: 10.7, reward: 35500 },
   { level: 19, success: 4.7,   keep: 86.2, break: 10.6, reward: 58000 },
   { level: 20, success: 3.3,   keep: 90.3, break: 9.9,  reward: 94000 },
-  // 초월 구간: 방지권 없이 축복·도박만. 안전 구간 20/23/26/28
+  // 초월 구간: 방지권 없이 축복·도박만. 여기서 타면 안전 구간 없이 +0강으로 리셋
   // 단계별 최적 플레이 기대 비용(0강부터): +25 약 56만 · +28 약 159만 · +30 약 270만P → 판매가는 그 약 90%
   { level: 21, success: 3.2,   keep: 94.3, break: 2.5,  reward: 126000 },
   { level: 22, success: 3.0,   keep: 94.0, break: 3.0,  reward: 183000 },
@@ -80,9 +80,10 @@ const ENHANCE_PROBABILITIES = [
 
 // 안전 구간: 한 번 도달한 5/10/15강 아래로는 떨어지지 않음
 // (예전엔 +19에서 타면 0강부터 다시 → +20 도달 기대 비용이 약 400만P라 사실상 불가능했음)
+// 초월 구간(+20에서 시도하는 강화부터)은 타면 무조건 +0강으로
 function enhanceCheckpoint(level) {
-  return level >= 28 ? 28 : level >= 26 ? 26 : level >= 23 ? 23 : level >= 20 ? 20
-    : level >= 15 ? 15 : level >= 10 ? 10 : level >= 5 ? 5 : 0;
+  if (level >= 20) return 0;
+  return level >= 15 ? 15 : level >= 10 ? 10 : level >= 5 ? 5 : 0;
 }
 
 function getEnhanceCost(lvl) {
@@ -312,7 +313,7 @@ function buyEnhanceItem(kind) {
 }
 
 function toggleEnhanceItem(kind) {
-  if (kind === 'protect' && currentEnhanceLevel >= NO_PROTECT_FROM) return alert(`🚫 +${NO_PROTECT_FROM + 1}강부터는 파괴 방지권을 쓸 수 없어요! (안전 구간 20·23·26·28강)`);
+  if (kind === 'protect' && currentEnhanceLevel >= NO_PROTECT_FROM) return alert(`🚫 +${NO_PROTECT_FROM + 1}강부터는 파괴 방지권을 쓸 수 없어요! (+20강부터 타면 +0강으로 리셋)`);
   if (myItems[kind] <= 0) return buyEnhanceItem(kind);
   if (autoUse[kind]) { autoUse[kind] = false; saveAutoUse(); } // 직접 누르면 자동 적용은 해제
   useItem[kind] = !useItem[kind];
@@ -494,7 +495,7 @@ function runEnhancement() {
     outcome = 'break';
     currentEnhanceLevel = enhanceCheckpoint(fromLevel);
     const near = roll - odds.success < 2 ? ' 😱 정말 아깝다!' : '';
-    msg = `<span class="text-rose-500 font-black text-xs">💥 밥이 타버렸습니다!${near} ${currentEnhanceLevel > 0 ? `(안전 구간 +${currentEnhanceLevel}강으로 내려감)` : '(+0 따스한 햇쌀밥으로 리셋)'}</span>`;
+    msg = `<span class="text-rose-500 font-black text-xs">💥 밥이 타버렸습니다!${near} ${currentEnhanceLevel > 0 ? `(안전 구간 +${currentEnhanceLevel}강으로 내려감)` : fromLevel >= 20 ? `(+${fromLevel}강 초월 밥이 재가 되어 +0강으로...)` : '(+0 따스한 햇쌀밥으로 리셋)'}</span>`;
   }
   syncEnhanceToCloud();
   if (outcome === 'success') recordSeasonProgress(currentEnhanceLevel);
