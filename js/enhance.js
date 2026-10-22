@@ -39,6 +39,17 @@ const BOWL_EVOLUTION = [
 ];
 const ENHANCE_MAX = 30;
 const NO_PROTECT_FROM = 20; // +20 → +21 시도부터 파괴 방지권 사용 불가
+// 🌌 초월 강화 체크: +20강 이상에서 강화하려면 직접 체크해야 함 (실수 방지). 20강 아래로 내려가거나 팔면 자동 해제
+let transcendOn = false;
+function setTranscend(on) { transcendOn = !!on; updateEnhanceUI(); }
+function renderTranscend() {
+  const wrap = document.getElementById('transcendWrap');
+  const cb = document.getElementById('transcendCheck');
+  if (currentEnhanceLevel < 20 || currentEnhanceLevel >= ENHANCE_MAX) transcendOn = false;
+  if (wrap) wrap.classList.toggle('hidden', !(currentEnhanceLevel >= 20 && currentEnhanceLevel < ENHANCE_MAX));
+  if (cb) cb.checked = transcendOn;
+}
+function transcendBlocked() { return currentEnhanceLevel >= 20 && currentEnhanceLevel < ENHANCE_MAX && !transcendOn; }
 
 // 판매가 기준: 축복서·방지권·도박 모드를 단계마다 가장 잘 골랐을 때의 '평균 강화 비용'
 // 기대 회수율(시세 평균 + 대박 손님 포함): +1~4강 약 92% · +5~9강 약 101% · +10~14강 약 103% · +15~20강 약 105%
@@ -153,6 +164,7 @@ function updateEnhanceUI() {
   renderRiceMarket();
   renderEnhanceRecommend();
 
+  renderTranscend();
   if (currentEnhanceLevel >= ENHANCE_MAX) {
     if (costText) costText.textContent = "최대 강화 달성";
     if (probS) probS.textContent = "-";
@@ -174,6 +186,7 @@ function updateEnhanceUI() {
       actionBtn.disabled = false;
       const extra = autoBuyExtraCost();
       actionBtn.textContent = `${gambleMode ? '🎲 ' : ''}+${currentEnhanceLevel + 1} 강화 시도 (${nextCost}P${extra ? ` + 🛒${extra}P` : ''})`;
+      if (transcendBlocked()) { actionBtn.disabled = true; actionBtn.textContent = '🔒 초월 강화 체크 후 가능'; }
     }
   }
 
@@ -446,6 +459,11 @@ let enhanceRevealing = false;
 function runEnhancement() {
   if (enhanceRevealing) return;
   if (currentEnhanceLevel >= ENHANCE_MAX) return alert(`이미 ${ENHANCE_MAX}강 최고 단계에 도달했습니다! 판매하여 정산하세요.`);
+  if (transcendBlocked()) {
+    const al = document.getElementById('enhanceStatusAlert');
+    if (al) al.innerHTML = '<span class="text-fuchsia-300 font-black text-xs">🔒 +20강에서 더 강화하려면 위의 [🌌 초월 강화 도전]을 체크하세요. (팔려면 [밥 판매 및 정산])</span>';
+    return;
+  }
 
   const now = Date.now();
   enhanceActionTimestamps = enhanceActionTimestamps.filter(t => now - t < 60000);
