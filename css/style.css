@@ -512,21 +512,21 @@ body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 
   color: #fffbeb !important;
   border: 2px solid transparent;
   background:
-    linear-gradient(105deg, transparent 35%, rgba(255,255,255,.9) 50%, transparent 65%) padding-box,
+    linear-gradient(105deg, transparent 40%, rgba(255,255,255,.5) 50%, transparent 60%) padding-box,
     radial-gradient(ellipse 90% 160% at 50% -20%, #fff7d6 0%, #fbbf24 30%, #6d28d9 70%, #1e1b4b 100%) padding-box,
     conic-gradient(from var(--angel-a), #ffffff, #fde68a, #f59e0b, #ffffff, #bae6fd, #ffffff, #fde68a, #f59e0b, #ffffff, #bae6fd, #ffffff) border-box;
   background-size: 260% 100%, 100% 100%, 100% 100%;
   background-repeat: no-repeat;
   animation: angelSweep 2.8s linear infinite, angelSpin 3.5s linear infinite, angelGlow 2.2s ease-in-out infinite alternate;
-  text-shadow: 0 0 3px #fff, 0 0 10px #fde68a, 0 1px 1px #78350f;
+  text-shadow: 0 1px 2px #3b0764, 0 0 8px rgba(253,230,138,.9);
 }
 .nb-angel::before, .nb-angel::after {
   content: ''; position: absolute; top: 50%; width: 1.7em; height: 1.25em; pointer-events: none;
   background:
-    radial-gradient(ellipse 100% 42% at 100% 18%, #ffffff 62%, transparent 64%),
-    radial-gradient(ellipse 88% 38% at 100% 48%, #e0f2fe 62%, transparent 64%),
-    radial-gradient(ellipse 70% 34% at 100% 78%, #fde68a 62%, transparent 64%);
-  filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 6px rgba(253,230,138,.95)) drop-shadow(0 0 10px rgba(186,230,253,.8));
+    radial-gradient(ellipse 100% 42% at 100% 18%, #fffdf5 58%, #fcd34d 61%, transparent 64%),
+    radial-gradient(ellipse 88% 38% at 100% 48%, #e0f2fe 58%, #fbbf24 61%, transparent 64%),
+    radial-gradient(ellipse 70% 34% at 100% 78%, #fde68a 58%, #d97706 61%, transparent 64%);
+  filter: drop-shadow(0 0 .6px #92400e) drop-shadow(0 0 4px rgba(253,230,138,.9)) drop-shadow(0 0 8px rgba(125,211,252,.7));
 }
 .nb-angel::before { right: calc(100% - .25em); transform-origin: 100% 50%; animation: angelWingL 1.5s ease-in-out infinite; }
 .nb-angel::after  { left: calc(100% - .25em);  transform-origin: 0% 50%;   animation: angelWingR 1.5s ease-in-out infinite; }
