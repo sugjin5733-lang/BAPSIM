@@ -501,46 +501,48 @@ body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
 /* 😇 대천사의 날개 · 세라핌 (누적 기부 10,000,000P)
-   - 회전하는 백금·금·하늘빛 고리 테두리
-   - 새벽 하늘 그라데이션 판 위로 성광이 훑고 지나감
-   - 세 겹 깃털 날개가 양쪽에서 천천히 날갯짓, 위로 후광 */
+   - 흰 진주빛 판 위로 금빛·하늘빛 성광이 흐름 (예전 흰 천사 배지 느낌)
+   - 금테가 천천히 도는 테두리 + 위로 번지는 후광
+   - 양쪽에 세 쌍(6장)의 깃털 날개 → 세라핌. 날개는 글자 밖에만 있어서 이름을 가리지 않음 */
 @property --angel-a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
 .nb-angel {
   position: relative;
-  margin-inline: 1.25em;
-  padding: 3px 18px; border-radius: 999px; font-weight: 900; letter-spacing: .02em;
-  color: #fffbeb !important;
-  border: 2px solid transparent;
+  margin-inline: 1.9em;
+  padding: 2px 14px; border-radius: 999px; font-weight: 900; white-space: nowrap;
+  color: #0c4a6e !important;
+  border: 1.5px solid transparent;
   background:
-    linear-gradient(105deg, transparent 40%, rgba(255,255,255,.5) 50%, transparent 60%) padding-box,
-    radial-gradient(ellipse 90% 160% at 50% -20%, #fff7d6 0%, #fbbf24 30%, #6d28d9 70%, #1e1b4b 100%) padding-box,
-    conic-gradient(from var(--angel-a), #ffffff, #fde68a, #f59e0b, #ffffff, #bae6fd, #ffffff, #fde68a, #f59e0b, #ffffff, #bae6fd, #ffffff) border-box;
-  background-size: 260% 100%, 100% 100%, 100% 100%;
+    linear-gradient(110deg, transparent 38%, rgba(253,230,138,.55) 50%, transparent 62%) padding-box,
+    radial-gradient(ellipse 70% 130% at 50% -25%, #ffffff 0%, #ffffff 35%, transparent 70%) padding-box,
+    linear-gradient(110deg, #e0f2fe 0%, #ffffff 30%, #fff7e0 50%, #ffffff 70%, #e0f2fe 100%) padding-box,
+    conic-gradient(from var(--angel-a), #fde68a, #ffffff, #f5c542, #ffffff, #bae6fd, #ffffff, #fde68a) border-box;
+  background-size: 260% 100%, 100% 100%, 100% 100%, 100% 100%;
   background-repeat: no-repeat;
-  animation: angelSweep 2.8s linear infinite, angelSpin 3.5s linear infinite, angelGlow 2.2s ease-in-out infinite alternate;
-  text-shadow: 0 1px 2px #3b0764, 0 0 8px rgba(253,230,138,.9);
+  animation: angelSweep 3.2s linear infinite, angelSpin 5s linear infinite, angelGlow 2.4s ease-in-out infinite alternate;
+  text-shadow: 0 0 6px #ffffff, 0 0 2px #ffffff;
 }
 .nb-angel::before, .nb-angel::after {
-  content: ''; position: absolute; top: 50%; width: 1.7em; height: 1.25em; pointer-events: none;
+  content: ''; position: absolute; top: 50%; width: 1.85em; height: 1.6em; pointer-events: none;
   background:
-    radial-gradient(ellipse 100% 42% at 100% 18%, #fffdf5 58%, #fcd34d 61%, transparent 64%),
-    radial-gradient(ellipse 88% 38% at 100% 48%, #e0f2fe 58%, #fbbf24 61%, transparent 64%),
-    radial-gradient(ellipse 70% 34% at 100% 78%, #fde68a 58%, #d97706 61%, transparent 64%);
-  filter: drop-shadow(0 0 .6px #92400e) drop-shadow(0 0 4px rgba(253,230,138,.9)) drop-shadow(0 0 8px rgba(125,211,252,.7));
+    radial-gradient(ellipse 95% 30% at 100% 14%, #ffffff 60%, #f3d27a 64%, transparent 67%),
+    radial-gradient(ellipse 100% 30% at 100% 50%, #ffffff 60%, #f3d27a 64%, transparent 67%),
+    radial-gradient(ellipse 80% 28% at 100% 86%, #f0f9ff 60%, #a5d8f3 64%, transparent 67%);
+  filter: drop-shadow(0 0 3px rgba(255,255,255,.95)) drop-shadow(0 0 5px rgba(253,230,138,.8));
 }
-.nb-angel::before { right: calc(100% - .25em); transform-origin: 100% 50%; animation: angelWingL 1.5s ease-in-out infinite; }
-.nb-angel::after  { left: calc(100% - .25em);  transform-origin: 0% 50%;   animation: angelWingR 1.5s ease-in-out infinite; }
+.nb-angel::before { right: calc(100% + 1px); transform-origin: 100% 50%; animation: angelWingL 1.8s ease-in-out infinite; }
+.nb-angel::after  { left: calc(100% + 1px);  transform-origin: 0% 50%;   animation: angelWingR 1.8s ease-in-out infinite; }
 @keyframes angelWingL {
-  0%, 100% { transform: translateY(-50%) rotate(4deg); }
-  50%      { transform: translateY(-64%) rotate(-16deg); }
+  0%, 100% { transform: translateY(-50%) rotate(0deg) scaleY(1); }
+  50%      { transform: translateY(-56%) rotate(-10deg) scaleY(1.12); }
 }
 @keyframes angelWingR {
-  0%, 100% { transform: translateY(-50%) scaleX(-1) rotate(4deg); }
-  50%      { transform: translateY(-64%) scaleX(-1) rotate(-16deg); }
+  0%, 100% { transform: translateY(-50%) scaleX(-1) rotate(0deg) scaleY(1); }
+  50%      { transform: translateY(-56%) scaleX(-1) rotate(-10deg) scaleY(1.12); }
 }
-@keyframes angelSweep { from { background-position: 160% 0, 0 0, 0 0; } to { background-position: -160% 0, 0 0, 0 0; } }
+@keyframes angelSweep { from { background-position: 160% 0, 0 0, 0 0, 0 0; } to { background-position: -160% 0, 0 0, 0 0, 0 0; } }
 @keyframes angelSpin { to { --angel-a: 360deg; } }
 @keyframes angelGlow {
-  from { box-shadow: 0 0 6px rgba(253,230,138,.7), 0 0 16px rgba(186,230,253,.45), 0 -8px 14px -6px rgba(255,255,255,.6); }
-  to   { box-shadow: 0 0 12px rgba(253,230,138,1), 0 0 30px rgba(186,230,253,.85), 0 -14px 22px -6px rgba(255,251,235,.95); }
+  from { box-shadow: 0 0 5px rgba(253,230,138,.6), 0 0 12px rgba(186,230,253,.45), 0 -7px 12px -5px rgba(255,251,235,.8); }
+  to   { box-shadow: 0 0 9px rgba(253,230,138,.95), 0 0 22px rgba(186,230,253,.75), 0 -12px 20px -5px rgba(255,251,235,1); }
 }
+

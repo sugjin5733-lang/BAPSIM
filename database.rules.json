@@ -120,7 +120,7 @@
       "$week": {
         "$nick": {
           ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || ((auth != null && root.child('user_uids').child(auth.uid).exists() && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('status').val() === 'approved' && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('uid').val() === auth.uid) && $nick === root.child('user_uids').child(auth.uid).val() && (!data.exists() || newData.child('maxLevel').val() > data.child('maxLevel').val()))",
-          ".validate": "newData.child('uid').val() === auth.uid && newData.child('nickname').val() === $nick && newData.child('maxLevel').isNumber() && newData.child('maxLevel').val() >= 1 && newData.child('maxLevel').val() <= 20 && newData.child('maxLevel').val() <= root.child('user_points').child($nick).child('enhanceLevel').val() && newData.child('at').val() === now"
+          ".validate": "newData.child('uid').val() === auth.uid && newData.child('nickname').val() === $nick && newData.child('maxLevel').isNumber() && newData.child('maxLevel').val() >= 1 && newData.child('maxLevel').val() <= 30 && newData.child('maxLevel').val() <= root.child('user_points').child($nick).child('enhanceLevel').val() && newData.child('at').val() === now"
         }
       }
     },
@@ -225,7 +225,7 @@
           ".validate": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || (newData.val() === now && newData.parent().child('budget').isNumber() && newData.parent().child('budget').val() >= 0 && newData.parent().child('budget').val() <= 300000 && ((data.exists() && ((newData.parent().child('budget').val() <= data.parent().child('budget').val() + 0.02 * (now - data.val()) - (newData.parent().child('points').val() - data.parent().child('points').val())) || (newData.parent().child('boostSince').val() === data.parent().child('boostSince').val() && newData.parent().child('boostUsed').isNumber() && data.parent().child('boostUsed').isNumber() && newData.parent().child('budget').val() <= data.parent().child('budget').val() + 0.02 * (now - data.val()) - (newData.parent().child('points').val() - data.parent().child('points').val()) + 72000 * (newData.parent().child('boostUsed').val() - data.parent().child('boostUsed').val())) || (newData.parent().child('boostSince').val() === now && newData.parent().child('boostUsed').isNumber() && newData.parent().child('budget').val() <= data.parent().child('budget').val() + 0.02 * (now - data.val()) - (newData.parent().child('points').val() - data.parent().child('points').val()) + 72000 * newData.parent().child('boostUsed').val()))) || (!data.exists() && newData.parent().child('budget').val() <= 50000 && newData.parent().child('points').val() <= data.parent().child('points').val())))"
         },
         "enhanceLevel": {
-          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 20 && ((auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || !data.exists() || newData.val() <= data.val() + 2)"
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 30 && ((auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || !data.exists() || newData.val() <= data.val() + 2)"
         },
         "password": {
           ".validate": "false"
@@ -245,7 +245,7 @@
           ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 12 && (!data.exists() || newData.val() >= data.val() || newData.parent().child('boostSince').val() === now)"
         },
         "owed": {
-          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000000"
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000000"
         },
         "cards": {
           "$card": {

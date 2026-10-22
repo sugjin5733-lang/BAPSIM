@@ -24,8 +24,21 @@ const BOWL_EVOLUTION = [
   { level: 17, icon: "🌀", name: "우주 기운을 품은 오로라 밥" },
   { level: 18, icon: "✨", name: "차원을 초월한 다이아몬드 신선밥" },
   { level: 19, icon: "🪐", name: "무한 에너지를 머금은 성운의 밥" },
-  { level: 20, icon: "👑", name: "태초의 천상 만다라 불멸 영생밥" }
+  { level: 20, icon: "👑", name: "태초의 천상 만다라 불멸 영생밥" },
+  // ── 초월 구간 (+21~+30): 파괴 방지권 사용 불가 ──
+  { level: 21, icon: "🌙", name: "달빛을 머금은 월광 은하밥" },
+  { level: 22, icon: "☄️", name: "혜성의 꼬리를 두른 유성밥" },
+  { level: 23, icon: "🐉", name: "청룡이 지키는 용궁 진수성찬" },
+  { level: 24, icon: "🔥", name: "불사조 깃털로 지은 봉황밥" },
+  { level: 25, icon: "🔱", name: "해신의 삼지창 심해 진주밥" },
+  { level: 26, icon: "⚡", name: "천둥신의 뇌전 벼락밥" },
+  { level: 27, icon: "🌈", name: "칠색 무지개 다리 너머 신선밥" },
+  { level: 28, icon: "🌞", name: "태양신의 황금 일광밥" },
+  { level: 29, icon: "🌌", name: "은하를 통째로 담은 우주의 밥" },
+  { level: 30, icon: "💫", name: "만물의 근원, 창세의 밥" }
 ];
+const ENHANCE_MAX = 30;
+const NO_PROTECT_FROM = 20; // +20 → +21 시도부터 파괴 방지권 사용 불가
 
 // 판매가 기준: 축복서·방지권·도박 모드를 단계마다 가장 잘 골랐을 때의 '평균 강화 비용'
 // 기대 회수율(시세 평균 + 대박 손님 포함): +1~4강 약 92% · +5~9강 약 101% · +10~14강 약 103% · +15~20강 약 105%
@@ -50,13 +63,26 @@ const ENHANCE_PROBABILITIES = [
   { level: 17, success: 10.9,  keep: 76.8, break: 12.6, reward: 24500 },
   { level: 18, success: 9.9,   keep: 79.9, break: 10.7, reward: 35500 },
   { level: 19, success: 4.7,   keep: 86.2, break: 10.6, reward: 58000 },
-  { level: 20, success: 3.3,   keep: 90.3, break: 9.9,  reward: 94000 }
+  { level: 20, success: 3.3,   keep: 90.3, break: 9.9,  reward: 94000 },
+  // 초월 구간: 방지권 없이 축복·도박만. 안전 구간 20/23/26/28
+  // 단계별 최적 플레이 기대 비용(0강부터): +25 약 56만 · +28 약 159만 · +30 약 270만P → 판매가는 그 약 90%
+  { level: 21, success: 3.2,   keep: 94.3, break: 2.5,  reward: 126000 },
+  { level: 22, success: 3.0,   keep: 94.0, break: 3.0,  reward: 183000 },
+  { level: 23, success: 2.8,   keep: 93.7, break: 3.5,  reward: 305000 },
+  { level: 24, success: 2.6,   keep: 93.4, break: 4.0,  reward: 355000 },
+  { level: 25, success: 2.4,   keep: 93.1, break: 4.5,  reward: 500000 },
+  { level: 26, success: 2.2,   keep: 92.8, break: 5.0,  reward: 883000 },
+  { level: 27, success: 2.0,   keep: 92.5, break: 5.5,  reward: 1010000 },
+  { level: 28, success: 1.8,   keep: 92.2, break: 6.0,  reward: 1430000 },
+  { level: 29, success: 1.6,   keep: 91.9, break: 6.5,  reward: 1620000 },
+  { level: 30, success: 1.5,   keep: 91.5, break: 7.0,  reward: 2430000 }
 ];
 
 // 안전 구간: 한 번 도달한 5/10/15강 아래로는 떨어지지 않음
 // (예전엔 +19에서 타면 0강부터 다시 → +20 도달 기대 비용이 약 400만P라 사실상 불가능했음)
 function enhanceCheckpoint(level) {
-  return level >= 15 ? 15 : level >= 10 ? 10 : level >= 5 ? 5 : 0;
+  return level >= 28 ? 28 : level >= 26 ? 26 : level >= 23 ? 23 : level >= 20 ? 20
+    : level >= 15 ? 15 : level >= 10 ? 10 : level >= 5 ? 5 : 0;
 }
 
 function getEnhanceCost(lvl) {
@@ -65,7 +91,12 @@ function getEnhanceCost(lvl) {
   if (lvl < 15) return 250;
   if (lvl < 17) return 400;
   if (lvl < 19) return 800;
-  return 1000;
+  if (lvl < 20) return 1000;
+  if (lvl < 22) return 1500;
+  if (lvl < 24) return 2000;
+  if (lvl < 26) return 3000;
+  if (lvl < 28) return 4000;
+  return 5000;
 }
 
 let currentEnhanceLevel = 0; // 서버 값으로 채워짐
@@ -98,7 +129,7 @@ function updateEnhanceUI() {
   const probB = document.getElementById('probBreak');
   const actionBtn = document.getElementById('enhanceActionBtn');
 
-  const bowl = BOWL_EVOLUTION[Math.min(currentEnhanceLevel, 20)];
+  const bowl = BOWL_EVOLUTION[Math.min(currentEnhanceLevel, ENHANCE_MAX)];
   const bowlName = bowl ? bowl.name : "일반 밥";
   const bowlIcon = bowl ? bowl.icon : "🍚";
 
@@ -121,14 +152,14 @@ function updateEnhanceUI() {
   renderRiceMarket();
   renderEnhanceRecommend();
 
-  if (currentEnhanceLevel >= 20) {
+  if (currentEnhanceLevel >= ENHANCE_MAX) {
     if (costText) costText.textContent = "최대 강화 달성";
     if (probS) probS.textContent = "-";
     if (probK) probK.textContent = "-";
     if (probB) probB.textContent = "-";
     if (actionBtn) {
       actionBtn.disabled = true;
-      actionBtn.textContent = "20강 최고등급 달성!";
+      actionBtn.textContent = `${ENHANCE_MAX}강 최고등급 달성!`;
     }
   } else {
     applyAutoItems();
@@ -200,11 +231,12 @@ let gambleMode = false; // 🎲 도박 강화: 비용 2배 · 성공 확률 2배
 const JUMP_CHANCE = 0.05; // +5강 이상에서 성공하면 5% 확률로 한 번에 +2 (대박 점프)
 
 const ENHANCE_RECOMMEND = ['기본','기본','기본','기본','기본','기본','도박','도박','축복+도박','축복+도박',
-  '도박','기본','기본','축복','축복+방지권','축복+도박','축복','축복+방지권','축복+방지권','축복+방지권'];
+  '도박','기본','기본','축복','축복+방지권','축복+도박','축복','축복+방지권','축복+방지권','축복+방지권',
+  '축복+도박','축복','축복','축복+도박','축복','축복','축복+도박','축복','축복+도박','축복'];
 function renderEnhanceRecommend() {
   const el = document.getElementById('enhanceRecommend');
   if (!el) return;
-  if (currentEnhanceLevel >= 20) { el.textContent = ''; return; }
+  if (currentEnhanceLevel >= ENHANCE_MAX) { el.textContent = ''; return; }
   const rec = ENHANCE_RECOMMEND[currentEnhanceLevel];
   const mine = [useItem.bless && myItems.bless > 0 ? '축복' : '', !gambleMode && useItem.protect && myItems.protect > 0 ? '방지권' : '', gambleMode ? '도박' : ''].filter(Boolean).join('+') || '기본';
   el.innerHTML = `💡 +${currentEnhanceLevel}→+${currentEnhanceLevel + 1} 추천: <strong class="text-amber-300">${rec}</strong>${mine === rec ? ' <span class="text-emerald-400">✓ 지금 설정과 같아요</span>' : ` <span class="text-slate-500">(지금: ${mine})</span>`}`;
@@ -259,7 +291,7 @@ function effectiveOdds(level) {
     brk = 100 - success;
   }
   const keepBase = keep; // 방지권 적용 전 '유지' 구간 (그 뒤 구간은 원래 '파괴')
-  const protectedNow = !gambleMode && useItem.protect && (myItems.protect > 0 || autoWanted().protect) && brk > 0;
+  const protectedNow = level < NO_PROTECT_FROM && !gambleMode && useItem.protect && (myItems.protect > 0 || autoWanted().protect) && brk > 0;
   if (protectedNow) { keep += brk; brk = 0; }
   return { success, keep, keepBase, break: brk, golden: isGoldenTime(), blessed: blessOn, blessGain: Math.min(100, successBeforeBless * 1.5) - successBeforeBless, protected: protectedNow, gamble: gambleMode };
 }
@@ -280,6 +312,7 @@ function buyEnhanceItem(kind) {
 }
 
 function toggleEnhanceItem(kind) {
+  if (kind === 'protect' && currentEnhanceLevel >= NO_PROTECT_FROM) return alert(`🚫 +${NO_PROTECT_FROM + 1}강부터는 파괴 방지권을 쓸 수 없어요! (안전 구간 20·23·26·28강)`);
   if (myItems[kind] <= 0) return buyEnhanceItem(kind);
   if (autoUse[kind]) { autoUse[kind] = false; saveAutoUse(); } // 직접 누르면 자동 적용은 해제
   useItem[kind] = !useItem[kind];
@@ -308,13 +341,13 @@ function setAutoUse(kind, on) {
 // 이번 단계에서 자동으로 쓰고 싶은 아이템 (보유 여부와 무관)
 function autoWanted() {
   const want = { protect: false, bless: false };
-  if (currentEnhanceLevel >= 20) return want;
+  if (currentEnhanceLevel >= ENHANCE_MAX) return want;
   const rec = ENHANCE_RECOMMEND[currentEnhanceLevel] || '';
   const base = ENHANCE_PROBABILITIES[currentEnhanceLevel];
   if (!base) return want;
   const breakBase = Math.max(0, Math.round((100 - base.success - base.keep) * 1000) / 1000);
   want.bless = autoUse.bless && base.success < 100 && (!autoUse.recOnly || rec.includes('축복'));
-  want.protect = autoUse.protect && !gambleMode && breakBase > 0 && (!autoUse.recOnly || rec.includes('방지권'));
+  want.protect = autoUse.protect && !gambleMode && breakBase > 0 && currentEnhanceLevel < NO_PROTECT_FROM && (!autoUse.recOnly || rec.includes('방지권'));
   return want;
 }
 
@@ -363,6 +396,10 @@ function renderEnhanceItems() {
     btn.className = `relative py-2 px-2 rounded-xl text-[11px] font-bold border transition-all ${on ? 'bg-amber-500 text-slate-950 border-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.6)]' : 'bg-slate-900 text-slate-300 border-slate-700 hover:border-amber-500/60'}`;
     btn.innerHTML = `${ENHANCE_ITEMS[kind].name} <span class="font-black">x${myItems[kind]}</span>
       <span class="block text-[9px] font-medium ${on ? 'text-slate-800' : 'text-slate-500'}">${autoUse[kind] ? (on ? (myItems[kind] > 0 ? '🤖 자동 적용 중' : `🤖 자동 구매+적용 (${itemTotal(kind)}P)`) : '🤖 자동 (이번 단계는 아낌)') : myItems[kind] > 0 ? (on ? '사용 중 (1회 소모)' : '눌러서 사용') : `없음 · 눌러서 구매 ${itemTotal(kind).toLocaleString()}P`}</span>`;
+    if (kind === 'protect' && currentEnhanceLevel >= NO_PROTECT_FROM) {
+      btn.className = 'relative py-2 px-2 rounded-xl text-[11px] font-bold border bg-slate-950 text-slate-600 border-slate-800 cursor-not-allowed';
+      btn.innerHTML = `${ENHANCE_ITEMS[kind].name} <span class="font-black">x${myItems[kind]}</span><span class="block text-[9px] font-bold text-rose-400/80">🚫 +21강부터 사용 불가</span>`;
+    }
   });
   ['protect', 'bless', 'recOnly'].forEach(k => {
     const cb = document.getElementById(`autoUse_${k}`);
@@ -407,7 +444,7 @@ let enhanceRevealing = false;
 
 function runEnhancement() {
   if (enhanceRevealing) return;
-  if (currentEnhanceLevel >= 20) return alert("이미 20강 최고 단계에 도달했습니다! 판매하여 정산하세요.");
+  if (currentEnhanceLevel >= ENHANCE_MAX) return alert(`이미 ${ENHANCE_MAX}강 최고 단계에 도달했습니다! 판매하여 정산하세요.`);
 
   const now = Date.now();
   enhanceActionTimestamps = enhanceActionTimestamps.filter(t => now - t < 60000);
@@ -441,7 +478,7 @@ function runEnhancement() {
   let outcome, msg, jumped = false;
   if (roll < odds.success) {
     outcome = 'success';
-    jumped = fromLevel >= 5 && fromLevel + 2 <= 20 && Math.random() < JUMP_CHANCE;
+    jumped = fromLevel >= 5 && fromLevel + 2 <= ENHANCE_MAX && Math.random() < JUMP_CHANCE;
     currentEnhanceLevel = fromLevel + (jumped ? 2 : 1);
     const evolvedBowl = BOWL_EVOLUTION[currentEnhanceLevel];
     msg = jumped
@@ -473,7 +510,7 @@ function runEnhancement() {
     if (outcome === 'success') {
       const evolvedBowl = BOWL_EVOLUTION[currentEnhanceLevel];
       if ((currentEnhanceLevel >= 15 || jumped) && window.confetti) confetti({ particleCount: jumped ? 220 : 150, spread: jumped ? 120 : 70 });
-      if (currentEnhanceLevel === 20) postFeed('enhance', `👑 +20강 [${evolvedBowl.name}] 달성!! ${evolvedBowl.icon}`, 'legendary', true);
+      if ([20, 25, 30].includes(currentEnhanceLevel) || (jumped && fromLevel < 25 && currentEnhanceLevel > 25)) postFeed('enhance', `${currentEnhanceLevel >= 30 ? '💫' : '👑'} +${currentEnhanceLevel}강 [${evolvedBowl.name}] 달성!! ${evolvedBowl.icon}`, 'legendary', true);
       if (jumped) postFeed('enhance', `🌟 대박 점프! +${fromLevel} → +${currentEnhanceLevel}강 [${evolvedBowl.name}] ${evolvedBowl.icon}`, currentEnhanceLevel >= 15 ? 'big' : 'normal');
       else if (currentEnhanceLevel >= 10) postFeed('enhance', `${odds.gamble ? '🎲 도박 강화로 ' : ''}+${currentEnhanceLevel}강 [${evolvedBowl.name}] 강화 성공! ${evolvedBowl.icon}`,
         currentEnhanceLevel >= 17 ? 'legendary' : currentEnhanceLevel >= 13 ? 'big' : 'normal');
@@ -483,7 +520,7 @@ function runEnhancement() {
     }
     updateEnhanceUI();
     renderEnhanceTable();
-    if (actionBtn) actionBtn.disabled = currentEnhanceLevel >= 20;
+    if (actionBtn) actionBtn.disabled = currentEnhanceLevel >= ENHANCE_MAX;
   };
 
   // 딜레이 없이 결과 바로 공개 (예전 +12강 이상 0.9초 두근두근 연출 제거)

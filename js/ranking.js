@@ -91,7 +91,7 @@ function renderRankingsData() {
     const sideMyBowlRank = document.getElementById('sideMyBowlRank');
 
     let myEnhanceRankIndex = sortedEnhance.findIndex(u => u.nickname === currentUser.nickname);
-    const myBowlObj = BOWL_EVOLUTION[Math.min(currentEnhanceLevel, 20)];
+    const myBowlObj = BOWL_EVOLUTION[Math.min(currentEnhanceLevel, ENHANCE_MAX)];
 
     if (sideMyBowlLevel) {
       sideMyBowlLevel.textContent = `+${currentEnhanceLevel} ${myBowlObj?.name || '일반 밥'}`;
@@ -112,7 +112,7 @@ function renderRankingsData() {
           else if (index === 2) medal = '🥉';
 
           const eLvl = user.enhanceLevel || 0;
-          const bObj = BOWL_EVOLUTION[Math.min(eLvl, 20)];
+          const bObj = BOWL_EVOLUTION[Math.min(eLvl, ENHANCE_MAX)];
           const item = document.createElement('div');
           item.className = `p-2 rounded-xl border flex items-center justify-between transition-all ${index < 3 ? 'bg-orange-50/70 border-orange-200' : 'bg-slate-50 border-slate-200'}`;
           const badgeClass = user.badge || 'nb-none';
@@ -183,7 +183,7 @@ function renderRankingsData() {
           else if (index === 2) rankBadge = '🥉 3등';
 
           const eLvl = user.enhanceLevel || 0;
-          const bObj = BOWL_EVOLUTION[Math.min(eLvl, 20)];
+          const bObj = BOWL_EVOLUTION[Math.min(eLvl, ENHANCE_MAX)];
           const item = document.createElement('div');
           item.className = `p-3 rounded-2xl border flex items-center justify-between transition-all ${index < 3 ? 'bg-orange-50/80 border-orange-200' : 'bg-slate-50 border-slate-200'}`;
           const badgeClass = user.badge || 'nb-none';

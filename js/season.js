@@ -92,7 +92,7 @@ async function renderSeasonRanking(container, summaryEl, myPointEl) {
       ? '<div class="text-center text-slate-400 py-6">아직 이번 주 기록이 없어요. 첫 주인공이 되어보세요!</div>'
       : ranked.map((e, i) => {
           const medal = ['🥇', '🥈', '🥉'][i] || `${i + 1}위`;
-          const bowl = BOWL_EVOLUTION[Math.min(e.maxLevel, 20)];
+          const bowl = BOWL_EVOLUTION[Math.min(e.maxLevel, ENHANCE_MAX)];
           return `
             <div class="p-3 rounded-2xl border flex items-center justify-between ${i < 3 ? 'bg-indigo-50/70 border-indigo-200' : 'bg-slate-50 border-slate-200'}">
               <div class="flex items-center gap-2 min-w-0">
