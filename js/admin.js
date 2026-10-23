@@ -456,6 +456,72 @@ function adminQuickSetPoint(nick) {
   });
 }
 
+// ==========================================
+// 🔄 시즌 초기화: 게임 진행 데이터를 전부 지우고 새 시즌 시작
+//  - 유지: 계정(닉네임·uid·승인·가입일), 시즌 도감 배지, 관리자 배지
+//  - 실행 전: 관리자 PC로 JSON 백업 파일 다운로드 + DB admin_backups/{시각} 에도 저장
+//  - 실행 후: meta/resetAt 갱신 → 접속 중인 모든 화면이 자동 새로고침 (예전 값이 다시 저장되는 것 방지)
+// ==========================================
+const SEASON_RESET_CLEAR_PATHS = ['point_logs', 'bank', 'transfers', 'seasons', 'duels', 'game_feed', 'market', 'admin_snapshots'];
+async function handleAdminSeasonReset() {
+  if (!isAdmin) return alert('관리자만 할 수 있어요.');
+  const code = prompt("🔄 시즌 초기화\n\n모든 회원의 포인트·강화·카드·아이템·배지(시즌 도감 배지 제외)·멤버십·은행·기록이 초기화돼요.\n되돌리려면 백업 파일로 복구해야 해요.\n\n진행하려면 '시즌초기화' 를 입력하세요.");
+  if (code !== '시즌초기화') return alert('시즌 초기화를 취소했어요.');
+  const startStr = prompt('새 시즌 시작 포인트 (모든 회원 동일):', '0');
+  if (startStr === null) return alert('취소했어요.');
+  const startPts = Math.max(0, parseInt(String(startStr).replace(/[,\s]/g, ''), 10) || 0);
+  const seasonName = (prompt('새 시즌 이름 (시즌 도감·기록에 쓰여요):', '시즌 1') || '새 시즌').slice(0, 30);
+
+  try {
+    // 1) 백업
+    const [usersSnap, ...others] = await Promise.all([db.ref('user_points').once('value'), ...SEASON_RESET_CLEAR_PATHS.map(p => db.ref(p).once('value'))]);
+    const users = usersSnap.val() || {};
+    const backup = { at: new Date().toISOString(), seasonName, user_points: users };
+    SEASON_RESET_CLEAR_PATHS.forEach((p, i) => { backup[p] = others[i].val(); });
+    try {
+      const blob = new Blob([JSON.stringify(backup)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `bapsim-season-backup-${todayKey()}-${Date.now()}.json`;
+      document.body.appendChild(a); a.click(); a.remove();
+    } catch (e) { console.warn('백업 파일 저장 실패', e); }
+    const backupKey = String(Date.now());
+    await db.ref(`admin_backups/${backupKey}`).set({ at: firebase.database.ServerValue.TIMESTAMP, seasonName, user_points: users, bank: backup.bank || null });
+
+    // 2) 회원별 초기화 (계정 정보 + 남길 배지만)
+    const keepBadges = new Set(['nb-admin', ...(typeof SEASON_BADGE_BOOK !== 'undefined' ? SEASON_BADGE_BOOK.map(b => b.cls) : [])]);
+    const updates = {};
+    Object.entries(users).forEach(([nick, u]) => {
+      if (!u || typeof u !== 'object') return;
+      const bgs = (Array.isArray(u.inventory && u.inventory.bgs) ? u.inventory.bgs : Object.values((u.inventory && u.inventory.bgs) || {})).filter(c => keepBadges.has(c));
+      const fresh = {
+        nickname: u.nickname || nick,
+        points: startPts,
+        budget: 50000,
+        budgetAt: firebase.database.ServerValue.TIMESTAMP,
+        enhanceLevel: 0,
+        inventory: { colors: [], symbols: [], bgs: ['nb-none', ...bgs] },
+        badge: keepBadges.has(u.badge) ? u.badge : 'nb-none',
+        color: '', symbol: '',
+        updatedAt: Date.now()
+      };
+      ['uid', 'status', 'approved', 'createdAt', 'email'].forEach(k => { if (u[k] !== undefined) fresh[k] = u[k]; });
+      updates[`user_points/${nick}`] = fresh;
+    });
+    // 3) 시즌 데이터 삭제
+    SEASON_RESET_CLEAR_PATHS.forEach(p => { updates[p] = null; });
+    // 그룹별 예측 베팅/결과
+    const groups = (await db.ref('groups').once('value')).val() || {};
+    Object.keys(groups).forEach(g => { updates[`groups/${g}/bets`] = null; updates[`groups/${g}/results`] = null; });
+    updates['meta/season'] = { name: seasonName, startedAt: firebase.database.ServerValue.TIMESTAMP, startPoints: startPts };
+    updates['meta/resetAt'] = firebase.database.ServerValue.TIMESTAMP;
+    await db.ref().update(updates);
+    alert(`✅ [${seasonName}] 시작! ${Object.keys(users).length}명 초기화 완료.\n백업: 내 PC 다운로드 파일 + DB admin_backups/${backupKey}\n\n접속 중인 화면은 자동으로 새로고침돼요.`);
+  } catch (err) {
+    alert('시즌 초기화 실패: ' + (err && err.message) + '\n(아무것도 바뀌지 않았거나 일부만 바뀌었을 수 있어요. 백업 파일을 확인하세요)');
+  }
+}
+
 function handleAdminResetAllItems() {
   const confirmCode = prompt("🚨 경고: 모든 회원의 보유 아이템 및 착용 치장이 전부 몰수 및 삭제됩니다!\n진행하시려면 '아이템삭제'를 입력하세요.");
   if (confirmCode !== "아이템삭제") return alert("아이템 몰수 작업이 취소되었습니다.");

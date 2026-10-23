@@ -11,7 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Black+Han+Sans&family=Rubik+Glitch&family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261023i">
+  <link rel="stylesheet" href="css/style.css?v=20261023j">
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white relative">
 
@@ -1204,6 +1204,16 @@
       <!-- 위험 관리 구역 -->
       <div class="p-4 bg-rose-50 border border-rose-200 rounded-2xl space-y-3 text-xs">
         <span class="font-black text-rose-900 block">🚨 위험 관리 구역</span>
+
+        <div class="p-3 rounded-xl bg-slate-950 text-white space-y-2">
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <span class="font-black text-amber-300">🔄 시즌 초기화 (전체 리셋)</span>
+              <p class="text-[11px] text-slate-300 mt-0.5 leading-relaxed">포인트·보류·강화·카드·아이템·상점 배지/칭호/색상·입장권·골드/블랙·예치금·은행·포인트 내역·시즌 기록·결투·예측·전광판·시세 기록을 전부 초기화해요.<br><b class="text-amber-200">유지:</b> 회원 계정·승인, 시즌 도감 배지(예: 부자왕), 관리자 배지 · 실행 전에 자동 백업(내 PC 파일 + DB)</p>
+            </div>
+            <button onclick="handleAdminSeasonReset()" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-3 py-2 rounded-xl shrink-0">시즌 초기화</button>
+          </div>
+        </div>
         
         <div class="flex items-center justify-between border-b border-rose-200/60 pb-2.5">
           <div>
@@ -1448,23 +1458,23 @@
     </div>
   </div>
 
-  <script src="js/core.js?v=20261023i"></script>
-  <script src="js/auth.js?v=20261023i"></script>
-  <script src="js/enhance.js?v=20261023i"></script>
-  <script src="js/shop.js?v=20261023i"></script>
-  <script src="js/chat.js?v=20261023i"></script>
-  <script src="js/games.js?v=20261023i"></script>
-  <script src="js/admin.js?v=20261023i"></script>
-  <script src="js/ranking.js?v=20261023i"></script>
-  <script src="js/restaurants.js?v=20261023i"></script>
-  <script src="js/tools.js?v=20261023i"></script>
-  <script src="js/feed.js?v=20261023i"></script>
-  <script src="js/bank.js?v=20261023i"></script>
-  <script src="js/tier.js?v=20261023i"></script>
-  <script src="js/cards.js?v=20261023i"></script>
-  <script src="js/season.js?v=20261023i"></script>
-  <script src="js/duel.js?v=20261023i"></script>
-  <script src="js/predict.js?v=20261023i"></script>
-  <script src="js/main.js?v=20261023i"></script>
+  <script src="js/core.js?v=20261023j"></script>
+  <script src="js/auth.js?v=20261023j"></script>
+  <script src="js/enhance.js?v=20261023j"></script>
+  <script src="js/shop.js?v=20261023j"></script>
+  <script src="js/chat.js?v=20261023j"></script>
+  <script src="js/games.js?v=20261023j"></script>
+  <script src="js/admin.js?v=20261023j"></script>
+  <script src="js/ranking.js?v=20261023j"></script>
+  <script src="js/restaurants.js?v=20261023j"></script>
+  <script src="js/tools.js?v=20261023j"></script>
+  <script src="js/feed.js?v=20261023j"></script>
+  <script src="js/bank.js?v=20261023j"></script>
+  <script src="js/tier.js?v=20261023j"></script>
+  <script src="js/cards.js?v=20261023j"></script>
+  <script src="js/season.js?v=20261023j"></script>
+  <script src="js/duel.js?v=20261023j"></script>
+  <script src="js/predict.js?v=20261023j"></script>
+  <script src="js/main.js?v=20261023j"></script>
 </body>
 </html>

@@ -59,3 +59,15 @@ firebase.auth().onAuthStateChanged(async (user) => {
   await handleAuthChange(user);
   updateGroupUI();
 });
+
+// 🔄 시즌 초기화 감지: 관리자가 초기화하면 열려 있는 화면을 새로고침 (예전 값이 다시 저장되지 않게)
+(function watchSeasonReset() {
+  const loadedAt = Date.now();
+  let first = true;
+  const start = () => db.ref('meta/resetAt').on('value', s => {
+    const v = Number(s.val()) || 0;
+    if (first) { first = false; if (!(v > loadedAt)) return; }
+    if (v > loadedAt - 5000) { try { alert('🔄 새 시즌이 시작됐어요! 화면을 새로고침할게요.'); } catch (e) {} location.reload(); }
+  }, () => {});
+  setTimeout(start, 3000);
+})();
