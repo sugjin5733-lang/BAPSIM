@@ -135,6 +135,7 @@ function detachUserListeners() {
   if (typeof stopBank === 'function') stopBank();
   if (typeof myBowlLoaded !== 'undefined') { myBowlLoaded = false; myBowl = { cost: 0, tries: 0 }; }
   if (typeof hotlineRef !== 'undefined' && hotlineRef) { hotlineRef.off(); hotlineRef = null; hotlineItems = {}; }
+  if (typeof judgmentRef !== 'undefined' && judgmentRef) { judgmentRef.off(); judgmentRef = null; }
   if (typeof myTier !== 'undefined') { myTier = { goldUntil: 0, blackUntil: 0, blessDay: '', vipDay: '' }; myDeposit = { amt: 0, since: 0 }; tierDirty = false; depositDirty = false; }
   if (myPointsRef) { myPointsRef.off(); myPointsRef = null; }
   if (myRequestRef) { myRequestRef.off(); myRequestRef = null; }

@@ -16,9 +16,10 @@ function switchRankTab(tab) {
   const labels = {
     points: '<i data-lucide="crown" class="w-3.5 h-3.5 text-amber-500"></i><span>전체 포인트 부자 랭킹</span>',
     enhance: '<i data-lucide="award" class="w-3.5 h-3.5 text-orange-500"></i><span>전체 밥키우기 강화 랭킹</span>',
-    season: '<i data-lucide="calendar" class="w-3.5 h-3.5 text-indigo-500"></i><span>이번 주 밥키우기 시즌</span>'
+    season: '<i data-lucide="calendar" class="w-3.5 h-3.5 text-indigo-500"></i><span>이번 주 밥키우기 시즌</span>',
+    black: '<span>🖤</span><span>프레스티지 블랙 랭킹 (자산 = 포인트+보류+예치금)</span>'
   };
-  ['points', 'enhance', 'season'].forEach(t => {
+  ['points', 'enhance', 'season', 'black'].forEach(t => {
     const btn = document.getElementById(`rankTab_${t}`);
     if (btn) btn.className = t === tab
       ? "py-2 rounded-xl bg-white shadow-xs text-slate-900 font-black"
@@ -34,9 +35,14 @@ function renderRankingsData() {
   db.ref('user_points').once('value', (snap) => {
     const data = snap.val() || {};
     const userList = Object.values(data).filter(u => u && u.nickname && (u.status === 'approved' || u.approved === true));
+    // 🖤 블랙 회원은 부자 랭킹에서 빠지고 블랙 랭킹으로 따로
+    const rankNow = typeof ServerClock !== 'undefined' ? ServerClock.now() : Date.now();
+    const isBlackU = u => (Number(u.blackUntil) || 0) > rankNow;
+    const assetsOf = u => (Number(u.points) || 0) + (Number(u.owed) || 0) + (Number(u.deposit && u.deposit.amt) || 0);
+    const sortedBlack = userList.filter(isBlackU).sort((a, b) => assetsOf(b) - assetsOf(a));
 
-    // 1) 사이드바 부자 랭킹 (TOP 5)
-    const sortedPoints = [...userList].sort((a, b) => (b.points || 0) - (a.points || 0));
+    // 1) 사이드바 부자 랭킹 (TOP 5) — 블랙 제외
+    const sortedPoints = userList.filter(u => !isBlackU(u)).sort((a, b) => (b.points || 0) - (a.points || 0));
     const sideContainer = document.getElementById('sideRankListContainer');
     const sideRankEl = document.getElementById('sideMyRankText');
     const sidePointEl = document.getElementById('sideMyPointText');
@@ -139,7 +145,27 @@ function renderRankingsData() {
     const summaryEl = document.getElementById('myRankSummary');
     const myPointEl = document.getElementById('myRankPointDisplay');
 
-    if (modalContainer && currentRankTab === 'season') {
+    if (modalContainer && currentRankTab === 'black') {
+      modalContainer.innerHTML = '';
+      const myIdx = sortedBlack.findIndex(u => u.nickname === currentUser.nickname);
+      if (summaryEl) summaryEl.textContent = myIdx !== -1 ? `${currentUser.nickname} 님은 블랙 ${myIdx + 1}위입니다!` : '블랙 회원만 오를 수 있는 랭킹이에요';
+      if (myPointEl) myPointEl.textContent = myIdx !== -1 ? `${assetsOf(sortedBlack[myIdx]).toLocaleString()}P` : '-';
+      if (sortedBlack.length === 0) modalContainer.innerHTML = '<div class="text-center text-slate-400 py-6 text-xs">아직 프레스티지 블랙 회원이 없어요</div>';
+      sortedBlack.forEach((user, index) => {
+        const item = document.createElement('div');
+        item.className = 'p-3 rounded-2xl border flex items-center justify-between bg-slate-950 border-amber-300/40 text-white';
+        item.innerHTML = `
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="font-black text-xs ${index === 0 ? 'text-amber-300 text-sm' : 'text-slate-300'}">${index === 0 ? '🖤 1등' : `${index + 1}위`}</span>
+            ${nickHTML(user, 'text-xs truncate')}
+          </div>
+          <div class="text-right shrink-0">
+            <span class="font-extrabold text-amber-200 text-xs">${assetsOf(user).toLocaleString()}P</span>
+            <span class="block text-[10px] text-slate-400">포인트 ${(Number(user.points) || 0).toLocaleString()}${Number(user.deposit && user.deposit.amt) ? ` · 예치 ${Number(user.deposit.amt).toLocaleString()}` : ''}</span>
+          </div>`;
+        modalContainer.appendChild(item);
+      });
+    } else if (modalContainer && currentRankTab === 'season') {
       renderSeasonRanking(modalContainer, summaryEl, myPointEl).catch(onDbError);
     } else if (modalContainer) {
       modalContainer.innerHTML = '';

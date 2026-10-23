@@ -9,7 +9,7 @@
 //
 //  골드: 7일 150만P · 판매 수수료 8% · 시간당 한도 10만P · 매일 축복권 1장
 //  블랙: 7일 500만P · 판매 수수료 5% · 시간당 한도 15만P · 매일 축복권 10장
-//        · 은행 예치(24시간마다 1%, 하루 최대 3만P, 금고에서 지급) · 슬롯 초특급 확률 5배
+//        · 은행 예치(24시간마다 3%, 상한 없음, 금고에서 지급 → 금고가 비면 못 받음) · 슬롯 초특급 확률 5배
 //        · 접속 시 전체 알림(하루 1번) · 관리자 핫라인 · 배너 명단
 
 const TIERS = {
@@ -18,8 +18,7 @@ const TIERS = {
 };
 const TIER_MAX_DAYS = 28;
 const DEPOSIT_MIN = 10000;
-const DEPOSIT_RATE = 0.01;          // 24시간마다 1%
-const DEPOSIT_DAILY_CAP = 30000;    // 하루 이자 최대
+const DEPOSIT_RATE = 0.03;          // 24시간마다 3% (상한 없음, 은행 금고에서 지급)
 const BLACK_SLOT_MULT = 5;          // 슬롯 초특급 확률 배수 (10배면 슬롯이 이득이 돼서 5배)
 
 let myTier = { goldUntil: 0, blackUntil: 0, blessDay: '', vipDay: '' };
@@ -135,7 +134,7 @@ function depositInterestDue() {
   if (!(myDeposit.amt > 0) || !myDeposit.since) return { days: 0, amt: 0 };
   const days = Math.floor((tierNow() - myDeposit.since) / 86400000);
   if (days <= 0) return { days: 0, amt: 0 };
-  return { days, amt: Math.min(DEPOSIT_DAILY_CAP * days, Math.floor(myDeposit.amt * DEPOSIT_RATE * days)) };
+  return { days, amt: Math.floor(myDeposit.amt * DEPOSIT_RATE * days) };
 }
 async function claimDepositInterest(silent = false) {
   const due = depositInterestDue();
@@ -162,7 +161,7 @@ async function depositPoints() {
   const amount = Math.floor(Number(input && input.value) || 0);
   if (amount < DEPOSIT_MIN) return alert(`최소 ${DEPOSIT_MIN.toLocaleString()}P부터 예치할 수 있어요.`);
   if (amount > userPoints) return alert('❌ 포인트가 부족해요!');
-  if (!confirm(`🏦 ${amount.toLocaleString()}P를 예치할까요?\n\n· 24시간마다 1% 이자 (하루 최대 ${DEPOSIT_DAILY_CAP.toLocaleString()}P, 은행 금고에서 지급)\n· 추가로 넣으면 지금까지 붙은 이자를 먼저 받고 이자 시계가 다시 시작돼요\n· 꺼낼 때 큰 금액은 시간당 한도에 따라 ⏳보류로 천천히 들어와요`)) return;
+  if (!confirm(`🏦 ${amount.toLocaleString()}P를 예치할까요?\n\n· 24시간마다 3% 이자 (상한 없음 · 은행 금고에서 지급, 금고가 모자라면 있는 만큼만)\n· 추가로 넣으면 지금까지 붙은 이자를 먼저 받고 이자 시계가 다시 시작돼요\n· 꺼낼 때 큰 금액은 시간당 한도에 따라 ⏳보류로 천천히 들어와요`)) return;
   if (myDeposit.amt > 0) await claimDepositInterest(true);
   updatePointsUI();
   addPoints(-amount, '🏦 은행 예치');
@@ -246,7 +245,7 @@ function renderTierBox() {
     const until = t.key === 'black' ? myTier.blackUntil : myTier.goldUntil;
     const active = until > now;
     const perks = t.key === 'black'
-      ? ['판매 수수료 10% → <b>5%</b>', '분당 강화 100 → <b>1,000회</b>', `시간당 한도 7.2만 → <b>${(t.perHour / 10000)}만P</b>`, `매일 축복권 <b>${t.bless}장</b>`, `은행 예치 <b>24시간마다 1%</b> (하루 최대 3만)`, `슬롯 초특급 확률 <b>${BLACK_SLOT_MULT}배</b>`, '🌌 <b>초월 방지권</b> (+20강부터 파괴 방지)', '접속할 때마다 전체 입장 알림 · 배너 명단', '📞 관리자 핫라인']
+      ? ['판매 수수료 10% → <b>5%</b>', '분당 강화 100 → <b>1,000회</b>', `시간당 한도 7.2만 → <b>${(t.perHour / 10000)}만P</b>`, `매일 축복권 <b>${t.bless}장</b>`, `은행 예치 <b>24시간마다 3%</b> (상한 없음)`, `슬롯 초특급 확률 <b>${BLACK_SLOT_MULT}배</b>`, '🌌 <b>초월 방지권</b> (+20강부터 파괴 방지)', '접속할 때마다 전체 입장 알림 · 배너 명단', '📞 관리자 핫라인']
       : ['판매 수수료 10% → <b>8%</b>', '분당 강화 100 → <b>300회</b>', `시간당 한도 7.2만 → <b>${(t.perHour / 10000)}만P</b>`, `매일 축복권 <b>${t.bless}장</b>`];
     return `<div class="tier-card tier-${t.key} rounded-2xl p-3 space-y-2">
       <div class="flex items-center justify-between gap-2">
@@ -269,7 +268,7 @@ function renderTierBox() {
         <span class="text-xs font-black text-white">🏦 블랙 예치금</span>
         <span class="text-xs font-black text-amber-200">${myDeposit.amt.toLocaleString()}P</span>
       </div>
-      <div class="text-[10px] text-slate-400">${myDeposit.amt > 0 ? `받을 이자 ${dep.amt.toLocaleString()}P (${dep.days}일) · 다음 이자까지 ${Math.max(0, Math.ceil(((myDeposit.since + (dep.days + 1) * 86400000) - now) / 3600000))}시간` : '24시간마다 1% (하루 최대 3만P) · 이자는 은행 금고에서 지급'}</div>
+      <div class="text-[10px] text-slate-400">${myDeposit.amt > 0 ? `받을 이자 ${dep.amt.toLocaleString()}P (${dep.days}일) · 다음 이자까지 ${Math.max(0, Math.ceil(((myDeposit.since + (dep.days + 1) * 86400000) - now) / 3600000))}시간` : '24시간마다 3% (상한 없음) · 이자는 은행 금고에서 지급'}</div>
       ${isBlack() ? `<div class="flex gap-1.5"><input id="tierDepositAmount" type="number" min="${DEPOSIT_MIN}" step="10000" placeholder="예치 금액" class="flex-1 min-w-0 bg-black/40 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs text-white">
         <button onclick="depositPoints()" class="bg-amber-400 text-slate-950 font-black px-3 rounded-xl text-[11px]">예치</button></div>` : ''}
       ${myDeposit.amt > 0 ? `<div class="flex gap-1.5"><button onclick="claimDepositInterest()" class="flex-1 bg-white/10 text-white font-bold py-1.5 rounded-xl text-[11px]">이자 받기</button><button onclick="withdrawDeposit()" class="flex-1 bg-white/10 text-rose-200 font-bold py-1.5 rounded-xl text-[11px]">전액 출금</button></div>` : ''}

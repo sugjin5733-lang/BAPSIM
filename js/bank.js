@@ -461,7 +461,7 @@ async function loadPrestigeMembers() {
     const users = (await db.ref('user_points').once('value')).val() || {};
     prestigeMembers = Object.values(users)
       .filter(u => u && u.nickname && (Number(u.blackUntil) || 0) > bankNow() && (u.status === 'approved' || u.approved === true)) // 🖤 블랙 회원 명단
-      .sort((a, b) => ((Number(b.points) || 0) + (Number(b.owed) || 0)) - ((Number(a.points) || 0) + (Number(a.owed) || 0)));
+      .sort((a, b) => ((Number(b.points) || 0) + (Number(b.owed) || 0) + (Number(b.deposit && b.deposit.amt) || 0)) - ((Number(a.points) || 0) + (Number(a.owed) || 0) + (Number(a.deposit && a.deposit.amt) || 0)));
   } catch (e) { /* 읽기 실패 시 이전 목록 유지 */ }
   renderPrestigeBanner();
 }
@@ -469,12 +469,14 @@ function renderPrestigeBanner() {
   // 넓은 화면: 왼쪽 사이드 카드 / 좁은 화면: 본문 위 띠 배너
   const empty = '<span class="text-[11px] text-amber-100/70">아직 아무도 없어요 · 첫 번째 프레스티지 블랙의 자리가 비어 있어요</span>';
   const chips = prestigeMembers.map(u => `<span class="prestige-member-chip">${nickHTML(u, 'text-[11px]')}</span>`).join('');
+  const assets = u => (Number(u.points) || 0) + (Number(u.owed) || 0) + (Number(u.deposit && u.deposit.amt) || 0);
+  const ranked = prestigeMembers.map((u, i) => `<div class="w-full flex items-center justify-between gap-2"><span class="flex items-center gap-1.5 min-w-0"><span class="text-[10px] font-black text-amber-300 shrink-0">${i + 1}</span>${nickHTML(u, 'text-[11px] truncate')}</span><span class="text-[10px] font-bold text-amber-100/80 shrink-0">${assets(u) >= 1e8 ? (assets(u) / 1e8).toFixed(1) + '억' : Math.round(assets(u) / 1e4).toLocaleString() + '만'}</span></div>`).join('');
   [['prestigeMemberBanner', 'prestigeMemberList', 'prestigeMemberCount'], ['prestigeSideCard', 'prestigeSideList', 'prestigeSideCount']].forEach(([w, l, c]) => {
     const wrap = document.getElementById(w), list = document.getElementById(l), count = document.getElementById(c);
     if (!wrap || !list) return;
     wrap.classList.remove('hidden');
     if (count) count.textContent = `${prestigeMembers.length}명`;
-    list.innerHTML = prestigeMembers.length === 0 ? empty : chips;
+    list.innerHTML = prestigeMembers.length === 0 ? empty : (l === 'prestigeSideList' ? ranked : chips);
   });
 }
 // 로그인 안 한 사람도 배너는 볼 수 있게 (구경도 구매욕구!)
