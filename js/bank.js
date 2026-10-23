@@ -461,7 +461,7 @@ async function loadPrestigeMembers() {
     const users = (await db.ref('user_points').once('value')).val() || {};
     prestigeMembers = Object.values(users)
       .filter(u => u && u.nickname && (Number(u.blackUntil) || 0) > bankNow() && (u.status === 'approved' || u.approved === true)) // 🖤 블랙 회원 명단
-      .sort((a, b) => ((Number(b.points) || 0) + (Number(b.owed) || 0) + (Number(b.deposit && b.deposit.amt) || 0)) - ((Number(a.points) || 0) + (Number(a.owed) || 0) + (Number(a.deposit && a.deposit.amt) || 0)));
+      .sort((a, b) => String(a.nickname).localeCompare(String(b.nickname), 'ko')); // 공개 명단은 이름순 (자산 순위는 블랙 클럽 안에서만)
   } catch (e) { /* 읽기 실패 시 이전 목록 유지 */ }
   renderPrestigeBanner();
 }
@@ -476,7 +476,8 @@ function renderPrestigeBanner() {
     if (!wrap || !list) return;
     wrap.classList.remove('hidden');
     if (count) count.textContent = `${prestigeMembers.length}명`;
-    list.innerHTML = prestigeMembers.length === 0 ? empty : (l === 'prestigeSideList' ? ranked : chips);
+    // 공개 배너는 명단만 (순위·자산은 블랙 클럽 안에서만)
+    list.innerHTML = prestigeMembers.length === 0 ? empty : chips;
   });
 }
 // 로그인 안 한 사람도 배너는 볼 수 있게 (구경도 구매욕구!)

@@ -19,7 +19,8 @@ function switchRankTab(tab) {
     season: '<i data-lucide="calendar" class="w-3.5 h-3.5 text-indigo-500"></i><span>이번 주 밥키우기 시즌</span>',
     black: '<span>🖤</span><span>프레스티지 블랙 랭킹 (자산 = 포인트+보류+예치금)</span>'
   };
-  ['points', 'enhance', 'season', 'black'].forEach(t => {
+  if (tab === 'black') tab = currentRankTab = 'points'; // 블랙 랭킹은 블랙 클럽 안에서만
+  ['points', 'enhance', 'season'].forEach(t => {
     const btn = document.getElementById(`rankTab_${t}`);
     if (btn) btn.className = t === tab
       ? "py-2 rounded-xl bg-white shadow-xs text-slate-900 font-black"
@@ -145,7 +146,7 @@ function renderRankingsData() {
     const summaryEl = document.getElementById('myRankSummary');
     const myPointEl = document.getElementById('myRankPointDisplay');
 
-    if (modalContainer && currentRankTab === 'black') {
+    if (modalContainer && currentRankTab === 'black' && false) {
       modalContainer.innerHTML = '';
       const myIdx = sortedBlack.findIndex(u => u.nickname === currentUser.nickname);
       if (summaryEl) summaryEl.textContent = myIdx !== -1 ? `${currentUser.nickname} 님은 블랙 ${myIdx + 1}위입니다!` : '블랙 회원만 오를 수 있는 랭킹이에요';

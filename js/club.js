@@ -11,7 +11,8 @@ const BLACK_POLICIES = {
   fest:    { icon: '🍀', name: '강화 축제',  price: 5000000, mins: 30, cooldownMin: 180, desc: '30분 동안 모든 회원 강화 성공 확률 ×1.1' },
   nofee:   { icon: '🆓', name: '수수료 휴일', price: 2000000, mins: 30, cooldownMin: 180, desc: '30분 동안 모든 회원 밥 판매 수수료 0%' },
   speaker: { icon: '📢', name: '블랙 확성기', price: 500000,  mins: 10, cooldownMin: 10,  desc: '내 메시지를 전광판 맨 위에 10분 동안 고정' },
-  hammer:  { icon: '⚖️', name: '심판의 망치', price: 10000000, mins: 0, cooldownMin: 1440, desc: '회원 1명의 포인트(보류 포함)를 0으로 (예치금은 제외) · 24시간에 한 번' }
+  hammer:  { icon: '⚖️', name: '심판의 망치', price: 10000000, mins: 0, cooldownMin: 1440, desc: '블랙이 아닌 회원 1명의 포인트(보류 포함)를 0으로 (예치금 제외) · 블랙끼리는 안 통함 · 24시간에 한 번' },
+  reset:   { icon: '⏱️', name: '쿨타임 초기화', price: 10000000, mins: 0, cooldownMin: 0, desc: '블랙 클럽의 모든 정책 쿨타임을 지금 바로 초기화 (진행 중인 정책은 그대로)' }
 };
 const FEST_MULT = 1.1;
 let activePolicies = {};   // 종류 → { by, from, until, mult?, text? }
@@ -56,6 +57,7 @@ async function activatePolicy(type) {
   const cd = policyCooldownLeft(type);
   if (cd > 0) return alert(`[${def.name}] 쿨타임: ${Math.ceil(cd / 60000)}분 뒤에 다시 쓸 수 있어요.`);
   if (userPoints < def.price) return alert(`❌ 포인트가 부족해요! (${def.price.toLocaleString()}P)`);
+  if (type === 'reset' && !Object.keys(BLACK_POLICIES).some(t => t !== 'reset' && !policyActive(t) && policyCooldownLeft(t) > 0)) return alert('지금 쿨타임 중인 정책이 없어요. (결제되지 않았어요)');
   let text = '', target = '';
   if (type === 'hammer') {
     target = (prompt('⚖️ 심판의 망치를 내릴 회원의 닉네임:', '') || '').trim();
@@ -64,6 +66,7 @@ async function activatePolicy(type) {
     let tu = null;
     try { tu = (await db.ref(`user_points/${target}`).once('value')).val(); } catch (e) {}
     if (!tu || !(tu.status === 'approved' || tu.approved === true)) return alert(`[${target}] 님을 찾을 수 없어요.`);
+    if ((Number(tu.blackUntil) || 0) > clubNow()) return alert(`🖤 [${target}] 님은 프레스티지 블랙 회원이에요. 블랙끼리는 심판의 망치가 통하지 않아요.`);
     if (!confirm(`⚖️ 정말 [${target}] 님의 포인트 ${(Number(tu.points) || 0).toLocaleString()}P${Number(tu.owed) ? ` + 보류 ${Number(tu.owed).toLocaleString()}P` : ''}를 0으로 만들까요?\n(되돌릴 수 없어요)`)) return;
   }
   if (type === 'speaker') {
@@ -93,6 +96,20 @@ async function activatePolicy(type) {
   if (typeof payFee === 'function') payFee(Math.round(def.price * 0.1));
   updatePointsUI();
   db.ref('policy_log').push(Object.assign({}, rec, { at: firebase.database.ServerValue.TIMESTAMP })).catch(() => {});
+  if (type === 'reset') {
+    // 진행이 끝난 정책 기록을 지워서 바로 다시 쓸 수 있게 (진행 중인 건 그대로)
+    const cleared = [];
+    for (const t of Object.keys(BLACK_POLICIES)) {
+      if (t === 'reset') continue;
+      try {
+        const r = await db.ref(`policies/${t}`).transaction(cur => (cur && (cur.until || 0) <= clubNow() ? null : undefined));
+        if (r.committed) cleared.push(BLACK_POLICIES[t].name);
+      } catch (e) {}
+    }
+    if (typeof postFeed === 'function') postFeed('policy', `⏱️ 블랙 클럽 쿨타임 초기화! ${cleared.join('·') || '정책'}을 바로 다시 쓸 수 있어요`, 'legendary', true);
+    if (window.confetti) confetti({ particleCount: 140, spread: 110, colors: ['#0a0a0a', '#fde68a', '#ffffff'] });
+    return;
+  }
   if (type === 'hammer') {
     // 대상자 화면이 접속하는 즉시(또는 다음 접속 때) 스스로 0으로 만듦
     db.ref(`judgments/${target}`).push({ by: currentUser.nickname, uid: authUser.uid, type: 'hammer', at: firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
@@ -167,6 +184,23 @@ function renderBlackClub() {
     }
   }
   renderBlackClubPolicies();
+  renderBlackClubRanking();
+}
+
+// 🖤 블랙 랭킹: 블랙 클럽 안, 블랙 회원에게만 (자산 = 포인트 + 보류 + 예치금)
+async function renderBlackClubRanking() {
+  const box = document.getElementById('blackClubRanking');
+  if (!box) return;
+  if (!(typeof isBlack === 'function' && isBlack())) { box.innerHTML = '<div class="text-[11px] text-slate-400 text-center py-3">🔒 블랙 회원만 볼 수 있어요.</div>'; return; }
+  let users = {};
+  try { users = (await db.ref('user_points').once('value')).val() || {}; } catch (e) {}
+  const now = clubNow();
+  const assets = u => (Number(u.points) || 0) + (Number(u.owed) || 0) + (Number(u.deposit && u.deposit.amt) || 0);
+  const list = Object.values(users).filter(u => u && u.nickname && (Number(u.blackUntil) || 0) > now && (u.status === 'approved' || u.approved === true)).sort((a, b) => assets(b) - assets(a));
+  box.innerHTML = list.map((u, i) => `<div class="club-row ${u.nickname === currentUser.nickname ? 'ring-1 ring-amber-300/60' : ''}">
+      <span class="flex items-center gap-2 min-w-0"><span class="text-[11px] font-black ${i === 0 ? 'text-amber-300' : 'text-slate-400'} shrink-0">${i === 0 ? '🖤 1' : i + 1}</span>${nickHTML(u, 'text-xs truncate')}</span>
+      <span class="text-right shrink-0"><span class="text-xs font-black text-amber-200">${assets(u).toLocaleString()}P</span>${Number(u.deposit && u.deposit.amt) ? `<span class="block text-[9px] text-slate-400">예치 ${Number(u.deposit.amt).toLocaleString()}</span>` : ''}</span>
+    </div>`).join('') || '<div class="text-[11px] text-slate-400 text-center py-3">아직 블랙 회원이 없어요</div>';
 }
 
 function renderBlackClubPolicies() {
@@ -176,7 +210,7 @@ function renderBlackClubPolicies() {
   box.innerHTML = Object.entries(BLACK_POLICIES).map(([t, d]) => {
     const on = policyActive(t), cd = policyCooldownLeft(t);
     const last = activePolicies[t];
-    const state = t === 'hammer' && last && cd > 0 ? `<span class="text-rose-300">최근 판결: ${esc(last.by)} → ${esc(last.target || '?')} · 쿨타임 ${Math.ceil(cd / 60000)}분</span>` : on ? `<span class="text-emerald-300">진행 중 · ${esc(activePolicies[t].by)} · ${policyLeftText(t)} 남음</span>`
+    const state = t === 'reset' ? '<span class="text-amber-200">언제든 사용 가능</span>' : t === 'hammer' && last && cd > 0 ? `<span class="text-rose-300">최근 판결: ${esc(last.by)} → ${esc(last.target || '?')} · 쿨타임 ${Math.ceil(cd / 60000)}분</span>` : on ? `<span class="text-emerald-300">진행 중 · ${esc(activePolicies[t].by)} · ${policyLeftText(t)} 남음</span>`
       : cd > 0 ? `<span class="text-slate-400">쿨타임 ${Math.ceil(cd / 60000)}분</span>` : '<span class="text-amber-200">발동 가능</span>';
     return `<div class="rounded-xl border border-white/10 bg-white/5 p-2.5 flex items-center justify-between gap-2">
       <div class="min-w-0">
@@ -202,6 +236,10 @@ async function executeJudgment(ref) {
     const r = await ref.transaction(cur => { got = cur || null; return cur ? null : undefined; });
     if (!r.committed || !got) return;
   } catch (e) { return; }
+  if (typeof isBlack === 'function' && isBlack()) { // 그 사이 블랙이 됐으면 무효
+    if (typeof bankToast === 'function') bankToast('⚖️ 심판의 망치 무효', `[${esc(got.by)}] 님의 판결이 있었지만, 블랙 회원이라 통하지 않았어요.`);
+    return;
+  }
   const lostPts = userPoints, lostOwed = myOwed;
   if (lostPts > 0) addPoints(-lostPts, `⚖️ 심판의 망치 (${String(got.by || '?').slice(0, 20)})`);
   myOwed = 0;

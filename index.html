@@ -11,7 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Black+Han+Sans&family=Rubik+Glitch&family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261023n">
+  <link rel="stylesheet" href="css/style.css?v=20261023o">
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white relative">
 
@@ -607,6 +607,10 @@
         <div id="blackClubPolicies" class="space-y-1.5"></div>
       </div>
       <div class="space-y-2">
+        <span class="text-xs font-extrabold text-amber-100">🏆 블랙 랭킹 <span class="text-[10px] font-bold text-slate-400">· 클럽 회원만 열람 · 자산 = 포인트+보류+예치금</span></span>
+        <div id="blackClubRanking" class="space-y-1.5"></div>
+      </div>
+      <div class="space-y-2">
         <span class="text-xs font-extrabold text-amber-100">⚙️ 내 혜택 관리</span>
         <div id="blackClubPerks" class="space-y-1.5 text-xs"></div>
       </div>
@@ -1003,7 +1007,7 @@
       </div>
 
       <!-- 랭킹 탭 전환 -->
-      <div class="bg-slate-100 p-1 rounded-2xl grid grid-cols-4 gap-1 text-xs font-bold">
+      <div class="bg-slate-100 p-1 rounded-2xl grid grid-cols-3 gap-1 text-xs font-bold">
         <button id="rankTab_points" onclick="switchRankTab('points')" class="py-2 rounded-xl bg-white shadow-xs text-slate-900 font-black">
           💰 포인트 부자
         </button>
@@ -1012,9 +1016,6 @@
         </button>
         <button id="rankTab_season" onclick="switchRankTab('season')" class="py-2 rounded-xl text-slate-500 hover:text-slate-900 font-bold">
           🗓️ 주간 시즌
-        </button>
-        <button id="rankTab_black" onclick="switchRankTab('black')" class="py-2 rounded-xl text-slate-500 hover:text-slate-900 font-bold">
-          🖤 블랙
         </button>
       </div>
 
@@ -1493,24 +1494,24 @@
     </div>
   </div>
 
-  <script src="js/core.js?v=20261023n"></script>
-  <script src="js/auth.js?v=20261023n"></script>
-  <script src="js/enhance.js?v=20261023n"></script>
-  <script src="js/shop.js?v=20261023n"></script>
-  <script src="js/chat.js?v=20261023n"></script>
-  <script src="js/games.js?v=20261023n"></script>
-  <script src="js/admin.js?v=20261023n"></script>
-  <script src="js/ranking.js?v=20261023n"></script>
-  <script src="js/restaurants.js?v=20261023n"></script>
-  <script src="js/tools.js?v=20261023n"></script>
-  <script src="js/feed.js?v=20261023n"></script>
-  <script src="js/bank.js?v=20261023n"></script>
-  <script src="js/tier.js?v=20261023n"></script>
-  <script src="js/club.js?v=20261023n"></script>
-  <script src="js/cards.js?v=20261023n"></script>
-  <script src="js/season.js?v=20261023n"></script>
-  <script src="js/duel.js?v=20261023n"></script>
-  <script src="js/predict.js?v=20261023n"></script>
-  <script src="js/main.js?v=20261023n"></script>
+  <script src="js/core.js?v=20261023o"></script>
+  <script src="js/auth.js?v=20261023o"></script>
+  <script src="js/enhance.js?v=20261023o"></script>
+  <script src="js/shop.js?v=20261023o"></script>
+  <script src="js/chat.js?v=20261023o"></script>
+  <script src="js/games.js?v=20261023o"></script>
+  <script src="js/admin.js?v=20261023o"></script>
+  <script src="js/ranking.js?v=20261023o"></script>
+  <script src="js/restaurants.js?v=20261023o"></script>
+  <script src="js/tools.js?v=20261023o"></script>
+  <script src="js/feed.js?v=20261023o"></script>
+  <script src="js/bank.js?v=20261023o"></script>
+  <script src="js/tier.js?v=20261023o"></script>
+  <script src="js/club.js?v=20261023o"></script>
+  <script src="js/cards.js?v=20261023o"></script>
+  <script src="js/season.js?v=20261023o"></script>
+  <script src="js/duel.js?v=20261023o"></script>
+  <script src="js/predict.js?v=20261023o"></script>
+  <script src="js/main.js?v=20261023o"></script>
 </body>
 </html>
