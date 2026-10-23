@@ -11,7 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Black+Han+Sans&family=Rubik+Glitch&family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261023j">
+  <link rel="stylesheet" href="css/style.css?v=20261023k">
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white relative">
 
@@ -24,7 +24,7 @@
   <!-- [좌측 날개 배너] -->
   <aside class="hidden 2xl:block fixed left-4 top-20 z-30 w-64 space-y-4">
     <!-- 👑 프레스티지 회원 (넓은 화면에서는 왼쪽에) -->
-    <div id="prestigeSideCard" onclick="openPrestigeModal()" class="hidden prestige-member-banner cursor-pointer rounded-3xl p-4 shadow-xl space-y-2.5">
+    <div id="prestigeSideCard" onclick="openBlackClub()" class="hidden prestige-member-banner cursor-pointer rounded-3xl p-4 shadow-xl space-y-2.5">
       <div class="flex items-center justify-between border-b border-amber-400/25 pb-2">
         <div>
           <div class="text-[9px] font-black tracking-[0.25em] text-amber-300">PRESTIGE BLACK</div>
@@ -33,6 +33,10 @@
         <span id="prestigeSideCount" class="text-[10px] font-black bg-amber-400/15 text-amber-200 border border-amber-400/40 px-2 py-0.5 rounded-full">0명</span>
       </div>
       <div id="prestigeSideList" class="flex flex-col items-start gap-1.5 max-h-56 overflow-y-auto no-scrollbar"></div>
+      <div class="black-club-motto border-t border-amber-400/20 pt-2">
+        <p>프레스티지 블랙은 밥심에 영향력을 행사할 수 있습니다.</p>
+        <p class="text-amber-200">프레스티지 블랙 클럽에서 뵙겠습니다. ›</p>
+      </div>
     </div>
 
     <div class="bg-white/95 backdrop-blur-md rounded-3xl p-4 border border-slate-200 shadow-xl space-y-3">
@@ -186,12 +190,13 @@
       </div>
     </div>
   </div>
+  <div id="policyBanner" class="hidden sticky top-[6.2rem] z-30 max-w-6xl mx-auto px-4 flex flex-wrap gap-1.5 justify-center pt-1.5"></div>
   <div id="feedToastContainer" class="fixed top-20 right-4 z-[60] flex flex-col gap-2 items-end pointer-events-none"></div>
 
   <!-- 메인 본문 -->
   <main class="max-w-6xl mx-auto px-4 pt-6 space-y-7">
     <!-- 👑 프레스티지 회원 배너 -->
-    <div id="prestigeMemberBanner" onclick="openPrestigeModal()" class="hidden 2xl:!hidden prestige-member-banner cursor-pointer rounded-2xl px-4 py-2.5 flex items-center gap-3">
+    <div id="prestigeMemberBanner" onclick="openBlackClub()" class="hidden 2xl:!hidden prestige-member-banner cursor-pointer rounded-2xl px-4 py-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
       <div class="shrink-0 text-center leading-tight">
         <div class="text-[9px] font-black tracking-[0.25em] text-amber-300">PRESTIGE BLACK</div>
         <div class="text-xs font-black text-white">🖤 블랙 <span id="prestigeMemberCount" class="text-amber-300">0명</span></div>
@@ -199,6 +204,10 @@
       <div class="h-8 w-px bg-amber-400/30 shrink-0"></div>
       <div id="prestigeMemberList" class="flex-1 min-w-0 flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5"></div>
       <span class="shrink-0 text-amber-300 font-black">›</span>
+      <div class="black-club-motto basis-full border-t border-amber-400/20 pt-1.5 flex flex-wrap gap-x-2">
+        <p>프레스티지 블랙은 밥심에 영향력을 행사할 수 있습니다.</p>
+        <p class="text-amber-200">프레스티지 블랙 클럽에서 뵙겠습니다.</p>
+      </div>
     </div>
 
     <!-- 상단 배너 & 타이머 -->
@@ -264,9 +273,9 @@
             <span>은행</span>
           </button>
 
-          <button id="hotlineToolbarBtn" onclick="openHotline()" class="hidden flex-1 sm:flex-initial items-center justify-center gap-1.5 bg-black hover:bg-slate-900 text-amber-200 font-black px-3 py-2 rounded-xl text-xs border border-amber-300/60 shadow-md transition-all">
-            <span>📞</span>
-            <span>핫라인</span>
+          <button id="hotlineToolbarBtn" onclick="openBlackClub()" class="hidden flex-1 sm:flex-initial items-center justify-center gap-1.5 bg-black hover:bg-slate-900 text-amber-200 font-black px-3 py-2 rounded-xl text-xs border border-amber-300/60 shadow-md transition-all">
+            <span>🖤</span>
+            <span>블랙 클럽</span>
           </button>
 
           <button onclick="openPrestigeModal()" class="prestige-btn flex-1 sm:flex-initial flex items-center justify-center gap-1.5 text-amber-200 font-black px-3 py-2 rounded-xl text-xs shadow-md transition-all">
@@ -578,6 +587,29 @@
         <div id="owedOptions" class="space-y-1.5"></div>
       </div>
       <p class="text-[10px] text-slate-400 leading-relaxed">1시간 단축 = 보류 72,000P 즉시 지급. 24시간 안에서 첫 1시간 20,000P, 한 시간 더할 때마다 4,000P씩 비싸져요 (하루 최대 12시간). 사이트를 꺼 두면 지급이 멈추지만, 한도는 최대 30만P까지 쌓였다가 다시 접속하면 한 번에 들어와요.</p>
+    </div>
+  </div>
+
+  <!-- 🖤 프레스티지 블랙 클럽 -->
+  <div id="blackClubModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4" onclick="if(event.target===this) closeBlackClub()">
+    <div class="black-club-panel w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto text-white">
+      <div class="flex items-start justify-between border-b border-amber-300/25 pb-3">
+        <div>
+          <div class="text-[10px] font-black tracking-[0.35em] text-amber-300">PRESTIGE BLACK CLUB</div>
+          <h3 class="font-black text-lg">🖤 프레스티지 블랙 클럽</h3>
+          <p class="text-[11px] text-slate-400 mt-0.5">밥심에 영향력을 행사하는 사람들의 공간</p>
+          <div id="blackClubStatus" class="text-[11px] mt-1.5"></div>
+        </div>
+        <button onclick="closeBlackClub()" class="text-slate-400 hover:text-white text-sm p-1">✕</button>
+      </div>
+      <div class="space-y-2">
+        <span class="text-xs font-extrabold text-amber-100">🏛️ 정책 행사 <span class="text-[10px] font-bold text-slate-400">· 모든 회원에게 적용 · 비용의 10%는 은행, 나머지 소각</span></span>
+        <div id="blackClubPolicies" class="space-y-1.5"></div>
+      </div>
+      <div class="space-y-2">
+        <span class="text-xs font-extrabold text-amber-100">⚙️ 내 혜택 관리</span>
+        <div id="blackClubPerks" class="space-y-1.5 text-xs"></div>
+      </div>
     </div>
   </div>
 
@@ -1458,23 +1490,24 @@
     </div>
   </div>
 
-  <script src="js/core.js?v=20261023j"></script>
-  <script src="js/auth.js?v=20261023j"></script>
-  <script src="js/enhance.js?v=20261023j"></script>
-  <script src="js/shop.js?v=20261023j"></script>
-  <script src="js/chat.js?v=20261023j"></script>
-  <script src="js/games.js?v=20261023j"></script>
-  <script src="js/admin.js?v=20261023j"></script>
-  <script src="js/ranking.js?v=20261023j"></script>
-  <script src="js/restaurants.js?v=20261023j"></script>
-  <script src="js/tools.js?v=20261023j"></script>
-  <script src="js/feed.js?v=20261023j"></script>
-  <script src="js/bank.js?v=20261023j"></script>
-  <script src="js/tier.js?v=20261023j"></script>
-  <script src="js/cards.js?v=20261023j"></script>
-  <script src="js/season.js?v=20261023j"></script>
-  <script src="js/duel.js?v=20261023j"></script>
-  <script src="js/predict.js?v=20261023j"></script>
-  <script src="js/main.js?v=20261023j"></script>
+  <script src="js/core.js?v=20261023k"></script>
+  <script src="js/auth.js?v=20261023k"></script>
+  <script src="js/enhance.js?v=20261023k"></script>
+  <script src="js/shop.js?v=20261023k"></script>
+  <script src="js/chat.js?v=20261023k"></script>
+  <script src="js/games.js?v=20261023k"></script>
+  <script src="js/admin.js?v=20261023k"></script>
+  <script src="js/ranking.js?v=20261023k"></script>
+  <script src="js/restaurants.js?v=20261023k"></script>
+  <script src="js/tools.js?v=20261023k"></script>
+  <script src="js/feed.js?v=20261023k"></script>
+  <script src="js/bank.js?v=20261023k"></script>
+  <script src="js/tier.js?v=20261023k"></script>
+  <script src="js/club.js?v=20261023k"></script>
+  <script src="js/cards.js?v=20261023k"></script>
+  <script src="js/season.js?v=20261023k"></script>
+  <script src="js/duel.js?v=20261023k"></script>
+  <script src="js/predict.js?v=20261023k"></script>
+  <script src="js/main.js?v=20261023k"></script>
 </body>
 </html>

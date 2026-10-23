@@ -740,6 +740,7 @@ function luckReport(logsObj, market) {
     const m = r.r.match(/시세 x([\d.]+)/); if (!m) return;
     const slot = Math.floor(r.ts / MARKET_SLOT_MS);
     const cands = [slot, slot - 1].map(s => market[s] ? marketFromAt(s, market[s].at).mult : null).filter(x => x != null);
+    (luckReport.policyWindows || []).forEach(w => { if (r.ts >= w.from - 5000 && r.ts <= w.until + 60000) cands.push(w.mult); });
     if (!cands.length) return;
     checked++;
     if (!cands.some(x => Math.abs(x - Number(m[1])) < 0.006)) forged++;
@@ -771,6 +772,10 @@ async function renderAnomalyPanel() {
     // 운 조작 검사용 포인트 내역 + 난수 조작 시도 기록
     let allLogs = {}, tamper = {}, market = {};
     try { market = (await db.ref('market').once('value')).val() || {}; } catch (e) {}
+    try {
+      const pl = (await db.ref('policy_log').limitToLast(500).once('value')).val() || {};
+      luckReport.policyWindows = Object.values(pl).filter(x => x && x.type === 'market').map(x => ({ from: Number(x.from) || 0, until: Number(x.until) || 0, mult: Number(x.mult) || 2 }));
+    } catch (e) { luckReport.policyWindows = []; }
     try { allLogs = (await db.ref('point_logs').once('value')).val() || {}; } catch (e) {}
     try {
       const tr = (await db.ref('tamper_reports').limitToLast(300).once('value')).val() || {};

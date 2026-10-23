@@ -74,6 +74,18 @@
       ".read": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true)",
       ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true)"
     },
+    "policies": {
+      ".read": "auth != null",
+      "$type": {
+        ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || ((auth != null && root.child('user_uids').child(auth.uid).exists() && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('status').val() === 'approved' && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('uid').val() === auth.uid) && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('blackUntil').val() > now && newData.child('by').val() === root.child('user_uids').child(auth.uid).val() && newData.child('uid').val() === auth.uid && newData.child('until').val() <= now + 1860000)"
+      }
+    },
+    "policy_log": {
+      ".read": "auth != null",
+      "$id": {
+        ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || (!data.exists() && (auth != null && root.child('user_uids').child(auth.uid).exists() && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('status').val() === 'approved' && root.child('user_points').child(root.child('user_uids').child(auth.uid).val()).child('uid').val() === auth.uid) && newData.child('uid').val() === auth.uid)"
+      }
+    },
     "meta": {
       ".read": "auth != null",
       ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true)"

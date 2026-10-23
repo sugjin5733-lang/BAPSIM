@@ -264,7 +264,10 @@ function toggleEnhanceProbTable() {
 // 🏦 수수료 (전부 은행 금고로): 아이템 구매 10%, 밥 판매 10%
 const ITEM_FEE_RATE = 0.1;
 const SELL_FEE_RATE = 0.1; // 기본. 💎 골드 8% · 블랙 5% → sellFeeRate()
-function curSellFee() { return typeof sellFeeRate === 'function' ? sellFeeRate() : SELL_FEE_RATE; }
+function curSellFee() {
+  if (typeof policyNoFee === 'function' && policyNoFee()) return 0; // 🖤 블랙 정책 '수수료 휴일'
+  return typeof sellFeeRate === 'function' ? sellFeeRate() : SELL_FEE_RATE;
+}
 function itemFee(kind) { return Math.round(ENHANCE_ITEMS[kind].price * ITEM_FEE_RATE); }
 function itemTotal(kind) { return ENHANCE_ITEMS[kind].price + itemFee(kind); }
 const ENHANCE_ITEMS = {
@@ -321,6 +324,7 @@ function effectiveOdds(level) {
   let mult = 1;
   const successBeforeBless = success;
   if (isGoldenTime()) mult *= GOLDEN_TIME.mult;
+  if (typeof policyFestMult === 'function') mult *= policyFestMult(); // 🖤 블랙 정책 '강화 축제'
   const blessOn = useItem.bless && (myItems.bless > 0 || autoWanted().bless);
   if (blessOn) mult *= 1.5;
   if (mult > 1) {
@@ -671,6 +675,11 @@ function riceMarket(ts) {
   const slot = Math.floor(ts / MARKET_SLOT_MS);
   const endsAt = (slot + 1) * MARKET_SLOT_MS;
   startMarketFeed();
+  // 🖤 블랙 정책 '시세 부양' 진행 중이면 그 배율로 고정 (모든 회원)
+  if (typeof policyMarket === 'function' && ts >= nowTs - 1000) {
+    const pm = policyMarket();
+    if (pm) return { mult: pm.mult, label: '🖤 블랙 시세 부양', tone: 'up2', slot, endsAt, policy: pm.by };
+  }
   const rec = marketCache[slot];
   if (!rec) {
     if (slot === Math.floor(nowTs / MARKET_SLOT_MS)) ensureMarketSlot(slot);

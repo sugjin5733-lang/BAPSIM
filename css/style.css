@@ -607,3 +607,17 @@ body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 
   min-width: 260px;
 }
 #hotlineToolbarBtn:not(.hidden) { display: flex; }
+
+/* 🖤 블랙 클럽 */
+.black-club-motto p { font-size: 10px; line-height: 1.5; color: rgba(255,255,255,.72); font-weight: 700; letter-spacing: .01em; }
+.black-club-panel {
+  background: radial-gradient(120% 70% at 50% -10%, rgba(253,230,138,.16), transparent 60%), linear-gradient(180deg, #121214 0%, #050505 100%);
+  border: 1px solid rgba(253,230,138,.5);
+  box-shadow: 0 0 40px -12px rgba(253,230,138,.5);
+}
+.club-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; border-radius: 12px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); }
+.policy-chip {
+  font-size: 11px; color: #fff; padding: 4px 10px; border-radius: 999px;
+  background: linear-gradient(160deg, #1c1c1e, #050505); border: 1px solid rgba(253,230,138,.7);
+  box-shadow: 0 4px 14px -6px rgba(253,230,138,.7);
+}

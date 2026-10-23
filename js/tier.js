@@ -42,7 +42,8 @@ function loadTierFromUser(val) {
       blackUntil: Number(val && val.blackUntil) || 0,
       blessDay: String((val && val.tierBlessDay) || ''),
       vipDay: String((val && val.vipDay) || ''),
-      vipAt: Number(val && val.vipAt) || 0
+      vipAt: Number(val && val.vipAt) || 0,
+      vipAlertOff: !!(val && val.vipAlertOff)
     };
   }
   refreshTierUI();
@@ -110,6 +111,7 @@ setInterval(() => tierDailyPerks(), 10 * 60 * 1000);
 let vipAnnouncedAt = 0;
 function announceBlackEntrance(justJoined = false) {
   if (!canSyncToCloud() || !isBlack()) return;
+  if (myTier.vipAlertOff && !justJoined) return; // 블랙 클럽에서 입장 알림을 끈 경우
   const now = tierNow();
   const last = Math.max(vipAnnouncedAt, Number(myTier.vipAt) || 0);
   if (!justJoined && now - last < 10 * 60 * 1000) return;
