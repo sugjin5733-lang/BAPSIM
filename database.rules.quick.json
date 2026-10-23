@@ -1,0 +1,113 @@
+{
+  "rules": {
+    ".read": "auth != null",
+    "restaurants": {
+      ".write": "auth != null"
+    },
+    "groups": {
+      ".write": "auth != null"
+    },
+    "lobby_messages": {
+      ".write": "auth != null"
+    },
+    "lobby_votes": {
+      ".write": "auth != null"
+    },
+    "messages": {
+      ".write": "auth != null"
+    },
+    "online_users": {
+      ".write": "auth != null"
+    },
+    "point_requests": {
+      ".write": "auth != null"
+    },
+    "rename_requests": {
+      ".write": "auth != null"
+    },
+    "user_uids": {
+      ".write": "auth != null"
+    },
+    "signup_requests": {
+      ".write": "auth != null"
+    },
+    "game_feed": {
+      ".write": "auth != null"
+    },
+    "seasons": {
+      ".write": "auth != null"
+    },
+    "duels": {
+      ".write": "auth != null"
+    },
+    "transfers": {
+      ".write": "auth != null"
+    },
+    "bank": {
+      ".write": "auth != null"
+    },
+    "market": {
+      ".write": "auth != null"
+    },
+    "tamper_reports": {
+      ".write": "auth != null"
+    },
+    "hotline": {
+      ".write": "auth != null"
+    },
+    "policies": {
+      ".write": "auth != null"
+    },
+    "policy_log": {
+      ".write": "auth != null"
+    },
+    "judgments": {
+      ".write": "auth != null"
+    },
+    "site_notice": {
+      ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true)"
+    },
+    "banned_users": {
+      ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true)"
+    },
+    "admin_snapshots": {
+      ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true)"
+    },
+    "admin_backups": {
+      ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true)"
+    },
+    "meta": {
+      ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true)"
+    },
+    "user_points": {
+      ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true)",
+      "$nick": {
+        ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || (auth != null && data.exists() && data.child('uid').val() === auth.uid)",
+        "uid": {
+          ".validate": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || newData.val() === data.val()"
+        },
+        "status": {
+          ".validate": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || newData.val() === data.val()"
+        },
+        "approved": {
+          ".validate": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || newData.val() === data.val()"
+        },
+        "points": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000000000"
+        },
+        "owed": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000000000"
+        },
+        "enhanceLevel": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 30"
+        }
+      }
+    },
+    "point_logs": {
+      ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true)",
+      "$nick": {
+        ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || (auth != null && root.child('user_points').child($nick).child('uid').val() === auth.uid)"
+      }
+    }
+  }
+}

@@ -1,6 +1,16 @@
 // 밥심 - 관리자 대시보드
 
+// 🔒 관리자 함수는 관리자 구글 계정으로 로그인했을 때만 실행 (콘솔에서 함수를 불러도 막힘)
+//    ※ 콘솔에서 DB에 직접 쓰는 건 Firebase 보안 규칙으로만 막을 수 있음
+function requireAdmin() {
+  if (typeof isAdmin !== 'undefined' && isAdmin === true) return true;
+  try { if (typeof reportTamper === 'function') reportTamper('관리자 기능 무단 호출'); } catch (e) {}
+  alert('관리자만 할 수 있어요.');
+  return false;
+}
+
 function adminEquipSelf() {
+  if (!requireAdmin()) return;
   myNickBg = 'nb-admin';
   myNickColor = '#ffffff';
   myNickSymbol = '👑';
@@ -12,6 +22,7 @@ function adminEquipSelf() {
 }
 
 function adminSendSpecialSticker(stickerType) {
+  if (!requireAdmin()) return;
   const chatPath = currentGroupId === 'lobby' ? 'lobby_messages' : `groups/${currentGroupId}/messages`;
   db.ref(chatPath).push({
     uid: authUser.uid,
@@ -151,6 +162,7 @@ function renderAdminSignupRequests() {
 }
 
 async function adminApproveRequest(uid, silent = false) {
+  if (!requireAdmin()) return;
   try {
     const reqSnap = await db.ref(`signup_requests/${uid}`).once('value');
     const r = reqSnap.val();
@@ -193,6 +205,7 @@ async function adminApproveRequest(uid, silent = false) {
 }
 
 async function adminRejectRequest(uid) {
+  if (!requireAdmin()) return;
   const snap = await db.ref(`signup_requests/${uid}`).once('value');
   const r = snap.val();
   if (!r) return;
@@ -271,6 +284,7 @@ async function removeUserRecords(nick, extra = {}) {
 }
 
 async function adminDeleteUser(nick) {
+  if (!requireAdmin()) return;
   if (!confirm(`[${nick}] 회원을 삭제하시겠습니까?\n해당 회원의 데이터가 초기화됩니다.`)) return;
   try {
     await removeUserRecords(nick);
@@ -281,6 +295,7 @@ async function adminDeleteUser(nick) {
 }
 
 async function adminBanUser(nick) {
+  if (!requireAdmin()) return;
   if (!confirm(`🚨 경고: [${nick}] 회원을 영구 차단하시겠습니까?\n차단된 닉네임은 다시는 사용할 수 없으며, 모든 계정 정보가 즉시 삭제됩니다.`)) return;
   try {
     await removeUserRecords(nick, { [`banned_users/${nick}`]: { nickname: nick, bannedAt: Date.now() } });
@@ -313,6 +328,7 @@ function attachAdminHotline() {
   }, onDbError);
 }
 async function adminReplyHotline(uid, id) {
+  if (!requireAdmin()) return;
   const el = document.getElementById(`hl_${id}`);
   const reply = (el && el.value || '').trim().slice(0, 500);
   if (!reply) return;
@@ -385,6 +401,7 @@ async function adminRevokeBadge() {
 }
 
 function adminManageUserItems(nick) {
+  if (!requireAdmin()) return;
   const choice = prompt(`[${nick}] 회원의 아이템 관리\n1: 모든 아이템 몰수 및 인벤토리 영구 삭제\n2: 코스믹 레인보우 선물\n3: 태양의 겁화 선물\n4: 원하는 배지 클래스명 직접 입력\n\n번호를 입력하세요:`);
   if (!choice) return;
 
@@ -431,6 +448,7 @@ function adminManageUserItems(nick) {
 }
 
 function adminQuickSetPoint(nick) {
+  if (!requireAdmin()) return;
   const val = prompt(`[${nick}] 회원의 새 포인트 값을 입력하세요:`);
   if (val === null) return;
   const num = parseInt(String(val).replace(/[,\s]/g, ''), 10);
@@ -446,7 +464,7 @@ function adminQuickSetPoint(nick) {
       }
       // 내역에 남김 (나중에 "기록 없는 포인트"로 오해하지 않도록)
       const key = db.ref(`point_logs/${nick}`).push().key;
-      db.ref(`point_logs/${nick}/${key}`).set({ d: num - old, r: '🛡️ 관리자 포인트 조정', bal: num, ts: firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
+      db.ref(`point_logs/${nick}/${key}`).set({ d: num - old, r: '🛡️ 관리자 포인트 조정', bal: num, ts: firebase.database.ServerValue.TIMESTAMP, by: currentUser.nickname, byUid: authUser && authUser.uid }).catch(() => {});
       if (currentUser.nickname === nick) {
         userPoints = num;
         updatePointsUI(false);
@@ -523,6 +541,7 @@ async function handleAdminSeasonReset() {
 }
 
 function handleAdminResetAllItems() {
+  if (!requireAdmin()) return;
   const confirmCode = prompt("🚨 경고: 모든 회원의 보유 아이템 및 착용 치장이 전부 몰수 및 삭제됩니다!\n진행하시려면 '아이템삭제'를 입력하세요.");
   if (confirmCode !== "아이템삭제") return alert("아이템 몰수 작업이 취소되었습니다.");
 
@@ -551,6 +570,7 @@ function handleAdminResetAllItems() {
 }
 
 function handleAdminResetAllPoints() {
+  if (!requireAdmin()) return;
   const confirmCode = prompt("경고: 모든 회원의 보유 포인트가 '0P'로 초기화됩니다!\n진행하시려면 '초기화'를 입력하세요.");
   if (confirmCode !== "초기화") return alert("초기화가 취소되었습니다.");
 
@@ -570,6 +590,7 @@ function handleAdminResetAllPoints() {
 }
 
 async function handleAdminResetAllVotes() {
+  if (!requireAdmin()) return;
   if (!confirm('오늘 모든 그룹의 투표를 리셋하시겠습니까?\n(투표는 매일 자동으로 새로 시작되므로 보통은 필요 없어요)')) return;
   const snap = await db.ref('groups').once('value');
   const updates = { lobby_votes: null };
@@ -614,6 +635,7 @@ function renderAdminGroupList() {
 }
 
 function adminDeleteGroup(gid, gname) {
+  if (!requireAdmin()) return;
   if (!confirm(`[${gname}] 그룹방을 완전히 삭제하시겠습니까?`)) return;
   db.ref(`groups/${gid}`).remove(() => {
     if (currentGroupId === gid) enterGroup('lobby', '전체 공개 로비');
@@ -655,6 +677,7 @@ function loadPendingPointRequests() {
 }
 
 function approvePointRequest(reqId, nickname, amount) {
+  if (!requireAdmin()) return;
   db.ref(`point_requests/${reqId}/status`).set('approved');
   db.ref(`user_points/${nickname}/points`).transaction((curr) => (curr || 0) + amount);
   alert('승인 완료');
@@ -838,6 +861,7 @@ async function renderAnomalyPanel() {
 }
 
 async function adminConfiscateGameItems(nick) {
+  if (!requireAdmin()) return;
   if (!confirm(`[${nick}] 회원의 반찬 카드, 강화 아이템, 받은 세트 보상 기록을 모두 몰수할까요?\n(포인트는 [포인트] 버튼으로 따로 조정하세요)`)) return;
   try {
     await db.ref(`user_points/${nick}`).update({ cards: null, items: null, setsClaimed: null });
@@ -873,6 +897,7 @@ function renderAdminRenameRequests() {
 }
 
 async function adminApproveRename(uid) {
+  if (!requireAdmin()) return;
   try {
     const r = (await db.ref(`rename_requests/${uid}`).once('value')).val();
     if (!r) return alert('요청을 찾을 수 없어요.');
@@ -909,6 +934,7 @@ async function adminApproveRename(uid) {
 }
 
 async function adminRejectRename(uid) {
+  if (!requireAdmin()) return;
   const r = (await db.ref(`rename_requests/${uid}`).once('value')).val();
   if (!r) return;
   if (!confirm(`[${r.from}] → [${r.to}] 요청을 거절하고 ${(r.paid || 0).toLocaleString()}P를 환불할까요?`)) return;
