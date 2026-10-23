@@ -678,7 +678,7 @@ function riceMarket(ts) {
   // 🖤 블랙 정책 '시세 부양' 진행 중이면 그 배율로 고정 (모든 회원)
   if (typeof policyMarket === 'function' && ts >= nowTs - 1000) {
     const pm = policyMarket();
-    if (pm) return { mult: pm.mult, label: '🖤 블랙 시세 부양', tone: 'up2', slot, endsAt, policy: pm.by };
+    if (pm) return { mult: pm.mult, label: (typeof isBlack === 'function' && isBlack()) ? '🖤 블랙 시세 부양' : '🖤 블랙의 영향', tone: 'up2', slot, endsAt, policy: pm.by };
   }
   const rec = marketCache[slot];
   if (!rec) {

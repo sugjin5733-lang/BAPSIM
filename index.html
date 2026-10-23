@@ -11,7 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Black+Han+Sans&family=Rubik+Glitch&family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261023p">
+  <link rel="stylesheet" href="css/style.css?v=20261023q">
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white relative">
 
@@ -597,20 +597,25 @@
         <div>
           <div class="text-[10px] font-black tracking-[0.35em] text-amber-300">PRESTIGE BLACK CLUB</div>
           <h3 class="font-black text-lg">🖤 프레스티지 블랙 클럽</h3>
-          <p class="text-[11px] text-slate-400 mt-0.5">밥심에 영향력을 행사하는 사람들의 공간</p>
+          <p class="text-[11px] text-slate-400 mt-0.5">프레스티지 블랙 클럽에서 뵙겠습니다.</p>
           <div id="blackClubStatus" class="text-[11px] mt-1.5"></div>
         </div>
         <button onclick="closeBlackClub()" class="text-slate-400 hover:text-white text-sm p-1">✕</button>
       </div>
-      <div class="space-y-2">
+      <div id="clubTeaser" class="text-center py-8 space-y-3">
+        <div class="text-5xl opacity-80">🖤</div>
+        <div class="text-sm font-black text-amber-200 tracking-wide">초대받은 자만 들어올 수 있습니다</div>
+        <p class="text-[11px] text-slate-400 leading-relaxed">프레스티지 블랙은 밥심에 영향력을 행사할 수 있습니다.<br>그 방법은 클럽 안에서만 공개됩니다.</p>
+      </div>
+      <div id="clubSecPolicies" class="space-y-2 hidden">
         <span class="text-xs font-extrabold text-amber-100">🏛️ 정책 행사 <span class="text-[10px] font-bold text-slate-400">· 모든 회원에게 적용 · 비용의 10%는 은행, 나머지 소각</span></span>
         <div id="blackClubPolicies" class="space-y-1.5"></div>
       </div>
-      <div class="space-y-2">
+      <div id="clubSecRanking" class="space-y-2 hidden">
         <span class="text-xs font-extrabold text-amber-100">🏆 블랙 랭킹 <span class="text-[10px] font-bold text-slate-400">· 클럽 회원만 열람 · 자산 = 포인트+보류+예치금</span></span>
         <div id="blackClubRanking" class="space-y-1.5"></div>
       </div>
-      <div class="space-y-2">
+      <div id="clubSecPerks" class="space-y-2 hidden">
         <span class="text-xs font-extrabold text-amber-100">⚙️ 내 혜택 관리</span>
         <div id="blackClubPerks" class="space-y-1.5 text-xs"></div>
       </div>
@@ -1494,24 +1499,24 @@
     </div>
   </div>
 
-  <script src="js/core.js?v=20261023p"></script>
-  <script src="js/auth.js?v=20261023p"></script>
-  <script src="js/enhance.js?v=20261023p"></script>
-  <script src="js/shop.js?v=20261023p"></script>
-  <script src="js/chat.js?v=20261023p"></script>
-  <script src="js/games.js?v=20261023p"></script>
-  <script src="js/admin.js?v=20261023p"></script>
-  <script src="js/ranking.js?v=20261023p"></script>
-  <script src="js/restaurants.js?v=20261023p"></script>
-  <script src="js/tools.js?v=20261023p"></script>
-  <script src="js/feed.js?v=20261023p"></script>
-  <script src="js/bank.js?v=20261023p"></script>
-  <script src="js/tier.js?v=20261023p"></script>
-  <script src="js/club.js?v=20261023p"></script>
-  <script src="js/cards.js?v=20261023p"></script>
-  <script src="js/season.js?v=20261023p"></script>
-  <script src="js/duel.js?v=20261023p"></script>
-  <script src="js/predict.js?v=20261023p"></script>
-  <script src="js/main.js?v=20261023p"></script>
+  <script src="js/core.js?v=20261023q"></script>
+  <script src="js/auth.js?v=20261023q"></script>
+  <script src="js/enhance.js?v=20261023q"></script>
+  <script src="js/shop.js?v=20261023q"></script>
+  <script src="js/chat.js?v=20261023q"></script>
+  <script src="js/games.js?v=20261023q"></script>
+  <script src="js/admin.js?v=20261023q"></script>
+  <script src="js/ranking.js?v=20261023q"></script>
+  <script src="js/restaurants.js?v=20261023q"></script>
+  <script src="js/tools.js?v=20261023q"></script>
+  <script src="js/feed.js?v=20261023q"></script>
+  <script src="js/bank.js?v=20261023q"></script>
+  <script src="js/tier.js?v=20261023q"></script>
+  <script src="js/club.js?v=20261023q"></script>
+  <script src="js/cards.js?v=20261023q"></script>
+  <script src="js/season.js?v=20261023q"></script>
+  <script src="js/duel.js?v=20261023q"></script>
+  <script src="js/predict.js?v=20261023q"></script>
+  <script src="js/main.js?v=20261023q"></script>
 </body>
 </html>

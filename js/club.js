@@ -106,18 +106,19 @@ async function activatePolicy(type) {
         if (r.committed) cleared.push(BLACK_POLICIES[t].name);
       } catch (e) {}
     }
-    if (typeof postFeed === 'function') postFeed('policy', `⏱️ 블랙 클럽 쿨타임 초기화! ${cleared.join('·') || '정책'}을 바로 다시 쓸 수 있어요`, 'legendary', true);
+    if (typeof postFeed === 'function') postFeed('policy', '🖤 프레스티지 블랙 클럽이 밥심에 영향력을 행사했습니다', 'legendary', true);
     if (window.confetti) confetti({ particleCount: 140, spread: 110, colors: ['#0a0a0a', '#fde68a', '#ffffff'] });
     return;
   }
   if (type === 'hammer') {
     // 대상자 화면이 접속하는 즉시(또는 다음 접속 때) 스스로 0으로 만듦
     db.ref(`judgments/${target}`).push({ by: currentUser.nickname, uid: authUser.uid, type: 'hammer', at: firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
-    if (typeof postFeed === 'function') postFeed('policy', `⚖️ 심판의 망치! [${target}] 님의 포인트가 0이 되었습니다`, 'legendary', true);
+    if (typeof postFeed === 'function') postFeed('policy', '⚖️ 프레스티지 블랙 클럽의 심판이 내려졌습니다', 'legendary', true);
     if (window.confetti) confetti({ particleCount: 160, spread: 120, colors: ['#0a0a0a', '#fde68a', '#ffffff'] });
     return;
   }
-  if (typeof postFeed === 'function') postFeed('policy', type === 'speaker' ? `📢 ${text}` : `🖤 [${def.name}] 발동! ${def.desc}`, 'legendary', true);
+  // 대중에게는 무엇을 했는지 밝히지 않음 (확성기는 메시지 자체가 목적이라 그대로)
+  if (typeof postFeed === 'function') postFeed('policy', type === 'speaker' ? `📢 ${text}` : '🖤 프레스티지 블랙 클럽이 밥심에 영향력을 행사했습니다', 'legendary', true);
   if (window.confetti) confetti({ particleCount: 160, spread: 120, colors: ['#0a0a0a', '#fde68a', '#ffffff'] });
 }
 
@@ -125,11 +126,26 @@ async function activatePolicy(type) {
 function renderPolicyBanner() {
   const bar = document.getElementById('policyBanner');
   if (!bar) return;
-  const items = Object.keys(BLACK_POLICIES).filter(t => t !== 'hammer' && policyActive(t)).map(t => {
-    const p = activePolicies[t], d = BLACK_POLICIES[t];
-    if (t === 'speaker') return `<span class="policy-chip">📢 <b>${esc(p.by)}</b>: ${esc(p.text || '')} <span class="opacity-70">${policyLeftText(t)}</span></span>`;
-    return `<span class="policy-chip">${d.icon} <b>${esc(p.by)}</b>님의 ${d.name}${t === 'market' ? ` x${(p.mult || 2).toFixed(2)}` : ''} <span class="opacity-70">${policyLeftText(t)} 남음</span></span>`;
-  });
+  const black = typeof isBlack === 'function' && isBlack();
+  const live = Object.keys(BLACK_POLICIES).filter(t => t !== 'hammer' && t !== 'reset' && policyActive(t));
+  let items;
+  if (black) {
+    items = live.map(t => {
+      const p = activePolicies[t], d = BLACK_POLICIES[t];
+      if (t === 'speaker') return `<span class="policy-chip">📢 <b>${esc(p.by)}</b>: ${esc(p.text || '')} <span class="opacity-70">${policyLeftText(t)}</span></span>`;
+      return `<span class="policy-chip">${d.icon} <b>${esc(p.by)}</b>님의 ${d.name}${t === 'market' ? ` x${(p.mult || 2).toFixed(2)}` : ''} <span class="opacity-70">${policyLeftText(t)} 남음</span></span>`;
+    });
+  } else {
+    // 일반 회원: 확성기 메시지만 보이고, 나머지는 무엇인지 밝히지 않음
+    items = [];
+    if (live.includes('speaker')) items.push(`<span class="policy-chip">📢 ${esc(activePolicies.speaker.text || '')}</span>`);
+    const hidden = live.filter(t => t !== 'speaker');
+    if (hidden.length) {
+      const left = Math.max(...hidden.map(t => activePolicies[t].until)) - clubNow();
+      const s = Math.max(0, Math.ceil(left / 1000));
+      items.push(`<span class="policy-chip">🖤 블랙 클럽의 영향력이 행사되고 있습니다 <span class="opacity-70">${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}</span></span>`);
+    }
+  }
   bar.classList.toggle('hidden', items.length === 0);
   bar.innerHTML = items.join('');
 }
@@ -160,6 +176,10 @@ function renderBlackClub() {
     ? `<span class="text-emerald-300 font-black">● 회원</span> · ${tierDaysLeft(myTier.blackUntil).toFixed(1)}일 남음 <button onclick="buyTier('black')" class="ml-2 bg-white/10 border border-white/20 text-white font-bold px-2 py-0.5 rounded-lg text-[10px]">7일 연장</button>`
     : `<span class="text-slate-400">회원 전용 공간이에요.</span> <button onclick="closeBlackClub(); openPrestigeModal()" class="ml-2 bg-amber-300 text-slate-950 font-black px-2 py-0.5 rounded-lg text-[10px]">블랙 가입하러 가기</button>`;
 
+  ['clubSecPolicies', 'clubSecRanking', 'clubSecPerks'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.toggle('hidden', !black); });
+  const teaser = document.getElementById('clubTeaser');
+  if (teaser) teaser.classList.toggle('hidden', black);
+  if (!black) return; // 비회원에게는 클럽 기능을 보여주지 않음
   const perks = document.getElementById('blackClubPerks');
   if (perks) {
     if (!black) { perks.innerHTML = '<div class="text-[11px] text-slate-400 text-center py-3">🔒 블랙 회원이 되면 여기서 모든 혜택을 관리할 수 있어요.</div>'; }
@@ -207,6 +227,7 @@ function renderBlackClubPolicies() {
   const box = document.getElementById('blackClubPolicies');
   if (!box) return;
   const black = typeof isBlack === 'function' && isBlack();
+  if (!black) { box.innerHTML = ''; return; } // 비회원 화면에는 정책 목록 자체를 만들지 않음
   box.innerHTML = Object.entries(BLACK_POLICIES).map(([t, d]) => {
     const on = policyActive(t), cd = policyCooldownLeft(t);
     const last = activePolicies[t];
@@ -244,7 +265,7 @@ async function executeJudgment(ref) {
   if (lostPts > 0) addPoints(-lostPts, `⚖️ 심판의 망치 (${String(got.by || '?').slice(0, 20)})`);
   myOwed = 0;
   updatePointsUI();
-  alert(`⚖️ 프레스티지 블랙 [${got.by}] 님이 심판의 망치를 내렸어요.\n포인트 ${lostPts.toLocaleString()}P${lostOwed ? ` + 보류 ${lostOwed.toLocaleString()}P` : ''}가 0이 되었습니다.`);
+  alert(`⚖️ 프레스티지 블랙 클럽의 심판이 내려졌습니다.\n포인트 ${lostPts.toLocaleString()}P${lostOwed ? ` + 보류 ${lostOwed.toLocaleString()}P` : ''}가 0이 되었습니다.`);
 
 }
 setInterval(watchMyJudgments, 5000);
