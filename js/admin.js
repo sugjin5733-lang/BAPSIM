@@ -433,16 +433,26 @@ function adminManageUserItems(nick) {
 function adminQuickSetPoint(nick) {
   const val = prompt(`[${nick}] 회원의 새 포인트 값을 입력하세요:`);
   if (val === null) return;
-  const num = parseInt(val, 10);
-  if (isNaN(num)) return alert("숫자만 입력 가능합니다.");
-
-  db.ref(`user_points/${nick}/points`).set(num, (err) => {
-    if (err) return alert("오류: " + err.message);
-    if (currentUser.nickname === nick) {
-      userPoints = num;
-      updatePointsUI(false);
-    }
-    alert(`[${nick}] 님의 포인트가 ${num.toLocaleString()}P 로 변경되었습니다.`);
+  const num = parseInt(String(val).replace(/[,\s]/g, ''), 10);
+  if (isNaN(num) || num < 0) return alert("0 이상의 숫자만 입력 가능합니다.");
+  db.ref(`user_points/${nick}/points`).once('value').then(snap => {
+    const old = Number(snap.val()) || 0;
+    db.ref(`user_points/${nick}/points`).set(num, (err) => {
+      if (err) {
+        const hint = /PERMISSION_DENIED/i.test(err.message || err.code || '')
+          ? `\n\n※ 서버 보안 규칙이 이 값을 막았어요. 대부분 '포인트 최대값' 제한 때문이에요.\nFirebase 콘솔 → Realtime Database → 규칙에서 points 의 최대값(예: 100000000)을 더 크게 바꾸고 게시해 주세요.`
+          : '';
+        return alert("오류: " + err.message + hint);
+      }
+      // 내역에 남김 (나중에 "기록 없는 포인트"로 오해하지 않도록)
+      const key = db.ref(`point_logs/${nick}`).push().key;
+      db.ref(`point_logs/${nick}/${key}`).set({ d: num - old, r: '🛡️ 관리자 포인트 조정', bal: num, ts: firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
+      if (currentUser.nickname === nick) {
+        userPoints = num;
+        updatePointsUI(false);
+      }
+      alert(`[${nick}] 님의 포인트가 ${num.toLocaleString()}P 로 변경되었습니다.`);
+    });
   });
 }
 
