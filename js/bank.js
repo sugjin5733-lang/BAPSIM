@@ -288,7 +288,7 @@ function computeSettlement(users, day) {
   const now = bankNow();
   const list = Object.values(users || {})
     .filter(u => u && u.nickname && (u.status === 'approved' || u.approved === true))
-    .map(u => ({ nick: u.nickname, total: (Number(u.points) || 0) + (Number(u.owed) || 0), u }));
+    .map(u => ({ nick: u.nickname, total: (Number(u.points) || 0) + (Number(u.owed) || 0) + (Number(u.deposit && u.deposit.amt) || 0), u }));
 
   const taxes = {};
   [...list].sort((a, b) => b.total - a.total).slice(0, TAX_TABLE.length).forEach((x, i) => {
@@ -460,14 +460,14 @@ async function loadPrestigeMembers() {
     }
     const users = (await db.ref('user_points').once('value')).val() || {};
     prestigeMembers = Object.values(users)
-      .filter(u => u && u.nickname && u.prestigePass === true && (u.status === 'approved' || u.approved === true))
+      .filter(u => u && u.nickname && (Number(u.blackUntil) || 0) > bankNow() && (u.status === 'approved' || u.approved === true)) // 🖤 블랙 회원 명단
       .sort((a, b) => ((Number(b.points) || 0) + (Number(b.owed) || 0)) - ((Number(a.points) || 0) + (Number(a.owed) || 0)));
   } catch (e) { /* 읽기 실패 시 이전 목록 유지 */ }
   renderPrestigeBanner();
 }
 function renderPrestigeBanner() {
   // 넓은 화면: 왼쪽 사이드 카드 / 좁은 화면: 본문 위 띠 배너
-  const empty = '<span class="text-[11px] text-amber-100/70">아직 아무도 없어요 · 첫 번째 프레스티지 회원의 자리가 비어 있어요</span>';
+  const empty = '<span class="text-[11px] text-amber-100/70">아직 아무도 없어요 · 첫 번째 프레스티지 블랙의 자리가 비어 있어요</span>';
   const chips = prestigeMembers.map(u => `<span class="prestige-member-chip">${nickHTML(u, 'text-[11px]')}</span>`).join('');
   [['prestigeMemberBanner', 'prestigeMemberList', 'prestigeMemberCount'], ['prestigeSideCard', 'prestigeSideList', 'prestigeSideCount']].forEach(([w, l, c]) => {
     const wrap = document.getElementById(w), list = document.getElementById(l), count = document.getElementById(c);
@@ -487,7 +487,7 @@ setInterval(loadPrestigeMembers, 5 * 60 * 1000);
 function owedEtaSeconds() {
   if (myOwed <= 0) return 0;
   const room = Math.max(0, availableBudget() - (userPoints - serverPoints));
-  return Math.max(0, myOwed - room) / BUDGET_RATE + 30; // 30초마다 지급하므로 여유
+  return Math.max(0, myOwed - room) / (typeof budgetRate === 'function' ? budgetRate() : BUDGET_RATE) + 30; // 30초마다 지급하므로 여유
 }
 function fmtEtaClock(sec) {
   const t = Date.now() + sec * 1000;

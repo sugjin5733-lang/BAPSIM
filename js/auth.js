@@ -134,6 +134,8 @@ async function handleAuthChange(user) {
 function detachUserListeners() {
   if (typeof stopBank === 'function') stopBank();
   if (typeof myBowlLoaded !== 'undefined') { myBowlLoaded = false; myBowl = { cost: 0, tries: 0 }; }
+  if (typeof hotlineRef !== 'undefined' && hotlineRef) { hotlineRef.off(); hotlineRef = null; hotlineItems = {}; }
+  if (typeof myTier !== 'undefined') { myTier = { goldUntil: 0, blackUntil: 0, blessDay: '', vipDay: '' }; myDeposit = { amt: 0, since: 0 }; tierDirty = false; depositDirty = false; }
   if (myPointsRef) { myPointsRef.off(); myPointsRef = null; }
   if (myRequestRef) { myRequestRef.off(); myRequestRef = null; }
   if (typeof renameRef !== 'undefined' && renameRef) { renameRef.off(); renameRef = null; myRenameRequest = null; }
@@ -179,6 +181,7 @@ function loadGameStateFromUser(val) {
   if (typeof loadBankFromUser === "function") loadBankFromUser(val);
   if (typeof loadBoostFromUser === "function") loadBoostFromUser(val);
   if (typeof loadBowlFromUser === "function") loadBowlFromUser(val);
+  if (typeof loadTierFromUser === "function") loadTierFromUser(val);
 }
 
 function bindNickname(nick) {
@@ -323,7 +326,8 @@ function availableBudget() {
   if (isAdmin) return Infinity; // 관리자는 규칙에서도 예외
   if (myBudgetAt == null) return 0;
   const estNow = Date.now() + serverTimeOffset - 2000; // 서버 시각보다 2초 보수적으로
-  return Math.min(BUDGET_CAP, (myBudget || 0) + BUDGET_RATE * Math.max(0, estNow - myBudgetAt) / 1000);
+  const rate = typeof budgetRate === 'function' ? budgetRate() : BUDGET_RATE; // 💎 골드·블랙은 시간당 한도↑
+  return Math.min(BUDGET_CAP, (myBudget || 0) + rate * Math.max(0, estNow - myBudgetAt) / 1000);
 }
 
 // 예전엔 한도를 넘으면 보상을 통째로 되돌렸는데(= 미지급), 이제는 넘친 만큼 '보류 포인트'로
@@ -415,6 +419,7 @@ function syncUserPointToCloud() {
     put('budget', Math.floor(Math.min(BUDGET_CAP, avail - delta)));
     put('budgetAt', firebase.database.ServerValue.TIMESTAMP);
     put('owed', myOwed);
+    if (typeof tierSyncFields === 'function') tierSyncFields(put);
     if (typeof boostDirty !== 'undefined' && boostDirty) {
       put('boostUsed', myBoost.used);
       put('boostSince', boostNewWindow ? firebase.database.ServerValue.TIMESTAMP : myBoost.since);
@@ -422,6 +427,7 @@ function syncUserPointToCloud() {
     }
   }
 
+  if (typeof tierSyncFields === 'function') tierSyncFields(put); // (분기 안에서 이미 실었으면 아무것도 안 함)
   if (pendingLog.length) {
     // 같은 사유는 하나로 합쳐서 기록
     const merged = [];
@@ -467,7 +473,7 @@ function showOwedToast(excess) {
   if (!box) return;
   const el = document.createElement('div');
   el.className = 'feed-toast feed-toast-plain';
-  const hours = excess / BUDGET_RATE / 3600;
+  const hours = excess / (typeof budgetRate === 'function' ? budgetRate() : BUDGET_RATE) / 3600;
   el.innerHTML = `<div class="text-[10px] font-black text-slate-500">⏳ 보류 포인트</div>
     <div class="text-xs font-bold">짧은 시간에 너무 많이 벌어서 <strong>${excess.toLocaleString()}P</strong>는 보류됐어요.<br>
     ${hours < 1 ? `약 ${Math.max(1, Math.ceil(hours * 60))}분` : `약 ${Math.ceil(hours)}시간`} 안에 자동으로 들어와요. (사라지지 않아요!)</div>`;
@@ -622,6 +628,7 @@ function attachUserPointListener() {
       settleMyBets();
       renderDuelArena();
       if (typeof initBank === 'function') initBank();
+      if (typeof tierDailyPerks === 'function') setTimeout(() => { tierDailyPerks(); if (isBlack()) attachHotline(); }, 2500);
     }
   }, onDbError);
 }

@@ -309,6 +309,7 @@ function renderPrestigeShop() {
   renderBadgeCards(document.getElementById('prestigeBadgeList'), SHOP_DATA.bgs.filter(b => isPrestigeItem(b.cost)));
   renderRenameSection();
   if (typeof renderDonorBadgeBox === 'function') renderDonorBadgeBox();
+  if (typeof renderTierBox === 'function') renderTierBox();
 }
 
 function buyPrestigePass() {

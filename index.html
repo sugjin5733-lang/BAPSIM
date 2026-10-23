@@ -11,7 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Black+Han+Sans&family=Rubik+Glitch&family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261023d">
+  <link rel="stylesheet" href="css/style.css?v=20261023e">
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white relative">
 
@@ -27,8 +27,8 @@
     <div id="prestigeSideCard" onclick="openPrestigeModal()" class="hidden prestige-member-banner cursor-pointer rounded-3xl p-4 shadow-xl space-y-2.5">
       <div class="flex items-center justify-between border-b border-amber-400/25 pb-2">
         <div>
-          <div class="text-[9px] font-black tracking-[0.25em] text-amber-300">PRESTIGE</div>
-          <div class="text-xs font-black text-white">👑 프레스티지 회원</div>
+          <div class="text-[9px] font-black tracking-[0.25em] text-amber-300">PRESTIGE BLACK</div>
+          <div class="text-xs font-black text-white">🖤 프레스티지 블랙</div>
         </div>
         <span id="prestigeSideCount" class="text-[10px] font-black bg-amber-400/15 text-amber-200 border border-amber-400/40 px-2 py-0.5 rounded-full">0명</span>
       </div>
@@ -193,8 +193,8 @@
     <!-- 👑 프레스티지 회원 배너 -->
     <div id="prestigeMemberBanner" onclick="openPrestigeModal()" class="hidden 2xl:!hidden prestige-member-banner cursor-pointer rounded-2xl px-4 py-2.5 flex items-center gap-3">
       <div class="shrink-0 text-center leading-tight">
-        <div class="text-[9px] font-black tracking-[0.25em] text-amber-300">PRESTIGE</div>
-        <div class="text-xs font-black text-white">👑 회원 <span id="prestigeMemberCount" class="text-amber-300">0명</span></div>
+        <div class="text-[9px] font-black tracking-[0.25em] text-amber-300">PRESTIGE BLACK</div>
+        <div class="text-xs font-black text-white">🖤 블랙 <span id="prestigeMemberCount" class="text-amber-300">0명</span></div>
       </div>
       <div class="h-8 w-px bg-amber-400/30 shrink-0"></div>
       <div id="prestigeMemberList" class="flex-1 min-w-0 flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5"></div>
@@ -535,6 +535,10 @@
       </div>
       <div id="prestigePassBox"></div>
       <div class="space-y-2.5">
+        <span class="text-xs font-extrabold text-amber-100">💎 멤버십 (입장권 보유자 전용 · 7일 단위)</span>
+        <div id="prestigeTierBox" class="space-y-2"></div>
+      </div>
+      <div class="space-y-2.5">
         <span class="text-xs font-extrabold text-sky-100">🎗️ 기부 천사 배지</span>
         <div id="prestigeDonorBox"></div>
       </div>
@@ -569,6 +573,22 @@
         <div id="owedOptions" class="space-y-1.5"></div>
       </div>
       <p class="text-[10px] text-slate-400 leading-relaxed">1시간 단축 = 보류 72,000P 즉시 지급. 24시간 안에서 첫 1시간 20,000P, 한 시간 더할 때마다 4,000P씩 비싸져요 (하루 최대 12시간). 사이트를 꺼 두면 지급이 멈추지만, 한도는 최대 30만P까지 쌓였다가 다시 접속하면 한 번에 들어와요.</p>
+    </div>
+  </div>
+
+  <!-- 📞 블랙 전용 관리자 핫라인 -->
+  <div id="hotlineModal" class="hidden fixed inset-0 z-[55] bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this) closeHotline()">
+    <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h3 class="font-black text-slate-900 text-base">📞 관리자 핫라인</h3>
+          <p class="text-[11px] text-slate-400">🖤 프레스티지 블랙 전용 · 관리자에게 바로 전달돼요</p>
+        </div>
+        <button onclick="closeHotline()" class="text-slate-400 hover:text-slate-700 text-sm p-1">✕</button>
+      </div>
+      <textarea id="hotlineText" rows="3" maxlength="500" placeholder="불편한 점, 포인트 문의, 건의사항 무엇이든" class="w-full border border-slate-200 rounded-xl p-3 text-xs"></textarea>
+      <button onclick="sendHotline()" class="w-full bg-slate-950 text-amber-200 font-black py-2.5 rounded-xl text-xs">보내기</button>
+      <div id="hotlineList" class="space-y-2 text-xs"></div>
     </div>
   </div>
 
@@ -1096,6 +1116,12 @@
         </button>
       </div>
 
+      <!-- 📞 블랙 핫라인 -->
+      <div class="space-y-2">
+        <h4 class="font-extrabold text-xs text-slate-800">📞 블랙 회원 핫라인 <span id="adminHotlineCount" class="text-[11px] bg-slate-900 text-amber-200 font-bold px-2 py-0.5 rounded-full">0건 대기</span></h4>
+        <div id="adminHotlineList" class="space-y-1.5 max-h-60 overflow-y-auto border rounded-2xl p-2 bg-slate-50 text-xs"></div>
+      </div>
+
       <!-- 🎖️ 배지 지급 -->
       <div class="space-y-2 p-3 rounded-2xl border border-amber-200 bg-amber-50/60">
         <h4 class="font-extrabold text-xs text-slate-800">🎖️ 배지 지급 (시즌 배지 · 특별 배지)</h4>
@@ -1417,22 +1443,23 @@
     </div>
   </div>
 
-  <script src="js/core.js?v=20261023d"></script>
-  <script src="js/auth.js?v=20261023d"></script>
-  <script src="js/enhance.js?v=20261023d"></script>
-  <script src="js/shop.js?v=20261023d"></script>
-  <script src="js/chat.js?v=20261023d"></script>
-  <script src="js/games.js?v=20261023d"></script>
-  <script src="js/admin.js?v=20261023d"></script>
-  <script src="js/ranking.js?v=20261023d"></script>
-  <script src="js/restaurants.js?v=20261023d"></script>
-  <script src="js/tools.js?v=20261023d"></script>
-  <script src="js/feed.js?v=20261023d"></script>
-  <script src="js/bank.js?v=20261023d"></script>
-  <script src="js/cards.js?v=20261023d"></script>
-  <script src="js/season.js?v=20261023d"></script>
-  <script src="js/duel.js?v=20261023d"></script>
-  <script src="js/predict.js?v=20261023d"></script>
-  <script src="js/main.js?v=20261023d"></script>
+  <script src="js/core.js?v=20261023e"></script>
+  <script src="js/auth.js?v=20261023e"></script>
+  <script src="js/enhance.js?v=20261023e"></script>
+  <script src="js/shop.js?v=20261023e"></script>
+  <script src="js/chat.js?v=20261023e"></script>
+  <script src="js/games.js?v=20261023e"></script>
+  <script src="js/admin.js?v=20261023e"></script>
+  <script src="js/ranking.js?v=20261023e"></script>
+  <script src="js/restaurants.js?v=20261023e"></script>
+  <script src="js/tools.js?v=20261023e"></script>
+  <script src="js/feed.js?v=20261023e"></script>
+  <script src="js/bank.js?v=20261023e"></script>
+  <script src="js/tier.js?v=20261023e"></script>
+  <script src="js/cards.js?v=20261023e"></script>
+  <script src="js/season.js?v=20261023e"></script>
+  <script src="js/duel.js?v=20261023e"></script>
+  <script src="js/predict.js?v=20261023e"></script>
+  <script src="js/main.js?v=20261023e"></script>
 </body>
 </html>

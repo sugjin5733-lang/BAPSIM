@@ -564,3 +564,15 @@ body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 
   animation: richSweep 3.5s linear infinite;
 }
 @keyframes richSweep { from { background-position: 160% 0, 0 0, 0 0, 0 0, 0 0; } to { background-position: -160% 0, 0 0, 0 0, 0 0, 0 0; } }
+
+/* 💎 멤버십 카드 */
+.tier-card.tier-gold {
+  background: linear-gradient(110deg, #b8860b 0%, #fde68a 45%, #fff7d6 50%, #fde68a 55%, #b8860b 100%);
+  background-size: 250% 100%; animation: shimmerSweep 4s linear infinite;
+  color: #1c1407; border: 1px solid #fde68a;
+}
+.tier-card.tier-black {
+  background: radial-gradient(120% 120% at 100% 0%, rgba(253,230,138,.18), transparent 50%), linear-gradient(160deg, #1a1a1a 0%, #050505 100%);
+  color: #ffffff; border: 1px solid rgba(253,230,138,.55);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 8px 24px -12px rgba(253,230,138,.5);
+}

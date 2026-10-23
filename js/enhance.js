@@ -168,10 +168,10 @@ function updateEnhanceUI() {
   const baseSell = currentEnhanceLevel > 0 ? ENHANCE_PROBABILITIES[currentEnhanceLevel - 1].reward : 0;
   const bs = document.getElementById('enhanceBowlStats');
   if (bs) bs.innerHTML = currentEnhanceLevel > 0 || myBowl.tries > 0
-    ? `🧾 이 밥: 0강부터 <strong class="text-slate-200">${myBowl.tries.toLocaleString()}회</strong> 강화 · 들인 돈 <strong class="text-amber-300">${myBowl.cost.toLocaleString()}P</strong>${baseSell > 0 && !mk.pending ? ` · 지금 팔면 ${(() => { const r = Math.round(baseSell * mk.mult); const n = r - Math.round(r * SELL_FEE_RATE) - myBowl.cost; return `<strong class="${n >= 0 ? 'text-emerald-300' : 'text-rose-300'}">${n >= 0 ? '+' : ''}${n.toLocaleString()}P</strong>`; })()}` : ''}`
+    ? `🧾 이 밥: 0강부터 <strong class="text-slate-200">${myBowl.tries.toLocaleString()}회</strong> 강화 · 들인 돈 <strong class="text-amber-300">${myBowl.cost.toLocaleString()}P</strong>${baseSell > 0 && !mk.pending ? ` · 지금 팔면 ${(() => { const r = Math.round(baseSell * mk.mult); const n = r - Math.round(r * curSellFee()) - myBowl.cost; return `<strong class="${n >= 0 ? 'text-emerald-300' : 'text-rose-300'}">${n >= 0 ? '+' : ''}${n.toLocaleString()}P</strong>`; })()}` : ''}`
     : '🧾 새 밥: 강화를 시작하면 들인 돈과 횟수가 쌓여요';
   if (sellText) sellText.innerHTML = baseSell > 0
-    ? `<span class="text-slate-500 text-[10px] font-bold">${baseSell.toLocaleString()} × ${mk.mult.toFixed(2)} − 수수료 10% =</span> ${(Math.round(baseSell * mk.mult) - Math.round(Math.round(baseSell * mk.mult) * SELL_FEE_RATE)).toLocaleString()}P`
+    ? `<span class="text-slate-500 text-[10px] font-bold">${baseSell.toLocaleString()} × ${mk.mult.toFixed(2)} − 수수료 ${Math.round(curSellFee() * 100)}% =</span> ${(Math.round(baseSell * mk.mult) - Math.round(Math.round(baseSell * mk.mult) * curSellFee())).toLocaleString()}P`
     : '0P';
   renderRiceMarket();
   renderEnhanceRecommend();
@@ -242,7 +242,8 @@ function toggleEnhanceProbTable() {
 // ==========================================
 // 🏦 수수료 (전부 은행 금고로): 아이템 구매 10%, 밥 판매 10%
 const ITEM_FEE_RATE = 0.1;
-const SELL_FEE_RATE = 0.1;
+const SELL_FEE_RATE = 0.1; // 기본. 💎 골드 8% · 블랙 5% → sellFeeRate()
+function curSellFee() { return typeof sellFeeRate === 'function' ? sellFeeRate() : SELL_FEE_RATE; }
 function itemFee(kind) { return Math.round(ENHANCE_ITEMS[kind].price * ITEM_FEE_RATE); }
 function itemTotal(kind) { return ENHANCE_ITEMS[kind].price + itemFee(kind); }
 const ENHANCE_ITEMS = {
@@ -706,15 +707,15 @@ function sellEnhancedBowl() {
   const base = ENHANCE_PROBABILITIES[currentEnhanceLevel - 1].reward;
   const reward = Math.round(base * mk.mult);
   const currentName = BOWL_EVOLUTION[currentEnhanceLevel]?.name || '밥';
-  const fee0 = Math.round(reward * SELL_FEE_RATE);
+  const fee0 = Math.round(reward * curSellFee());
   const inv = myBowl.cost, tries = myBowl.tries;
-  if (!confirm(`+${currentEnhanceLevel}강 [${currentName}] 판매\n\n기본 ${base.toLocaleString()}P × 시세 ${mk.label} x${mk.mult.toFixed(2)} = ${reward.toLocaleString()}P\n🏦 판매 수수료 10%: -${fee0.toLocaleString()}P (은행 금고로)\n받는 금액: ${(reward - fee0).toLocaleString()}P\n\n🧾 이 밥에 들인 돈: ${inv.toLocaleString()}P (강화 ${tries.toLocaleString()}회)\n예상 손익: ${(reward - fee0 - inv) >= 0 ? '+' : ''}${(reward - fee0 - inv).toLocaleString()}P (대박 손님 제외)\n\n판매 후 밥은 +0단계로 리셋됩니다. 판매할까요?`)) return;
+  if (!confirm(`+${currentEnhanceLevel}강 [${currentName}] 판매\n\n기본 ${base.toLocaleString()}P × 시세 ${mk.label} x${mk.mult.toFixed(2)} = ${reward.toLocaleString()}P\n🏦 판매 수수료 ${Math.round(curSellFee() * 100)}%: -${fee0.toLocaleString()}P (은행 금고로)\n받는 금액: ${(reward - fee0).toLocaleString()}P\n\n🧾 이 밥에 들인 돈: ${inv.toLocaleString()}P (강화 ${tries.toLocaleString()}회)\n예상 손익: ${(reward - fee0 - inv) >= 0 ? '+' : ''}${(reward - fee0 - inv).toLocaleString()}P (대박 손님 제외)\n\n판매 후 밥은 +0단계로 리셋됩니다. 판매할까요?`)) return;
   if (riceMarket().slot !== mk.slot) return alert('⏳ 그 사이 시세가 바뀌었어요! 새 시세를 확인하고 다시 눌러주세요.');
 
   // 🎉 대박 손님: 5% 확률로 판매금 2배
   const lucky = Math.random() < 0.05;
   const gross = lucky ? reward * 2 : reward;
-  const sellFee = Math.round(gross * SELL_FEE_RATE);
+  const sellFee = Math.round(gross * curSellFee());
   const paid = gross - sellFee;
   const owedBefore = myOwed;
   addPoints(paid, `+${currentEnhanceLevel}강 밥 판매 (시세 x${mk.mult.toFixed(2)}${lucky ? ' · 대박 손님 x2' : ''} · 수수료 ${sellFee.toLocaleString()}P 제외)`);

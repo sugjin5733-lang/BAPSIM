@@ -62,6 +62,7 @@ function openAdminDashboard() {
   window.__adminListenersAttached = true;
   migrateLegacyData();
   initAdminBadgeGrant();
+  attachAdminHotline();
   renderAnomalyPanel();
   loadPendingPointRequests();
   renderAdminUserList();
@@ -287,6 +288,35 @@ async function adminBanUser(nick) {
   } catch (err) {
     alert("차단 처리 오류: " + err.message);
   }
+}
+
+// ==========================================
+// 📞 블랙 회원 핫라인 (hotline/{uid}/{id})
+// ==========================================
+function attachAdminHotline() {
+  db.ref('hotline').on('value', snap => {
+    const all = snap.val() || {};
+    const rows = [];
+    Object.entries(all).forEach(([uid, items]) => Object.entries(items || {}).forEach(([id, h]) => rows.push({ uid, id, ...h })));
+    rows.sort((a, b) => (!!a.reply - !!b.reply) || (b.ts || 0) - (a.ts || 0));
+    const waiting = rows.filter(r => !r.reply).length;
+    const cnt = document.getElementById('adminHotlineCount');
+    if (cnt) cnt.textContent = `${waiting}건 대기`;
+    const box = document.getElementById('adminHotlineList');
+    if (!box) return;
+    box.innerHTML = rows.length === 0 ? '<div class="text-center text-slate-400 py-3">핫라인 민원이 없어요</div>'
+      : rows.map(r => `<div class="p-2.5 bg-white border ${r.reply ? 'border-slate-200' : 'border-amber-300'} rounded-xl space-y-1.5">
+          <div class="flex justify-between gap-2"><strong>🖤 ${esc(r.nick || '?')}</strong><span class="text-[10px] text-slate-400">${r.ts ? new Date(r.ts).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }) : ''}</span></div>
+          <div class="whitespace-pre-line text-slate-800">${esc(r.text || '')}</div>
+          ${r.reply ? `<div class="bg-amber-50 border border-amber-200 rounded-lg p-1.5 text-amber-900">↳ ${esc(r.reply)}</div>` : `<div class="flex gap-1"><input id="hl_${esc(r.id)}" placeholder="답변 입력" class="flex-1 border rounded-lg px-2 py-1 text-[11px]"><button onclick="adminReplyHotline(${jsArg(r.uid)}, ${jsArg(r.id)})" class="bg-slate-900 text-white font-bold px-2 rounded-lg text-[10px]">답변</button></div>`}
+        </div>`).join('');
+  }, onDbError);
+}
+async function adminReplyHotline(uid, id) {
+  const el = document.getElementById(`hl_${id}`);
+  const reply = (el && el.value || '').trim().slice(0, 500);
+  if (!reply) return;
+  await db.ref(`hotline/${uid}/${id}`).update({ reply, replyAt: firebase.database.ServerValue.TIMESTAMP });
 }
 
 // ==========================================

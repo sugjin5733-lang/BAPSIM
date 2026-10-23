@@ -237,7 +237,7 @@ function spinSlotMachine(times = 1) {
     const slot2 = document.getElementById('slot2');
     const slot3 = document.getElementById('slot3');
 
-    const isMegaJackpot = Math.random() < SLOT_MEGA_CHANCE;
+    const isMegaJackpot = Math.random() < (typeof slotMegaChance === 'function' ? slotMegaChance() : SLOT_MEGA_CHANCE);
 
     let counter = 0;
     const spinTimer = setInterval(() => {
@@ -293,7 +293,7 @@ function spinSlotMachine(times = 1) {
     let totalWon = 0;
 
     for (let i = 0; i < times; i++) {
-      if (Math.random() < SLOT_MEGA_CHANCE) {
+      if (Math.random() < (typeof slotMegaChance === 'function' ? slotMegaChance() : SLOT_MEGA_CHANCE)) {
         megaJackpots++;
         totalWon += SLOT_MEGA_PRIZE;
         continue;
