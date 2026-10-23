@@ -539,7 +539,9 @@ function luckTail(ps, k) {
   let s = 0; for (let j = k; j < dp.length; j++) s += dp[j];
   return Math.min(1, s);
 }
-function luckReport(logsObj) {
+// 새 시세(DB 기록) 적용 이후 판매만 검사 (예전 탭이 닫힐 시간 여유)
+const MARKET_V2_FROM = Date.parse('2026-10-23T18:00:00+09:00');
+function luckReport(logsObj, market) {
   const rows = Object.values(logsObj || {}).filter(r => r && typeof r.ts === 'number' && typeof r.r === 'string').sort((a, b) => a.ts - b.ts);
   const t = {};
   const sales = rows.filter(r => /밥 판매/.test(r.r)), lucky = sales.filter(r => /대박 손님/.test(r.r)).length;
@@ -560,12 +562,22 @@ function luckReport(logsObj) {
     if (L >= 5 && (N === L + 1 || N === L + 2)) { jp.push(JUMP_CHANCE); if (N === L + 2) jumps++; }
   }
   t['대박 점프'] = { n: jp.length, k: jumps, p: luckTail(jp, jumps) };
+  // 🧾 판매 시세 위조: 내역의 "시세 xN" 이 그 분(또는 직전 분)의 실제 DB 시세와 다르면
+  let forged = 0, checked = 0;
+  if (market) sales.filter(r => r.ts >= MARKET_V2_FROM).forEach(r => {
+    const m = r.r.match(/시세 x([\d.]+)/); if (!m) return;
+    const slot = Math.floor(r.ts / MARKET_SLOT_MS);
+    const cands = [slot, slot - 1].map(s => market[s] ? marketFromAt(s, market[s].at).mult : null).filter(x => x != null);
+    if (!cands.length) return;
+    checked++;
+    if (!cands.some(x => Math.abs(x - Number(m[1])) < 0.006)) forged++;
+  });
   const sec = {};
   rows.filter(r => /베팅/.test(r.r)).forEach(r => { const k = Math.floor(r.ts / 1000); sec[k] = (sec[k] || 0) + 1; });
   const maxSec = Math.max(0, ...Object.values(sec));
   const minP = Math.min(...Object.values(t).map(x => x.p));
   const worst = Object.entries(t).sort((a, b) => a[1].p - b[1].p)[0];
-  return { minP, maxSec, worst, tests: t };
+  return { minP, maxSec, worst, tests: t, forged, checked };
 }
 function oneInText(p) {
   if (p <= 0) return '사실상 0';
@@ -585,7 +597,8 @@ async function renderAnomalyPanel() {
     const users = (await db.ref('user_points').once('value')).val() || {};
     await takeDailySnapshot(users);
     // 운 조작 검사용 포인트 내역 + 난수 조작 시도 기록
-    let allLogs = {}, tamper = {};
+    let allLogs = {}, tamper = {}, market = {};
+    try { market = (await db.ref('market').once('value')).val() || {}; } catch (e) {}
     try { allLogs = (await db.ref('point_logs').once('value')).val() || {}; } catch (e) {}
     try {
       const tr = (await db.ref('tamper_reports').limitToLast(300).once('value')).val() || {};
@@ -613,7 +626,8 @@ async function renderAnomalyPanel() {
       if ((u.enhanceLevel || 0) >= ANOMALY.enhance) { flags.push(`🍚 +${u.enhanceLevel}강`); score += 1; }
       if (p && (u.enhanceLevel || 0) >= 15 && p.enhanceLevel <= 5) { flags.push(`⚡ 하루 만에 +${p.enhanceLevel}→+${u.enhanceLevel}강`); score += 2; }
       if (typeof u.budget === 'number' && u.budget < 3000 && (u.points || 0) > 20000) { flags.push('⏳ 지금 포인트 한도까지 쓰는 중'); score += 1; }
-      const luck = allLogs[u.nickname] ? luckReport(allLogs[u.nickname]) : null;
+      const luck = allLogs[u.nickname] ? luckReport(allLogs[u.nickname], market) : null;
+      if (luck && luck.forged > 0) { flags.push(`🧾 판매 시세 위조 ${luck.forged}/${luck.checked}건 (실제 시세와 다름)`); score += 25; }
       if (luck && luck.minP < 1e-6) { const [name, x] = luck.worst; flags.push(`🚨 확률 조작 의심: ${name} ${x.k}/${x.n} (우연일 확률 ${oneInText(x.p)})`); score += 20; }
       else if (luck && luck.minP < 1e-3) { const [name, x] = luck.worst; flags.push(`🎲 운이 너무 좋음: ${name} ${x.k}/${x.n} (${oneInText(x.p)})`); score += 4; }
       if (luck && luck.maxSec >= 6) { flags.push(`🖐️ 1초에 베팅 ${luck.maxSec}번 (매크로 의심)`); score += 5; }

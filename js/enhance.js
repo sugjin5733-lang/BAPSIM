@@ -39,6 +39,14 @@ const BOWL_EVOLUTION = [
 ];
 const ENHANCE_MAX = 30;
 const NO_PROTECT_FROM = 20; // +20 → +21 시도부터 파괴 방지권 사용 불가
+// 🧾 이 밥에 들인 돈·강화 횟수 (0강에서 시작해 판매할 때까지, 파괴돼도 계속 누적). 서버 user_points/bowl
+let myBowl = { cost: 0, tries: 0 }, myBowlDirty = false, myBowlLoaded = false, lastSaleSummary = null;
+function loadBowlFromUser(val) {
+  if (myBowlLoaded) return; // 이 기기만 쓰는 값 → 처음 한 번만 읽음 (에코 덮어쓰기 방지)
+  const b = val && val.bowl;
+  myBowl = { cost: Math.max(0, Number(b && b.cost) || 0), tries: Math.max(0, Number(b && b.tries) || 0) };
+  myBowlLoaded = true;
+}
 // 🌌 초월 강화 체크: +20강 이상에서 강화하려면 직접 체크해야 함 (실수 방지). 20강 아래로 내려가거나 팔면 자동 해제
 let transcendOn = false;
 function setTranscend(on) { transcendOn = !!on; updateEnhanceUI(); }
@@ -51,42 +59,42 @@ function renderTranscend() {
 }
 function transcendBlocked() { return currentEnhanceLevel >= 20 && currentEnhanceLevel < ENHANCE_MAX && !transcendOn; }
 
-// 판매가 기준: 축복서·방지권·도박 모드를 단계마다 가장 잘 골랐을 때의 '평균 강화 비용'
-// 기대 회수율(시세 평균 + 대박 손님 포함): +1~4강 약 92% · +5~9강 약 101% · +10~14강 약 103% · +15~20강 약 105%
-// → 잘 하면 항상 조금씩 남고, 시세 폭등·대박 손님·대박 점프가 겹치면 크게 터짐
+// 판매가 기준: 축복서·방지권·도박 모드를 단계마다 가장 잘 골랐을 때의 '평균 강화 비용'(아이템 수수료 포함)
+// 판매가 = 평균 비용 × 1.157 → 평균 시세(1.006)·대박 손님(+5%)·판매 수수료(10%)까지 반영하면
+// 잘 하는 사람 기준 평균 회수율 약 110% (2026-10-23 조정, 열심히 하면 일주일 안에 프레스티지 가능)
 const ENHANCE_PROBABILITIES = [
-  { level: 1,  success: 100.0, keep: 0.0,  break: 0.0,  reward: 90 },
-  { level: 2,  success: 90.6,  keep: 9.4,  break: 0.0,  reward: 180 },
-  { level: 3,  success: 79.8,  keep: 20.2, break: 0.0,  reward: 290 },
-  { level: 4,  success: 70.1,  keep: 27.9, break: 2.1,  reward: 420 },
-  { level: 5,  success: 59.9,  keep: 35.0, break: 5.1,  reward: 660 },
-  { level: 6,  success: 50.1,  keep: 39.7, break: 10.2, reward: 940 },
-  { level: 7,  success: 45.4,  keep: 44.1, break: 10.5, reward: 1250 },
-  { level: 8,  success: 40.2,  keep: 49.6, break: 10.3, reward: 1750 },
-  { level: 9,  success: 33.6,  keep: 56.6, break: 9.8,  reward: 2350 },
-  { level: 10, success: 29.3,  keep: 61.4, break: 9.5,  reward: 3250 },
-  { level: 11, success: 25.5,  keep: 64.5, break: 10.1, reward: 4150 },
-  { level: 12, success: 23.6,  keep: 65.9, break: 10.6, reward: 5500 },
-  { level: 13, success: 19.3,  keep: 70.2, break: 10.5, reward: 7850 },
-  { level: 14, success: 18.1,  keep: 72.3, break: 9.7,  reward: 11000 },
-  { level: 15, success: 14.8,  keep: 75.5, break: 9.9,  reward: 16500 },
-  { level: 16, success: 13.1,  keep: 78.0, break: 9.8,  reward: 19000 },
-  { level: 17, success: 10.9,  keep: 76.8, break: 12.6, reward: 24500 },
-  { level: 18, success: 9.9,   keep: 79.9, break: 10.7, reward: 35500 },
-  { level: 19, success: 4.7,   keep: 86.2, break: 10.6, reward: 58000 },
-  { level: 20, success: 3.3,   keep: 90.3, break: 9.9,  reward: 94000 },
+  { level: 1,  success: 100.0, keep: 0.0,  break: 0.0,  reward: 120 },
+  { level: 2,  success: 90.6,  keep: 9.4,  break: 0.0,  reward: 240 },
+  { level: 3,  success: 79.8,  keep: 20.2, break: 0.0,  reward: 390 },
+  { level: 4,  success: 70.1,  keep: 27.9, break: 2.1,  reward: 560 },
+  { level: 5,  success: 59.9,  keep: 35.0, break: 5.1,  reward: 810 },
+  { level: 6,  success: 50.1,  keep: 39.7, break: 10.2, reward: 1200 },
+  { level: 7,  success: 45.4,  keep: 44.1, break: 10.5, reward: 1600 },
+  { level: 8,  success: 40.2,  keep: 49.6, break: 10.3, reward: 2200 },
+  { level: 9,  success: 33.6,  keep: 56.6, break: 9.8,  reward: 3000 },
+  { level: 10, success: 29.3,  keep: 61.4, break: 9.5,  reward: 4200 },
+  { level: 11, success: 25.5,  keep: 64.5, break: 10.1, reward: 5300 },
+  { level: 12, success: 23.6,  keep: 65.9, break: 10.6, reward: 7000 },
+  { level: 13, success: 19.3,  keep: 70.2, break: 10.5, reward: 10000 },
+  { level: 14, success: 18.1,  keep: 72.3, break: 9.7,  reward: 14000 },
+  { level: 15, success: 14.8,  keep: 75.5, break: 9.9,  reward: 21000 },
+  { level: 16, success: 13.1,  keep: 78.0, break: 9.8,  reward: 24000 },
+  { level: 17, success: 10.9,  keep: 76.8, break: 12.6, reward: 32000 },
+  { level: 18, success: 9.9,   keep: 79.9, break: 10.7, reward: 46000 },
+  { level: 19, success: 4.7,   keep: 86.2, break: 10.6, reward: 75000 },
+  { level: 20, success: 3.3,   keep: 90.3, break: 9.9,  reward: 120000 },
   // 초월 구간: 방지권 없이 축복·도박만. 여기서 타면 안전 구간 없이 +0강으로 리셋
   // 단계별 최적 플레이 기대 비용(0강부터): +25 약 56만 · +28 약 159만 · +30 약 270만P → 판매가는 그 약 90%
-  { level: 21, success: 3.2,   keep: 94.3, break: 2.5,  reward: 126000 },
-  { level: 22, success: 3.0,   keep: 94.0, break: 3.0,  reward: 183000 },
-  { level: 23, success: 2.8,   keep: 93.7, break: 3.5,  reward: 305000 },
-  { level: 24, success: 2.6,   keep: 93.4, break: 4.0,  reward: 355000 },
-  { level: 25, success: 2.4,   keep: 93.1, break: 4.5,  reward: 500000 },
-  { level: 26, success: 2.2,   keep: 92.8, break: 5.0,  reward: 883000 },
-  { level: 27, success: 2.0,   keep: 92.5, break: 5.5,  reward: 1010000 },
-  { level: 28, success: 1.8,   keep: 92.2, break: 6.0,  reward: 1430000 },
-  { level: 29, success: 1.6,   keep: 91.9, break: 6.5,  reward: 1620000 },
-  { level: 30, success: 1.5,   keep: 91.5, break: 7.0,  reward: 2430000 }
+  { level: 21, success: 3.2,   keep: 94.3, break: 2.5,  reward: 160000 },
+  { level: 22, success: 3.0,   keep: 94.0, break: 3.0,  reward: 230000 },
+  { level: 23, success: 2.8,   keep: 93.7, break: 3.5,  reward: 390000 },
+  { level: 24, success: 2.6,   keep: 93.4, break: 4.0,  reward: 450000 },
+  { level: 25, success: 2.4,   keep: 93.1, break: 4.5,  reward: 640000 },
+  { level: 26, success: 2.2,   keep: 92.8, break: 5.0,  reward: 1130000 },
+  { level: 27, success: 2.0,   keep: 92.5, break: 5.5,  reward: 1290000 },
+  { level: 28, success: 1.8,   keep: 92.2, break: 6.0,  reward: 1830000 },
+  { level: 29, success: 1.6,   keep: 91.9, break: 6.5,  reward: 2070000 },
+  { level: 30, success: 1.5,   keep: 91.5, break: 7.0,  reward: 3110000 }
 ];
 
 // 안전 구간: 한 번 도달한 5/10/15강 아래로는 떨어지지 않음
@@ -158,6 +166,10 @@ function updateEnhanceUI() {
 
   const mk = riceMarket();
   const baseSell = currentEnhanceLevel > 0 ? ENHANCE_PROBABILITIES[currentEnhanceLevel - 1].reward : 0;
+  const bs = document.getElementById('enhanceBowlStats');
+  if (bs) bs.innerHTML = currentEnhanceLevel > 0 || myBowl.tries > 0
+    ? `🧾 이 밥: 0강부터 <strong class="text-slate-200">${myBowl.tries.toLocaleString()}회</strong> 강화 · 들인 돈 <strong class="text-amber-300">${myBowl.cost.toLocaleString()}P</strong>${baseSell > 0 && !mk.pending ? ` · 지금 팔면 ${(() => { const r = Math.round(baseSell * mk.mult); const n = r - Math.round(r * SELL_FEE_RATE) - myBowl.cost; return `<strong class="${n >= 0 ? 'text-emerald-300' : 'text-rose-300'}">${n >= 0 ? '+' : ''}${n.toLocaleString()}P</strong>`; })()}` : ''}`
+    : '🧾 새 밥: 강화를 시작하면 들인 돈과 횟수가 쌓여요';
   if (sellText) sellText.innerHTML = baseSell > 0
     ? `<span class="text-slate-500 text-[10px] font-bold">${baseSell.toLocaleString()} × ${mk.mult.toFixed(2)} − 수수료 10% =</span> ${(Math.round(baseSell * mk.mult) - Math.round(Math.round(baseSell * mk.mult) * SELL_FEE_RATE)).toLocaleString()}P`
     : '0P';
@@ -482,7 +494,6 @@ function runEnhancement() {
   const autoBought = autoBuyForAttempt(cost);
   addPoints(-cost, `${gambleMode ? '도박 ' : ''}강화 시도 +${currentEnhanceLevel}→+${currentEnhanceLevel + 1}`);
   enhanceActionTimestamps.push(now);
-  updatePointsUI();
 
   const odds = effectiveOdds(currentEnhanceLevel);
   const alertEl = document.getElementById('enhanceStatusAlert');
@@ -492,6 +503,10 @@ function runEnhancement() {
   const roll = Math.random() * 100;
   const tags = [autoBought.length ? '🛒자동구매' : '', odds.gamble ? '🎲도박' : '', odds.golden ? '🌞골든타임' : '', odds.blessed ? '✨축복' : '', odds.protected ? '🛡️방지권' : ''].filter(Boolean).join(' ');
   consumeUsedItems(odds);
+  myBowl.tries += 1;
+  myBowl.cost += cost + (odds.protected ? itemTotal('protect') : 0) + (odds.blessed && odds.blessGain > 0 ? itemTotal('bless') : 0);
+  myBowlDirty = true;
+  updatePointsUI(); // 포인트 차감 + 이 밥 기록을 한 번에 저장
 
   // 결과는 바로 확정·저장하고, 화면 공개만 연출로 늦춤 (창을 닫아도 결과는 그대로)
   let outcome, msg, jumped = false;
@@ -557,25 +572,80 @@ function seeded01(seed) {
   t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
   return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 }
-function riceMarket(ts) {
-  if (ts == null) ts = Date.now() + (typeof serverTimeOffset === 'number' ? serverTimeOffset : 0);
-  const slot = Math.floor(ts / MARKET_SLOT_MS);
-  const u = seeded01(slot * 7919 + 13), v = seeded01(slot * 104729 + 7);
+// 🔒 시세는 이제 미리 알 수 없음 (2026-10-23)
+//  - 예전: 시각만으로 계산하는 공개 공식 → 콘솔로 미래 폭등 시각을 알 수 있었고,
+//          serverTimeOffset 을 바꾸면 지금 당장 원하는 시세로 팔 수도 있었음
+//  - 지금: 매분 그 분에 처음 시세를 본 사람이 market/{분} 에 '서버 시각(밀리초)'만 기록하고,
+//          시세는 그 밀리초 값으로 정해짐 → 아무도 미리 모르고, 기록하는 사람도 고를 수 없음
+//          (보안 규칙: 그 1분 안에만, 한 번만, at 은 서버 시각이어야 함)
+//  - 시계는 ServerClock(잠긴 객체)만 사용 → 콘솔로 시차를 바꿔도 소용없음
+const ServerClock = (() => {
+  let off = 0;
+  db.ref('.info/serverTimeOffset').on('value', s => { off = Number(s.val()) || 0; });
+  return Object.freeze({ now: () => Date.now() + off });
+})();
+const marketCache = {};      // 분(slot) → { s, at }
+const marketEnsuring = {};
+let marketFeedOn = false;
+function startMarketFeed() {
+  if (marketFeedOn) return;
+  marketFeedOn = true;
+  db.ref('market').orderByKey().limitToLast(15).on('value', snap => {
+    const v = snap.val() || {};
+    Object.entries(v).forEach(([k, x]) => { if (x && typeof x.at === 'number') marketCache[k] = x; });
+    if (typeof renderRiceMarket === 'function') renderRiceMarket();
+  }, () => { marketFeedOn = false; });
+}
+function marketFromAt(slot, at) {
+  const ms = Math.floor(Number(at) % 1000000007);
+  const u = seeded01(ms * 7919 + 13), v = seeded01(ms * 104729 + slot % 100000 + 7);
   let mult, label, tone;
-  if (u < 0.003)      { mult = 2.5;              label = '💥 초폭등'; tone = 'up3'; } // 0.3% (평균 약 5.5시간에 1번)
+  if (u < 0.003)      { mult = 2.5;              label = '💥 초폭등'; tone = 'up3'; } // 0.3%
   else if (u < 0.015) { mult = 1.6 + 0.6 * v;    label = '🚀 폭등'; tone = 'up2'; }  // 1.2% (x1.6~2.2)
   else if (u < 0.12)  { mult = 1.15 + 0.15 * v;  label = '📈 상승'; tone = 'up'; }
-  else if (u < 0.76) { mult = 0.95 + 0.15 * v;  label = '➖ 보합'; tone = 'flat'; }
-  else if (u < 0.94) { mult = 0.8 + 0.1 * v;    label = '📉 하락'; tone = 'down'; }
-  else               { mult = 0.65;             label = '💀 폭락'; tone = 'down2'; }
-  mult = Math.round(mult * 100) / 100;
-  return { mult, label, tone, slot, endsAt: (slot + 1) * MARKET_SLOT_MS };
+  else if (u < 0.76)  { mult = 0.95 + 0.15 * v;  label = '➖ 보합'; tone = 'flat'; }
+  else if (u < 0.94)  { mult = 0.8 + 0.1 * v;    label = '📉 하락'; tone = 'down'; }
+  else                { mult = 0.65;             label = '💀 폭락'; tone = 'down2'; }
+  return { mult: Math.round(mult * 100) / 100, label, tone };
+}
+async function ensureMarketSlot(slot) {
+  if (marketEnsuring[slot] || marketCache[slot]) return;
+  if (typeof authUser === 'undefined' || !authUser) return;
+  marketEnsuring[slot] = true;
+  try {
+    const ref = db.ref(`market/${slot}`);
+    const res = await ref.transaction(cur => (cur ? undefined : { s: slot, at: firebase.database.ServerValue.TIMESTAMP }));
+    const val = res.snapshot && res.snapshot.val();
+    if (val && typeof val.at === 'number') marketCache[slot] = val;
+    else { const got = (await ref.once('value')).val(); if (got && typeof got.at === 'number') marketCache[slot] = got; }
+    if (Math.random() < 0.05) pruneOldMarket(slot);
+  } catch (e) { /* 다음 틱에 다시 */ }
+  finally { marketEnsuring[slot] = false; if (typeof renderRiceMarket === 'function') renderRiceMarket(); }
+}
+function pruneOldMarket(slot) {
+  db.ref('market').orderByKey().endAt(String(slot - 1500)).limitToFirst(100).once('value').then(snap => {
+    const del = {}; snap.forEach(c => { del[c.key] = null; });
+    if (Object.keys(del).length) db.ref('market').update(del).catch(() => {});
+  }).catch(() => {});
+}
+function riceMarket(ts) {
+  const nowTs = ServerClock.now();
+  if (ts == null) ts = nowTs;
+  const slot = Math.floor(ts / MARKET_SLOT_MS);
+  const endsAt = (slot + 1) * MARKET_SLOT_MS;
+  startMarketFeed();
+  const rec = marketCache[slot];
+  if (!rec) {
+    if (slot === Math.floor(nowTs / MARKET_SLOT_MS)) ensureMarketSlot(slot);
+    return { mult: 1, label: '⏳ 시세 확인 중', tone: 'flat', slot, endsAt, pending: true };
+  }
+  return Object.assign(marketFromAt(slot, rec.at), { slot, endsAt });
 }
 
 function renderRiceMarket() {
   const box = document.getElementById('riceMarketPanel');
   if (!box) return;
-  const nowTs = Date.now() + (typeof serverTimeOffset === 'number' ? serverTimeOffset : 0);
+  const nowTs = ServerClock.now();
   const mk = riceMarket(nowTs);
   const left = Math.max(0, mk.endsAt - nowTs);
   const mm = Math.floor(left / 60000), ss = Math.floor((left % 60000) / 1000);
@@ -590,7 +660,7 @@ function renderRiceMarket() {
     <div class="flex items-end justify-between gap-2 mt-1">
       <div class="${color} font-black text-lg leading-none ${mk.tone === 'up2' || mk.tone === 'up3' ? 'animate-pulse' : ''}">${mk.label} x${mk.mult.toFixed(2)}</div>
       <div class="flex items-end gap-0.5 h-7">
-        ${hist.map((h, i) => `<div title="x${h.mult.toFixed(2)}" class="w-2 rounded-sm ${h.mult >= 1.6 ? 'bg-fuchsia-400' : h.mult >= 1.15 ? 'bg-emerald-400' : h.mult >= 0.95 ? 'bg-slate-500' : 'bg-rose-400'} ${i === hist.length - 1 ? 'ring-1 ring-amber-300' : 'opacity-70'}" style="height:${Math.min(100, Math.round((h.mult - 0.5) / 2.0 * 100))}%"></div>`).join('')}
+        ${hist.map((h, i) => h.pending ? `<div title="기록 없음" class="w-2 rounded-sm bg-slate-700 opacity-40" style="height:20%"></div>` : `<div title="x${h.mult.toFixed(2)}" class="w-2 rounded-sm ${h.mult >= 1.6 ? 'bg-fuchsia-400' : h.mult >= 1.15 ? 'bg-emerald-400' : h.mult >= 0.95 ? 'bg-slate-500' : 'bg-rose-400'} ${i === hist.length - 1 ? 'ring-1 ring-amber-300' : 'opacity-70'}" style="height:${Math.min(100, Math.round((h.mult - 0.5) / 2.0 * 100))}%"></div>`).join('')}
       </div>
     </div>`;
 }
@@ -598,7 +668,7 @@ let lastSpikeAlertSlot = null;
 function checkMarketSpikeAlert() {
   const mk = riceMarket();
   if (lastSpikeAlertSlot === null) { lastSpikeAlertSlot = mk.slot; return; } // 처음 접속한 순간은 알리지 않음
-  if (mk.slot === lastSpikeAlertSlot) return;
+  if (mk.slot === lastSpikeAlertSlot || mk.pending) return;
   lastSpikeAlertSlot = mk.slot;
   if (mk.tone !== 'up3') return; // 알림은 초폭등(x2.5)만
   if (typeof canSyncToCloud === 'function' && !canSyncToCloud()) return;
@@ -632,11 +702,14 @@ function sellEnhancedBowl() {
   if (currentEnhanceLevel <= 0) return alert("현재 +0단계 밥은 판매할 수 없습니다. 강화 후 판매하세요!");
 
   const mk = riceMarket();
+  if (mk.pending) return alert('⏳ 이번 분 시세를 확인하는 중이에요. 1~2초 뒤에 다시 눌러주세요!');
   const base = ENHANCE_PROBABILITIES[currentEnhanceLevel - 1].reward;
   const reward = Math.round(base * mk.mult);
   const currentName = BOWL_EVOLUTION[currentEnhanceLevel]?.name || '밥';
   const fee0 = Math.round(reward * SELL_FEE_RATE);
-  if (!confirm(`+${currentEnhanceLevel}강 [${currentName}] 판매\n\n기본 ${base.toLocaleString()}P × 시세 ${mk.label} x${mk.mult.toFixed(2)} = ${reward.toLocaleString()}P\n🏦 판매 수수료 10%: -${fee0.toLocaleString()}P (은행 금고로)\n받는 금액: ${(reward - fee0).toLocaleString()}P\n\n판매 후 밥은 +0단계로 리셋됩니다. 판매할까요?`)) return;
+  const inv = myBowl.cost, tries = myBowl.tries;
+  if (!confirm(`+${currentEnhanceLevel}강 [${currentName}] 판매\n\n기본 ${base.toLocaleString()}P × 시세 ${mk.label} x${mk.mult.toFixed(2)} = ${reward.toLocaleString()}P\n🏦 판매 수수료 10%: -${fee0.toLocaleString()}P (은행 금고로)\n받는 금액: ${(reward - fee0).toLocaleString()}P\n\n🧾 이 밥에 들인 돈: ${inv.toLocaleString()}P (강화 ${tries.toLocaleString()}회)\n예상 손익: ${(reward - fee0 - inv) >= 0 ? '+' : ''}${(reward - fee0 - inv).toLocaleString()}P (대박 손님 제외)\n\n판매 후 밥은 +0단계로 리셋됩니다. 판매할까요?`)) return;
+  if (riceMarket().slot !== mk.slot) return alert('⏳ 그 사이 시세가 바뀌었어요! 새 시세를 확인하고 다시 눌러주세요.');
 
   // 🎉 대박 손님: 5% 확률로 판매금 2배
   const lucky = Math.random() < 0.05;
@@ -648,6 +721,8 @@ function sellEnhancedBowl() {
   if (typeof payFee === 'function') payFee(sellFee);
   const soldLvl = currentEnhanceLevel;
   currentEnhanceLevel = 0;
+  lastSaleSummary = { invest: inv, tries, paid };
+  myBowl = { cost: 0, tries: 0 };
   updatePointsUI();
   updateEnhanceUI();
   renderEnhanceTable();
@@ -677,6 +752,11 @@ function startDoubleUp(amount, soldLvl, lucky = false, held = 0) {
   renderDoubleUp(lucky
     ? `🎉 <strong class="text-amber-300">대박 손님 등장!</strong> 2배 값으로 팔려서 <strong>${amount.toLocaleString()}P</strong>를 받았어요!`
     : `💰 +${soldLvl}강 밥을 팔아 <strong>${amount.toLocaleString()}P</strong>를 받았어요!`, lucky ? 'win' : 'normal');
+  if (lastSaleSummary) {
+    const box = document.getElementById('doubleUpPanel');
+    const net = lastSaleSummary.paid - lastSaleSummary.invest;
+    if (box) box.insertAdjacentHTML('afterbegin', `<div class="text-[10px] font-bold ${net >= 0 ? 'text-emerald-300' : 'text-rose-300'}">🧾 0강부터 ${lastSaleSummary.tries.toLocaleString()}회 강화 · 들인 돈 ${lastSaleSummary.invest.toLocaleString()}P → 손익 ${net >= 0 ? '+' : ''}${net.toLocaleString()}P${lastSaleSummary.invest > 0 ? ` (${Math.round(lastSaleSummary.paid / lastSaleSummary.invest * 100)}%)` : ''}</div>`);
+  }
 }
 
 function renderDoubleUp(headline, tone = 'normal') {

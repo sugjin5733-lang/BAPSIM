@@ -107,7 +107,9 @@ async function renderSeasonRanking(container, summaryEl, myPointEl) {
 // 🏅 시즌 배지 도감: 시즌마다 한정 배지가 생기면 여기에 등록
 //  { id, cls, name, season, desc } — 지금은 아직 없음
 // ==========================================
-const SEASON_BADGE_BOOK = [];
+const SEASON_BADGE_BOOK = [
+  { id: 'beta-rich', cls: 'nb-richking', name: '💰 부자왕', season: '베타 시즌 (~10.23)', desc: '부자 랭킹 시즌 1위' }
+];
 function openSeasonBadgeBook() {
   const box = document.getElementById('seasonBadgeBookList');
   const owned = new Set((myInventory && myInventory.bgs) || []);

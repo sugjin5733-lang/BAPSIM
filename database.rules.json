@@ -70,6 +70,12 @@
       ".read": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true)",
       ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true)"
     },
+    "market": {
+      ".read": "auth != null",
+      "$slot": {
+        ".write": "auth != null && ((!data.exists() && newData.child('s').isNumber() && (newData.child('s').val() + '') === $slot && newData.child('s').val() * 60000 <= now && now < (newData.child('s').val() + 1) * 60000 + 3000 && newData.child('at').val() === now) || (!newData.exists() && data.child('at').val() < now - 86400000))"
+      }
+    },
     "tamper_reports": {
       ".read": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true)",
       "$id": {

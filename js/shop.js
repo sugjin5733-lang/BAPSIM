@@ -37,13 +37,13 @@ const SHOP_DATA = {
   ],
   bgs: [
     { id: "nb-jackpot", name: "🎰 잭팟 777 (전설의 손)", class: "nb-jackpot", cost: 777777, unlock: 'jackpot', desc: "카지노 전광 전구가 질주하고 금빛 릴이 돌아가는 배지 · 💎💎💎 슬롯 초특급 잭팟을 터뜨린 사람만 구매 가능" },
-    { id: "nb-najeon", name: "🐚 나전칠기 (명장)", class: "nb-najeon", cost: 100000000, reqLvl: 20, desc: "황금 섬광이 섞인 무지개 고리가 질주하고, 색이 흐르는 자개판 위로 금박 빛줄기와 별가루가 쏟아지는 밥심 최후의 전설 [20강 필요]" },
-    { id: "nb-ricegod", name: "🍚 천상의 밥신 (창세)", class: "nb-ricegod", cost: 10000000, reqLvl: 20, desc: "금빛 고리가 천천히 돌고 쌀알 별빛이 은은하게 빛나는 밥심의 상징 [20강 필요]" },
-    { id: "nb-cosmic", name: "🌌 코스믹 레인보우 (태초 신화)", class: "nb-cosmic", cost: 999999, reqLvl: 17, desc: "흐르는 무지개 홀로그램 위로 빛줄기가 스치는 오라 [17강 필요]" },
-    { id: "nb-solar", name: "☀️ 태양의 겁화 (솔라 플레어)", class: "nb-solar", cost: 999999, reqLvl: 17, desc: "아래에서 솟구치는 불꽃과 흩날리는 불티 [17강 필요]" },
-    { id: "nb-abyss", name: "🌋 심연의 지옥염화 (헬파이어)", class: "nb-abyss", cost: 999999, reqLvl: 17, desc: "갈라진 땅 사이로 흐르는 용암과 숨 쉬는 핏빛 열기 [17강 필요]" },
-    { id: "nb-cyberaurora", name: "💎 사이버 네온 프리즘 (환상)", class: "nb-cyberaurora", cost: 999999, reqLvl: 17, desc: "레이저 스캔과 주사선, 색이 갈라지는 네온 글자 [17강 필요]" },
-    { id: "nb-infinity", name: "♾️ 영겁의 인피니티 (절대자)", class: "nb-infinity", cost: 999999, reqLvl: 17, desc: "회전하는 황금 고리 안의 보랏빛 차원문 [17강 필요]" },
+    { id: "nb-najeon", name: "🐚 나전칠기 (명장)", class: "nb-najeon", cost: 100000000, reqLvl: 27, desc: "황금 섬광이 섞인 무지개 고리가 질주하고, 색이 흐르는 자개판 위로 금박 빛줄기와 별가루가 쏟아지는 밥심 최후의 전설 [27강 필요]" },
+    { id: "nb-ricegod", name: "🍚 천상의 밥신 (창세)", class: "nb-ricegod", cost: 10000000, reqLvl: 24, desc: "금빛 고리가 천천히 돌고 쌀알 별빛이 은은하게 빛나는 밥심의 상징 [24강 필요]" },
+    { id: "nb-cosmic", name: "🌌 코스믹 레인보우 (태초 신화)", class: "nb-cosmic", cost: 999999, reqLvl: 22, desc: "흐르는 무지개 홀로그램 위로 빛줄기가 스치는 오라 [22강 필요]" },
+    { id: "nb-solar", name: "☀️ 태양의 겁화 (솔라 플레어)", class: "nb-solar", cost: 999999, reqLvl: 22, desc: "아래에서 솟구치는 불꽃과 흩날리는 불티 [22강 필요]" },
+    { id: "nb-abyss", name: "🌋 심연의 지옥염화 (헬파이어)", class: "nb-abyss", cost: 999999, reqLvl: 22, desc: "갈라진 땅 사이로 흐르는 용암과 숨 쉬는 핏빛 열기 [22강 필요]" },
+    { id: "nb-cyberaurora", name: "💎 사이버 네온 프리즘 (환상)", class: "nb-cyberaurora", cost: 999999, reqLvl: 22, desc: "레이저 스캔과 주사선, 색이 갈라지는 네온 글자 [22강 필요]" },
+    { id: "nb-infinity", name: "♾️ 영겁의 인피니티 (절대자)", class: "nb-infinity", cost: 999999, reqLvl: 22, desc: "회전하는 황금 고리 안의 보랏빛 차원문 [22강 필요]" },
     { id: "nb-blackhole", name: "🕳️ 심연의 블랙홀 (시공 왜곡)", class: "nb-blackhole", cost: 888888, reqLvl: 12, desc: "빙글빙글 도는 강착 원반과 칠흑의 사건 지평선 [12강 필요]" },
     { id: "nb-matrix", name: "🟢 사이버 매트릭스 (디지털 네오)", class: "nb-matrix", cost: 777777, reqLvl: 12, desc: "쏟아지는 초록 코드 비와 발광 터미널 글자 [12강 필요]" },
     { id: "nb-universe", name: "🪐 다크 유니버스 (신화)", class: "nb-universe", cost: 500000, reqLvl: 12, desc: "반짝이는 별과 천천히 도는 성운 [12강 필요]" },
@@ -132,7 +132,7 @@ function renderBadgeCards(bgContainer, list) {
       const isGold = bg.cost >= 100000 && !isMythic;
 
       // 잭팟 전용 배지는 강화 단계 대신 '슬롯 초특급 잭팟 달성' 조건
-      const reqLvl = bg.unlock ? 0 : Math.max(bg.reqLvl || 0, bg.cost >= 999999 ? 17 : bg.cost >= 5000 ? 12 : 0);
+      const reqLvl = bg.unlock ? 0 : Math.max(bg.reqLvl || 0, bg.cost >= 999999 ? 22 : bg.cost >= 5000 ? 12 : 0);
       const unlockMissing = bg.unlock === 'jackpot' && !myJackpotUnlocked;
       const isUltimate = bg.cost >= 10000000;
 
@@ -186,7 +186,7 @@ function renderBadgeCards(bgContainer, list) {
 // 상점에서 팔지 않는 특별 배지 (세트 완성, 시즌 보상, 관리자 지급 등)
 const SPECIAL_BADGE_NAMES = {
   'nb-buffet': '🍱 한식뷔페 마스터', 'nb-royal': '👑 수라상 미식가', 'nb-collector': '📒 반찬 도감 완성자',
-  'nb-admin': '🛡️ 관리자', 'nb-angel': '😇 대천사의 날개'
+  'nb-admin': '🛡️ 관리자', 'nb-angel': '😇 대천사의 날개', 'nb-richking': '💰 베타 시즌 부자왕'
 };
 
 function renderOwnedSpecialBadges() {

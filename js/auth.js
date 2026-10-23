@@ -133,6 +133,7 @@ async function handleAuthChange(user) {
 
 function detachUserListeners() {
   if (typeof stopBank === 'function') stopBank();
+  if (typeof myBowlLoaded !== 'undefined') { myBowlLoaded = false; myBowl = { cost: 0, tries: 0 }; }
   if (myPointsRef) { myPointsRef.off(); myPointsRef = null; }
   if (myRequestRef) { myRequestRef.off(); myRequestRef = null; }
   if (typeof renameRef !== 'undefined' && renameRef) { renameRef.off(); renameRef = null; myRenameRequest = null; }
@@ -177,6 +178,7 @@ function loadGameStateFromUser(val) {
   if (typeof loadPrestigeFromUser === "function") loadPrestigeFromUser(val);
   if (typeof loadBankFromUser === "function") loadBankFromUser(val);
   if (typeof loadBoostFromUser === "function") loadBoostFromUser(val);
+  if (typeof loadBowlFromUser === "function") loadBowlFromUser(val);
 }
 
 function bindNickname(nick) {
@@ -391,6 +393,7 @@ function syncUserPointToCloud() {
   put('inventory', myInventory);
   put('mining', myMining);
   if (typeof dayNetLoaded !== 'undefined' && dayNetLoaded) put('dayNet', myDayNet);
+  if (typeof myBowlLoaded !== 'undefined' && myBowlLoaded) put('bowl', myBowl);
   put('updatedAt', Date.now());
 
   if (userPoints !== serverPoints || myOwed !== (lastServerState.owed || 0)) {
