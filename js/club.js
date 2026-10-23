@@ -1,6 +1,6 @@
 // 밥심 - 🖤 프레스티지 블랙 클럽
 //
-//  1) 블랙 혜택 관리: 입장 알림 on/off, 매일 축복권, 예치금, 초월 방지권, 관리자 핫라인, 멤버십 연장
+//  1) 블랙 혜택 관리: 입장 알림 on/off, 매일 축복권, 예치금, 초월 방지권, 관리자 핫라인
 //  2) 정책 행사: 큰 돈을 내고 밥심 전체에 영향을 주는 정책을 발동 (모든 회원에게 적용)
 //     - 같은 정책은 한 번에 하나만, 끝나도 쿨타임 동안 다시 못 씀
 //     - 비용의 10%는 은행 금고, 90%는 소각 (인플레 방지)
@@ -173,7 +173,7 @@ function renderBlackClub() {
   const black = typeof isBlack === 'function' && isBlack();
   const head = document.getElementById('blackClubStatus');
   if (head) head.innerHTML = black
-    ? `<span class="text-emerald-300 font-black">● 회원</span> · ${tierDaysLeft(myTier.blackUntil).toFixed(1)}일 남음 <button onclick="buyTier('black')" class="ml-2 bg-white/10 border border-white/20 text-white font-bold px-2 py-0.5 rounded-lg text-[10px]">7일 연장</button>`
+    ? `<span class="text-emerald-300 font-black">● 영구 회원</span>`
     : `<span class="text-slate-400">회원 전용 공간이에요.</span> <button onclick="closeBlackClub(); openPrestigeModal()" class="ml-2 bg-amber-300 text-slate-950 font-black px-2 py-0.5 rounded-lg text-[10px]">블랙 가입하러 가기</button>`;
 
   ['clubSecPolicies', 'clubSecRanking', 'clubSecPerks'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.toggle('hidden', !black); });

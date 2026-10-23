@@ -1,14 +1,14 @@
 // 밥심 - 💎 프레스티지 멤버십 (골드 · 블랙)
 //
-//  - 둘 다 프레스티지 상점 입장권이 있어야 가입 가능, 7일 단위 (최대 28일까지 미리 연장)
+//  - 둘 다 프레스티지 상점 입장권이 있어야 가입 가능, 한 번 사면 영구 (2026-10-23 변경: 7일 → 영구)
 //    → 한 번 사면 영원히 이득 보는 구조가 아니라 매주 포인트를 태우는 구조 (인플레 방지)
 //  - 가입비는 사라짐(소각). 예치 이자는 은행 금고에서 나감 → 새 포인트를 찍어내지 않음
 //  - 블랙은 골드 혜택을 모두 포함
 //  - 보안 규칙: goldUntil/blackUntil 은 같은 저장에서 포인트가 가입비만큼 줄어야만 늘릴 수 있고,
 //    시간당 한도(예산) 공식도 등급에 맞춰 검사함
 //
-//  골드: 7일 150만P · 판매 수수료 8% · 시간당 한도 10만P · 매일 축복권 1장
-//  블랙: 7일 500만P · 판매 수수료 5% · 시간당 한도 15만P · 매일 축복권 10장
+//  골드: 영구 150만P · 판매 수수료 8% · 시간당 한도 10만P · 매일 축복권 1장
+//  블랙: 영구 500만P · 판매 수수료 5% · 시간당 한도 15만P · 매일 축복권 10장
 //        · 은행 예치(24시간마다 3%, 상한 없음, 금고에서 지급 → 금고가 비면 못 받음) · 슬롯 초특급 확률 5배
 //        · 접속 시 전체 알림(하루 1번) · 관리자 핫라인 · 배너 명단
 
@@ -17,6 +17,8 @@ const TIERS = {
   black: { key: 'black', name: '프레스티지 블랙', icon: '🖤', price: 5000000, days: 7, fee: 0.05, perHour: 150000, bless: 10 }
 };
 const TIER_MAX_DAYS = 28;
+const TIER_PERMANENT = 4102444800000; // 2100-01-01 = 영구
+function tierIsPermanent(until) { return until >= TIER_PERMANENT - 86400000; }
 const DEPOSIT_MIN = 10000;
 const DEPOSIT_RATE = 0.03;          // 24시간마다 3% (상한 없음, 은행 금고에서 지급)
 const BLACK_SLOT_MULT = 5;          // 슬롯 초특급 확률 배수 (10배면 슬롯이 이득이 돼서 5배)
@@ -74,14 +76,13 @@ function buyTier(key) {
   if (!myPrestigePass) return alert('👑 프레스티지 상점 입장권이 있어야 가입할 수 있어요.');
   const now = tierNow();
   const cur = key === 'black' ? myTier.blackUntil : myTier.goldUntil;
-  const base = Math.max(now, cur);
-  const next = base + t.days * 86400000;
-  if (next - now > TIER_MAX_DAYS * 86400000 + 60000) return alert(`최대 ${TIER_MAX_DAYS}일까지만 미리 연장할 수 있어요.`);
+  if (tierIsPermanent(cur)) return alert(`이미 ${t.name} 영구 회원이에요.`);
+  const next = TIER_PERMANENT;
   if (userPoints < t.price) return alert(`❌ 포인트가 부족해요! (${t.name} ${t.days}일 ${t.price.toLocaleString()}P)`);
   if (key === 'gold' && isBlack()) return alert('이미 블랙 회원이에요. 블랙에는 골드 혜택이 모두 들어 있어요.');
-  if (!confirm(`${t.icon} ${t.name} ${cur > now ? '연장' : '가입'}\n\n${t.days}일 · ${t.price.toLocaleString()}P\n만료: ${new Date(next).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false })}\n\n진행할까요?`)) return;
+  if (!confirm(`${t.icon} ${t.name} 가입\n\n영구 회원 · ${t.price.toLocaleString()}P (한 번만 내면 끝)\n\n진행할까요?`)) return;
   updatePointsUI(); // 쌓인 변경을 먼저 저장 → 가입 저장에서는 포인트가 정확히 가입비만큼만 줄어야 규칙 통과
-  addPoints(-t.price, `${t.icon} ${t.name} ${t.days}일`);
+  addPoints(-t.price, `${t.icon} ${t.name} (영구)`);
   if (key === 'black') myTier.blackUntil = next; else myTier.goldUntil = next;
   tierDirty = true;
   updatePointsUI();
@@ -93,6 +94,11 @@ function buyTier(key) {
 // 매일 축복권 + 블랙 입장 알림 (접속 시, 그리고 10분마다 날짜 확인)
 function tierDailyPerks() {
   if (!canSyncToCloud() || !isGold()) return;
+  // 7일제 시절 가입자 → 영구로 전환 (같은 가격을 냈으므로)
+  let upg = false;
+  if (myTier.blackUntil > tierNow() && !tierIsPermanent(myTier.blackUntil)) { myTier.blackUntil = TIER_PERMANENT; upg = true; }
+  if (myTier.goldUntil > tierNow() && !tierIsPermanent(myTier.goldUntil)) { myTier.goldUntil = TIER_PERMANENT; upg = true; }
+  if (upg) { tierDirty = true; updatePointsUI(); if (typeof bankToast === 'function') bankToast('💎 멤버십 영구 전환', '골드·블랙이 영구 회원제로 바뀌어서 내 멤버십도 영구가 됐어요!'); }
   const today = todayKey(tierNow());
   const me = currentUser.nickname;
   if (myTier.blessDay !== today) {
@@ -254,8 +260,7 @@ function renderTierBox() {
           <div class="text-sm font-black">${t.icon} ${t.name}</div>
         </div>
         <div class="text-right">
-          ${active ? `<div class="text-[10px] font-black ${t.key === 'black' ? 'text-emerald-300' : 'text-emerald-800'}">이용 중 · ${tierDaysLeft(until).toFixed(1)}일 남음</div>` : ''}
-          <button onclick="buyTier('${t.key}')" class="mt-0.5 ${t.key === 'black' ? 'bg-white text-slate-950' : 'bg-slate-950 text-amber-200'} font-black px-3 py-1.5 rounded-xl text-[11px]">${active ? '7일 연장' : '가입'} · ${(t.price / 10000).toLocaleString()}만P</button>
+          ${active ? `<div class="text-[11px] font-black ${t.key === 'black' ? 'text-emerald-300' : 'text-emerald-800'}">✓ 영구 회원</div>` : `<button onclick="buyTier('${t.key}')" class="mt-0.5 ${t.key === 'black' ? 'bg-white text-slate-950' : 'bg-slate-950 text-amber-200'} font-black px-3 py-1.5 rounded-xl text-[11px]">영구 가입 · ${(t.price / 10000).toLocaleString()}만P</button>`}
         </div>
       </div>
       <ul class="text-[10px] leading-relaxed space-y-0.5 ${t.key === 'black' ? 'text-slate-300' : 'text-amber-950/80'}">${perks.map(p => `<li>· ${p}</li>`).join('')}</ul>
