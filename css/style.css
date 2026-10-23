@@ -599,3 +599,11 @@ body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 
   background: radial-gradient(120% 140% at 50% 0%, rgba(253,230,138,.35), transparent 60%), linear-gradient(160deg, #3b0764, #0b0b0d);
   box-shadow: 0 0 14px rgba(232,121,249,.55), inset 0 0 8px rgba(253,230,138,.35);
 }
+/* 🖤 블랙 입장 알림 */
+.feed-toast-vip {
+  background: radial-gradient(120% 120% at 100% 0%, rgba(253,230,138,.25), transparent 55%), linear-gradient(160deg, #1c1c1e, #050505);
+  color: #fff; border: 1.5px solid #fde68a;
+  box-shadow: 0 0 24px rgba(253,230,138,.45), 0 10px 30px -10px rgba(0,0,0,.6);
+  min-width: 260px;
+}
+#hotlineToolbarBtn:not(.hidden) { display: flex; }

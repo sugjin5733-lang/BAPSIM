@@ -628,7 +628,7 @@ function attachUserPointListener() {
       settleMyBets();
       renderDuelArena();
       if (typeof initBank === 'function') initBank();
-      if (typeof tierDailyPerks === 'function') setTimeout(() => { tierDailyPerks(); if (isBlack()) attachHotline(); }, 2500);
+      if (typeof tierDailyPerks === 'function') setTimeout(() => { tierDailyPerks(); announceBlackEntrance(); refreshTierUI(); if (isBlack()) attachHotline(); }, 2500);
     }
   }, onDbError);
 }

@@ -38,7 +38,8 @@ function attachFeedListener() {
     // 접속 이후에 생긴 큰 사건만 토스트로 (지난 기록은 전광판에만)
     const isNew = (f.ts || 0) >= feedStartedAt - 5000;
     const isMine = authUser && f.uid === authUser.uid;
-    if (isNew && !isMine && FEED_LEVELS[f.level] >= FEED_LEVELS.big) showFeedToast(f);
+    if (isNew && f.kind === 'vip') showVipToast(f); // 🖤 블랙 입장은 본인 포함 모두에게
+    else if (isNew && !isMine && FEED_LEVELS[f.level] >= FEED_LEVELS.big) showFeedToast(f);
   }, onDbError);
 
   // 최근 소식을 5초마다 돌려가며 보여줌
@@ -47,6 +48,19 @@ function attachFeedListener() {
     feedTickerIdx = (feedTickerIdx + 1) % feedItems.length;
     renderFeedTicker(feedItems[feedItems.length - 1 - feedTickerIdx], true);
   }, 5000);
+}
+
+function showVipToast(f) {
+  const box = document.getElementById('feedToastContainer');
+  if (!box) return;
+  const t = document.createElement('div');
+  t.className = 'feed-toast feed-toast-vip';
+  t.innerHTML = `<div class="text-[9px] font-black tracking-[0.3em] text-amber-300">PRESTIGE BLACK</div>
+    <div class="text-sm font-black leading-snug mt-0.5">${nickHTML(f, 'text-xs')} <span class="text-white">${esc(f.text.replace(/^🖤\s*/, ''))}</span></div>`;
+  box.appendChild(t);
+  if (window.confetti) confetti({ particleCount: 140, spread: 110, origin: { y: 0.15 }, colors: ['#0a0a0a', '#fde68a', '#ffffff', '#b8860b'] });
+  setTimeout(() => t.classList.add('feed-toast-out'), 6500);
+  setTimeout(() => t.remove(), 7200);
 }
 
 function feedLine(f) {

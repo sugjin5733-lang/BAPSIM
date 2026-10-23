@@ -46,6 +46,8 @@ const NO_PROTECT_FROM = 20; // +20 → +21 시도부터 파괴 방지권 사용 
 //    → 축복+초월 방지권으로 +27강 약 1,300만P · +30강 약 4,700만P (방지권 없이는 +30강 평균 12억P)
 //  - 가격의 10%는 은행 금고로(수수료), 나머지는 소각
 let useTProtect = false;
+// 분당 강화 한도: 기본 100 · 🥇 골드 300 · 🖤 블랙 1000
+function enhancePerMinLimit() { const k = typeof myTierKey === 'function' ? myTierKey() : null; return k === 'black' ? 1000 : k === 'gold' ? 300 : 100; }
 function tprotectPrice(L) { return L < 22 ? 30000 : L < 24 ? 50000 : L < 26 ? 100000 : L < 28 ? 200000 : 300000; }
 function tprotectAvailable() { return typeof isBlack === 'function' && isBlack() && currentEnhanceLevel >= NO_PROTECT_FROM && currentEnhanceLevel < ENHANCE_MAX; }
 function tprotectActive() { return useTProtect && tprotectAvailable() && !gambleMode; }
@@ -224,7 +226,7 @@ function updateEnhanceUI() {
   const now = Date.now();
   enhanceActionTimestamps = enhanceActionTimestamps.filter(t => now - t < 60000);
   const cdEl = document.getElementById('enhanceCooldownText');
-  if (cdEl) cdEl.textContent = `분당 강화: ${enhanceActionTimestamps.length} / 100회`;
+  if (cdEl) cdEl.textContent = `분당 강화: ${enhanceActionTimestamps.length} / ${enhancePerMinLimit()}회${typeof myTierKey === 'function' && myTierKey() ? ` (${myTierKey() === 'black' ? '🖤 블랙' : '🥇 골드'})` : ''}`;
 
   localStorage.setItem('bapsim_enhance_level', currentEnhanceLevel.toString());
   syncEnhanceToCloud();
@@ -508,10 +510,10 @@ function runEnhancement() {
 
   const now = Date.now();
   enhanceActionTimestamps = enhanceActionTimestamps.filter(t => now - t < 60000);
-  if (enhanceActionTimestamps.length >= 100) {
+  if (enhanceActionTimestamps.length >= enhancePerMinLimit()) {
     const oldest = enhanceActionTimestamps[0];
     const remSec = Math.ceil((60000 - (now - oldest)) / 1000);
-    return alert(`⏳ 분당 강화 횟수(100회)를 초과했습니다!\n잠시 후 (${remSec}초 뒤) 다시 시도해주세요.`);
+    return alert(`⏳ 분당 강화 횟수(${enhancePerMinLimit()}회)를 초과했습니다!\n잠시 후 (${remSec}초 뒤) 다시 시도해주세요.`);
   }
 
   const cost = currentAttemptCost();

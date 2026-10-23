@@ -41,9 +41,11 @@ function loadTierFromUser(val) {
       goldUntil: Number(val && val.goldUntil) || 0,
       blackUntil: Number(val && val.blackUntil) || 0,
       blessDay: String((val && val.tierBlessDay) || ''),
-      vipDay: String((val && val.vipDay) || '')
+      vipDay: String((val && val.vipDay) || ''),
+      vipAt: Number(val && val.vipAt) || 0
     };
   }
+  refreshTierUI();
   if (!depositDirty) {
     const d = val && val.deposit;
     myDeposit = { amt: Math.max(0, Number(d && d.amt) || 0), since: Number(d && d.since) || 0 };
@@ -84,12 +86,12 @@ function buyTier(key) {
   tierDirty = true;
   updatePointsUI();
   if (window.confetti) confetti({ particleCount: 180, spread: 120, colors: key === 'black' ? ['#0f0f0f', '#fde68a', '#ffffff'] : ['#fde047', '#f59e0b', '#ffffff'] });
-  setTimeout(() => { tierDailyPerks(true); if (typeof loadPrestigeMembers === 'function') loadPrestigeMembers(); }, 1500);
+  setTimeout(() => { tierDailyPerks(); if (key === 'black') { announceBlackEntrance(true); attachHotline(); } refreshTierUI(); if (typeof loadPrestigeMembers === 'function') loadPrestigeMembers(); }, 1500);
   renderTierBox();
 }
 
 // 매일 축복권 + 블랙 입장 알림 (접속 시, 그리고 10분마다 날짜 확인)
-function tierDailyPerks(justJoined = false) {
+function tierDailyPerks() {
   if (!canSyncToCloud() || !isGold()) return;
   const today = todayKey(tierNow());
   const me = currentUser.nickname;
@@ -101,13 +103,28 @@ function tierDailyPerks(justJoined = false) {
     if (typeof renderEnhanceItems === 'function') renderEnhanceItems();
     if (typeof bankToast === 'function') bankToast(`${isBlack() ? '🖤' : '🥇'} 멤버십 혜택`, `오늘의 축복 주문서 <strong>${n}장</strong>이 들어왔어요.`);
   }
-  if (isBlack() && myTier.vipDay !== today) {
-    myTier.vipDay = today;
-    db.ref(`user_points/${me}/vipDay`).set(today).catch(() => {});
-    if (typeof postFeed === 'function') postFeed('vip', `🖤 프레스티지 블랙 회원님이 ${justJoined ? '탄생했습니다' : '입장하셨습니다'}`, 'big', true);
-  }
 }
 setInterval(() => tierDailyPerks(), 10 * 60 * 1000);
+
+// 🖤 블랙 입장 알림: 사이트를 열 때마다 전체 알림 (새로고침 연타 방지로 10분에 한 번)
+let vipAnnouncedAt = 0;
+function announceBlackEntrance(justJoined = false) {
+  if (!canSyncToCloud() || !isBlack()) return;
+  const now = tierNow();
+  const last = Math.max(vipAnnouncedAt, Number(myTier.vipAt) || 0);
+  if (!justJoined && now - last < 10 * 60 * 1000) return;
+  vipAnnouncedAt = now;
+  myTier.vipAt = now;
+  db.ref(`user_points/${currentUser.nickname}/vipAt`).set(now).catch(() => {});
+  if (typeof postFeed === 'function') postFeed('vip', justJoined ? '🖤 프레스티지 블랙 회원이 탄생했습니다!' : '🖤 프레스티지 블랙 회원님이 입장하셨습니다', 'legendary', true);
+}
+
+// 등급에 따라 보이는 버튼 (📞 핫라인은 블랙만)
+function refreshTierUI() {
+  const hb = document.getElementById('hotlineToolbarBtn');
+  if (hb) hb.classList.toggle('hidden', !isBlack());
+}
+setInterval(refreshTierUI, 60 * 1000);
 
 // ------------------------------------------------------------------
 // 🏦 블랙 전용 은행 예치 (이자는 금고에서)
@@ -227,8 +244,8 @@ function renderTierBox() {
     const until = t.key === 'black' ? myTier.blackUntil : myTier.goldUntil;
     const active = until > now;
     const perks = t.key === 'black'
-      ? ['판매 수수료 10% → <b>5%</b>', `시간당 한도 7.2만 → <b>${(t.perHour / 10000)}만P</b>`, `매일 축복권 <b>${t.bless}장</b>`, `은행 예치 <b>24시간마다 1%</b> (하루 최대 3만)`, `슬롯 초특급 확률 <b>${BLACK_SLOT_MULT}배</b>`, '🌌 <b>초월 방지권</b> (+20강부터 파괴 방지)', '접속하면 전체 알림 · 배너 명단', '📞 관리자 핫라인']
-      : ['판매 수수료 10% → <b>8%</b>', `시간당 한도 7.2만 → <b>${(t.perHour / 10000)}만P</b>`, `매일 축복권 <b>${t.bless}장</b>`];
+      ? ['판매 수수료 10% → <b>5%</b>', '분당 강화 100 → <b>1,000회</b>', `시간당 한도 7.2만 → <b>${(t.perHour / 10000)}만P</b>`, `매일 축복권 <b>${t.bless}장</b>`, `은행 예치 <b>24시간마다 1%</b> (하루 최대 3만)`, `슬롯 초특급 확률 <b>${BLACK_SLOT_MULT}배</b>`, '🌌 <b>초월 방지권</b> (+20강부터 파괴 방지)', '접속할 때마다 전체 입장 알림 · 배너 명단', '📞 관리자 핫라인']
+      : ['판매 수수료 10% → <b>8%</b>', '분당 강화 100 → <b>300회</b>', `시간당 한도 7.2만 → <b>${(t.perHour / 10000)}만P</b>`, `매일 축복권 <b>${t.bless}장</b>`];
     return `<div class="tier-card tier-${t.key} rounded-2xl p-3 space-y-2">
       <div class="flex items-center justify-between gap-2">
         <div>
