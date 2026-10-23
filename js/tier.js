@@ -227,7 +227,7 @@ function renderTierBox() {
     const until = t.key === 'black' ? myTier.blackUntil : myTier.goldUntil;
     const active = until > now;
     const perks = t.key === 'black'
-      ? ['판매 수수료 10% → <b>5%</b>', `시간당 한도 7.2만 → <b>${(t.perHour / 10000)}만P</b>`, `매일 축복권 <b>${t.bless}장</b>`, `은행 예치 <b>24시간마다 1%</b> (하루 최대 3만)`, `슬롯 초특급 확률 <b>${BLACK_SLOT_MULT}배</b>`, '접속하면 전체 알림 · 배너 명단', '📞 관리자 핫라인']
+      ? ['판매 수수료 10% → <b>5%</b>', `시간당 한도 7.2만 → <b>${(t.perHour / 10000)}만P</b>`, `매일 축복권 <b>${t.bless}장</b>`, `은행 예치 <b>24시간마다 1%</b> (하루 최대 3만)`, `슬롯 초특급 확률 <b>${BLACK_SLOT_MULT}배</b>`, '🌌 <b>초월 방지권</b> (+20강부터 파괴 방지)', '접속하면 전체 알림 · 배너 명단', '📞 관리자 핫라인']
       : ['판매 수수료 10% → <b>8%</b>', `시간당 한도 7.2만 → <b>${(t.perHour / 10000)}만P</b>`, `매일 축복권 <b>${t.bless}장</b>`];
     return `<div class="tier-card tier-${t.key} rounded-2xl p-3 space-y-2">
       <div class="flex items-center justify-between gap-2">

@@ -39,6 +39,24 @@ const BOWL_EVOLUTION = [
 ];
 const ENHANCE_MAX = 30;
 const NO_PROTECT_FROM = 20; // +20 → +21 시도부터 파괴 방지권 사용 불가
+// 🌌 초월 방지권 (🖤 프레스티지 블랙 전용): +20강부터 시도하는 강화에서 파괴(0강 리셋)를 막아줌
+//  - 보관 불가, 시도할 때마다 그 단계 가격으로 자동 결제 (싼 단계에서 사 두고 비싼 단계에서 쓰는 것 방지)
+//  - 가격(시도 1회): +20~21 3만 · +22~23 5만 · +24~25 10만 · +26~27 20만 · +28~29 30만P
+//    → +24강까지는 타도 다시 쌓는 게 싸서 안 쓰는 게 이득, +25강부터는 확실히 이득 (파괴 1번 = 수백만~수천만P)
+//    → 축복+초월 방지권으로 +27강 약 1,300만P · +30강 약 4,700만P (방지권 없이는 +30강 평균 12억P)
+//  - 가격의 10%는 은행 금고로(수수료), 나머지는 소각
+let useTProtect = false;
+function tprotectPrice(L) { return L < 22 ? 30000 : L < 24 ? 50000 : L < 26 ? 100000 : L < 28 ? 200000 : 300000; }
+function tprotectAvailable() { return typeof isBlack === 'function' && isBlack() && currentEnhanceLevel >= NO_PROTECT_FROM && currentEnhanceLevel < ENHANCE_MAX; }
+function tprotectActive() { return useTProtect && tprotectAvailable() && !gambleMode; }
+function toggleTProtect() {
+  if (!tprotectAvailable()) return alert('🖤 프레스티지 블랙 회원만 +20강부터 쓸 수 있어요.');
+  if (gambleMode) return alert('도박 모드에서는 쓸 수 없어요.');
+  useTProtect = !useTProtect;
+  renderEnhanceItems();
+  updateEnhanceUI();
+}
+
 // 🧾 이 밥에 들인 돈·강화 횟수 (0강에서 시작해 판매할 때까지, 파괴돼도 계속 누적). 서버 user_points/bowl
 let myBowl = { cost: 0, tries: 0 }, myBowlDirty = false, myBowlLoaded = false, lastSaleSummary = null;
 function loadBowlFromUser(val) {
@@ -198,6 +216,7 @@ function updateEnhanceUI() {
       actionBtn.disabled = false;
       const extra = autoBuyExtraCost();
       actionBtn.textContent = `${gambleMode ? '🎲 ' : ''}+${currentEnhanceLevel + 1} 강화 시도 (${nextCost}P${extra ? ` + 🛒${extra}P` : ''})`;
+      if (tprotectActive()) actionBtn.textContent = `${gambleMode ? '🎲 ' : ''}+${currentEnhanceLevel + 1} 강화 시도 (${nextCost}P + 🌌${tprotectPrice(currentEnhanceLevel).toLocaleString()}P)`;
       if (transcendBlocked()) { actionBtn.disabled = true; actionBtn.textContent = '🔒 초월 강화 체크 후 가능'; }
     }
   }
@@ -318,9 +337,10 @@ function effectiveOdds(level) {
     brk = 100 - success;
   }
   const keepBase = keep; // 방지권 적용 전 '유지' 구간 (그 뒤 구간은 원래 '파괴')
-  const protectedNow = level < NO_PROTECT_FROM && !gambleMode && useItem.protect && (myItems.protect > 0 || autoWanted().protect) && brk > 0;
+  const tprot = level >= NO_PROTECT_FROM && tprotectActive() && brk > 0;
+  const protectedNow = tprot || (level < NO_PROTECT_FROM && !gambleMode && useItem.protect && (myItems.protect > 0 || autoWanted().protect) && brk > 0);
   if (protectedNow) { keep += brk; brk = 0; }
-  return { success, keep, keepBase, break: brk, golden: isGoldenTime(), blessed: blessOn, blessGain: Math.min(100, successBeforeBless * 1.5) - successBeforeBless, protected: protectedNow, gamble: gambleMode };
+  return { success, keep, keepBase, break: brk, golden: isGoldenTime(), blessed: blessOn, blessGain: Math.min(100, successBeforeBless * 1.5) - successBeforeBless, protected: protectedNow, tprotect: tprot, gamble: gambleMode };
 }
 
 function buyEnhanceItem(kind) {
@@ -423,6 +443,14 @@ function renderEnhanceItems() {
     btn.className = `relative py-2 px-2 rounded-xl text-[11px] font-bold border transition-all ${on ? 'bg-amber-500 text-slate-950 border-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.6)]' : 'bg-slate-900 text-slate-300 border-slate-700 hover:border-amber-500/60'}`;
     btn.innerHTML = `${ENHANCE_ITEMS[kind].name} <span class="font-black">x${myItems[kind]}</span>
       <span class="block text-[9px] font-medium ${on ? 'text-slate-800' : 'text-slate-500'}">${autoUse[kind] ? (on ? (myItems[kind] > 0 ? '🤖 자동 적용 중' : `🤖 자동 구매+적용 (${itemTotal(kind)}P)`) : '🤖 자동 (이번 단계는 아낌)') : myItems[kind] > 0 ? (on ? '사용 중 (1회 소모)' : '눌러서 사용') : `없음 · 눌러서 구매 ${itemTotal(kind).toLocaleString()}P`}</span>`;
+    if (kind === 'protect' && tprotectAvailable()) {
+      const on = tprotectActive();
+      btn.className = `relative py-2 px-2 rounded-xl text-[11px] font-bold border transition-all ${on ? 'tprotect-on text-white border-amber-300' : 'bg-slate-950 text-slate-200 border-fuchsia-500/50 hover:border-amber-300/70'}`;
+      btn.onclick = toggleTProtect;
+      btn.innerHTML = `🌌 초월 방지권 <span class="text-[9px] font-black text-amber-300">BLACK</span><span class="block text-[9px] font-bold ${on ? 'text-amber-200' : 'text-slate-400'}">${on ? `사용 중 · 시도마다 ${tprotectPrice(currentEnhanceLevel).toLocaleString()}P` : `눌러서 사용 · 이번 ${tprotectPrice(currentEnhanceLevel).toLocaleString()}P`}</span>`;
+      return;
+    }
+    if (kind === 'protect') btn.onclick = () => toggleEnhanceItem('protect');
     if (kind === 'protect' && currentEnhanceLevel >= NO_PROTECT_FROM) {
       btn.className = 'relative py-2 px-2 rounded-xl text-[11px] font-bold border bg-slate-950 text-slate-600 border-slate-800 cursor-not-allowed';
       btn.innerHTML = `${ENHANCE_ITEMS[kind].name} <span class="font-black">x${myItems[kind]}</span><span class="block text-[9px] font-bold text-rose-400/80">🚫 +21강부터 사용 불가</span>`;
@@ -454,7 +482,7 @@ function consumeUsedItems(odds) {
   ['protect', 'bless'].forEach(kind => {
     if (kind === 'protect' && gambleMode) return;
     // 효과가 없었던 아이템은 소모하지 않음 (파괴 0% 단계의 방지권, 이미 100% 성공인 단계의 축복서)
-    if (odds && kind === 'protect' && !odds.protected) return;
+    if (odds && kind === 'protect' && (!odds.protected || odds.tprotect)) return; // 초월 방지권은 따로 결제
     if (odds && kind === 'bless' && !(odds.blessed && odds.blessGain > 0)) return;
     if (useItem[kind] && myItems[kind] > 0) {
       myItems[kind]--;
@@ -487,6 +515,8 @@ function runEnhancement() {
   }
 
   const cost = currentAttemptCost();
+  const tpCost = tprotectActive() ? tprotectPrice(currentEnhanceLevel) : 0;
+  if (tpCost && userPoints < cost + tpCost) return alert(`❌ 포인트가 부족해요! (강화 ${cost.toLocaleString()}P + 초월 방지권 ${tpCost.toLocaleString()}P)`);
   if (userPoints < cost) {
     return alert(`❌ 강화 비용이 부족합니다! (필요: ${cost}P / 보유: ${userPoints}P)`);
   }
@@ -494,6 +524,10 @@ function runEnhancement() {
   applyAutoItems();
   const autoBought = autoBuyForAttempt(cost);
   addPoints(-cost, `${gambleMode ? '도박 ' : ''}강화 시도 +${currentEnhanceLevel}→+${currentEnhanceLevel + 1}`);
+  if (tpCost) {
+    addPoints(-tpCost, `🌌 초월 방지권 (+${currentEnhanceLevel})`);
+    if (typeof payFee === 'function') payFee(Math.round(tpCost * 0.1));
+  }
   enhanceActionTimestamps.push(now);
 
   const odds = effectiveOdds(currentEnhanceLevel);
@@ -505,7 +539,7 @@ function runEnhancement() {
   const tags = [autoBought.length ? '🛒자동구매' : '', odds.gamble ? '🎲도박' : '', odds.golden ? '🌞골든타임' : '', odds.blessed ? '✨축복' : '', odds.protected ? '🛡️방지권' : ''].filter(Boolean).join(' ');
   consumeUsedItems(odds);
   myBowl.tries += 1;
-  myBowl.cost += cost + (odds.protected ? itemTotal('protect') : 0) + (odds.blessed && odds.blessGain > 0 ? itemTotal('bless') : 0);
+  myBowl.cost += cost + tpCost + (odds.protected && !odds.tprotect ? itemTotal('protect') : 0) + (odds.blessed && odds.blessGain > 0 ? itemTotal('bless') : 0);
   myBowlDirty = true;
   updatePointsUI(); // 포인트 차감 + 이 밥 기록을 한 번에 저장
 
