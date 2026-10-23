@@ -61,6 +61,7 @@ function openAdminDashboard() {
   if (window.__adminListenersAttached) return; // 열 때마다 리스너가 중복 등록되던 문제 방지
   window.__adminListenersAttached = true;
   migrateLegacyData();
+  initAdminBadgeGrant();
   renderAnomalyPanel();
   loadPendingPointRequests();
   renderAdminUserList();
@@ -286,6 +287,71 @@ async function adminBanUser(nick) {
   } catch (err) {
     alert("차단 처리 오류: " + err.message);
   }
+}
+
+// ==========================================
+// 🎖️ 배지 지급/회수: 시즌 배지·특별 배지를 골라서 회원에게
+// ==========================================
+function adminBadgeOptions() {
+  const opts = [];
+  (typeof SEASON_BADGE_BOOK !== 'undefined' ? SEASON_BADGE_BOOK : []).forEach(b => opts.push([b.cls, `🏅 [시즌] ${b.season} · ${b.name}`]));
+  Object.entries(typeof SPECIAL_BADGE_NAMES !== 'undefined' ? SPECIAL_BADGE_NAMES : {}).forEach(([cls, name]) => {
+    if (cls === 'nb-angel' || opts.some(o => o[0] === cls)) return; // 대천사의 날개는 기부 1위 자동
+    opts.push([cls, `✨ [특별] ${name}`]);
+  });
+  SHOP_DATA.bgs.forEach(b => opts.push([b.class, `🛍️ [상점] ${b.name}`]));
+  return opts;
+}
+async function initAdminBadgeGrant() {
+  const sel = document.getElementById('adminBadgeClass');
+  if (sel) {
+    sel.innerHTML = adminBadgeOptions().map(([c, n]) => `<option value="${esc(c)}">${esc(n)}</option>`).join('');
+    sel.onchange = () => {
+      const p = document.getElementById('adminBadgePreview');
+      if (p) p.innerHTML = `미리보기: <span class="${safeClass(sel.value)} text-xs inline-block">${esc((document.getElementById('adminBadgeNick').value || '닉네임'))}</span>`;
+    };
+    sel.onchange();
+  }
+  try {
+    const users = (await db.ref('user_points').once('value')).val() || {};
+    const dl = document.getElementById('adminBadgeNickList');
+    if (dl) dl.innerHTML = Object.values(users).filter(u => u && u.nickname && (u.status === 'approved' || u.approved)).map(u => `<option value="${esc(u.nickname)}"></option>`).join('');
+  } catch (e) {}
+}
+async function adminGrantBadge() {
+  if (!isAdmin) return;
+  const nick = (document.getElementById('adminBadgeNick').value || '').trim();
+  const cls = document.getElementById('adminBadgeClass').value;
+  const equip = document.getElementById('adminBadgeEquip').checked;
+  if (!nick || !cls) return alert('닉네임과 배지를 골라주세요.');
+  const snap = await db.ref(`user_points/${nick}`).once('value');
+  const u = snap.val();
+  if (!u) return alert(`[${nick}] 회원을 찾을 수 없어요.`);
+  const name = (adminBadgeOptions().find(o => o[0] === cls) || [cls, cls])[1];
+  if (!confirm(`[${nick}] 님에게 ${name} 배지를 지급할까요?${equip ? '\n(바로 장착)' : ''}`)) return;
+  const inv = u.inventory || { colors: [], bgs: ['nb-none'], symbols: [] };
+  inv.bgs = Array.isArray(inv.bgs) ? inv.bgs : Object.values(inv.bgs || {});
+  if (!inv.bgs.includes('nb-none')) inv.bgs.unshift('nb-none');
+  if (!inv.bgs.includes(cls)) inv.bgs.push(cls);
+  const upd = { inventory: inv };
+  if (equip) upd.badge = cls;
+  await db.ref(`user_points/${nick}`).update(upd);
+  alert(`✅ [${nick}] 님에게 배지를 지급했어요.`);
+}
+async function adminRevokeBadge() {
+  if (!isAdmin) return;
+  const nick = (document.getElementById('adminBadgeNick').value || '').trim();
+  const cls = document.getElementById('adminBadgeClass').value;
+  if (!nick || !cls) return alert('닉네임과 배지를 골라주세요.');
+  const u = (await db.ref(`user_points/${nick}`).once('value')).val();
+  if (!u) return alert(`[${nick}] 회원을 찾을 수 없어요.`);
+  if (!confirm(`[${nick}] 님의 [${cls}] 배지를 회수할까요?`)) return;
+  const inv = u.inventory || { colors: [], bgs: ['nb-none'], symbols: [] };
+  inv.bgs = (Array.isArray(inv.bgs) ? inv.bgs : Object.values(inv.bgs || {})).filter(c => c !== cls);
+  const upd = { inventory: inv };
+  if (u.badge === cls) upd.badge = 'nb-none';
+  await db.ref(`user_points/${nick}`).update(upd);
+  alert(`🗑️ [${nick}] 님의 배지를 회수했어요.`);
 }
 
 function adminManageUserItems(nick) {
