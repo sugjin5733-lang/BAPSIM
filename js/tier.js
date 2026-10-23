@@ -7,14 +7,14 @@
 //  - 보안 규칙: goldUntil/blackUntil 은 같은 저장에서 포인트가 가입비만큼 줄어야만 늘릴 수 있고,
 //    시간당 한도(예산) 공식도 등급에 맞춰 검사함
 //
-//  골드: 7일 30만P  · 판매 수수료 8% · 시간당 한도 10만P · 매일 축복권 1장
-//  블랙: 7일 200만P · 판매 수수료 5% · 시간당 한도 15만P · 매일 축복권 10장
+//  골드: 7일 150만P · 판매 수수료 8% · 시간당 한도 10만P · 매일 축복권 1장
+//  블랙: 7일 500만P · 판매 수수료 5% · 시간당 한도 15만P · 매일 축복권 10장
 //        · 은행 예치(24시간마다 1%, 하루 최대 3만P, 금고에서 지급) · 슬롯 초특급 확률 5배
 //        · 접속 시 전체 알림(하루 1번) · 관리자 핫라인 · 배너 명단
 
 const TIERS = {
-  gold:  { key: 'gold',  name: '프레스티지 골드', icon: '🥇', price: 300000,  days: 7, fee: 0.08, perHour: 100000, bless: 1 },
-  black: { key: 'black', name: '프레스티지 블랙', icon: '🖤', price: 2000000, days: 7, fee: 0.05, perHour: 150000, bless: 10 }
+  gold:  { key: 'gold',  name: '프레스티지 골드', icon: '🥇', price: 1500000,  days: 7, fee: 0.08, perHour: 100000, bless: 1 },
+  black: { key: 'black', name: '프레스티지 블랙', icon: '🖤', price: 5000000, days: 7, fee: 0.05, perHour: 150000, bless: 10 }
 };
 const TIER_MAX_DAYS = 28;
 const DEPOSIT_MIN = 10000;

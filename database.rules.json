@@ -262,10 +262,10 @@
           }
         },
         "goldUntil": {
-          ".validate": "newData.isNumber() && ((auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || newData.val() === data.val() || (newData.val() <= now + 2419260000 && (data.parent().child('points').val() - newData.parent().child('points').val()) >= 300000 && root.child('user_points').child($nick).child('prestigePass').val() === true))"
+          ".validate": "newData.isNumber() && ((auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || newData.val() === data.val() || (newData.val() <= now + 2419260000 && (data.parent().child('points').val() - newData.parent().child('points').val()) >= 1500000 && root.child('user_points').child($nick).child('prestigePass').val() === true))"
         },
         "blackUntil": {
-          ".validate": "newData.isNumber() && ((auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || newData.val() === data.val() || (newData.val() <= now + 2419260000 && (data.parent().child('points').val() - newData.parent().child('points').val()) >= 2000000 && root.child('user_points').child($nick).child('prestigePass').val() === true))"
+          ".validate": "newData.isNumber() && ((auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || newData.val() === data.val() || (newData.val() <= now + 2419260000 && (data.parent().child('points').val() - newData.parent().child('points').val()) >= 5000000 && root.child('user_points').child($nick).child('prestigePass').val() === true))"
         },
         "deposit": {
           ".validate": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || (newData.child('amt').isNumber() && newData.child('amt').val() >= 0 && newData.child('since').isNumber() && newData.child('since').val() <= now + 60000 && ((!data.exists() && newData.child('amt').val() <= (data.parent().child('points').val() - newData.parent().child('points').val())) || (data.exists() && newData.child('amt').val() - data.child('amt').val() <= (data.parent().child('points').val() - newData.parent().child('points').val()))))"

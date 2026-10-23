@@ -565,14 +565,33 @@ body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 
 }
 @keyframes richSweep { from { background-position: 160% 0, 0 0, 0 0, 0 0, 0 0; } to { background-position: -160% 0, 0 0, 0 0, 0 0, 0 0; } }
 
-/* 💎 멤버십 카드 */
+/* 💎 멤버십 카드: 골드는 차분한 금판, 블랙은 한 단계 위 (흑요석 + 도는 금테 + 별빛) */
 .tier-card.tier-gold {
-  background: linear-gradient(110deg, #b8860b 0%, #fde68a 45%, #fff7d6 50%, #fde68a 55%, #b8860b 100%);
-  background-size: 250% 100%; animation: shimmerSweep 4s linear infinite;
-  color: #1c1407; border: 1px solid #fde68a;
+  background: linear-gradient(160deg, #e9c46a 0%, #d4a72c 55%, #b8860b 100%);
+  color: #1c1407; border: 1px solid rgba(253,230,138,.7);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.35);
 }
+@property --black-a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
 .tier-card.tier-black {
-  background: radial-gradient(120% 120% at 100% 0%, rgba(253,230,138,.18), transparent 50%), linear-gradient(160deg, #1a1a1a 0%, #050505 100%);
-  color: #ffffff; border: 1px solid rgba(253,230,138,.55);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 8px 24px -12px rgba(253,230,138,.5);
+  position: relative; overflow: hidden; isolation: isolate;
+  color: #ffffff;
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(105deg, transparent 38%, rgba(253,230,138,.16) 50%, transparent 62%) padding-box,
+    radial-gradient(1.5px 1.5px at 18% 30%, rgba(255,255,255,.9), transparent 60%) padding-box,
+    radial-gradient(1px 1px at 72% 22%, rgba(253,230,138,.9), transparent 60%) padding-box,
+    radial-gradient(1.5px 1.5px at 84% 70%, rgba(255,255,255,.8), transparent 60%) padding-box,
+    radial-gradient(1px 1px at 35% 80%, rgba(253,230,138,.8), transparent 60%) padding-box,
+    radial-gradient(120% 120% at 100% 0%, rgba(253,230,138,.22), transparent 50%) padding-box,
+    linear-gradient(160deg, #1c1c1e 0%, #050505 100%) padding-box,
+    conic-gradient(from var(--black-a), #1a1a1a, #fde68a, #fff7d6, #b8860b, #1a1a1a, #fde68a, #1a1a1a) border-box;
+  background-size: 260% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+  background-repeat: no-repeat;
+  animation: blackSweep 4.5s linear infinite, blackSpin 6s linear infinite, blackGlow 2.6s ease-in-out infinite alternate;
+}
+@keyframes blackSweep { from { background-position: 170% 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; } to { background-position: -170% 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; } }
+@keyframes blackSpin { to { --black-a: 360deg; } }
+@keyframes blackGlow {
+  from { box-shadow: 0 8px 24px -12px rgba(253,230,138,.45); }
+  to   { box-shadow: 0 10px 34px -10px rgba(253,230,138,.85), 0 0 18px -6px rgba(255,247,214,.6); }
 }
