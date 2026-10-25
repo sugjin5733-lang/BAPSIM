@@ -19,7 +19,8 @@ const RELIEF_AMOUNT = 20000;
 const RELIEF_ACTIVE_DAYS = 3;
 const RELIEF_LIMIT = 30000; // 자산(포인트+보류) 3만P 이하면 누구나 지원
 // '잃은 금액' 계산에서 빼는 항목 (게임이 아닌 소비/이동)
-const NET_EXCLUDE = /상점|입장권|변경권|송금|기부|부자세|재난지원금|보류|환불|관리자|배지/;
+const NET_EXCLUDE = /상점|입장권|변경권|송금|기부|부자세|재난지원금|보류|환불|환급|관리자|배지/;
+const TAX_MIN_ASSETS = 200000; // 자산(포인트+보류+예치) 20만P 이상만 부자세 대상
 
 let myDayNet = { d: '', v: 0, pd: '', pv: 0 };
 let dayNetLoaded = false;
@@ -116,6 +117,8 @@ function initBank() {
   on(db.ref('bank/donors'), 'value', s => { setDonors(s.val()); renderBankModal(); renderDonorBadgeBox(); });
   on(db.ref('bank/days').limitToLast(7), 'value', s => { bankState.days = s.val() || {}; renderBankModal(); scheduleBankDues(800); });
   on(db.ref(`transfers/${me}`), 'child_added', s => claimTransfer(s.ref));
+  on(db.ref(`bank/refunds/${me}`), 'child_added', s => claimRefund(s.ref));
+  on(db.ref('bank/taxTotal'), 'value', s => { bankState.taxTotal = s.val() || {}; renderBankModal(); });
 
   ensureDailySettlement();
   bankTimer = setInterval(() => { ensureDailySettlement(); processMyBankDues(); }, 5 * 60 * 1000);
@@ -174,6 +177,20 @@ async function claimTransfer(ref) {
   updatePointsUI();
   bankToast('💸 포인트 도착!', `[${esc(got.from)}] 님이 <strong>${fmtP(amt)}</strong>를 보냈어요.${got.msg ? `<br>“${esc(got.msg)}”` : ''}`);
   if (window.confetti) confetti({ particleCount: 70, spread: 70 });
+}
+
+// 🏦 환급: 관리자/정산 정정으로 bank/refunds/{닉}/{id} = { amt, reason } 이 생기면 본인 화면이 받아감
+async function claimRefund(ref) {
+  let got = null;
+  try {
+    const r = await ref.transaction(cur => { got = cur || null; return cur ? null : undefined; });
+    if (!r.committed || !got) return;
+  } catch (e) { return; }
+  const amt = Math.floor(Number(got.amt) || 0);
+  if (amt <= 0) return;
+  addPoints(amt, `🏦 환급: ${String(got.reason || '정산 정정').slice(0, 30)}`);
+  updatePointsUI();
+  bankToast('🏦 환급 도착', `<strong>${fmtP(amt)}</strong>를 돌려받았어요. (${esc(got.reason || '정산 정정')})`);
 }
 
 // ------------------------------------------------------------------
@@ -292,7 +309,7 @@ function computeSettlement(users, day) {
 
   const taxes = {};
   [...list].sort((a, b) => b.total - a.total).slice(0, TAX_TABLE.length).forEach((x, i) => {
-    if (x.total >= TAX_TABLE[i]) taxes[x.nick] = TAX_TABLE[i];
+    if (x.total >= TAX_MIN_ASSETS && x.total >= TAX_TABLE[i]) taxes[x.nick] = TAX_TABLE[i];
   });
 
   const relief = {};
@@ -342,6 +359,7 @@ async function processMyBankDues() {
             addPoints(-take, `🏛️ 부자세 (${day})`);
             updatePointsUI();
             await db.ref('bank/balance').transaction(c => (Number(c) || 0) + take);
+            await db.ref(`bank/taxTotal/${me}`).transaction(c => (Number(c) || 0) + take); // 🏛️ 최고 납세자 랭킹
           }
           bankToast('🏛️ 부자세 납부', `자산 상위 회원이라 <strong>${fmtP(take)}</strong>가 밥심 은행에 납부됐어요. (재난지원금으로 쓰여요)`);
         }
@@ -413,6 +431,10 @@ function renderBankModal() {
     : h ? ` · 😇 날개 주인 ${esc(h)}(${fmtP(hAmt)}) — 빼앗기까지 ${fmtP(hAmt + 1 - mine)}`
     : ` · 😇 첫 주인까지 ${fmtP(Math.max(0, DONOR_BADGE_GOAL - mine))}`));
 
+  const taxers = Object.entries(bankState.taxTotal || {}).filter(([, v]) => Number(v) > 0).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  set('bankTaxRank', taxers.length === 0
+    ? '<div class="text-center text-slate-400 py-2">아직 부자세를 낸 사람이 없어요 (자산 20만P 이상 상위 3명이 매일 납부)</div>'
+    : taxers.map(([n, v], i) => `<div class="flex justify-between py-1 border-b border-slate-100 last:border-0"><span class="font-bold text-slate-700">${['🥇', '🥈', '🥉'][i] || (i + 1)} ${esc(n)}${n === me ? ' (나)' : ''}</span><span class="font-black text-emerald-700">${fmtP(v)}</span></div>`).join(''));
   const donors = Object.entries(bankState.donors || {}).sort((a, b) => b[1] - a[1]).slice(0, 5);
   set('bankDonorRank', donors.length === 0
     ? '<div class="text-center text-slate-400 py-2">아직 기부자가 없어요. 첫 번째 천사가 되어주세요!</div>'

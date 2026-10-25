@@ -186,7 +186,7 @@ function renderBadgeCards(bgContainer, list) {
 // 상점에서 팔지 않는 특별 배지 (세트 완성, 시즌 보상, 관리자 지급 등)
 const SPECIAL_BADGE_NAMES = {
   'nb-buffet': '🍱 한식뷔페 마스터', 'nb-royal': '👑 수라상 미식가', 'nb-collector': '📒 반찬 도감 완성자',
-  'nb-admin': '🛡️ 관리자', 'nb-angel': '😇 대천사의 날개', 'nb-richking': '💰 베타 시즌 부자왕'
+  'nb-admin': '🛡️ 관리자', 'nb-angel': '😇 대천사의 날개', 'nb-richking': '💰 베타 시즌 부자왕', 'nb-bapking': '🍚 베타 시즌 밥신'
 };
 
 function renderOwnedSpecialBadges() {

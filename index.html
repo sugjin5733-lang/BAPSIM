@@ -11,7 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Black+Han+Sans&family=Rubik+Glitch&family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261023s">
+  <link rel="stylesheet" href="css/style.css?v=20261026a">
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white relative">
 
@@ -667,7 +667,7 @@
         <div class="text-[10px] font-black tracking-widest text-sky-200">은행 금고 (재난지원금 재원)</div>
         <div id="bankBalance" class="text-2xl font-black mt-0.5">0P</div>
         <div id="bankFeeTotal" class="text-[10px] font-bold text-sky-200"></div>
-        <div class="text-[10px] text-sky-100/80 mt-1 leading-relaxed">재원: 부자세(매일 1·2·3위 3만·2만·1만P) + 수수료(밥 판매 10% · 강화 아이템 10% · 보류 단축) + 기부 → 매일 자산 3만P 이하 회원 모두에게 2만P씩 재난지원금</div>
+        <div class="text-[10px] text-sky-100/80 mt-1 leading-relaxed">재원: 부자세(매일 자산 20만P 이상 1·2·3위 3만·2만·1만P) + 수수료(밥 판매 10% · 강화 아이템 10% · 보류 단축) + 기부 → 매일 자산 3만P 이하 회원 모두에게 2만P씩 재난지원금</div>
       </div>
 
       <div class="space-y-2">
@@ -701,6 +701,11 @@
         <span class="text-xs font-extrabold text-slate-800">📅 오늘의 정산</span>
         <div id="bankToday" class="text-[11px] bg-slate-50 border border-slate-100 rounded-2xl p-3"></div>
         <p class="text-[10px] text-slate-400">매일 0시(한국 시간) 이후 첫 접속자가 정산표를 만들고, 대상자가 접속하면 자동으로 납부·지급돼요. 금고가 부족하면 채워지는 대로 지급돼요.</p>
+      </div>
+
+      <div class="space-y-1.5">
+        <span class="text-xs font-extrabold text-slate-800">🏛️ 최고 납세자 랭킹 <span class="text-[10px] font-bold text-slate-400">· 누적 부자세</span></span>
+        <div id="bankTaxRank" class="text-xs bg-slate-50 border border-slate-100 rounded-2xl px-3 py-2"></div>
       </div>
 
       <div class="space-y-1.5">
@@ -1517,24 +1522,24 @@
     </div>
   </div>
 
-  <script src="js/core.js?v=20261023s"></script>
-  <script src="js/auth.js?v=20261023s"></script>
-  <script src="js/enhance.js?v=20261023s"></script>
-  <script src="js/shop.js?v=20261023s"></script>
-  <script src="js/chat.js?v=20261023s"></script>
-  <script src="js/games.js?v=20261023s"></script>
-  <script src="js/admin.js?v=20261023s"></script>
-  <script src="js/ranking.js?v=20261023s"></script>
-  <script src="js/restaurants.js?v=20261023s"></script>
-  <script src="js/tools.js?v=20261023s"></script>
-  <script src="js/feed.js?v=20261023s"></script>
-  <script src="js/bank.js?v=20261023s"></script>
-  <script src="js/tier.js?v=20261023s"></script>
-  <script src="js/club.js?v=20261023s"></script>
-  <script src="js/cards.js?v=20261023s"></script>
-  <script src="js/season.js?v=20261023s"></script>
-  <script src="js/duel.js?v=20261023s"></script>
-  <script src="js/predict.js?v=20261023s"></script>
-  <script src="js/main.js?v=20261023s"></script>
+  <script src="js/core.js?v=20261026a"></script>
+  <script src="js/auth.js?v=20261026a"></script>
+  <script src="js/enhance.js?v=20261026a"></script>
+  <script src="js/shop.js?v=20261026a"></script>
+  <script src="js/chat.js?v=20261026a"></script>
+  <script src="js/games.js?v=20261026a"></script>
+  <script src="js/admin.js?v=20261026a"></script>
+  <script src="js/ranking.js?v=20261026a"></script>
+  <script src="js/restaurants.js?v=20261026a"></script>
+  <script src="js/tools.js?v=20261026a"></script>
+  <script src="js/feed.js?v=20261026a"></script>
+  <script src="js/bank.js?v=20261026a"></script>
+  <script src="js/tier.js?v=20261026a"></script>
+  <script src="js/club.js?v=20261026a"></script>
+  <script src="js/cards.js?v=20261026a"></script>
+  <script src="js/season.js?v=20261026a"></script>
+  <script src="js/duel.js?v=20261026a"></script>
+  <script src="js/predict.js?v=20261026a"></script>
+  <script src="js/main.js?v=20261026a"></script>
 </body>
 </html>

@@ -108,11 +108,21 @@ async function renderSeasonRanking(container, summaryEl, myPointEl) {
 //  { id, cls, name, season, desc } — 지금은 아직 없음
 // ==========================================
 const SEASON_BADGE_BOOK = [
-  { id: 'beta-rich', cls: 'nb-richking', name: '💰 부자왕', season: '베타 시즌 (~10.23)', desc: '부자 랭킹 시즌 1위' }
+  { id: 'beta-rich', cls: 'nb-richking', name: '💰 부자왕', season: '베타 시즌 (~10.23)', desc: '부자 랭킹 시즌 1위' },
+  { id: 'beta-bap',  cls: 'nb-bapking',  name: '🍚 밥신', season: '베타 시즌 (~10.23)', desc: '밥키우기 시즌 1위' }
 ];
-function openSeasonBadgeBook() {
+async function openSeasonBadgeBook() {
   const box = document.getElementById('seasonBadgeBookList');
   const owned = new Set((myInventory && myInventory.bgs) || []);
+  // 누가 가졌는지 (명예의 전당처럼 모두에게 공개)
+  const holders = {};
+  try {
+    const users = (await db.ref('user_points').once('value')).val() || {};
+    Object.values(users).forEach(u => {
+      const bgs = u && u.inventory && u.inventory.bgs ? (Array.isArray(u.inventory.bgs) ? u.inventory.bgs : Object.values(u.inventory.bgs)) : [];
+      bgs.forEach(c => { (holders[c] = holders[c] || []).push(u); });
+    });
+  } catch (e) {}
   const got = SEASON_BADGE_BOOK.filter(b => owned.has(b.cls)).length;
   const cnt = document.getElementById('seasonBadgeBookCount');
   if (cnt) cnt.textContent = `${got} / ${SEASON_BADGE_BOOK.length}`;
@@ -124,10 +134,12 @@ function openSeasonBadgeBook() {
        </div>`
     : SEASON_BADGE_BOOK.map(b => {
         const has = owned.has(b.cls);
-        return `<div class="p-3 rounded-2xl border ${has ? 'bg-white border-amber-300' : 'bg-slate-50 border-slate-200'} text-center space-y-1.5">
+        const who = holders[b.cls] || [];
+        return `<div class="p-3 rounded-2xl border ${has ? 'bg-white border-amber-300 ring-2 ring-amber-200' : 'bg-white border-slate-200'} text-center space-y-1.5">
           <div class="text-[10px] font-black text-slate-400">${esc(b.season)}</div>
-          <span class="${has ? safeClass(b.cls) : ''} text-xs inline-block ${has ? '' : 'text-slate-300 font-black'}">${has ? esc(b.name) : '???'}</span>
-          <div class="text-[10px] text-slate-400">${esc(b.desc || '')}</div>
+          <span class="${safeClass(b.cls)} text-xs inline-block">${esc(b.name)}</span>
+          <div class="text-[10px] text-slate-500 font-bold">${esc(b.desc || '')}</div>
+          <div class="text-[10px] ${who.length ? 'text-amber-700 font-black' : 'text-slate-300'}">${who.length ? `👑 ${who.map(u => esc(u.nickname)).join(', ')}` : '주인 없음'}${has ? ' · 내 배지' : ''}</div>
         </div>`;
       }).join('');
   document.getElementById('seasonBadgeBookModal').classList.remove('hidden');
