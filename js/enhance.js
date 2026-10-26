@@ -81,40 +81,41 @@ function transcendBlocked() { return currentEnhanceLevel >= 20 && currentEnhance
 
 // 판매가 기준: 축복서·방지권·도박 모드를 단계마다 가장 잘 골랐을 때의 '평균 강화 비용'(아이템 수수료 포함)
 // 판매가 = 평균 비용 × 1.157 → 평균 시세(1.006)·대박 손님(+5%)·판매 수수료(10%)까지 반영하면
-// 잘 하는 사람 기준 평균 회수율 약 110% (2026-10-23 조정, 열심히 하면 일주일 안에 프레스티지 가능)
+// 잘 하는 사람 기준 평균 회수율 약 110% (2026-10-23 조정)
+// 2026-10-26: 전 단계 +15% → 잘 하면 약 126%, 보통 약 110%
 const ENHANCE_PROBABILITIES = [
-  { level: 1,  success: 100.0, keep: 0.0,  break: 0.0,  reward: 120 },
-  { level: 2,  success: 90.6,  keep: 9.4,  break: 0.0,  reward: 240 },
-  { level: 3,  success: 79.8,  keep: 20.2, break: 0.0,  reward: 390 },
-  { level: 4,  success: 70.1,  keep: 27.9, break: 2.1,  reward: 560 },
-  { level: 5,  success: 59.9,  keep: 35.0, break: 5.1,  reward: 810 },
-  { level: 6,  success: 50.1,  keep: 39.7, break: 10.2, reward: 1200 },
-  { level: 7,  success: 45.4,  keep: 44.1, break: 10.5, reward: 1600 },
-  { level: 8,  success: 40.2,  keep: 49.6, break: 10.3, reward: 2200 },
-  { level: 9,  success: 33.6,  keep: 56.6, break: 9.8,  reward: 3000 },
-  { level: 10, success: 29.3,  keep: 61.4, break: 9.5,  reward: 4200 },
-  { level: 11, success: 25.5,  keep: 64.5, break: 10.1, reward: 5300 },
-  { level: 12, success: 23.6,  keep: 65.9, break: 10.6, reward: 7000 },
-  { level: 13, success: 19.3,  keep: 70.2, break: 10.5, reward: 10000 },
-  { level: 14, success: 18.1,  keep: 72.3, break: 9.7,  reward: 14000 },
-  { level: 15, success: 14.8,  keep: 75.5, break: 9.9,  reward: 21000 },
-  { level: 16, success: 13.1,  keep: 78.0, break: 9.8,  reward: 24000 },
-  { level: 17, success: 10.9,  keep: 76.8, break: 12.6, reward: 32000 },
-  { level: 18, success: 9.9,   keep: 79.9, break: 10.7, reward: 46000 },
-  { level: 19, success: 4.7,   keep: 86.2, break: 10.6, reward: 75000 },
-  { level: 20, success: 3.3,   keep: 90.3, break: 9.9,  reward: 120000 },
+  { level: 1,  success: 100.0, keep: 0.0,  break: 0.0,  reward: 140 },
+  { level: 2,  success: 90.6,  keep: 9.4,  break: 0.0,  reward: 280 },
+  { level: 3,  success: 79.8,  keep: 20.2, break: 0.0,  reward: 450 },
+  { level: 4,  success: 70.1,  keep: 27.9, break: 2.1,  reward: 640 },
+  { level: 5,  success: 59.9,  keep: 35.0, break: 5.1,  reward: 930 },
+  { level: 6,  success: 50.1,  keep: 39.7, break: 10.2, reward: 1400 },
+  { level: 7,  success: 45.4,  keep: 44.1, break: 10.5, reward: 1800 },
+  { level: 8,  success: 40.2,  keep: 49.6, break: 10.3, reward: 2500 },
+  { level: 9,  success: 33.6,  keep: 56.6, break: 9.8,  reward: 3400 },
+  { level: 10, success: 29.3,  keep: 61.4, break: 9.5,  reward: 4800 },
+  { level: 11, success: 25.5,  keep: 64.5, break: 10.1, reward: 6100 },
+  { level: 12, success: 23.6,  keep: 65.9, break: 10.6, reward: 8000 },
+  { level: 13, success: 19.3,  keep: 70.2, break: 10.5, reward: 12000 },
+  { level: 14, success: 18.1,  keep: 72.3, break: 9.7,  reward: 16000 },
+  { level: 15, success: 14.8,  keep: 75.5, break: 9.9,  reward: 24000 },
+  { level: 16, success: 13.1,  keep: 78.0, break: 9.8,  reward: 28000 },
+  { level: 17, success: 10.9,  keep: 76.8, break: 12.6, reward: 37000 },
+  { level: 18, success: 9.9,   keep: 79.9, break: 10.7, reward: 53000 },
+  { level: 19, success: 4.7,   keep: 86.2, break: 10.6, reward: 86000 },
+  { level: 20, success: 3.3,   keep: 90.3, break: 9.9,  reward: 140000 },
   // 초월 구간: 방지권 없이 축복·도박만. 여기서 타면 안전 구간 없이 +0강으로 리셋
   // 단계별 최적 플레이 기대 비용(0강부터): +25 약 56만 · +28 약 159만 · +30 약 270만P → 판매가는 그 약 90%
-  { level: 21, success: 3.2,   keep: 94.3, break: 2.5,  reward: 160000 },
-  { level: 22, success: 3.0,   keep: 94.0, break: 3.0,  reward: 230000 },
-  { level: 23, success: 2.8,   keep: 93.7, break: 3.5,  reward: 390000 },
-  { level: 24, success: 2.6,   keep: 93.4, break: 4.0,  reward: 450000 },
-  { level: 25, success: 2.4,   keep: 93.1, break: 4.5,  reward: 640000 },
-  { level: 26, success: 2.2,   keep: 92.8, break: 5.0,  reward: 1130000 },
-  { level: 27, success: 2.0,   keep: 92.5, break: 5.5,  reward: 1290000 },
-  { level: 28, success: 1.8,   keep: 92.2, break: 6.0,  reward: 1830000 },
-  { level: 29, success: 1.6,   keep: 91.9, break: 6.5,  reward: 2070000 },
-  { level: 30, success: 1.5,   keep: 91.5, break: 7.0,  reward: 3110000 }
+  { level: 21, success: 3.2,   keep: 94.3, break: 2.5,  reward: 180000 },
+  { level: 22, success: 3.0,   keep: 94.0, break: 3.0,  reward: 260000 },
+  { level: 23, success: 2.8,   keep: 93.7, break: 3.5,  reward: 450000 },
+  { level: 24, success: 2.6,   keep: 93.4, break: 4.0,  reward: 520000 },
+  { level: 25, success: 2.4,   keep: 93.1, break: 4.5,  reward: 740000 },
+  { level: 26, success: 2.2,   keep: 92.8, break: 5.0,  reward: 1300000 },
+  { level: 27, success: 2.0,   keep: 92.5, break: 5.5,  reward: 1500000 },
+  { level: 28, success: 1.8,   keep: 92.2, break: 6.0,  reward: 2100000 },
+  { level: 29, success: 1.6,   keep: 91.9, break: 6.5,  reward: 2400000 },
+  { level: 30, success: 1.5,   keep: 91.5, break: 7.0,  reward: 3600000 }
 ];
 
 // 안전 구간: 한 번 도달한 5/10/15강 아래로는 떨어지지 않음
