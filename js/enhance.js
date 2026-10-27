@@ -380,7 +380,7 @@ function toggleEnhanceItem(kind) {
 //  - '추천 단계에서만'을 켜면 💡 추천 조합에 포함된 단계에서만 사용
 //  - 효과가 없는 단계(이미 100% 성공, 파괴 확률 0%)에서는 아이템을 아끼고 쓰지 않음
 // ==========================================
-let autoUse = { protect: false, bless: false, recOnly: false };
+let autoUse = { protect: false, bless: false, recOnly: true };
 try { autoUse = Object.assign(autoUse, JSON.parse(localStorage.getItem('bapsim_auto_items') || '{}')); } catch (e) {}
 function saveAutoUse() { try { localStorage.setItem('bapsim_auto_items', JSON.stringify(autoUse)); } catch (e) {} }
 
@@ -393,6 +393,13 @@ function setAutoUse(kind, on) {
 }
 
 // 이번 단계에서 자동으로 쓰고 싶은 아이템 (보유 여부와 무관)
+// 판매가·아이템가(수수료 포함) 기준 기대수익 계산으로 뽑은 '자동 구매가 이득인 단계'
+const AUTO_BLESS_AT = new Set([13, 14, 16, 17, 18, 19]);
+const AUTO_PROTECT_AT = new Set([14, 17, 18, 19]);
+function autoSmartAt(lv, rec) {
+  if (lv >= 20) return { bless: (rec || '').includes('축복'), protect: false };
+  return { bless: AUTO_BLESS_AT.has(lv), protect: AUTO_PROTECT_AT.has(lv) };
+}
 function autoWanted() {
   const want = { protect: false, bless: false };
   if (currentEnhanceLevel >= ENHANCE_MAX) return want;
@@ -400,8 +407,10 @@ function autoWanted() {
   const base = ENHANCE_PROBABILITIES[currentEnhanceLevel];
   if (!base) return want;
   const breakBase = Math.max(0, Math.round((100 - base.success - base.keep) * 1000) / 1000);
-  want.bless = autoUse.bless && base.success < 100 && (!autoUse.recOnly || rec.includes('축복'));
-  want.protect = autoUse.protect && !gambleMode && breakBase > 0 && currentEnhanceLevel < NO_PROTECT_FROM && (!autoUse.recOnly || rec.includes('방지권'));
+  // 자동 구매는 '본전 이상 나오는 단계'에서만 (모든 단계 자동 구매 시 수익률 30%대로 폭락하던 문제)
+  const smart = autoSmartAt(currentEnhanceLevel, rec);
+  want.bless = autoUse.bless && base.success < 100 && smart.bless;
+  want.protect = autoUse.protect && !gambleMode && breakBase > 0 && currentEnhanceLevel < NO_PROTECT_FROM && smart.protect;
   return want;
 }
 
