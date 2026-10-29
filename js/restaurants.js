@@ -441,6 +441,7 @@ function openAddModal() {
   document.getElementById('deleteActionWrapper').classList.add('hidden');
   document.getElementById('sheetRestNotice').classList.add('hidden');
   document.getElementById('modalTitle').textContent = "식당 등록 및 식단 업데이트";
+  if (typeof resetOcrBox === 'function') resetOcrBox();
   document.getElementById('addModal').classList.remove('hidden');
 }
 
@@ -465,6 +466,7 @@ function openEditModal(id) {
     document.getElementById('sheetRestNotice').classList.add('hidden');
   }
   document.getElementById('modalTitle').textContent = `[${r.name}] 식단 수정`;
+  if (typeof resetOcrBox === 'function') resetOcrBox();
   document.getElementById('addModal').classList.remove('hidden');
 }
 
@@ -513,3 +515,137 @@ function handleDeleteCurrentRestaurant() {
     closeAddModal();
   });
 }
+
+// ==========================================
+// 📷 사진으로 자동 입력 (반자동): 인스타 메뉴 사진 → 글자 인식(브라우저 안에서, 무료) → 입력칸 채우기
+// ==========================================
+const OCR_LIB = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
+let ocrWorkerPromise = null;
+function loadOcrWorker() {
+  if (ocrWorkerPromise) return ocrWorkerPromise;
+  ocrWorkerPromise = new Promise((resolve, reject) => {
+    const go = () => Tesseract.createWorker('kor', 1, {
+      logger: m => { if (m.status === 'recognizing text') setOcrStatus(`🔍 글자 읽는 중... ${Math.round((m.progress || 0) * 100)}%`); }
+    }).then(resolve, reject);
+    if (window.Tesseract) return go();
+    const s = document.createElement('script');
+    s.src = OCR_LIB; s.onload = go; s.onerror = () => reject(new Error('인식 도구를 불러오지 못했어요'));
+    document.head.appendChild(s);
+  }).catch(e => { ocrWorkerPromise = null; throw e; });
+  return ocrWorkerPromise;
+}
+function setOcrStatus(msg) {
+  const el = document.getElementById('ocrStatus');
+  if (!el) return;
+  el.classList.toggle('hidden', !msg);
+  el.textContent = msg || '';
+}
+
+// 작은/색 많은 이미지도 잘 읽히게: 크게 키우고 흑백+대비 올리기
+function prepMenuImage(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(3, Math.max(1, 1800 / Math.max(img.width, img.height)));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
+      const g = c.getContext('2d');
+      g.drawImage(img, 0, 0, c.width, c.height);
+      const d = g.getImageData(0, 0, c.width, c.height), p = d.data;
+      let sum = 0;
+      for (let i = 0; i < p.length; i += 4) { const y = 0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2]; p[i] = y; sum += y; }
+      const avg = sum / (p.length / 4), dark = avg < 110; // 어두운 배경에 밝은 글씨면 뒤집기
+      for (let i = 0; i < p.length; i += 4) {
+        let y = p[i]; if (dark) y = 255 - y;
+        y = Math.max(0, Math.min(255, (y - 128) * 1.6 + 140));
+        p[i] = p[i + 1] = p[i + 2] = y;
+      }
+      g.putImageData(d, 0, 0);
+      URL.revokeObjectURL(img.src);
+      resolve(c);
+    };
+    img.onerror = () => reject(new Error('이미지를 열 수 없어요'));
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+const OCR_SKIP = /^(백?미?밥|쌀밥|흰쌀밥|잡곡밥|흑미밥|공기밥|현미밥|배추김치|김치|포기김치|깍두기|총각김치|열무김치|맛김치|오늘의?메뉴|오늘의?식단|점심메뉴|메뉴|중식|석식|조식|런치|lunch|menu|today|월|화|수|목|금|토|일|월요일|화요일|수요일|목요일|금요일|토요일|일요일)$/i;
+const OCR_SOUP = /(국|탕|찌개|전골|개장|스프|수프|짬뽕|우동|국수|미역국|곰탕)$/;
+const OCR_DESSERT = /(음료|주스|쥬스|커피|식혜|수정과|요구르트|요거트|야쿠르트|아이스크림|아이스티|과일|후식|디저트|케이크|쿠키|빵|떡|라면|쿨피스|콜라|사이다|매실차|녹차|차$|푸딩|젤리|샐러드바|누룽지|숭늉|토스트|와플|시리얼)/;
+const OCR_MAIN_HINT = /(고기|돼지|소고기|불고기|제육|닭|치킨|오리|갈비|삼겹|목살|보쌈|족발|수육|장어|생선|고등어|삼치|갈치|연어|오징어|낙지|쭈꾸미|주꾸미|새우|떡갈비|함박|돈까스|돈가스|까스|커틀릿|탕수육|강정|볶음|찜|구이|조림|튀김|전$|잡채|순대|동그랑땡|너겟|소시지|햄|카레|짜장|덮밥|비빔|스테이크|미트볼)/;
+
+function cleanOcrLine(s) {
+  return String(s)
+    .replace(/[#@][^\s]+/g, ' ')                                   // 해시태그·멘션
+    .replace(/\d{1,2}\s*[\/.월]\s*\d{1,2}\s*(일)?\s*(\([^)]*\))?/g, ' ') // 날짜
+    .replace(/[\d,]+\s*원/g, ' ')                                   // 가격
+    .replace(/\(\s*[월화수목금토일]\s*\)|[월화수목금토일]요일/g, ' ')                // 요일
+    .replace(/(오늘|금일|이번\s*주|내일)?\s*의?\s*(점심|중식|런치)?\s*(메뉴|식단|메뉴판)(입니다|이에요|예요)?/g, ' ')
+    .replace(/[^가-힣a-zA-Z&\s]/g, ' ')
+    .replace(/\s+/g, ' ').trim();
+}
+function parseMenuText(text) {
+  const out = { mains: [], soup: [], dessert: [], lines: [] };
+  const seen = new Set();
+  String(text).split(/\n|·|•|\||,|\/|ㆍ/).forEach(raw => {
+    const line = cleanOcrLine(raw);
+    const key = line.replace(/\s/g, '');
+    if (key.length < 2 || key.length > 18 || seen.has(key)) return;
+    if (!/[가-힣]{2,}/.test(key)) return;            // 한글 2자 이상 없는 줄은 잡음
+    if (/[가-힣]\s[가-힣]\s[가-힣]\s[가-힣]/.test(line)) return; // 한 글자씩 흩어진 잡음
+    seen.add(key);
+    out.lines.push(line);
+    if (OCR_SKIP.test(key)) return;
+    if (OCR_DESSERT.test(key)) out.dessert.push(line);
+    else if (OCR_SOUP.test(key)) out.soup.push(line);
+    else out.mains.push(line);
+  });
+  // 고기·튀김 같은 '메인스러운' 반찬을 앞으로
+  out.mains.sort((a, b) => (OCR_MAIN_HINT.test(b) ? 1 : 0) - (OCR_MAIN_HINT.test(a) ? 1 : 0));
+  return out;
+}
+
+async function handleMenuPhoto(file) {
+  if (!file || !/^image\//.test(file.type)) return;
+  const prev = document.getElementById('ocrPreview');
+  prev.src = URL.createObjectURL(file); prev.classList.remove('hidden');
+  setOcrStatus('⏳ 인식 도구 준비 중... (처음 한 번은 10초쯤 걸려요)');
+  try {
+    const [worker, canvas] = await Promise.all([loadOcrWorker(), prepMenuImage(file)]);
+    setOcrStatus('🔍 글자 읽는 중...');
+    const { data } = await worker.recognize(canvas);
+    const r = parseMenuText(data.text || '');
+    if (!r.lines.length) { setOcrStatus('😢 글자를 못 찾았어요. 메뉴 부분만 크게 캡처해서 다시 올려주세요.'); return; }
+    const set = (id, arr, n) => { if (arr.length) document.getElementById(id).value = arr.slice(0, n).join(', '); };
+    set('formRestMains', r.mains, 6);
+    set('formRestSoup', r.soup, 2);
+    set('formRestDessert', r.dessert, 3);
+    const now = new Date();
+    document.getElementById('formRestDate').value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const wrap = document.getElementById('ocrRawWrap'), box = document.getElementById('ocrLines');
+    box.innerHTML = r.lines.map(l => `<button type="button" class="px-2 py-0.5 rounded-full bg-white border border-slate-200 hover:border-orange-400 text-slate-700" onclick="addOcrLineToMains(this.textContent)">${esc(l)}</button>`).join('');
+    wrap.classList.remove('hidden');
+    setOcrStatus(`✅ 메인 ${Math.min(6, r.mains.length)}개 · 국 ${Math.min(2, r.soup.length)}개 · 후식 ${Math.min(3, r.dessert.length)}개를 채웠어요. 틀린 글자는 고친 뒤 저장해 주세요!`);
+  } catch (e) {
+    setOcrStatus('⚠️ ' + (e && e.message ? e.message : '인식 실패') + ' — 다시 시도해 주세요');
+  }
+}
+function addOcrLineToMains(line) {
+  const el = document.getElementById('formRestMains');
+  const cur = el.value.split(',').map(s => s.trim()).filter(Boolean);
+  if (!cur.includes(line)) cur.push(line);
+  el.value = cur.join(', ');
+}
+function resetOcrBox() {
+  setOcrStatus('');
+  ['ocrPreview', 'ocrRawWrap'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('hidden'); });
+}
+// 식단 창이 열려 있을 때 Ctrl+V 로 사진 붙여넣기
+document.addEventListener('paste', e => {
+  const modal = document.getElementById('addModal');
+  if (!modal || modal.classList.contains('hidden')) return;
+  const item = [...((e.clipboardData && e.clipboardData.items) || [])].find(i => i.type && i.type.startsWith('image/'));
+  if (!item) return;
+  e.preventDefault();
+  handleMenuPhoto(item.getAsFile());
+});

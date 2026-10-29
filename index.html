@@ -11,7 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Black+Han+Sans&family=Rubik+Glitch&family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261029d">
+  <link rel="stylesheet" href="css/style.css?v=20261029e">
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white relative">
 
@@ -1325,6 +1325,23 @@
       </div>
       <form id="restaurantForm" onsubmit="handleSaveRestaurant(event)" class="space-y-3 text-xs">
         <input type="hidden" id="editRestId" value="" />
+        <div id="ocrBox" class="rounded-2xl border-2 border-dashed border-orange-300 bg-orange-50/60 p-3 space-y-2">
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <div class="font-black text-orange-700 text-[13px]">📷 사진으로 자동 입력</div>
+              <div class="text-[10px] text-orange-600/80">인스타 메뉴 사진을 캡처해서 올리거나 <b>Ctrl+V</b>로 붙여넣기 하세요</div>
+            </div>
+            <label class="shrink-0 bg-orange-500 hover:bg-orange-600 text-white font-bold px-3 py-2 rounded-xl cursor-pointer text-[11px]">
+              사진 선택<input id="ocrFile" type="file" accept="image/*" class="hidden" onchange="handleMenuPhoto(this.files && this.files[0]); this.value=''">
+            </label>
+          </div>
+          <div id="ocrStatus" class="hidden text-[11px] font-bold text-orange-700"></div>
+          <img id="ocrPreview" class="hidden w-full max-h-40 object-contain rounded-xl bg-white border border-orange-200" alt="">
+          <details id="ocrRawWrap" class="hidden text-[10px] text-slate-500">
+            <summary class="cursor-pointer font-bold">인식된 글자 전체 보기 (줄을 눌러 메인에 추가)</summary>
+            <div id="ocrLines" class="flex flex-wrap gap-1 mt-1.5"></div>
+          </details>
+        </div>
         <div>
           <label class="font-bold text-slate-700 block mb-1">식당 이름 *</label>
           <input id="formRestName" type="text" placeholder="예: 일루" required class="w-full border rounded-xl p-2.5 bg-slate-50 font-bold" />
@@ -1523,24 +1540,24 @@
     </div>
   </div>
 
-  <script src="js/core.js?v=20261029d"></script>
-  <script src="js/auth.js?v=20261029d"></script>
-  <script src="js/enhance.js?v=20261029d"></script>
-  <script src="js/shop.js?v=20261029d"></script>
-  <script src="js/chat.js?v=20261029d"></script>
-  <script src="js/games.js?v=20261029d"></script>
-  <script src="js/admin.js?v=20261029d"></script>
-  <script src="js/ranking.js?v=20261029d"></script>
-  <script src="js/restaurants.js?v=20261029d"></script>
-  <script src="js/tools.js?v=20261029d"></script>
-  <script src="js/feed.js?v=20261029d"></script>
-  <script src="js/bank.js?v=20261029d"></script>
-  <script src="js/tier.js?v=20261029d"></script>
-  <script src="js/club.js?v=20261029d"></script>
-  <script src="js/cards.js?v=20261029d"></script>
-  <script src="js/season.js?v=20261029d"></script>
-  <script src="js/duel.js?v=20261029d"></script>
-  <script src="js/predict.js?v=20261029d"></script>
-  <script src="js/main.js?v=20261029d"></script>
+  <script src="js/core.js?v=20261029e"></script>
+  <script src="js/auth.js?v=20261029e"></script>
+  <script src="js/enhance.js?v=20261029e"></script>
+  <script src="js/shop.js?v=20261029e"></script>
+  <script src="js/chat.js?v=20261029e"></script>
+  <script src="js/games.js?v=20261029e"></script>
+  <script src="js/admin.js?v=20261029e"></script>
+  <script src="js/ranking.js?v=20261029e"></script>
+  <script src="js/restaurants.js?v=20261029e"></script>
+  <script src="js/tools.js?v=20261029e"></script>
+  <script src="js/feed.js?v=20261029e"></script>
+  <script src="js/bank.js?v=20261029e"></script>
+  <script src="js/tier.js?v=20261029e"></script>
+  <script src="js/club.js?v=20261029e"></script>
+  <script src="js/cards.js?v=20261029e"></script>
+  <script src="js/season.js?v=20261029e"></script>
+  <script src="js/duel.js?v=20261029e"></script>
+  <script src="js/predict.js?v=20261029e"></script>
+  <script src="js/main.js?v=20261029e"></script>
 </body>
 </html>
