@@ -380,8 +380,9 @@ function toggleEnhanceItem(kind) {
 //  - '추천 단계에서만'을 켜면 💡 추천 조합에 포함된 단계에서만 사용
 //  - 효과가 없는 단계(이미 100% 성공, 파괴 확률 0%)에서는 아이템을 아끼고 쓰지 않음
 // ==========================================
-let autoUse = { protect: false, bless: false, recOnly: true };
+let autoUse = { protect: false, bless: false, recOnly: false };
 try { autoUse = Object.assign(autoUse, JSON.parse(localStorage.getItem('bapsim_auto_items') || '{}')); } catch (e) {}
+try { if (!localStorage.getItem('bapsim_auto_v2')) { autoUse.recOnly = false; localStorage.setItem('bapsim_auto_v2', '1'); saveAutoUse(); } } catch (e) {}
 function saveAutoUse() { try { localStorage.setItem('bapsim_auto_items', JSON.stringify(autoUse)); } catch (e) {} }
 
 function setAutoUse(kind, on) {
@@ -408,7 +409,7 @@ function autoWanted() {
   if (!base) return want;
   const breakBase = Math.max(0, Math.round((100 - base.success - base.keep) * 1000) / 1000);
   // 자동 구매는 '본전 이상 나오는 단계'에서만 (모든 단계 자동 구매 시 수익률 30%대로 폭락하던 문제)
-  const smart = autoSmartAt(currentEnhanceLevel, rec);
+  const smart = autoUse.recOnly ? autoSmartAt(currentEnhanceLevel, rec) : { bless: true, protect: true };
   want.bless = autoUse.bless && base.success < 100 && smart.bless;
   want.protect = autoUse.protect && !gambleMode && breakBase > 0 && currentEnhanceLevel < NO_PROTECT_FROM && smart.protect;
   return want;
