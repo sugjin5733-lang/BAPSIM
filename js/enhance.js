@@ -780,6 +780,8 @@ function sellEnhancedBowl() {
   currentEnhanceLevel = 0;
   lastSaleSummary = { invest: inv, tries, paid };
   myBowl = { cost: 0, tries: 0 };
+  // 판매하면 0강부터 다시 시작 → 축복서 자동은 꺼줌 (원하는 강에서 다시 켜기)
+  if (autoUse.bless) { autoUse.bless = false; useItem.bless = false; saveAutoUse(); renderEnhanceItems(); }
   updatePointsUI();
   updateEnhanceUI();
   renderEnhanceTable();
