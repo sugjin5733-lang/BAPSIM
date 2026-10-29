@@ -767,7 +767,8 @@ function luckTail(ps, k) {
   return Math.min(1, s);
 }
 // 새 시세(DB 기록) 적용 이후 판매만 검사 (예전 탭이 닫힐 시간 여유)
-const MARKET_V2_FROM = Date.parse('2026-10-23T18:00:00+09:00');
+// 10/29 이전 기록은 '시세 처음 만든 사람만 다른 시세를 보던 버그' 때문에 검사 불가 → 수정 배포 이후만 검사
+const MARKET_V2_FROM = Date.parse('2026-10-29T10:45:00+09:00');
 function luckReport(logsObj, market) {
   const rows = Object.values(logsObj || {}).filter(r => r && typeof r.ts === 'number' && typeof r.r === 'string').sort((a, b) => a.ts - b.ts);
   const t = {};

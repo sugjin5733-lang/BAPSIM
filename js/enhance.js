@@ -674,13 +674,26 @@ async function ensureMarketSlot(slot) {
   marketEnsuring[slot] = true;
   try {
     const ref = db.ref(`market/${slot}`);
-    const res = await ref.transaction(cur => (cur ? undefined : { s: slot, at: firebase.database.ServerValue.TIMESTAMP }));
-    const val = res.snapshot && res.snapshot.val();
-    if (val && typeof val.at === 'number') marketCache[slot] = val;
-    else { const got = (await ref.once('value')).val(); if (got && typeof got.at === 'number') marketCache[slot] = got; }
+    await ref.transaction(cur => (cur ? undefined : { s: slot, at: firebase.database.ServerValue.TIMESTAMP }));
+    // ⚠️ 트랜잭션 결과의 at 은 '내 PC가 추정한 서버 시각'이라 실제 저장값과 수백 ms 달라질 수 있음
+    //    → 그 값으로 시세를 계산하면 처음 만든 사람만 다른 시세를 보게 됨 (실제 버그였음)
+    //    → 실시간 피드가 받은 진짜 값이 있으면 그걸 쓰고, 없으면 서버에서 직접 다시 읽음
+    if (!marketCache[slot]) {
+      const got = await fetchMarketTruth(slot);
+      if (got && typeof got.at === 'number') marketCache[slot] = got;
+    }
     if (Math.random() < 0.05) pruneOldMarket(slot);
   } catch (e) { /* 다음 틱에 다시 */ }
   finally { marketEnsuring[slot] = false; if (typeof renderRiceMarket === 'function') renderRiceMarket(); }
+}
+async function fetchMarketTruth(slot) {
+  try {
+    const tok = await firebase.auth().currentUser.getIdToken();
+    const r = await fetch(`${firebase.app().options.databaseURL}/market/${slot}.json?auth=${encodeURIComponent(tok)}`, { cache: 'no-store' });
+    if (r.ok) { const v = await r.json(); if (v && typeof v.at === 'number') return v; }
+  } catch (e) {}
+  await new Promise(res => setTimeout(res, 1500));
+  return marketCache[slot] || null;
 }
 function pruneOldMarket(slot) {
   db.ref('market').orderByKey().endAt(String(slot - 1500)).limitToFirst(100).once('value').then(snap => {
