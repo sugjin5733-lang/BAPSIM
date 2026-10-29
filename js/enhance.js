@@ -146,6 +146,7 @@ let enhanceActionTimestamps = [];
 function openEnhanceModal() {
   if (!checkApprovalGuard()) return;
   renderEnhanceItems();
+  { const ep = document.getElementById("enhanceMyPoints"); if (ep) ep.textContent = `${userPoints.toLocaleString()}P`; }
   updateEnhanceUI();
   renderEnhanceTable();
   document.getElementById('enhanceModal').classList.remove('hidden');
@@ -473,12 +474,19 @@ function renderEnhanceItems() {
       btn.innerHTML = `${ENHANCE_ITEMS[kind].name} <span class="font-black">x${myItems[kind]}</span><span class="block text-[9px] font-bold text-rose-400/80">🚫 +21강부터 사용 불가</span>`;
     }
   });
-  ['protect', 'bless', 'recOnly'].forEach(k => {
-    const cb = document.getElementById(`autoUse_${k}`);
-    if (cb) cb.checked = !!autoUse[k];
+  const AUTO_BTN = {
+    protect: { id: 'autoUse_protect', label: '🛡️ 방지권 자동', on: 'bg-sky-500/25 text-sky-200 border-sky-400 shadow-[0_0_10px_rgba(56,189,248,.35)]' },
+    bless: { id: 'autoUse_bless', label: '✨ 축복서 자동', on: 'bg-amber-500/25 text-amber-200 border-amber-400 shadow-[0_0_10px_rgba(251,191,36,.35)]' },
+    recOnly: { id: 'autoUse_recOnly_wrap', label: '💡 +13↑만', on: 'bg-emerald-500/25 text-emerald-200 border-emerald-400' }
+  };
+  Object.entries(AUTO_BTN).forEach(([k, c]) => {
+    const b = document.getElementById(c.id);
+    if (!b) return;
+    const on = !!autoUse[k];
+    const dim = k === 'recOnly' && !(autoUse.protect || autoUse.bless) ? ' opacity-40' : '';
+    b.className = `py-2.5 px-1 rounded-xl text-[11px] font-black border-2 transition-all active:scale-95 ${on ? c.on : 'bg-slate-900 text-slate-400 border-slate-700 hover:border-slate-500'}${dim}`;
+    b.innerHTML = `${c.label}<span class="block text-[10px] font-bold ${on ? '' : 'text-slate-500'}">${on ? 'ON' : 'OFF'}</span>`;
   });
-  const recWrap = document.getElementById('autoUse_recOnly_wrap');
-  if (recWrap) recWrap.classList.toggle('opacity-40', !(autoUse.protect || autoUse.bless));
   ['protect', 'bless'].forEach(kind => {
     const b = document.getElementById(`enhBuy_${kind}`);
     if (b) b.textContent = `+1 (${itemTotal(kind).toLocaleString()}P)`;
@@ -781,7 +789,9 @@ function sellEnhancedBowl() {
   lastSaleSummary = { invest: inv, tries, paid };
   myBowl = { cost: 0, tries: 0 };
   // 판매하면 0강부터 다시 시작 → 축복서 자동은 꺼줌 (원하는 강에서 다시 켜기)
-  if (autoUse.bless) { autoUse.bless = false; useItem.bless = false; saveAutoUse(); renderEnhanceItems(); }
+  if (autoUse.bless) { autoUse.bless = false; useItem.bless = false; saveAutoUse(); }
+  gambleMode = false; // 도박 강화도 판매하면 해제
+  renderEnhanceItems();
   updatePointsUI();
   updateEnhanceUI();
   renderEnhanceTable();

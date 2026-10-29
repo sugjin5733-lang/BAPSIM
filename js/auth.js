@@ -643,6 +643,8 @@ function updatePointsUI(shouldPushToCloud = true) {
   if (typeof updateOwedEta === 'function') updateOwedEta();
   if (chatPoint) chatPoint.textContent = `보유: ${userPoints.toLocaleString()}P`;
   if (shopPoint) shopPoint.textContent = `${userPoints.toLocaleString()}P`;
+  const enhPoint = document.getElementById('enhanceMyPoints');
+  if (enhPoint) enhPoint.textContent = `${userPoints.toLocaleString()}P`;
 
   updatePreviewBox();
   if (shouldPushToCloud) syncUserPointToCloud();
