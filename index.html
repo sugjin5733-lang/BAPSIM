@@ -11,7 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Black+Han+Sans&family=Rubik+Glitch&family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261029e">
+  <link rel="stylesheet" href="css/style.css?v=20261030a">
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white relative">
 
@@ -1222,6 +1222,17 @@
         <div id="adminPendingUsersContainer" class="space-y-2 max-h-36 overflow-y-auto border rounded-2xl p-2 bg-slate-50 text-xs"></div>
       </div>
 
+      <!-- 등록 식당 관리 -->
+      <div class="space-y-3">
+        <h4 class="font-extrabold text-xs text-slate-800 flex items-center gap-1.5">🍽️ 등록 식당 관리 및 삭제 (<span id="adminRestCount">0곳</span>)</h4>
+        <p class="text-[10px] text-slate-400 -mt-2">시트 연동 식당도 삭제하면 다음 동기화 때 다시 생기지 않아요 (아래 '숨긴 식당'에서 복구 가능)</p>
+        <div id="adminRestListContainer" class="space-y-2 max-h-48 overflow-y-auto border rounded-2xl p-2 bg-slate-50 text-xs"></div>
+        <div id="adminRestHiddenWrap" class="hidden text-xs">
+          <div class="font-bold text-slate-500 text-[11px] mb-1">🙈 숨긴 식당 (시트 연동)</div>
+          <div id="adminRestHiddenList" class="flex flex-wrap gap-1.5"></div>
+        </div>
+      </div>
+
       <!-- 개설된 비밀 그룹 관리 -->
       <div class="space-y-3">
         <h4 class="font-extrabold text-xs text-slate-800 flex items-center gap-1.5">
@@ -1540,24 +1551,24 @@
     </div>
   </div>
 
-  <script src="js/core.js?v=20261029e"></script>
-  <script src="js/auth.js?v=20261029e"></script>
-  <script src="js/enhance.js?v=20261029e"></script>
-  <script src="js/shop.js?v=20261029e"></script>
-  <script src="js/chat.js?v=20261029e"></script>
-  <script src="js/games.js?v=20261029e"></script>
-  <script src="js/admin.js?v=20261029e"></script>
-  <script src="js/ranking.js?v=20261029e"></script>
-  <script src="js/restaurants.js?v=20261029e"></script>
-  <script src="js/tools.js?v=20261029e"></script>
-  <script src="js/feed.js?v=20261029e"></script>
-  <script src="js/bank.js?v=20261029e"></script>
-  <script src="js/tier.js?v=20261029e"></script>
-  <script src="js/club.js?v=20261029e"></script>
-  <script src="js/cards.js?v=20261029e"></script>
-  <script src="js/season.js?v=20261029e"></script>
-  <script src="js/duel.js?v=20261029e"></script>
-  <script src="js/predict.js?v=20261029e"></script>
-  <script src="js/main.js?v=20261029e"></script>
+  <script src="js/core.js?v=20261030a"></script>
+  <script src="js/auth.js?v=20261030a"></script>
+  <script src="js/enhance.js?v=20261030a"></script>
+  <script src="js/shop.js?v=20261030a"></script>
+  <script src="js/chat.js?v=20261030a"></script>
+  <script src="js/games.js?v=20261030a"></script>
+  <script src="js/admin.js?v=20261030a"></script>
+  <script src="js/ranking.js?v=20261030a"></script>
+  <script src="js/restaurants.js?v=20261030a"></script>
+  <script src="js/tools.js?v=20261030a"></script>
+  <script src="js/feed.js?v=20261030a"></script>
+  <script src="js/bank.js?v=20261030a"></script>
+  <script src="js/tier.js?v=20261030a"></script>
+  <script src="js/club.js?v=20261030a"></script>
+  <script src="js/cards.js?v=20261030a"></script>
+  <script src="js/season.js?v=20261030a"></script>
+  <script src="js/duel.js?v=20261030a"></script>
+  <script src="js/predict.js?v=20261030a"></script>
+  <script src="js/main.js?v=20261030a"></script>
 </body>
 </html>

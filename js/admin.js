@@ -78,6 +78,7 @@ function openAdminDashboard() {
   loadPendingPointRequests();
   renderAdminUserList();
   renderAdminGroupList();
+  renderAdminRestaurantList();
   renderAdminSignupRequests();
   renderAdminRenameRequests();
 }
@@ -632,6 +633,47 @@ async function handleAdminResetAllVotes() {
   });
   await db.ref().update(updates);
   alert('투표 리셋 완료');
+}
+
+// 🍽️ 등록 식당 관리 (관리자 전용 삭제)
+let adminRestHidden = {};
+function renderAdminRestaurantList() {
+  const draw = () => {
+    const container = document.getElementById('adminRestListContainer');
+    if (!container) return;
+    const list = Object.values(restaurants || {}).filter(r => r && r.id).sort((a, b) => String(a.name).localeCompare(String(b.name), 'ko'));
+    const cnt = document.getElementById('adminRestCount');
+    if (cnt) cnt.textContent = `${list.length}곳`;
+    container.innerHTML = list.length === 0 ? '<div class="text-center text-slate-400 py-3">등록된 식당이 없습니다.</div>' : list.map(r => `
+      <div class="p-2 bg-white border rounded-xl flex items-center justify-between gap-2">
+        <div class="min-w-0">
+          <span class="font-bold text-slate-800 truncate block">${esc(r.name || '(이름 없음)')} ${r.fromSheet ? '<span class="text-[9px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold">시트</span>' : ''}</span>
+          <span class="text-[10px] text-slate-400">${esc(r.menuDate || '날짜 없음')} · ${esc(r.updatedBy || (r.fromSheet ? '시트' : '-'))}</span>
+        </div>
+        <button onclick="adminDeleteRestaurant(${jsArg(r.id)})" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-2 py-1 rounded-lg text-[10px] shrink-0">삭제</button>
+      </div>`).join('');
+    const hid = Object.entries(adminRestHidden || {});
+    const hw = document.getElementById('adminRestHiddenWrap');
+    if (hw) hw.classList.toggle('hidden', hid.length === 0);
+    const hl = document.getElementById('adminRestHiddenList');
+    if (hl) hl.innerHTML = hid.map(([id, v]) => `<button onclick="adminUnhideRestaurant(${jsArg(id)})" class="px-2 py-1 rounded-lg bg-white border border-slate-200 hover:border-emerald-400 text-slate-600 font-bold">${esc((v && v.name) || id)} <span class="text-emerald-600">↩ 복구</span></button>`).join('');
+  };
+  db.ref('restaurants').on('value', draw);
+  db.ref('restaurants_hidden').on('value', snap => { adminRestHidden = snap.val() || {}; draw(); });
+}
+async function adminDeleteRestaurant(id) {
+  if (!requireAdmin()) return;
+  const r = (restaurants || {})[id];
+  if (!r) return;
+  if (!confirm(`🍽️ [${r.name}] 식당을 삭제할까요?${r.fromSheet ? '\n\n(시트 연동 식당이라 다음 동기화 때 다시 안 생기게 숨김 처리도 같이 해요)' : ''}`)) return;
+  const updates = { [`restaurants/${id}`]: null };
+  if (r.fromSheet) updates[`restaurants_hidden/${id}`] = { name: r.name || id, at: firebase.database.ServerValue.TIMESTAMP, by: currentUser.nickname };
+  try { await db.ref().update(updates); } catch (e) { alert('삭제 실패: ' + e.message); }
+}
+async function adminUnhideRestaurant(id) {
+  if (!requireAdmin()) return;
+  if (!confirm('이 식당 숨김을 풀까요? 다음 시트 동기화 때 다시 나타나요.')) return;
+  try { await db.ref(`restaurants_hidden/${id}`).remove(); if (typeof syncFromGoogleSheet === 'function') syncFromGoogleSheet(false); } catch (e) { alert('실패: ' + e.message); }
 }
 
 function renderAdminGroupList() {

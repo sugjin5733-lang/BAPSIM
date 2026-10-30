@@ -42,8 +42,11 @@ async function syncFromGoogleSheet(isManual = false) {
     const sheetData = await res.json();
 
     if (sheetData && Object.keys(sheetData).length > 0) {
+      let hidden = {};
+      try { hidden = (await db.ref('restaurants_hidden').once('value')).val() || {}; } catch (e) {}
       for (const key of Object.keys(sheetData)) {
         const rest = sheetData[key];
+        if (!rest || !rest.id || hidden[rest.id]) continue; // 관리자가 삭제(숨김)한 식당은 다시 안 만듦
 
         let cleanDate = rest.menuDate == null ? "" : String(rest.menuDate);
         if (cleanDate.includes("GMT") || cleanDate.length > 12) {
@@ -524,9 +527,7 @@ let ocrWorkerPromise = null;
 function loadOcrWorker() {
   if (ocrWorkerPromise) return ocrWorkerPromise;
   ocrWorkerPromise = new Promise((resolve, reject) => {
-    const go = () => Tesseract.createWorker('kor', 1, {
-      logger: m => { if (m.status === 'recognizing text') setOcrStatus(`🔍 글자 읽는 중... ${Math.round((m.progress || 0) * 100)}%`); }
-    }).then(resolve, reject);
+    const go = () => Tesseract.createWorker('kor', 1, {}).then(resolve, reject);
     if (window.Tesseract) return go();
     const s = document.createElement('script');
     s.src = OCR_LIB; s.onload = go; s.onerror = () => reject(new Error('인식 도구를 불러오지 못했어요'));
@@ -541,38 +542,70 @@ function setOcrStatus(msg) {
   el.textContent = msg || '';
 }
 
-// 작은/색 많은 이미지도 잘 읽히게: 크게 키우고 흑백+대비 올리기
-function prepMenuImage(file) {
+// 사진 → 인식용 캔버스 여러 장 (흑백 / 이진화 / 반전) : 인스타 메뉴판은 배경·글씨색이 제각각이라 여러 번 읽고 제일 나은 걸 고름
+function loadImg(file) {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.onload = () => {
-      const scale = Math.min(3, Math.max(1, 1800 / Math.max(img.width, img.height)));
-      const c = document.createElement('canvas');
-      c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
-      const g = c.getContext('2d');
-      g.drawImage(img, 0, 0, c.width, c.height);
-      const d = g.getImageData(0, 0, c.width, c.height), p = d.data;
-      let sum = 0;
-      for (let i = 0; i < p.length; i += 4) { const y = 0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2]; p[i] = y; sum += y; }
-      const avg = sum / (p.length / 4), dark = avg < 110; // 어두운 배경에 밝은 글씨면 뒤집기
-      for (let i = 0; i < p.length; i += 4) {
-        let y = p[i]; if (dark) y = 255 - y;
-        y = Math.max(0, Math.min(255, (y - 128) * 1.6 + 140));
-        p[i] = p[i + 1] = p[i + 2] = y;
-      }
-      g.putImageData(d, 0, 0);
-      URL.revokeObjectURL(img.src);
-      resolve(c);
-    };
+    img.onload = () => resolve(img);
     img.onerror = () => reject(new Error('이미지를 열 수 없어요'));
     img.src = URL.createObjectURL(file);
   });
 }
+function prepMenuVariants(img) {
+  const scale = Math.min(3, Math.max(1, 2000 / Math.max(img.width, img.height)));
+  const W = Math.round(img.width * scale), H = Math.round(img.height * scale);
+  const base = document.createElement('canvas'); base.width = W; base.height = H;
+  const bg = base.getContext('2d'); bg.imageSmoothingQuality = 'high'; bg.drawImage(img, 0, 0, W, H);
+  const src = bg.getImageData(0, 0, W, H).data;
+  const gray = new Uint8ClampedArray(W * H);
+  const hist = new Array(256).fill(0);
+  for (let i = 0, j = 0; i < src.length; i += 4, j++) { const y = 0.299 * src[i] + 0.587 * src[i + 1] + 0.114 * src[i + 2]; gray[j] = y; hist[y | 0]++; }
+  // Otsu 임계값
+  let sum = 0; for (let i = 0; i < 256; i++) sum += i * hist[i];
+  let sB = 0, wB = 0, best = 0, th = 128; const total = W * H;
+  for (let i = 0; i < 256; i++) { wB += hist[i]; if (!wB) continue; const wF = total - wB; if (!wF) break; sB += i * hist[i]; const mB = sB / wB, mF = (sum - sB) / wF; const v = wB * wF * (mB - mF) ** 2; if (v > best) { best = v; th = i; } }
+  let dark = 0; for (let j = 0; j < gray.length; j++) if (gray[j] < th) dark++;
+  const textIsLight = dark / gray.length > 0.5; // 어두운 면적이 더 많으면 배경이 어두운 것 → 글씨가 밝음
+  const make = (fn) => {
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const g = c.getContext('2d'); const d = g.createImageData(W, H); const p = d.data;
+    for (let j = 0, i = 0; j < gray.length; j++, i += 4) { const v = fn(gray[j]); p[i] = p[i + 1] = p[i + 2] = v; p[i + 3] = 255; }
+    g.putImageData(d, 0, 0); return c;
+  };
+  const flip = v => textIsLight ? 255 - v : v;
+  return [
+    make(v => flip(v)),                                         // 흑백
+    make(v => flip(v < th ? 0 : 255)),                          // 이진화
+    make(v => flip(Math.max(0, Math.min(255, (v - th) * 2.2 + 128)))) // 대비 강하게
+  ];
+}
+
+// 한식뷔페 자주 나오는 반찬 사전: 글자가 살짝 틀리면 가장 비슷한 이름으로 고쳐줌
+const DISH_DICT = ('돼지고기김치찜,김치찜,제육볶음,고추장불고기,소불고기,불고기,간장불고기,돼지불백,닭볶음탕,닭갈비,닭강정,양념치킨,후라이드치킨,치킨까스,돈까스,돈가스,생선까스,함박스테이크,떡갈비,동그랑땡,너비아니,미트볼,소세지야채볶음,비엔나볶음,햄볶음,스팸구이,계란말이,계란찜,계란후라이,두부조림,두부부침,마파두부,연두부,어묵볶음,오뎅볶음,감자조림,감자채볶음,메추리알장조림,장조림,멸치볶음,진미채볶음,오징어볶음,오징어채볶음,낙지볶음,쭈꾸미볶음,주꾸미볶음,제육쌈밥,보쌈,수육,족발,고등어구이,고등어조림,삼치구이,갈치조림,갈치구이,임연수구이,꽁치조림,코다리조림,가자미구이,연어구이,새우튀김,오징어튀김,야채튀김,고구마튀김,김말이튀김,김말이,탕수육,깐풍기,유린기,칠리새우,잡채,당면,떡볶이,라볶이,순대,찰순대,순대볶음,부침개,김치전,해물파전,부추전,호박전,동태전,감자전,녹두전,콩나물무침,숙주나물,시금치나물,고사리나물,도라지무침,무생채,오이무침,오이소박이,파래무침,미역줄기볶음,애호박볶음,가지볶음,버섯볶음,브로콜리,양배추쌈,상추쌈,쌈채소,샐러드,콘샐러드,마카로니샐러드,감자샐러드,단호박샐러드,코울슬로,떡갈비,카레라이스,카레,짜장,짜장밥,볶음밥,김치볶음밥,비빔밥,오므라이스,잔치국수,비빔국수,쫄면,우동,짬뽕,라면,한강라면,소고기무국,미역국,된장국,된장찌개,김치찌개,순두부찌개,부대찌개,육개장,설렁탕,갈비탕,콩나물국,북엇국,황태국,어묵국,떡국,만둣국,감자국,배추국,시래기국,아욱국,유부장국,계란국,순댓국,뼈해장국,감자탕,닭개장,곰탕,추어탕,청국장,식혜,수정과,요구르트,야쿠르트,아이스크림,과일,수박,귤,바나나,사과,요거트,푸딩,커피,아이스티,매실차,누룽지,숭늉,토스트,와플,떡,인절미,시리얼,흑미밥,잡곡밥,쌀밥,배추김치,깍두기,총각김치,열무김치').split(',');
+function editDist(a, b) {
+  const m = a.length, n = b.length; if (Math.abs(m - n) > 2) return 9;
+  let prev = Array.from({ length: n + 1 }, (_, j) => j);
+  for (let i = 1; i <= m; i++) { const cur = [i]; for (let j = 1; j <= n; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); prev = cur; }
+  return prev[n];
+}
+function snapDish(line) {
+  const k = line.replace(/\s/g, '');
+  if (DISH_DICT.includes(k)) return { text: line, known: true };
+  if (k.length < 2) return { text: line, known: false };
+  const lim = k.length >= 6 ? 2 : 1;
+  let best = null, bd = 9;
+  for (const d of DISH_DICT) {
+    if (k.length === 2 && d.length !== 2) continue; // 두 글자는 같은 길이 단어로만 (잡재→잡채, 식해→식혜)
+    const x = editDist(k, d); if (x < bd) { bd = x; best = d; }
+  }
+  return bd <= lim ? { text: best, known: true } : { text: line, known: false };
+}
 
 const OCR_SKIP = /^(백?미?밥|쌀밥|흰쌀밥|잡곡밥|흑미밥|공기밥|현미밥|배추김치|김치|포기김치|깍두기|총각김치|열무김치|맛김치|오늘의?메뉴|오늘의?식단|점심메뉴|메뉴|중식|석식|조식|런치|lunch|menu|today|월|화|수|목|금|토|일|월요일|화요일|수요일|목요일|금요일|토요일|일요일)$/i;
+const OCR_NOISE = /(맛있게|드세요|감사|영업|오픈|마감|문의|예약|주차|가격|인분|매장|포장|배달|문정|송파|가든파이브|휴무|공지|안내|이벤트|팔로우|좋아요|댓글|게시물|사장님|손님|여러분|오늘도|든든|행복|하세요|합니다|입니다|있습니다|드립니다|무한리필|뷔페|식당|한식)/;
 const OCR_SOUP = /(국|탕|찌개|전골|개장|스프|수프|짬뽕|우동|국수|미역국|곰탕)$/;
 const OCR_DESSERT = /(음료|주스|쥬스|커피|식혜|수정과|요구르트|요거트|야쿠르트|아이스크림|아이스티|과일|후식|디저트|케이크|쿠키|빵|떡|라면|쿨피스|콜라|사이다|매실차|녹차|차$|푸딩|젤리|샐러드바|누룽지|숭늉|토스트|와플|시리얼)/;
-const OCR_MAIN_HINT = /(고기|돼지|소고기|불고기|제육|닭|치킨|오리|갈비|삼겹|목살|보쌈|족발|수육|장어|생선|고등어|삼치|갈치|연어|오징어|낙지|쭈꾸미|주꾸미|새우|떡갈비|함박|돈까스|돈가스|까스|커틀릿|탕수육|강정|볶음|찜|구이|조림|튀김|전$|잡채|순대|동그랑땡|너겟|소시지|햄|카레|짜장|덮밥|비빔|스테이크|미트볼)/;
+const OCR_MAIN_HINT = /(떡갈비|떡볶이|라볶이|고기|돼지|소고기|불고기|제육|닭|치킨|오리|갈비|삼겹|목살|보쌈|족발|수육|장어|생선|고등어|삼치|갈치|연어|오징어|낙지|쭈꾸미|주꾸미|새우|떡갈비|함박|돈까스|돈가스|까스|커틀릿|탕수육|강정|볶음|찜|구이|조림|튀김|전$|잡채|순대|동그랑땡|너겟|소시지|햄|카레|짜장|덮밥|비빔|스테이크|미트볼)/;
 
 function cleanOcrLine(s) {
   return String(s)
@@ -585,23 +618,31 @@ function cleanOcrLine(s) {
     .replace(/\s+/g, ' ').trim();
 }
 function parseMenuText(text) {
-  const out = { mains: [], soup: [], dessert: [], lines: [] };
+  const out = { mains: [], soup: [], dessert: [], lines: [], known: 0, knownSet: new Set() };
   const seen = new Set();
   String(text).split(/\n|·|•|\||,|\/|ㆍ/).forEach(raw => {
-    const line = cleanOcrLine(raw);
-    const key = line.replace(/\s/g, '');
+    let line = cleanOcrLine(raw);
+    let key = line.replace(/\s/g, '');
     if (key.length < 2 || key.length > 18 || seen.has(key)) return;
     if (!/[가-힣]{2,}/.test(key)) return;            // 한글 2자 이상 없는 줄은 잡음
     if (/[가-힣]\s[가-힣]\s[가-힣]\s[가-힣]/.test(line)) return; // 한 글자씩 흩어진 잡음
-    seen.add(key);
+    const sn = snapDish(line);
+    const sk = sn.text.replace(/\s/g, '');
+    if (seen.has(sk)) return;
+    seen.add(key); seen.add(sk);
+    line = sn.text; key = sk;
+    if (sn.known) out.known++;
     out.lines.push(line);
     if (OCR_SKIP.test(key)) return;
-    if (OCR_DESSERT.test(key)) out.dessert.push(line);
+    if (!sn.known && OCR_NOISE.test(key)) return;
+    if (sn.known) out.knownSet.add(line);
+    if (OCR_DESSERT.test(key) && !OCR_MAIN_HINT.test(key)) out.dessert.push(line);
     else if (OCR_SOUP.test(key)) out.soup.push(line);
     else out.mains.push(line);
   });
   // 고기·튀김 같은 '메인스러운' 반찬을 앞으로
-  out.mains.sort((a, b) => (OCR_MAIN_HINT.test(b) ? 1 : 0) - (OCR_MAIN_HINT.test(a) ? 1 : 0));
+  const rank = x => (OCR_MAIN_HINT.test(x) ? 0 : 2) + (out.knownSet.has(x) ? 0 : 1);
+  out.mains.sort((a, b) => rank(a) - rank(b));
   return out;
 }
 
@@ -611,10 +652,28 @@ async function handleMenuPhoto(file) {
   prev.src = URL.createObjectURL(file); prev.classList.remove('hidden');
   setOcrStatus('⏳ 인식 도구 준비 중... (처음 한 번은 10초쯤 걸려요)');
   try {
-    const [worker, canvas] = await Promise.all([loadOcrWorker(), prepMenuImage(file)]);
-    setOcrStatus('🔍 글자 읽는 중...');
-    const { data } = await worker.recognize(canvas);
-    const r = parseMenuText(data.text || '');
+    const [worker, img] = await Promise.all([loadOcrWorker(), loadImg(file)]);
+    const variants = prepMenuVariants(img);
+    URL.revokeObjectURL(img.src);
+    // 여러 방식(사진 3종 × 읽기 모드 2종)으로 읽고, 사전에 있는 반찬이 가장 많이 나온 결과를 씀
+    let r = null, bestScore = -1, n = 0;
+    const total = variants.length * 2;
+    for (const psm of ['11', '6']) {
+      await worker.setParameters({ tessedit_pageseg_mode: psm, preserve_interword_spaces: '1' });
+      for (const cv of variants) {
+        n++;
+        setOcrStatus(`🔍 글자 읽는 중... (${n}/${total})`);
+        const { data } = await worker.recognize(cv);
+        // 확신도 낮은 줄(잡음)은 버림
+        const lines = (data.lines && data.lines.length) ? data.lines.filter(l => (l.confidence || 0) >= 45).map(l => l.text).join('\n') : (data.text || '');
+        const cand = parseMenuText(lines);
+        const score = cand.known * 3 + cand.mains.length + cand.soup.length + cand.dessert.length - Math.max(0, cand.lines.length - cand.known - 8);
+        if (score > bestScore) { bestScore = score; r = cand; }
+        if (cand.known >= 8) break;
+      }
+      if (r && r.known >= 8) break;
+    }
+    r = r || parseMenuText('');
     if (!r.lines.length) { setOcrStatus('😢 글자를 못 찾았어요. 메뉴 부분만 크게 캡처해서 다시 올려주세요.'); return; }
     const set = (id, arr, n) => { if (arr.length) document.getElementById(id).value = arr.slice(0, n).join(', '); };
     set('formRestMains', r.mains, 6);
