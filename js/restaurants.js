@@ -643,6 +643,9 @@ function parseMenuText(text) {
   // 고기·튀김 같은 '메인스러운' 반찬을 앞으로
   const rank = x => (OCR_MAIN_HINT.test(x) ? 0 : 2) + (out.knownSet.has(x) ? 0 : 1);
   out.mains.sort((a, b) => rank(a) - rank(b));
+  // 사전에도 없고 반찬 같지도 않은 줄(대개 잘못 읽은 글자)은 메인이 충분하면 빼고, 아래 '인식된 글자'에서 골라 넣게 함
+  const sure = out.mains.filter(x => rank(x) < 3);
+  if (sure.length >= 3) out.mains = sure;
   return out;
 }
 
