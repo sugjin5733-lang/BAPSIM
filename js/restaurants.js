@@ -42,11 +42,23 @@ async function syncFromGoogleSheet(isManual = false) {
     const sheetData = await res.json();
 
     if (sheetData && Object.keys(sheetData).length > 0) {
-      let hidden = {};
+      let hidden = {}, current = {};
       try { hidden = (await db.ref('restaurants_hidden').once('value')).val() || {}; } catch (e) {}
+      try { current = (await db.ref('restaurants').once('value')).val() || {}; } catch (e) {}
+      // 시트 ID는 '몇 번째 줄'(sheet_rest_N)이라 시트에서 줄을 지우면 번호가 밀림
+      //  → 숨김은 이름으로 판단, 시트에 더 이상 없는 번호의 옛 식당은 DB에서 정리
+      const hiddenNames = new Set(Object.values(hidden).map(h => String((h && h.name) || '').trim()).filter(Boolean));
+      const liveIds = new Set(Object.values(sheetData).map(r => r && r.id).filter(Boolean));
+      const stale = {};
+      Object.entries(current).forEach(([k, r]) => { if (r && r.fromSheet && !liveIds.has(k)) stale[`restaurants/${k}`] = null; });
+      if (liveIds.size > 0 && Object.keys(stale).length) { try { await db.ref().update(stale); } catch (e) {} }
       for (const key of Object.keys(sheetData)) {
         const rest = sheetData[key];
-        if (!rest || !rest.id || hidden[rest.id]) continue; // 관리자가 삭제(숨김)한 식당은 다시 안 만듦
+        if (!rest || !rest.id) continue;
+        if (hiddenNames.has(String(rest.name || '').trim())) { // 관리자가 삭제(숨김)한 식당은 다시 안 만듦
+          if (current[rest.id] && current[rest.id].fromSheet) { try { await db.ref(`restaurants/${rest.id}`).remove(); } catch (e) {} }
+          continue;
+        }
 
         let cleanDate = rest.menuDate == null ? "" : String(rest.menuDate);
         if (cleanDate.includes("GMT") || cleanDate.length > 12) {

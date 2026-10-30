@@ -324,7 +324,7 @@ function attachAdminHotline() {
       : rows.map(r => `<div class="p-2.5 bg-white border ${r.reply ? 'border-slate-200' : 'border-amber-300'} rounded-xl space-y-1.5">
           <div class="flex justify-between gap-2"><strong>🖤 ${esc(r.nick || '?')}</strong><span class="text-[10px] text-slate-400">${r.ts ? new Date(r.ts).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }) : ''}</span></div>
           <div class="whitespace-pre-line text-slate-800">${esc(r.text || '')}</div>
-          ${r.reply ? `<div class="bg-amber-50 border border-amber-200 rounded-lg p-1.5 text-amber-900">↳ ${esc(r.reply)}</div>` : `<div class="flex gap-1"><input id="hl_${esc(r.id)}" placeholder="답변 입력" class="flex-1 border rounded-lg px-2 py-1 text-[11px]"><button onclick="adminReplyHotline(${jsArg(r.uid)}, ${jsArg(r.id)})" class="bg-slate-900 text-white font-bold px-2 rounded-lg text-[10px]">답변</button></div>`}
+          ${r.reply ? `<div class="bg-amber-50 border border-amber-200 rounded-lg p-1.5 text-amber-900">↳ ${esc(r.reply)}</div><div class="text-right"><button onclick="adminDeleteHotline(${jsArg(r.uid)}, ${jsArg(r.id)})" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold px-2 py-1 rounded-lg text-[10px]">🗑️ 삭제</button></div>` : `<div class="flex gap-1"><input id="hl_${esc(r.id)}" placeholder="답변 입력" class="flex-1 border rounded-lg px-2 py-1 text-[11px]"><button onclick="adminReplyHotline(${jsArg(r.uid)}, ${jsArg(r.id)})" class="bg-slate-900 text-white font-bold px-2 rounded-lg text-[10px]">답변</button></div>`}
         </div>`).join('');
   }, onDbError);
 }
@@ -334,6 +334,12 @@ async function adminReplyHotline(uid, id) {
   const reply = (el && el.value || '').trim().slice(0, 500);
   if (!reply) return;
   await db.ref(`hotline/${uid}/${id}`).update({ reply, replyAt: firebase.database.ServerValue.TIMESTAMP });
+}
+
+async function adminDeleteHotline(uid, id) {
+  if (!requireAdmin()) return;
+  if (!confirm('답변 끝난 이 핫라인 민원을 삭제할까요? (회원 화면에서도 사라져요)')) return;
+  try { await db.ref(`hotline/${uid}/${id}`).remove(); } catch (e) { alert('삭제 실패: ' + e.message); }
 }
 
 // ==========================================
@@ -667,7 +673,7 @@ async function adminDeleteRestaurant(id) {
   if (!r) return;
   if (!confirm(`🍽️ [${r.name}] 식당을 삭제할까요?${r.fromSheet ? '\n\n(시트 연동 식당이라 다음 동기화 때 다시 안 생기게 숨김 처리도 같이 해요)' : ''}`)) return;
   const updates = { [`restaurants/${id}`]: null };
-  if (r.fromSheet) updates[`restaurants_hidden/${id}`] = { name: r.name || id, at: firebase.database.ServerValue.TIMESTAMP, by: currentUser.nickname };
+  if (r.fromSheet) updates[`restaurants_hidden/${id}`] = { name: (r.name || id).trim(), at: firebase.database.ServerValue.TIMESTAMP, by: currentUser.nickname };
   try { await db.ref().update(updates); } catch (e) { alert('삭제 실패: ' + e.message); }
 }
 async function adminUnhideRestaurant(id) {
