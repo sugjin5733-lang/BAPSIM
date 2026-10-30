@@ -779,6 +779,8 @@ function sellEnhancedBowl() {
   if (enhanceRevealing) return;
   if (currentEnhanceLevel <= 0) return alert("현재 +0단계 밥은 판매할 수 없습니다. 강화 후 판매하세요!");
 
+  if (typeof netConnected !== 'undefined' && !netConnected) return alert('📡 인터넷 연결이 끊겨서 시세를 확인할 수 없어요. 연결되면 다시 팔아주세요!');
+  if (typeof newVersionAvailable !== 'undefined' && newVersionAvailable) { if (confirm('🆕 새 버전이 나왔어요. 새로고침 후에 판매할 수 있어요.\n지금 새로고침할까요? (밥은 그대로 남아요)')) location.reload(); return; }
   const mk = riceMarket();
   if (mk.pending) return alert('⏳ 이번 분 시세를 확인하는 중이에요. 1~2초 뒤에 다시 눌러주세요!');
   const base = ENHANCE_PROBABILITIES[currentEnhanceLevel - 1].reward;

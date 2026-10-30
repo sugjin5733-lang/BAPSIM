@@ -842,7 +842,8 @@ function luckReport(logsObj, market) {
   let forged = 0, checked = 0;
   if (market) sales.filter(r => r.ts >= MARKET_V2_FROM).forEach(r => {
     const m = r.r.match(/시세 x([\d.]+)/); if (!m) return;
-    const slot = Math.floor(r.ts / MARKET_SLOT_MS);
+    // 끊겼다가 한꺼번에 올라온 기록은 ts 가 늦으니, 실제 판매 시각(ct)이 있으면 그걸로 판단
+    const slot = Math.floor((typeof r.ct === 'number' ? r.ct : r.ts) / MARKET_SLOT_MS);
     const cands = [slot, slot - 1].map(s => market[s] ? marketFromAt(s, market[s].at).mult : null).filter(x => x != null);
     (luckReport.policyWindows || []).forEach(w => { if (r.ts >= w.from - 5000 && r.ts <= w.until + 60000) cands.push(w.mult); });
     if (!cands.length) return;

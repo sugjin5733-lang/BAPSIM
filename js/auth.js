@@ -1,4 +1,27 @@
 // 밥심 - 로그인, 회원 상태, 포인트 동기화, 접속자
+const APP_VERSION = ((document.currentScript && document.currentScript.src || '').match(/[?&]v=([\w-]+)/) || [])[1] || 'dev';
+// 🌐 연결 상태 + 🆕 새 버전 감지 (예전 버전/끊긴 상태로 판매하면 시세가 어긋남)
+let netConnected = true, newVersionAvailable = false;
+function watchConnectionAndVersion() {
+  try { firebase.database().ref('.info/connected').on('value', s => { netConnected = s.val() === true; }); } catch (e) {}
+  const check = async () => {
+    try {
+      const html = await (await fetch(`index.html?nocache=${Date.now()}`, { cache: 'no-store' })).text();
+      const v = (html.match(/js\/auth\.js\?v=([\w-]+)/) || [])[1];
+      if (v && APP_VERSION !== 'dev' && v !== APP_VERSION && !newVersionAvailable) {
+        newVersionAvailable = true;
+        const b = document.createElement('div');
+        b.className = 'fixed bottom-4 left-1/2 -translate-x-1/2 z-[100] bg-amber-400 text-slate-900 font-black text-xs px-4 py-2.5 rounded-2xl shadow-2xl cursor-pointer';
+        b.textContent = '🆕 새 버전이 나왔어요! 눌러서 새로고침 (새로고침 전엔 밥 판매가 막혀요)';
+        b.onclick = () => location.reload();
+        document.body.appendChild(b);
+      }
+    } catch (e) {}
+  };
+  setTimeout(check, 20000);
+  setInterval(check, 5 * 60 * 1000);
+}
+document.addEventListener('DOMContentLoaded', watchConnectionAndVersion);
 //
 // 로그인 구조
 //  - 처음 들어오면 익명 로그인 → 식단/랭킹/채팅 "보기"만 가능
@@ -360,7 +383,7 @@ function addPoints(delta, reason) {
   delta = Math.round(Number(delta) || 0);
   if (!delta) return;
   userPoints += delta;
-  pendingLog.push({ d: delta, r: String(reason || '기타').slice(0, 60) });
+  pendingLog.push({ d: delta, r: String(reason || '기타').slice(0, 60), ct: (typeof ServerClock === 'object' ? ServerClock.now() : Date.now()) });
   if (typeof trackDayNet === 'function') trackDayNet(delta, reason);
 }
 
@@ -434,11 +457,14 @@ function syncUserPointToCloud() {
     const merged = [];
     pendingLog.forEach(e => {
       const last = merged[merged.length - 1];
-      if (last && last.r === e.r) last.d += e.d; else merged.push({ d: e.d, r: e.r });
+      if (last && last.r === e.r) last.d += e.d; else merged.push({ d: e.d, r: e.r, ct: e.ct });
     });
     merged.filter(e => e.d !== 0).forEach(e => {
       const key = db.ref(`point_logs/${nick}`).push().key;
-      updates[`point_logs/${nick}/${key}`] = { d: e.d, r: e.r, bal: userPoints, ts: firebase.database.ServerValue.TIMESTAMP };
+      // ct = 실제로 일어난 시각(서버 기준 추정), v = 앱 버전 → 연결이 끊겼다 한꺼번에 올라와도 부검 가능
+      const ent = { d: e.d, r: e.r, bal: userPoints, ts: firebase.database.ServerValue.TIMESTAMP, v: APP_VERSION };
+      if (typeof e.ct === 'number') ent.ct = Math.round(e.ct);
+      updates[`point_logs/${nick}/${key}`] = ent;
     });
     pendingLog = [];
     maybePruneLogs(nick);
