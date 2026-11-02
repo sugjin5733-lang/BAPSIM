@@ -152,6 +152,19 @@ async function openSeasonBadgeBook() {
       </div>`);
     }
   } catch (e) {}
+  // 🗿 동상 명예의 전당: 지금 동상 + 가장 오래 서 있던 동상
+  try {
+    if (typeof statueState !== 'undefined' && box) {
+      const st = statueState, best = statueBest, now = statueNow();
+      const liveMs = st && st.nick ? now - (st.at || now) : 0;
+      const rec = best && (!st || !st.nick || best.ms >= liveMs) ? { nick: best.nick, ms: best.ms, shape: best.shape, price: best.price } : (st && st.nick ? { nick: st.nick, ms: liveMs, shape: st.shape, price: st.price, live: true } : null);
+      box.insertAdjacentHTML('beforeend', `<div class="col-span-full mt-2 rounded-2xl statue-hall p-3 space-y-2">
+        <div class="flex items-center justify-between"><span class="text-xs font-black text-amber-900">🗿 동상 명예의 전당</span><span class="text-[10px] font-bold text-amber-700">밥심에 단 하나</span></div>
+        <div class="flex items-center gap-2 bg-white/70 rounded-xl px-2.5 py-1.5 text-[11px]"><span class="text-amber-700 font-bold shrink-0">지금</span>${st && st.nick ? `<span class="pt-2">${statueFigureHTML(st.shape, '', 'sm', false, st.price)}</span><span class="min-w-0 truncate">${nickHTML({ nickname: st.nick, badge: st.badge, color: st.color, noStatueTag: true }, 'text-[11px]')}</span><span class="ml-auto text-slate-500 shrink-0">${statueDur(liveMs)}째 · 👏${st.claps || 0}</span>` : '<span class="text-slate-400">비어 있음</span>'}</div>
+        <div class="flex items-center gap-2 bg-white/70 rounded-xl px-2.5 py-1.5 text-[11px]"><span class="text-amber-700 font-bold shrink-0">🏆 최장</span>${rec ? `<span class="min-w-0 truncate font-black text-slate-800">${esc(rec.nick)}</span><span class="ml-auto text-slate-500 shrink-0">${statueDur(rec.ms)}${rec.live ? ' (진행 중)' : ''}</span>` : '<span class="text-slate-400">아직 기록 없음</span>'}</div>
+      </div>`);
+    }
+  } catch (e) {}
   document.getElementById('seasonBadgeBookModal').classList.remove('hidden');
 }
 function closeSeasonBadgeBook() { document.getElementById('seasonBadgeBookModal').classList.add('hidden'); }
