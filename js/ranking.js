@@ -32,8 +32,25 @@ function switchRankTab(tab) {
   renderRankingsData();
 }
 
+// ⚡ 최적화: 예전엔 10초마다 전체 회원 데이터를 통째로 다시 내려받았음.
+//    이제는 한 번 구독해 두고 바뀐 부분만 받아서, 바뀌었을 때만 다시 그림 (최대 10초에 한 번)
+let rankSnap = null, rankDirty = false, rankListening = false, rankLastDraw = 0;
 function renderRankingsData() {
-  db.ref('user_points').once('value', (snap) => {
+  if (!rankListening) {
+    rankListening = true;
+    db.ref('user_points').on('value', s => {
+      rankSnap = s; rankDirty = true;
+      if (Date.now() - rankLastDraw > 10000) renderRankingsData();
+    }, err => { rankListening = false; onDbError(err); });
+  }
+  if (!rankSnap) return;
+  rankDirty = false; rankLastDraw = Date.now();
+  drawRankings(rankSnap);
+}
+setInterval(() => { if (rankDirty) renderRankingsData(); }, 10000);
+
+function drawRankings(snap) {
+  {
     const data = snap.val() || {};
     const userList = Object.values(data).filter(u => u && u.nickname && (u.status === 'approved' || u.approved === true));
     // 🖤 블랙 회원은 부자 랭킹에서 빠지고 블랙 랭킹으로 따로
@@ -234,5 +251,5 @@ function renderRankingsData() {
         });
       }
     }
-  });
+  }
 }

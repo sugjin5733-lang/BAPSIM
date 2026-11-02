@@ -2,7 +2,7 @@
 //
 //  - 블랙 위의 단 한 자리. 블랙 회원 + 지금 밥 +25강 이상 + 대천사의 날개(기부 1위) + 7,777만P(소각)
 //  - 자리가 차 있으면 조건을 갖춘 블랙이 도전장(5,000만P, 소각) → 24시간 동안 자산이 더 많이 늘어난 쪽이 화이트
-//  - 혜택: 시간당 한도 30만P · 판매 수수료 0% · 분당 강화 1,000회 · 하루 1번 초월 보험 · 전용 배지 · 강림 연출
+//  - 혜택: 시간당 한도 50만P · 판매 수수료 0% · 분당 강화 1,000회 · 하루 1번 초월 보험 · 전용 배지 · 강림 연출
 //  - 권능: 천명(블랙 정책 중단+1시간 금지) · 천벌(블랙에게도 통하는 망치+블랙 박탈) · 추방(블랙 탈퇴)
 //          · 축복의 비(1시간 강화 확률 ×1.2) · 칙령(1시간 맨 위 고정 문구)
 //  데이터(보안 규칙상 bank 아래): bank/white/throne · bank/white/challenge · bank/white/cool/{power} · bank/white/history
@@ -12,7 +12,7 @@ const WHITE_PRICE = 77770000;
 const WHITE_MIN_LVL = 25;
 const WHITE_CHALLENGE_PRICE = 50000000;
 const WHITE_CHALLENGE_MS = 24 * 3600000;
-const WHITE_PER_HOUR = 300000;
+const WHITE_PER_HOUR = 500000;
 const WHITE_RAIN_MULT = 1.2;
 const WHITE_POWERS = {
   decree: { icon: '🕊️', name: '천명',     price: 5000000,  mins: 0,  cooldownMin: 60,   desc: '진행 중인 블랙 정책 하나를 즉시 끝내고, 1시간 동안 같은 정책 발동 금지' },
@@ -375,7 +375,7 @@ async function renderWhiteClub() {
   }
   const perks = document.getElementById('whitePerks');
   if (perks) perks.innerHTML = [
-    '💧 시간당 한도 30만P · 판매 수수료 0% · 분당 강화 1,000회',
+    '💧 시간당 한도 50만P · 판매 수수료 0% · 분당 강화 1,000회',
     '🔥 초월 보험: 하루 1번, +20강 이상에서 밥이 타면 +20강으로 복구',
     '🛡️ 심판의 망치·천벌·추방이 통하지 않음',
     '🤍 접속하면 강림 연출 + 익명 전광판 알림 · 전용 배지 「프레스티지 화이트」(장착하면 정체가 드러나요)',

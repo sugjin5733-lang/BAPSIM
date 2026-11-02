@@ -38,7 +38,7 @@ function startApp() {
   updateEnhanceUI();
   updateGroupUI();
   setInterval(() => syncFromGoogleSheet(false), 1000 * 60 * 3);
-  setInterval(() => renderRankingsData(), 1000 * 10);
+  // (랭킹은 ranking.js 에서 변경 구독으로 자동 갱신)
   lucide.createIcons();
 }
 
