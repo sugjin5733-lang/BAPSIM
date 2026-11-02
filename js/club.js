@@ -202,7 +202,7 @@ function renderBlackClub() {
           <label class="flex items-center gap-1.5 cursor-pointer"><span class="text-[10px] ${vipOn ? 'text-emerald-300' : 'text-slate-500'}">${vipOn ? 'ON' : 'OFF'}</span><input type="checkbox" ${vipOn ? 'checked' : ''} onchange="setVipAlert(this.checked)" class="accent-amber-400 w-4 h-4"></label></div>
         <div class="club-row"><span>✨ 매일 축복권 ${TIERS.black.bless}장</span><span class="text-[10px] ${myTier.blessDay === today ? 'text-emerald-300' : 'text-amber-200'}">${myTier.blessDay === today ? '오늘 받음' : '접속하면 지급'} · 보유 ${myItems.bless || 0}장</span></div>
         <div class="club-row"><span>🌌 초월 방지권</span><span class="text-[10px] text-slate-300">밥키우기 +20강부터 방지권 버튼에서 켜기</span></div>
-        <div class="club-row"><span>💹 판매 수수료 5% · 시간당 한도 15만 · 분당 강화 1,000회</span><span class="text-[10px] text-emerald-300">적용 중</span></div>
+        <div class="club-row"><span>💹 판매 수수료 5% · 시간당 한도 22만 · 분당 강화 1,000회</span><span class="text-[10px] text-emerald-300">적용 중</span></div>
         <div class="club-row"><span>🎰 슬롯 초특급 확률 ${BLACK_SLOT_MULT}배</span><span class="text-[10px] text-emerald-300">적용 중</span></div>
         <div class="rounded-xl border border-white/10 bg-white/5 p-2.5 space-y-1.5">
           <div class="flex items-center justify-between text-xs"><span class="font-black">🏦 예치금</span><span class="font-black text-amber-200">${myDeposit.amt.toLocaleString()}P</span></div>

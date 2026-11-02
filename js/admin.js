@@ -724,7 +724,7 @@ function renderAdminOwedList() {
     const now = Date.now();
     const rows = Object.values(users || {}).filter(u => u && u.nickname).map(u => {
       const owed = Number(u.owed) || 0, pts = Number(u.points) || 0;
-      const tier = u.uid && u.uid === whiteUid ? ['🤍 화이트', 300000] : (Number(u.blackUntil) || 0) > now ? ['🖤 블랙', 150000] : (Number(u.goldUntil) || 0) > now ? ['🥇 골드', 100000] : ['일반', 72000];
+      const tier = u.uid && u.uid === whiteUid ? ['🤍 화이트', 300000] : (Number(u.blackUntil) || 0) > now ? ['🖤 블랙', 220000] : (Number(u.goldUntil) || 0) > now ? ['🥇 골드', 100000] : ['일반', 72000];
       return { nick: u.nickname, owed, pts, tier: tier[0], rate: tier[1], hours: owed / tier[1], seen: Number(u.updatedAt) || 0 };
     }).sort((x, y) => y.owed - x.owed);
     const total = rows.reduce((t, r) => t + r.owed, 0);
