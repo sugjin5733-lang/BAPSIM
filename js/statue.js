@@ -4,7 +4,7 @@
 //  - 넓은 화면: 왼쪽 위(헤더 왼쪽 빈 곳) · 작은 화면: 본문 맨 위 작은 띠
 //  - 첫 동상 100만P. 갈아끼우려면 '직전 가격 + 10만P'를 정확히 내야 함 (더도 덜도 없음)
 //  - 낸 돈은 전부 사라짐 (누구에게도 가지 않음) · 앞 주인은 아무것도 돌려받지 않음
-//  - 구매는 프레스티지 상점 맨 위에서
+//  - 구매는 유틸리티 '🗿 동상' 버튼 (시즌 도감과 반반)
 //  - 재질: 100~120만 청동 · 130~150만 은 · 160~190만 황금👑 · 200만~ 다이아몬드👑 (갈아끼울수록 화려해짐)
 //  - 동상 주인은 어디서든 닉네임 옆에 작은 동상 표시 · 누구나 하루 한 번 박수👏 · 철거당하면 다음 접속 때 알림 + 되찾기
 //  데이터: bank/statue = { nick, uid, shape, msg, price, at, badge, color, claps, prev, prevHeld } · bank/statue_best · bank/statue_log/{id}
@@ -87,7 +87,7 @@ function renderStatue() {
 // 👏 박수: 동상 하나당 하루 한 번 (누구나)
 async function clapStatue(el) {
   const st = statueState;
-  if (!st || !st.nick) return openPrestigeModal();
+  if (!st || !st.nick) return openStatueModal();
   statueBurst(el, '👏');
   if (typeof canSyncToCloud !== 'function' || !canSyncToCloud()) return;
   const key = `bapsim_statue_clap_${st.at}_${todayKey()}`;
@@ -125,18 +125,26 @@ function checkStatueToppled() {
       <div class="flex justify-center">${statueFigureHTML(st.shape, st.msg, 'md', true, st.price)}</div>
       <div class="text-sm font-black text-slate-900">😢 내 동상이 철거됐어요</div>
       <div class="text-xs text-slate-600"><b>${esc(st.nick)}</b>님이 ${(st.price || 0).toLocaleString()}P를 내고<br>내 동상을 갈아끼웠어요.${st.prevHeld ? `<br><span class="text-slate-400">(내 동상은 ${statueDur(st.prevHeld)} 동안 서 있었어요)</span>` : ''}</div>
-      <button onclick="document.getElementById('statueToppledPopup').remove(); openPrestigeModal()" class="w-full bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 font-black py-2.5 rounded-xl text-xs">🗿 되찾기 · ${statueNextPrice().toLocaleString()}P</button>
+      <button onclick="document.getElementById('statueToppledPopup').remove(); openStatueModal()" class="w-full bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 font-black py-2.5 rounded-xl text-xs">🗿 되찾기 · ${statueNextPrice().toLocaleString()}P</button>
       <button onclick="document.getElementById('statueToppledPopup').remove()" class="w-full text-slate-400 text-xs font-bold py-1">다음에</button>
     </div>`;
   el.addEventListener('click', e => { if (e.target === el) el.remove(); });
   document.body.appendChild(el);
 }
 
+function openStatueModal() {
+  document.getElementById('statueModal').classList.remove('hidden');
+  const p = document.getElementById('statueMyPoints'); if (p && typeof userPoints === 'number') p.textContent = `${userPoints.toLocaleString()}P`;
+  renderStatueShop();
+}
+function closeStatueModal() { document.getElementById('statueModal').classList.add('hidden'); }
+
 function pickStatueShape(k) { statuePick = k; renderStatueShop(); }
 
 function renderStatueShop() {
   const box = document.getElementById('statueShopBox');
   if (!box) return;
+  { const p = document.getElementById('statueMyPoints'); if (p && typeof userPoints === 'number') p.textContent = `${userPoints.toLocaleString()}P`; }
   const st = statueState;
   const price = statueNextPrice();
   const nextTier = statueTier(price);
@@ -149,8 +157,8 @@ function renderStatueShop() {
     <div class="statue-shop rounded-2xl p-4 space-y-3">
       <div class="flex items-center justify-between">
         <div>
-          <div class="text-[10px] font-black tracking-[0.25em] text-amber-300">BAPSIM STATUE</div>
-          <div class="text-sm font-black text-white">🗿 밥심 동상 <span class="text-[10px] text-slate-400 font-bold">· 밥심에 단 하나</span></div>
+          <div class="text-[10px] text-slate-400">${st && st.nick ? '지금 동상' : '아직 비어 있는'}</div>
+          <div class="text-sm font-black text-white">${st && st.nick ? `${statueTier(st.price).icon} ${statueTier(st.price).name} 동상` : '첫 동상의 주인이 되어보세요'}</div>
         </div>
         <div class="text-right">
           <div class="text-[10px] text-slate-400">${st && st.nick ? '갈아끼우기' : '첫 동상'}</div>

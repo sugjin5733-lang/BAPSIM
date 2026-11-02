@@ -12,7 +12,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Black+Han+Sans&family=Rubik+Glitch&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-  <link rel="stylesheet" href="css/style.css?v=20261103r">
+  <link rel="stylesheet" href="css/style.css?v=20261103s">
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white relative">
 
@@ -157,7 +157,7 @@
   </aside>
 
   <!-- 🗿 밥심 동상 (넓은 화면: 왼쪽 위) -->
-  <div id="statueCorner" onclick="openPrestigeModal()" title="밥심 동상 · 프레스티지 상점에서 세울 수 있어요" class="hidden 2xl:flex fixed top-1.5 left-4 z-50 w-64 h-[52px] items-center gap-2.5 px-2 cursor-pointer statue-corner" style="max-width: calc((100vw - 72rem) / 2 - 1.5rem)"></div>
+  <div id="statueCorner" onclick="openStatueModal()" title="밥심 동상" class="hidden 2xl:flex fixed top-1.5 left-4 z-50 w-64 h-[52px] items-center gap-2.5 px-2 cursor-pointer statue-corner" style="max-width: calc((100vw - 72rem) / 2 - 1.5rem)"></div>
 
   <!-- 상단 네비게이션 헤더 -->
   <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
@@ -224,7 +224,7 @@
   <!-- 메인 본문 -->
   <main class="max-w-6xl mx-auto px-4 pt-6 space-y-7">
     <!-- 🗿 밥심 동상 (작은 화면) -->
-    <div id="statueMini" onclick="openPrestigeModal()" class="2xl:hidden statue-corner cursor-pointer rounded-2xl px-3 py-1.5 flex items-center gap-2.5 bg-white border border-amber-200/70"></div>
+    <div id="statueMini" onclick="openStatueModal()" class="2xl:hidden statue-corner cursor-pointer rounded-2xl px-3 py-1.5 flex items-center gap-2.5 bg-white border border-amber-200/70"></div>
     <!-- 🤍 화이트 (작은 화면) -->
     <div id="whiteMiniCard" onclick="openWhiteClub()" class="2xl:hidden white-side-card cursor-pointer rounded-2xl px-4 py-2.5 flex items-center justify-between gap-3">
       <div class="min-w-0">
@@ -322,9 +322,14 @@
             <span>🃏</span><span>반찬 도감</span>
             <span id="headerCardCount" class="text-[10px] bg-white/20 px-1.5 rounded-full font-bold">0/24</span>
           </button>
-          <button onclick="openSeasonBadgeBook()" class="util-btn bg-slate-800 text-amber-200 border border-slate-700">
-            <span>🏅</span><span>시즌 도감</span>
-          </button>
+          <div class="grid grid-cols-2 rounded-xl overflow-hidden shadow-md text-xs font-black">
+            <button onclick="openSeasonBadgeBook()" class="flex items-center justify-center gap-1 bg-slate-800 hover:brightness-125 text-amber-200 px-1 py-2.5 whitespace-nowrap transition-all border-r border-slate-600">
+              <span>🏅</span><span>시즌 도감</span>
+            </button>
+            <button onclick="openStatueModal()" class="flex items-center justify-center gap-1 bg-gradient-to-r from-amber-300 to-yellow-400 hover:brightness-110 text-amber-950 px-1 py-2.5 whitespace-nowrap transition-all">
+              <span>🗿</span><span>동상</span>
+            </button>
+          </div>
         </div>
 
         <div class="util-group">
@@ -592,7 +597,6 @@
         </div>
         <button onclick="closePrestigeModal()" class="text-slate-400 hover:text-white text-sm p-1">✕</button>
       </div>
-      <div id="statueShopBox"></div>
       <div id="prestigePassBox"></div>
       <div class="space-y-2.5">
         <span class="text-xs font-extrabold text-amber-100">💎 멤버십 (입장권 보유자 전용 · 한 번 사면 영구)</span>
@@ -763,6 +767,20 @@
 
 
   <!-- 🏷️ 닉네임 명판 경매 -->
+  <div id="statueModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4" onclick="if(event.target===this) closeStatueModal()">
+    <div class="prestige-panel w-full max-w-md rounded-3xl shadow-2xl p-5 space-y-3 max-h-[90vh] overflow-y-auto text-white">
+      <div class="flex items-center justify-between border-b border-amber-400/25 pb-2.5">
+        <div>
+          <div class="text-[10px] font-black tracking-[0.3em] text-amber-300">BAPSIM STATUE</div>
+          <h3 class="font-black text-lg text-white">🗿 밥심 동상</h3>
+          <p class="text-[11px] text-slate-400">밥심에 단 하나 · 내 보유 <strong id="statueMyPoints" class="text-amber-300">0P</strong></p>
+        </div>
+        <button onclick="closeStatueModal()" class="text-slate-400 hover:text-white text-sm p-1">✕</button>
+      </div>
+      <div id="statueShopBox"></div>
+    </div>
+  </div>
+
   <div id="lottoModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this) closeLottoModal()">
     <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-5 space-y-3 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
@@ -1731,30 +1749,30 @@
     </div>
   </div>
 
-  <script src="js/core.js?v=20261103r"></script>
-  <script src="js/auth.js?v=20261103r"></script>
-  <script src="js/enhance.js?v=20261103r"></script>
-  <script src="js/shop.js?v=20261103r"></script>
-  <script src="js/chat.js?v=20261103r"></script>
-  <script src="js/games.js?v=20261103r"></script>
-  <script src="js/admin.js?v=20261103r"></script>
-  <script src="js/ranking.js?v=20261103r"></script>
-  <script src="js/restaurants.js?v=20261103r"></script>
-  <script src="js/tools.js?v=20261103r"></script>
-  <script src="js/feed.js?v=20261103r"></script>
-  <script src="js/bank.js?v=20261103r"></script>
-  <script src="js/tier.js?v=20261103r"></script>
-  <script src="js/club.js?v=20261103r"></script>
-  <script src="js/white.js?v=20261103r"></script>
-  <script src="js/pets.js?v=20261103r"></script>
-  <script src="js/chair.js?v=20261103r"></script>
-  <script src="js/nameplate.js?v=20261103r"></script>
-  <script src="js/lotto.js?v=20261103r"></script>
-  <script src="js/statue.js?v=20261103r"></script>
-  <script src="js/cards.js?v=20261103r"></script>
-  <script src="js/season.js?v=20261103r"></script>
-  <script src="js/duel.js?v=20261103r"></script>
-  <script src="js/predict.js?v=20261103r"></script>
-  <script src="js/main.js?v=20261103r"></script>
+  <script src="js/core.js?v=20261103s"></script>
+  <script src="js/auth.js?v=20261103s"></script>
+  <script src="js/enhance.js?v=20261103s"></script>
+  <script src="js/shop.js?v=20261103s"></script>
+  <script src="js/chat.js?v=20261103s"></script>
+  <script src="js/games.js?v=20261103s"></script>
+  <script src="js/admin.js?v=20261103s"></script>
+  <script src="js/ranking.js?v=20261103s"></script>
+  <script src="js/restaurants.js?v=20261103s"></script>
+  <script src="js/tools.js?v=20261103s"></script>
+  <script src="js/feed.js?v=20261103s"></script>
+  <script src="js/bank.js?v=20261103s"></script>
+  <script src="js/tier.js?v=20261103s"></script>
+  <script src="js/club.js?v=20261103s"></script>
+  <script src="js/white.js?v=20261103s"></script>
+  <script src="js/pets.js?v=20261103s"></script>
+  <script src="js/chair.js?v=20261103s"></script>
+  <script src="js/nameplate.js?v=20261103s"></script>
+  <script src="js/lotto.js?v=20261103s"></script>
+  <script src="js/statue.js?v=20261103s"></script>
+  <script src="js/cards.js?v=20261103s"></script>
+  <script src="js/season.js?v=20261103s"></script>
+  <script src="js/duel.js?v=20261103s"></script>
+  <script src="js/predict.js?v=20261103s"></script>
+  <script src="js/main.js?v=20261103s"></script>
 </body>
 </html>
