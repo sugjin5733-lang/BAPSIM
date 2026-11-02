@@ -11,7 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Black+Han+Sans&family=Rubik+Glitch&family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261102i">
+  <link rel="stylesheet" href="css/style.css?v=20261102j">
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white relative">
 
@@ -25,14 +25,15 @@
   <aside class="hidden 2xl:block fixed left-4 top-20 z-30 w-64 space-y-4">
     <!-- 🤍 프레스티지 화이트 클럽: 주인이 있는지만 공개 (누구인지는 비밀) -->
     <div id="whiteSideCard" onclick="openWhiteClub()" class="white-side-card cursor-pointer rounded-3xl p-4 shadow-xl space-y-2">
-      <div class="flex items-center justify-between border-b border-amber-300/50 pb-2">
+      <span class="ws-spark" style="left:12%;animation-delay:0s"></span><span class="ws-spark" style="left:38%;animation-delay:1.1s"></span><span class="ws-spark" style="left:66%;animation-delay:.5s"></span><span class="ws-spark" style="left:86%;animation-delay:1.7s"></span>
+      <div class="relative flex items-center justify-between border-b border-amber-300/50 pb-2">
         <div>
-          <div class="text-[9px] font-black tracking-[0.25em] text-amber-500">PRESTIGE WHITE</div>
-          <div class="text-xs font-black text-slate-900">🤍 화이트 클럽</div>
+          <div class="ws-label text-[9px] font-black tracking-[0.25em]">PRESTIGE WHITE</div>
+          <div class="ws-title text-xs font-black">🤍 프레스티지 화이트</div>
         </div>
         <span id="whiteSideState" class="text-[10px] font-black px-2 py-0.5 rounded-full border">…</span>
       </div>
-      <p id="whiteSideText" class="text-[10.5px] leading-relaxed text-slate-500">블랙 위의 단 하나의 자리.</p>
+      <p id="whiteSideText" class="relative text-[10.5px] leading-relaxed text-slate-500">블랙 위의 단 하나의 자리.</p>
     </div>
     <!-- 👑 프레스티지 회원 (넓은 화면에서는 왼쪽에) -->
     <div id="prestigeSideCard" onclick="openBlackClub()" class="hidden prestige-member-banner cursor-pointer rounded-3xl p-4 shadow-xl space-y-2.5">
@@ -1588,25 +1589,25 @@
     </div>
   </div>
 
-  <script src="js/core.js?v=20261102i"></script>
-  <script src="js/auth.js?v=20261102i"></script>
-  <script src="js/enhance.js?v=20261102i"></script>
-  <script src="js/shop.js?v=20261102i"></script>
-  <script src="js/chat.js?v=20261102i"></script>
-  <script src="js/games.js?v=20261102i"></script>
-  <script src="js/admin.js?v=20261102i"></script>
-  <script src="js/ranking.js?v=20261102i"></script>
-  <script src="js/restaurants.js?v=20261102i"></script>
-  <script src="js/tools.js?v=20261102i"></script>
-  <script src="js/feed.js?v=20261102i"></script>
-  <script src="js/bank.js?v=20261102i"></script>
-  <script src="js/tier.js?v=20261102i"></script>
-  <script src="js/club.js?v=20261102i"></script>
-  <script src="js/white.js?v=20261102i"></script>
-  <script src="js/cards.js?v=20261102i"></script>
-  <script src="js/season.js?v=20261102i"></script>
-  <script src="js/duel.js?v=20261102i"></script>
-  <script src="js/predict.js?v=20261102i"></script>
-  <script src="js/main.js?v=20261102i"></script>
+  <script src="js/core.js?v=20261102j"></script>
+  <script src="js/auth.js?v=20261102j"></script>
+  <script src="js/enhance.js?v=20261102j"></script>
+  <script src="js/shop.js?v=20261102j"></script>
+  <script src="js/chat.js?v=20261102j"></script>
+  <script src="js/games.js?v=20261102j"></script>
+  <script src="js/admin.js?v=20261102j"></script>
+  <script src="js/ranking.js?v=20261102j"></script>
+  <script src="js/restaurants.js?v=20261102j"></script>
+  <script src="js/tools.js?v=20261102j"></script>
+  <script src="js/feed.js?v=20261102j"></script>
+  <script src="js/bank.js?v=20261102j"></script>
+  <script src="js/tier.js?v=20261102j"></script>
+  <script src="js/club.js?v=20261102j"></script>
+  <script src="js/white.js?v=20261102j"></script>
+  <script src="js/cards.js?v=20261102j"></script>
+  <script src="js/season.js?v=20261102j"></script>
+  <script src="js/duel.js?v=20261102j"></script>
+  <script src="js/predict.js?v=20261102j"></script>
+  <script src="js/main.js?v=20261102j"></script>
 </body>
 </html>

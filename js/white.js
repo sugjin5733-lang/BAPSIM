@@ -1,6 +1,6 @@
 // 밥심 - 🤍 프레스티지 화이트 클럽 (블랙 위의 단 한 자리 · 주인은 비밀)
 //
-//  - 블랙 위의 단 한 자리. 블랙 회원 + 지금 밥 +25강 이상 + 7,777만P(소각)로 즉위
+//  - 블랙 위의 단 한 자리. 블랙 회원 + 지금 밥 +25강 이상 + 대천사의 날개(기부 1위) + 7,777만P(소각)
 //  - 자리가 차 있으면 조건을 갖춘 블랙이 도전장(5,000만P, 소각) → 24시간 동안 자산이 더 많이 늘어난 쪽이 화이트
 //  - 혜택: 시간당 한도 30만P · 판매 수수료 0% · 분당 강화 1,000회 · 하루 1번 초월 보험 · 전용 배지 · 강림 연출
 //  - 권능: 천명(블랙 정책 중단+1시간 금지) · 천벌(블랙에게도 통하는 망치+블랙 박탈) · 추방(블랙 탈퇴)
@@ -80,9 +80,12 @@ function onLostWhite() {
 // ------------------------------------------------------------------
 // 즉위 / 도전
 // ------------------------------------------------------------------
+// 😇 대천사의 날개: 지금 누적 기부 1위인 사람 (bank.js)
+function hasAngelWings() { return typeof angelHolderNick !== 'undefined' && !!angelHolderNick && typeof currentUser !== 'undefined' && angelHolderNick === currentUser.nickname; }
 function whiteEligible() {
   if (!(typeof isBlack === 'function' && isBlack())) return '🖤 프레스티지 블랙 회원만 오를 수 있어요.';
   if (currentEnhanceLevel < WHITE_MIN_LVL) return `🍚 지금 밥이 +${WHITE_MIN_LVL}강 이상이어야 해요. (지금 +${currentEnhanceLevel}강)`;
+  if (!hasAngelWings()) return '😇 대천사의 날개(누적 기부 1위)를 지금 가지고 있어야 해요.';
   return '';
 }
 async function joinWhite() {
@@ -310,7 +313,7 @@ function renderWhiteBanner() {
   st.className = `text-[10px] font-black px-2 py-0.5 rounded-full border ${t ? 'bg-amber-100 text-amber-700 border-amber-300' : 'bg-slate-100 text-slate-500 border-slate-200'}`;
   if (tx) tx.innerHTML = t
     ? `블랙 위의 단 하나의 자리에 <b class="text-slate-800">주인이 있습니다.</b><br>그가 누구인지는 아무도 모릅니다.${c ? '<br><b class="text-rose-500">⚔️ 왕좌 쟁탈전 진행 중</b>' : ''}`
-    : '블랙 위의 단 하나의 자리가 <b class="text-slate-800">비어 있습니다.</b><br>+25강 블랙만 도전할 수 있어요. ›';
+    : '블랙 위의 단 하나의 자리가 <b class="text-slate-800">비어 있습니다.</b><br>+25강 · 😇 대천사의 날개를 가진 블랙만 오를 수 있어요. ›';
 }
 function openWhiteClub() {
   document.getElementById('whiteClubModal').classList.remove('hidden');
@@ -347,6 +350,7 @@ async function renderWhiteClub() {
     const cond = `<ul class="text-[11px] text-slate-600 space-y-0.5">
         <li>${typeof isBlack === 'function' && isBlack() ? '✅' : '⬜'} 프레스티지 블랙 회원</li>
         <li>${currentEnhanceLevel >= WHITE_MIN_LVL ? '✅' : '⬜'} 지금 밥 +${WHITE_MIN_LVL}강 이상 <span class="text-slate-400">(지금 +${currentEnhanceLevel}강)</span></li>
+        <li>${hasAngelWings() ? '✅' : '⬜'} 😇 대천사의 날개 보유 <span class="text-slate-400">(지금 누적 기부 1위)</span></li>
         <li>${userPoints >= (t ? WHITE_CHALLENGE_PRICE : WHITE_PRICE) ? '✅' : '⬜'} ${t ? `도전장 ${WHITE_CHALLENGE_PRICE.toLocaleString()}P` : `즉위 ${WHITE_PRICE.toLocaleString()}P`} <span class="text-slate-400">(소각)</span></li>
       </ul>`;
     join.innerHTML = me ? duel : `${duel}
