@@ -312,6 +312,9 @@ function renderWhiteBanner() {
   st.textContent = t ? '주인 있음' : '비어 있음';
   st.className = `text-[10px] font-black px-2 py-0.5 rounded-full border ${t ? 'bg-amber-100 text-amber-700 border-amber-300' : 'bg-slate-100 text-slate-500 border-slate-200'}`;
   if (tx) tx.innerHTML = `세상을 비추는 환한 빛 ›${c ? '<br><b class="text-rose-500 text-[10px]">⚔️ 왕좌 쟁탈전 진행 중</b>' : ''}`;
+  const ms = document.getElementById('whiteMiniState'), mt = document.getElementById('whiteMiniText');
+  if (ms) { ms.textContent = st.textContent; ms.className = 'shrink-0 ' + st.className; }
+  if (mt) mt.innerHTML = c ? '<span class="text-rose-500">⚔️ 왕좌 쟁탈전 진행 중</span> ›' : '세상을 비추는 환한 빛 ›';
 }
 function openWhiteClub() {
   document.getElementById('whiteClubModal').classList.remove('hidden');

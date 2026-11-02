@@ -12,7 +12,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Black+Han+Sans&family=Rubik+Glitch&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-  <link rel="stylesheet" href="css/style.css?v=20261103d">
+  <link rel="stylesheet" href="css/style.css?v=20261103e">
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white relative">
 
@@ -220,6 +220,14 @@
 
   <!-- 메인 본문 -->
   <main class="max-w-6xl mx-auto px-4 pt-6 space-y-7">
+    <!-- 🤍 화이트 (작은 화면) -->
+    <div id="whiteMiniCard" onclick="openWhiteClub()" class="2xl:hidden white-side-card cursor-pointer rounded-2xl px-4 py-2.5 flex items-center justify-between gap-3">
+      <div class="min-w-0">
+        <div class="ws-label text-[9px] font-black tracking-[0.25em]">PRESTIGE WHITE</div>
+        <p id="whiteMiniText" class="text-[11px] font-black tracking-wide text-amber-700 truncate">세상을 비추는 환한 빛 ›</p>
+      </div>
+      <span id="whiteMiniState" class="shrink-0 text-[10px] font-black px-2 py-0.5 rounded-full border">…</span>
+    </div>
     <!-- 👑 프레스티지 회원 배너 -->
     <div id="prestigeMemberBanner" onclick="openBlackClub()" class="hidden 2xl:!hidden prestige-member-banner cursor-pointer rounded-2xl px-4 py-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
       <div class="shrink-0 text-center leading-tight">
@@ -1714,28 +1722,28 @@
     </div>
   </div>
 
-  <script src="js/core.js?v=20261103d"></script>
-  <script src="js/auth.js?v=20261103d"></script>
-  <script src="js/enhance.js?v=20261103d"></script>
-  <script src="js/shop.js?v=20261103d"></script>
-  <script src="js/chat.js?v=20261103d"></script>
-  <script src="js/games.js?v=20261103d"></script>
-  <script src="js/admin.js?v=20261103d"></script>
-  <script src="js/ranking.js?v=20261103d"></script>
-  <script src="js/restaurants.js?v=20261103d"></script>
-  <script src="js/tools.js?v=20261103d"></script>
-  <script src="js/feed.js?v=20261103d"></script>
-  <script src="js/bank.js?v=20261103d"></script>
-  <script src="js/tier.js?v=20261103d"></script>
-  <script src="js/club.js?v=20261103d"></script>
-  <script src="js/white.js?v=20261103d"></script>
-  <script src="js/pets.js?v=20261103d"></script>
-  <script src="js/chair.js?v=20261103d"></script>
-  <script src="js/nameplate.js?v=20261103d"></script>
-  <script src="js/cards.js?v=20261103d"></script>
-  <script src="js/season.js?v=20261103d"></script>
-  <script src="js/duel.js?v=20261103d"></script>
-  <script src="js/predict.js?v=20261103d"></script>
-  <script src="js/main.js?v=20261103d"></script>
+  <script src="js/core.js?v=20261103e"></script>
+  <script src="js/auth.js?v=20261103e"></script>
+  <script src="js/enhance.js?v=20261103e"></script>
+  <script src="js/shop.js?v=20261103e"></script>
+  <script src="js/chat.js?v=20261103e"></script>
+  <script src="js/games.js?v=20261103e"></script>
+  <script src="js/admin.js?v=20261103e"></script>
+  <script src="js/ranking.js?v=20261103e"></script>
+  <script src="js/restaurants.js?v=20261103e"></script>
+  <script src="js/tools.js?v=20261103e"></script>
+  <script src="js/feed.js?v=20261103e"></script>
+  <script src="js/bank.js?v=20261103e"></script>
+  <script src="js/tier.js?v=20261103e"></script>
+  <script src="js/club.js?v=20261103e"></script>
+  <script src="js/white.js?v=20261103e"></script>
+  <script src="js/pets.js?v=20261103e"></script>
+  <script src="js/chair.js?v=20261103e"></script>
+  <script src="js/nameplate.js?v=20261103e"></script>
+  <script src="js/cards.js?v=20261103e"></script>
+  <script src="js/season.js?v=20261103e"></script>
+  <script src="js/duel.js?v=20261103e"></script>
+  <script src="js/predict.js?v=20261103e"></script>
+  <script src="js/main.js?v=20261103e"></script>
 </body>
 </html>

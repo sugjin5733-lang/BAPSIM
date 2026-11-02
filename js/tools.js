@@ -22,7 +22,7 @@ function updateCountdown() {
       timerEl.textContent = `${hours > 0 ? hours + '시간 ' : ''}${minutes}분 ${seconds < 10 ? '0' : ''}${seconds}초 남음`;
       timerEl.className = "text-orange-400 font-mono underline decoration-orange-500/50 underline-offset-8 font-extrabold";
     } else {
-      timerEl.textContent = "점심 투표 마감! 식사 맛있게 하세요 🍚";
+      timerEl.textContent = "점심 투표 마감! 식사 맛있게 하세요\u00a0🍚";
       timerEl.className = "text-emerald-400 font-bold";
     }
   }
