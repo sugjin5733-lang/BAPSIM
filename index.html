@@ -11,7 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Black+Han+Sans&family=Rubik+Glitch&family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261102k">
+  <link rel="stylesheet" href="css/style.css?v=20261102l">
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white relative">
 
@@ -256,7 +256,7 @@
           밥심 유틸리티
         </span>
 
-        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 w-full">
+        <div class="grid grid-cols-2 sm:grid-cols-6 gap-2 w-full">
           <button onclick="openMiniGameModal()" class="w-full flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2 py-2.5 rounded-xl text-xs shadow-md transition-all">
             <i data-lucide="gamepad-2" class="w-3.5 h-3.5"></i>
             <span>포인트 게임장</span>
@@ -266,6 +266,11 @@
             <span>🍚</span>
             <span>밥키우기</span>
             <span id="headerEnhanceBadge" class="text-[10px] bg-slate-900 text-amber-300 px-1.5 py-0.2 rounded-full font-bold">+0강</span>
+          </button>
+
+          <button onclick="openPetModal()" class="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-black px-2 py-2.5 rounded-xl text-xs shadow-md transition-all">
+            <span>🐾</span>
+            <span>펫</span>
           </button>
 
           <button onclick="openCardModal()" class="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white font-black px-2 py-2.5 rounded-xl text-xs shadow-md transition-all">
@@ -657,6 +662,51 @@
       <div class="space-y-1.5">
         <span class="text-xs font-extrabold text-slate-800">✨ 화이트의 혜택</span>
         <ul id="whitePerks" class="text-[11px] text-slate-600 space-y-0.5"></ul>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 🐾 펫 -->
+  <div id="petModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this) closePetModal()">
+    <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-5 space-y-3 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+        <div>
+          <h3 class="font-black text-slate-900 text-base">🐾 펫</h3>
+          <p class="text-[11px] text-slate-400">데리고 다니는 펫 1마리가 강화비를 깎고 판매가를 올려줘요 · 💰 <span id="petMyPoints">0P</span></p>
+        </div>
+        <button onclick="closePetModal()" class="text-slate-400 hover:text-slate-700 text-sm p-1">✕</button>
+      </div>
+      <div class="flex gap-1.5">
+        <button id="petTab_mine" onclick="setPetTab('mine')">🐾 내 펫</button>
+        <button id="petTab_gacha" onclick="setPetTab('gacha')">🥚 뽑기</button>
+        <button id="petTab_book" onclick="setPetTab('book')">📖 도감</button>
+      </div>
+      <div id="petSec_mine" class="space-y-2">
+        <div id="petActiveBox"></div>
+        <div id="petMineList" class="space-y-1.5"></div>
+      </div>
+      <div id="petSec_gacha" class="hidden space-y-2">
+        <div class="pet-egg-card rounded-2xl p-4 text-center space-y-2">
+          <div class="text-5xl pet-egg-wobble">🥚</div>
+          <div class="text-xs font-black text-slate-800">펫 알 · 200,000P <span class="text-slate-400 font-bold">(소각 · 천장 없음)</span></div>
+          <div class="text-[10px] text-slate-500">일반 84.778% · 희귀 15% · <span class="text-violet-500 font-bold">영웅 0.2%</span> · <span class="text-amber-500 font-bold">전설 0.02%</span> · <span class="text-fuchsia-500 font-bold">신화 0.002%</span></div>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="buyPetEggs(1)" class="bg-slate-900 text-white font-black py-2.5 rounded-xl text-xs">🥚 1개 · 20만P</button>
+            <button onclick="buyPetEggs(10)" class="bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black py-2.5 rounded-xl text-xs">🥚×10 · 200만P</button>
+          </div>
+          <div class="text-[10px] text-slate-400">같은 펫이 또 나오면 ★이 올라 강화 상한이 열려요 (★5 이후엔 🍖 간식 3개)</div>
+        </div>
+        <div id="petHatchResult"></div>
+        <button onclick="buyPetSnack()" class="w-full bg-amber-100 hover:bg-amber-200 text-amber-800 font-black py-2 rounded-xl text-[11px]">🍖 펫 간식 사기 · 20,000P (펫 강화 성공 +10%p)</button>
+      </div>
+      <div id="petSec_book" class="hidden space-y-3">
+        <div id="petBookList" class="space-y-3"></div>
+        <div class="text-[10px] text-slate-500 leading-relaxed bg-slate-50 rounded-xl p-2.5">
+          ⚒️ 펫 강화 +1~+10 · 단계마다 효과 +8% (+10이면 1.8배) · 성공 90/80/70/60/50/40/30/20/12/6% · +6부터 실패 시 50% 하락 · 파괴 없음<br>
+          ⭐ 강화 상한: ★1 +4 · ★2 +6 · ★3 +8 · ★4 +9 · ★5 +10<br>
+          🍚 먹이(하루 1번): 일반 무료 · 희귀 1천 · 영웅 1만 · 전설 5만 · 신화 20만P (×강화 단계마다 +20%) — 안 주면 그날 효과 꺼짐
+        </div>
       </div>
     </div>
   </div>
@@ -1589,25 +1639,26 @@
     </div>
   </div>
 
-  <script src="js/core.js?v=20261102k"></script>
-  <script src="js/auth.js?v=20261102k"></script>
-  <script src="js/enhance.js?v=20261102k"></script>
-  <script src="js/shop.js?v=20261102k"></script>
-  <script src="js/chat.js?v=20261102k"></script>
-  <script src="js/games.js?v=20261102k"></script>
-  <script src="js/admin.js?v=20261102k"></script>
-  <script src="js/ranking.js?v=20261102k"></script>
-  <script src="js/restaurants.js?v=20261102k"></script>
-  <script src="js/tools.js?v=20261102k"></script>
-  <script src="js/feed.js?v=20261102k"></script>
-  <script src="js/bank.js?v=20261102k"></script>
-  <script src="js/tier.js?v=20261102k"></script>
-  <script src="js/club.js?v=20261102k"></script>
-  <script src="js/white.js?v=20261102k"></script>
-  <script src="js/cards.js?v=20261102k"></script>
-  <script src="js/season.js?v=20261102k"></script>
-  <script src="js/duel.js?v=20261102k"></script>
-  <script src="js/predict.js?v=20261102k"></script>
-  <script src="js/main.js?v=20261102k"></script>
+  <script src="js/core.js?v=20261102l"></script>
+  <script src="js/auth.js?v=20261102l"></script>
+  <script src="js/enhance.js?v=20261102l"></script>
+  <script src="js/shop.js?v=20261102l"></script>
+  <script src="js/chat.js?v=20261102l"></script>
+  <script src="js/games.js?v=20261102l"></script>
+  <script src="js/admin.js?v=20261102l"></script>
+  <script src="js/ranking.js?v=20261102l"></script>
+  <script src="js/restaurants.js?v=20261102l"></script>
+  <script src="js/tools.js?v=20261102l"></script>
+  <script src="js/feed.js?v=20261102l"></script>
+  <script src="js/bank.js?v=20261102l"></script>
+  <script src="js/tier.js?v=20261102l"></script>
+  <script src="js/club.js?v=20261102l"></script>
+  <script src="js/white.js?v=20261102l"></script>
+  <script src="js/pets.js?v=20261102l"></script>
+  <script src="js/cards.js?v=20261102l"></script>
+  <script src="js/season.js?v=20261102l"></script>
+  <script src="js/duel.js?v=20261102l"></script>
+  <script src="js/predict.js?v=20261102l"></script>
+  <script src="js/main.js?v=20261102l"></script>
 </body>
 </html>

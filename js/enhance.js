@@ -187,7 +187,7 @@ function updateEnhanceUI() {
   if (shopEnhanceTxt) shopEnhanceTxt.textContent = `+${currentEnhanceLevel}강 (${bowlName})`;
 
   const mk = riceMarket();
-  const baseSell = currentEnhanceLevel > 0 ? ENHANCE_PROBABILITIES[currentEnhanceLevel - 1].reward : 0;
+  const baseSell = currentEnhanceLevel > 0 ? Math.round(ENHANCE_PROBABILITIES[currentEnhanceLevel - 1].reward * (typeof petSaleMult === 'function' ? petSaleMult() : 1)) : 0;
   const bs = document.getElementById('enhanceBowlStats');
   if (bs) bs.innerHTML = currentEnhanceLevel > 0 || myBowl.tries > 0
     ? `🧾 이 밥: 0강부터 <strong class="text-slate-200">${myBowl.tries.toLocaleString()}회</strong> 강화 · 들인 돈 <strong class="text-amber-300">${myBowl.cost.toLocaleString()}P</strong>${baseSell > 0 && !mk.pending ? ` · 지금 팔면 ${(() => { const r = Math.round(baseSell * mk.mult); const n = r - Math.round(r * curSellFee()) - myBowl.cost; return `<strong class="${n >= 0 ? 'text-emerald-300' : 'text-rose-300'}">${n >= 0 ? '+' : ''}${n.toLocaleString()}P</strong>`; })()}` : ''}`
@@ -296,7 +296,8 @@ function renderEnhanceRecommend() {
 }
 
 function currentAttemptCost() {
-  return getEnhanceCost(currentEnhanceLevel) * (gambleMode ? 2 : 1);
+  const base = getEnhanceCost(currentEnhanceLevel) * (gambleMode ? 2 : 1);
+  return typeof petCostMult === 'function' ? Math.max(1, Math.round(base * petCostMult())) : base;
 }
 function toggleGambleMode() {
   gambleMode = !gambleMode;
@@ -572,7 +573,7 @@ function runEnhancement() {
   let outcome, msg, jumped = false;
   if (roll < odds.success) {
     outcome = 'success';
-    jumped = fromLevel >= 5 && fromLevel + 2 <= ENHANCE_MAX && Math.random() < JUMP_CHANCE;
+    jumped = fromLevel >= 5 && fromLevel + 2 <= ENHANCE_MAX && Math.random() < (typeof petJumpChance === 'function' ? petJumpChance() : JUMP_CHANCE);
     currentEnhanceLevel = fromLevel + (jumped ? 2 : 1);
     const evolvedBowl = BOWL_EVOLUTION[currentEnhanceLevel];
     msg = jumped
@@ -584,6 +585,11 @@ function runEnhancement() {
     msg = outcome === 'saved'
       ? `<span class="text-sky-300 font-black text-xs">🛡️ 방지권 발동! 밥이 탈 뻔했지만 지켜냈어요!</span>`
       : `<span class="text-amber-400 font-bold text-xs">⚠️ 강화 실패! 밥은 유지되었습니다. ${tags}${near}</span>`;
+  } else if (typeof petShield === 'function' && petShield(fromLevel)) {
+    // 🐾 전설·신화 펫의 파괴 막기 (하루 정해진 횟수, +20강 미만)
+    outcome = 'saved';
+    const pp = typeof activePet === 'function' ? activePet() : null;
+    msg = `<span class="text-amber-500 font-black text-xs">${pp ? pp.icon : '🐾'} 펫이 밥을 지켜냈어요! 파괴 막기 (오늘 ${petShieldLeft()}번 남음)</span>`;
   } else {
     outcome = 'break';
     currentEnhanceLevel = enhanceCheckpoint(fromLevel);
@@ -786,7 +792,7 @@ function sellEnhancedBowl() {
   const mk = riceMarket();
   if (mk.pending) return alert('⏳ 이번 분 시세를 확인하는 중이에요. 1~2초 뒤에 다시 눌러주세요!');
   const base = ENHANCE_PROBABILITIES[currentEnhanceLevel - 1].reward;
-  const reward = Math.round(base * mk.mult);
+  const reward = Math.round(base * mk.mult * (typeof petSaleMult === 'function' ? petSaleMult() : 1));
   const currentName = BOWL_EVOLUTION[currentEnhanceLevel]?.name || '밥';
   const fee0 = Math.round(reward * curSellFee());
   const inv = myBowl.cost, tries = myBowl.tries;
@@ -794,7 +800,7 @@ function sellEnhancedBowl() {
   if (riceMarket().slot !== mk.slot) return alert('⏳ 그 사이 시세가 바뀌었어요! 새 시세를 확인하고 다시 눌러주세요.');
 
   // 🎉 대박 손님: 5% 확률로 판매금 2배
-  const lucky = Math.random() < 0.05;
+  const lucky = Math.random() < (typeof petLuckyChance === 'function' ? petLuckyChance() : 0.05);
   const gross = lucky ? reward * 2 : reward;
   const sellFee = Math.round(gross * curSellFee());
   const paid = gross - sellFee;

@@ -208,6 +208,7 @@ function loadGameStateFromUser(val) {
   if (typeof loadTierFromUser === "function") loadTierFromUser(val);
   loadBestEnhance(val);
   if (typeof loadWhiteFromUser === 'function') loadWhiteFromUser(val);
+  if (typeof loadPetsFromUser === 'function') loadPetsFromUser(val);
 }
 
 function bindNickname(nick) {
@@ -734,6 +735,7 @@ function initPresenceSystem() {
         nickname: currentUser.nickname,
         badge: myNickBg,
         symbol: myNickSymbol,
+        petTag: typeof activePetTag === 'function' ? activePetTag() : '',
         color: myNickColor,
         lastSeen: Date.now()
       }).catch(() => {});

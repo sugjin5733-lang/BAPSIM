@@ -99,7 +99,8 @@ function nickHTML(u, extraClass = '') {
   // 대천사의 날개는 현재 주인(기부 1위)만 표시
   if (badge === 'nb-angel' && typeof angelHolderKnown !== 'undefined' && angelHolderKnown && u.nickname !== angelHolderNick) badge = 'nb-none';
   if (badge === 'nb-season-1' || badge === 'nb-season-2' || badge === 'nb-season-3') badge = 'nb-none';
-  return `<span class="${safeClass(badge)} ${extraClass} inline-block" style="${color ? `color:${color} !important;` : ''}">${sym ? sym + ' ' : ''}${esc(u.nickname)}${sym ? ' ' + sym : ''}</span>`;
+  const pet = u.petTag ? `<span class="pet-tag">${esc(String(u.petTag).slice(0, 16))}</span>` : '';
+  return `<span class="${safeClass(badge)} ${extraClass} inline-block" style="${color ? `color:${color} !important;` : ''}">${sym ? sym + ' ' : ''}${esc(u.nickname)}${sym ? ' ' + sym : ''}</span>${pet}`;
 }
 // 비밀번호 해시 (DB에 평문 저장 방지)
 async function sha256(text) {

@@ -703,3 +703,21 @@ body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 
 @keyframes heavenGlow { from { box-shadow: 0 0 6px rgba(253,230,138,.6); } to { box-shadow: 0 0 16px rgba(253,230,138,1), 0 0 30px rgba(255,255,255,.9); } }
 @keyframes heavenHalo { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-2px); } }
 @keyframes heavenCloud { 0%,100% { transform: translateY(-55%) translateX(0); } 50% { transform: translateY(-55%) translateX(-2px); } }
+
+/* 🐾 펫 */
+.pet-tag { display: inline-block; margin-left: 4px; font-size: 10px; font-weight: 900; padding: 0 5px; border-radius: 999px; background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; vertical-align: middle; white-space: nowrap; }
+.pet-chip { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 6px 4px; border-radius: 12px; background: #fff; min-width: 54px; }
+.pet-g-common { border: 1.5px solid #e2e8f0; }
+.pet-g-rare { border: 1.5px solid #7dd3fc; background: linear-gradient(135deg, #fff, #f0f9ff); }
+.pet-g-hero { border: 1.5px solid #c4b5fd; background: linear-gradient(135deg, #fff, #f5f3ff); box-shadow: 0 0 10px rgba(167,139,250,.35); }
+.pet-g-legend { border: 1.5px solid #fcd34d; background: linear-gradient(135deg, #fff, #fffbeb); box-shadow: 0 0 14px rgba(251,191,36,.45); }
+.pet-g-mythic { border: 2px solid transparent; background: linear-gradient(#fff, #fff) padding-box, linear-gradient(90deg, #f472b6, #a78bfa, #60a5fa, #34d399, #fbbf24, #f472b6) border-box; background-size: 100% 100%, 300% 100%; animation: petRainbow 3s linear infinite; box-shadow: 0 0 16px rgba(244,114,182,.45); }
+@keyframes petRainbow { from { background-position: 0 0, 0 0; } to { background-position: 0 0, 300% 0; } }
+.pet-egg-card { background: radial-gradient(ellipse at 50% 0%, #fff1f2, #ffffff 70%); border: 1.5px solid #fecdd3; }
+.pet-egg-wobble { display: inline-block; animation: petWobble 2.2s ease-in-out infinite; }
+@keyframes petWobble { 0%,70%,100% { transform: rotate(0); } 75% { transform: rotate(-10deg); } 80% { transform: rotate(9deg); } 85% { transform: rotate(-6deg); } 90% { transform: rotate(4deg); } }
+.pet-hatch { animation: petPop .45s cubic-bezier(.2,1.4,.4,1) both; border: 1.5px solid #e2e8f0; background: #fff; }
+.pet-hatch-hero { border-color: #c4b5fd; background: linear-gradient(135deg, #faf5ff, #fff); }
+.pet-hatch-legend { border-color: #fcd34d; background: linear-gradient(135deg, #fffbeb, #fff); box-shadow: 0 0 24px rgba(251,191,36,.5); }
+.pet-hatch-mythic { border-color: #f472b6; background: linear-gradient(135deg, #fdf2f8, #eff6ff, #ecfdf5); box-shadow: 0 0 30px rgba(244,114,182,.55); }
+@keyframes petPop { from { transform: scale(.85); opacity: 0; } to { transform: none; opacity: 1; } }
