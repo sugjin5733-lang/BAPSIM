@@ -310,6 +310,7 @@ function updateAccountUI() {
   if (memberStatus) memberStatus.textContent = isUserApproved ? '승인된 회원' : '승인 대기 중';
 
   document.getElementById('authAdminBtn')?.classList.toggle('hidden', !isAdmin);
+  if (typeof refreshTierUI === 'function') refreshTierUI();
 
   // 헤더 프로필 버튼
   const pText = document.getElementById('userProfileText');

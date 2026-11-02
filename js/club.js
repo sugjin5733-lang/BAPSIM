@@ -18,6 +18,8 @@ const FEST_MULT = 1.1;
 let activePolicies = {};   // 종류 → { by, from, until, mult?, text? }
 let policiesWatching = false;
 
+// 블랙 회원 + 관리자(열람 모드)는 클럽 안을 볼 수 있음. 정책 행사는 블랙만
+function clubCanView() { return (typeof isBlack === 'function' && isBlack()) || (typeof isAdmin !== 'undefined' && isAdmin); }
 function clubNow() { return typeof ServerClock !== 'undefined' ? ServerClock.now() : Date.now(); }
 function policyActive(type) { const p = activePolicies[type]; return !!(p && typeof p.until === 'number' && p.until > clubNow() && (p.from || 0) <= clubNow()); }
 function policyLeftText(type) {
@@ -40,6 +42,7 @@ function watchPolicies() {
   policiesWatching = true;
   db.ref('policies').on('value', s => {
     activePolicies = s.val() || {};
+    maybeShowSpeaker();
     renderPolicyBanner();
     renderBlackClub();
     if (typeof updateEnhanceUI === 'function') { try { updateEnhanceUI(); } catch (e) {} }
@@ -126,8 +129,9 @@ async function activatePolicy(type) {
 function renderPolicyBanner() {
   const bar = document.getElementById('policyBanner');
   if (!bar) return;
-  const black = typeof isBlack === 'function' && isBlack();
-  const live = Object.keys(BLACK_POLICIES).filter(t => t !== 'hammer' && t !== 'reset' && policyActive(t));
+  const black = clubCanView();
+  // 📢 확성기는 띠에 고정하지 않고 팝업으로 떴다가 닫힘 (maybeShowSpeaker)
+  const live = Object.keys(BLACK_POLICIES).filter(t => t !== 'hammer' && t !== 'reset' && t !== 'speaker' && policyActive(t));
   let items;
   if (black) {
     items = live.map(t => {
@@ -138,7 +142,6 @@ function renderPolicyBanner() {
   } else {
     // 일반 회원: 확성기 메시지만 보이고, 나머지는 무엇인지 밝히지 않음
     items = [];
-    if (live.includes('speaker')) items.push(`<span class="policy-chip">📢 ${esc(activePolicies.speaker.text || '')}</span>`);
     const hidden = live.filter(t => t !== 'speaker');
     if (hidden.length) {
       const left = Math.max(...hidden.map(t => activePolicies[t].until)) - clubNow();
@@ -170,18 +173,21 @@ function setVipAlert(on) {
 function renderBlackClub() {
   const m = document.getElementById('blackClubModal');
   if (!m || m.classList.contains('hidden')) return;
-  const black = typeof isBlack === 'function' && isBlack();
+  const member = typeof isBlack === 'function' && isBlack();
+  const black = clubCanView();
   const head = document.getElementById('blackClubStatus');
-  if (head) head.innerHTML = black
+  if (head) head.innerHTML = member
     ? `<span class="text-emerald-300 font-black">● 영구 회원</span>`
+    : black ? `<span class="text-sky-300 font-black">🛡️ 관리자 열람 모드</span> <span class="text-slate-400 text-[10px]">(정책 행사는 블랙 회원만)</span>`
     : `<span class="text-slate-400">회원 전용 공간이에요.</span> <button onclick="closeBlackClub(); openPrestigeModal()" class="ml-2 bg-amber-300 text-slate-950 font-black px-2 py-0.5 rounded-lg text-[10px]">블랙 가입하러 가기</button>`;
 
-  ['clubSecPolicies', 'clubSecRanking', 'clubSecPerks'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.toggle('hidden', !black); });
+  ['clubSecPolicies', 'clubSecRanking'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.toggle('hidden', !black); });
+  { const el = document.getElementById('clubSecPerks'); if (el) el.classList.toggle('hidden', !member); }
   const teaser = document.getElementById('clubTeaser');
   if (teaser) teaser.classList.toggle('hidden', black);
   if (!black) return; // 비회원에게는 클럽 기능을 보여주지 않음
   const perks = document.getElementById('blackClubPerks');
-  if (perks) {
+  if (perks && member) {
     if (!black) { perks.innerHTML = '<div class="text-[11px] text-slate-400 text-center py-3">🔒 블랙 회원이 되면 여기서 모든 혜택을 관리할 수 있어요.</div>'; }
     else {
       const today = todayKey(tierNow());
@@ -211,7 +217,7 @@ function renderBlackClub() {
 async function renderBlackClubRanking() {
   const box = document.getElementById('blackClubRanking');
   if (!box) return;
-  if (!(typeof isBlack === 'function' && isBlack())) { box.innerHTML = '<div class="text-[11px] text-slate-400 text-center py-3">🔒 블랙 회원만 볼 수 있어요.</div>'; return; }
+  if (!clubCanView()) { box.innerHTML = '<div class="text-[11px] text-slate-400 text-center py-3">🔒 블랙 회원만 볼 수 있어요.</div>'; return; }
   let users = {};
   try { users = (await db.ref('user_points').once('value')).val() || {}; } catch (e) {}
   const now = clubNow();
@@ -226,7 +232,7 @@ async function renderBlackClubRanking() {
 function renderBlackClubPolicies() {
   const box = document.getElementById('blackClubPolicies');
   if (!box) return;
-  const black = typeof isBlack === 'function' && isBlack();
+  const black = clubCanView();
   if (!black) { box.innerHTML = ''; return; } // 비회원 화면에는 정책 목록 자체를 만들지 않음
   box.innerHTML = Object.entries(BLACK_POLICIES).map(([t, d]) => {
     const on = policyActive(t), cd = policyCooldownLeft(t);
@@ -269,3 +275,72 @@ async function executeJudgment(ref) {
 
 }
 setInterval(watchMyJudgments, 5000);
+
+
+// ------------------------------------------------------------------
+// 📢 블랙 확성기: 화면 가운데 팝업으로 떴다가 자동으로 닫힘 + 목소리로 읽어줌
+//  - 한 확성기는 한 사람에게 한 번만 (새로고침해도 다시 안 뜸)
+//  - 🔇 누르면 다음부터 소리 없이 팝업만
+// ------------------------------------------------------------------
+const SPEAKER_SHOW_MS = 9000;
+let speakerShownKey = '';
+function speakerMuted() { try { return localStorage.getItem('bapsim_speaker_mute') === '1'; } catch (e) { return false; } }
+function maybeShowSpeaker() {
+  if (!policyActive('speaker')) return;
+  const p = activePolicies.speaker;
+  const key = `${p.by}|${p.from}`;
+  if (speakerShownKey === key) return;
+  let seen = '';
+  try { seen = localStorage.getItem('bapsim_speaker_seen') || ''; } catch (e) {}
+  speakerShownKey = key;
+  if (seen === key) return;
+  try { localStorage.setItem('bapsim_speaker_seen', key); } catch (e) {}
+  showSpeakerPopup(p.by, p.text || '');
+}
+function showSpeakerPopup(by, text) {
+  document.getElementById('speakerPopup')?.remove();
+  const el = document.createElement('div');
+  el.id = 'speakerPopup';
+  el.className = 'speaker-popup';
+  el.innerHTML = `
+    <div class="speaker-card">
+      <div class="flex items-center justify-between gap-3 mb-1.5">
+        <span class="text-[11px] font-black tracking-widest text-amber-300">📢 블랙 확성기</span>
+        <span class="flex gap-1">
+          <button onclick="toggleSpeakerMute()" id="speakerMuteBtn" class="text-[11px] px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20">${speakerMuted() ? '🔇' : '🔊'}</button>
+          <button onclick="closeSpeakerPopup()" class="text-[11px] px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20">✕</button>
+        </span>
+      </div>
+      <div class="text-lg sm:text-xl font-black text-white leading-snug break-words">${esc(text)}</div>
+      <div class="mt-1.5 text-[11px] text-slate-400">— 🖤 ${esc(by)}</div>
+      <div class="speaker-bar"><span style="animation-duration:${SPEAKER_SHOW_MS}ms"></span></div>
+    </div>`;
+  document.body.appendChild(el);
+  speakSpeaker(by, text);
+  clearTimeout(showSpeakerPopup._t);
+  showSpeakerPopup._t = setTimeout(closeSpeakerPopup, SPEAKER_SHOW_MS);
+}
+function closeSpeakerPopup() {
+  const el = document.getElementById('speakerPopup');
+  if (!el) return;
+  el.classList.add('speaker-out');
+  setTimeout(() => el.remove(), 350);
+  try { window.speechSynthesis && speechSynthesis.cancel(); } catch (e) {}
+}
+function toggleSpeakerMute() {
+  const m = !speakerMuted();
+  try { localStorage.setItem('bapsim_speaker_mute', m ? '1' : '0'); } catch (e) {}
+  if (m) { try { speechSynthesis.cancel(); } catch (e) {} }
+  const b = document.getElementById('speakerMuteBtn'); if (b) b.textContent = m ? '🔇' : '🔊';
+}
+function speakSpeaker(by, text) {
+  if (speakerMuted() || !window.speechSynthesis || !text) return;
+  try {
+    const u = new SpeechSynthesisUtterance(`${by}님의 확성기. ${text}`);
+    u.lang = 'ko-KR'; u.rate = 1.05;
+    const ko = speechSynthesis.getVoices().find(v => /ko/i.test(v.lang));
+    if (ko) u.voice = ko;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  } catch (e) {}
+}

@@ -129,7 +129,7 @@ function announceBlackEntrance(justJoined = false) {
 // 등급에 따라 보이는 버튼 (📞 핫라인은 블랙만)
 function refreshTierUI() {
   const hb = document.getElementById('hotlineToolbarBtn');
-  if (hb) hb.classList.toggle('hidden', !isBlack());
+  if (hb) hb.classList.toggle('hidden', !(isBlack() || (typeof isAdmin !== 'undefined' && isAdmin)));
 }
 setInterval(refreshTierUI, 60 * 1000);
 

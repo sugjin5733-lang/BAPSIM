@@ -640,3 +640,13 @@ body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 
   text-shadow: 0 1px 0 #431407, 0 0 6px rgba(251,146,60,.7);
   animation: richSweep 3.2s linear infinite;
 }
+
+/* 📢 블랙 확성기 팝업 */
+.speaker-popup { position: fixed; inset: 0; z-index: 120; display: flex; align-items: flex-start; justify-content: center; padding: 72px 16px 0; pointer-events: none; }
+.speaker-card { pointer-events: auto; width: 100%; max-width: 440px; background: linear-gradient(135deg, #0a0a0a, #1c1917); border: 1.5px solid rgba(253, 230, 138, .7); border-radius: 22px; padding: 14px 16px 12px; color: #fff; box-shadow: 0 20px 60px rgba(0,0,0,.45), 0 0 0 4px rgba(253,230,138,.12); animation: speakerIn .45s cubic-bezier(.2,1.4,.4,1) both; }
+.speaker-out .speaker-card { animation: speakerOut .35s ease-in both; }
+.speaker-bar { margin-top: 10px; height: 3px; border-radius: 9px; background: rgba(255,255,255,.1); overflow: hidden; }
+.speaker-bar span { display: block; height: 100%; background: linear-gradient(90deg, #fde68a, #f59e0b); animation: speakerBar linear both; transform-origin: left; }
+@keyframes speakerIn { from { opacity: 0; transform: translateY(-24px) scale(.92); } to { opacity: 1; transform: none; } }
+@keyframes speakerOut { to { opacity: 0; transform: translateY(-16px) scale(.96); } }
+@keyframes speakerBar { from { transform: scaleX(1); } to { transform: scaleX(0); } }
