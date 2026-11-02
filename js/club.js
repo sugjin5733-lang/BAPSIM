@@ -193,7 +193,6 @@ function renderBlackClub() {
     else {
       const today = todayKey(tierNow());
       const vipOn = !myTier.vipAlertOff;
-      const dep = depositInterestDue();
       perks.innerHTML = `
         <div class="club-row"><span>🔔 접속 시 전체 입장 알림</span>
           <label class="flex items-center gap-1.5 cursor-pointer"><span class="text-[10px] ${vipOn ? 'text-emerald-300' : 'text-slate-500'}">${vipOn ? 'ON' : 'OFF'}</span><input type="checkbox" ${vipOn ? 'checked' : ''} onchange="setVipAlert(this.checked)" class="accent-amber-400 w-4 h-4"></label></div>
@@ -203,9 +202,7 @@ function renderBlackClub() {
         <div class="club-row"><span>🎰 슬롯 초특급 확률 ${BLACK_SLOT_MULT}배</span><span class="text-[10px] text-emerald-300">적용 중</span></div>
         <div class="rounded-xl border border-white/10 bg-white/5 p-2.5 space-y-1.5">
           <div class="flex items-center justify-between text-xs"><span class="font-black">🏦 예치금</span><span class="font-black text-amber-200">${myDeposit.amt.toLocaleString()}P</span></div>
-          <div class="text-[10px] text-slate-400">${myDeposit.amt > 0 ? `받을 이자 ${dep.amt.toLocaleString()}P (${dep.days}일)` : '24시간마다 3% (상한 없음) · 이자는 은행 금고에서'}</div>
-          <div class="flex gap-1.5"><input id="tierDepositAmount" type="number" min="${DEPOSIT_MIN}" step="10000" placeholder="예치 금액" class="flex-1 min-w-0 bg-black/40 border border-white/15 rounded-lg px-2 py-1 text-xs text-white"><button onclick="depositPoints().then(renderBlackClub)" class="bg-amber-400 text-slate-950 font-black px-3 rounded-lg text-[11px]">예치</button></div>
-          ${myDeposit.amt > 0 ? `<div class="flex gap-1.5"><button onclick="claimDepositInterest().then(renderBlackClub)" class="flex-1 bg-white/10 font-bold py-1 rounded-lg text-[11px]">이자 받기</button><button onclick="withdrawDeposit().then(renderBlackClub)" class="flex-1 bg-white/10 text-rose-200 font-bold py-1 rounded-lg text-[11px]">전액 출금</button></div>` : ''}
+          ${depositPanelHTML('club')}
         </div>
         <button onclick="openHotline()" class="w-full bg-white/10 hover:bg-white/15 border border-white/15 font-black py-2 rounded-xl text-xs">📞 관리자 핫라인 ${Object.values(hotlineItems || {}).filter(h => h && h.reply).length ? '<span class="text-amber-200">· 답변 있음</span>' : ''}</button>`;
     }

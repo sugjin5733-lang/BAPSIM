@@ -10,7 +10,14 @@ function loadPrestigeFromUser(val) { myPrestigePass = !!(val && val.prestigePass
 function isPrestigeItem(cost) { return cost >= PRESTIGE_MIN; }
 // 💸 프레스티지 배지 가격 10배 인상 (cost 는 등급 구분용 기준값으로 유지, 실제 결제가는 priceOf)
 const PRESTIGE_PRICE_MULT = 10;
-function priceOf(bg) { return bg && isPrestigeItem(bg.cost) ? bg.cost * PRESTIGE_PRICE_MULT : (bg ? bg.cost : 0); }
+function priceOf(bg) {
+  if (!bg) return 0;
+  if (!isPrestigeItem(bg.cost)) return bg.cost;
+  const s = String(bg.cost);
+  // 777,777 → 7,777,777 처럼 같은 숫자가 반복되는 가격은 숫자 하나를 더 붙여서 (×10 하면 7,777,770 이라 어색함)
+  if (/^(\d)\1+$/.test(s)) return Number(s + s[0]);
+  return bg.cost * PRESTIGE_PRICE_MULT;
+}
 
 // ==========================================
 // 4. 상점 메타데이터 및 밥키우기 레벨 제한 (5000P 이상은 12강부터)

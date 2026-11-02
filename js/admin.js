@@ -5,9 +5,43 @@
 function requireAdmin() {
   if (typeof isAdmin !== 'undefined' && isAdmin === true) return true;
   try { if (typeof reportTamper === 'function') reportTamper('관리자 기능 무단 호출'); } catch (e) {}
-  alert('관리자만 할 수 있어요.');
+  purgeTamperer('관리자 기능 무단 호출');
   return false;
 }
+
+// 🚨 숙청: 관리자 기능·관리자 탭·난수를 몰래 건드리면 그 자리에서 자산 전부 몰수
+//  (포인트·보류·예치금·아이템·밥 단계 → 0, 전광판에 공개, 관리자 이상 감지에 기록)
+let purgeDone = false;
+function purgeTamperer(why) {
+  try {
+    if (purgeDone || (typeof isAdmin !== 'undefined' && isAdmin === true)) return;
+    if (typeof canSyncToCloud !== 'function' || !canSyncToCloud()) return;
+    purgeDone = true;
+    const nick = currentUser.nickname;
+    const lost = { points: userPoints, owed: myOwed, deposit: (typeof myDeposit !== 'undefined' && myDeposit.amt) || 0 };
+    if (userPoints > 0) addPoints(-userPoints, `🚨 숙청: ${String(why).slice(0, 30)}`);
+    myOwed = 0;
+    if (typeof myDeposit !== 'undefined') { myDeposit = { amt: 0, since: 0, int: 0 }; depositDirty = true; }
+    if (typeof myItems !== 'undefined') myItems = { protect: 0, bless: 0 };
+    currentEnhanceLevel = 0;
+    updatePointsUI();
+    db.ref(`user_points/${nick}`).update({ items: { protect: 0, bless: 0 }, enhanceLevel: 0, purged: { at: firebase.database.ServerValue.TIMESTAMP, why: String(why).slice(0, 40), lost } }).catch(() => {});
+    if (typeof postFeed === 'function') postFeed('purge', `🚨 [${nick}] 님이 ${why}로 숙청되었습니다. 전 재산 몰수!`, 'legendary', true);
+    setTimeout(() => alert(`🚨 숙청되었습니다.\n사유: ${why}\n\n관리자 기능을 몰래 건드려서 포인트·보류·예치금·아이템이 모두 몰수됐어요.`), 300);
+  } catch (e) {}
+}
+// 개발자 도구로 관리자 창을 몰래 열면 숙청
+document.addEventListener('DOMContentLoaded', () => {
+  const m = document.getElementById('adminDashboardModal');
+  if (!m || typeof MutationObserver === 'undefined') return;
+  new MutationObserver(() => {
+    if (!m.classList.contains('hidden') && !(typeof isAdmin !== 'undefined' && isAdmin === true)) {
+      m.classList.add('hidden');
+      try { reportTamper('관리자 창 몰래 열기'); } catch (e) {}
+      purgeTamperer('관리자 창 몰래 열기');
+    }
+  }).observe(m, { attributes: true, attributeFilter: ['class', 'style'] });
+});
 
 function adminEquipSelf() {
   if (!requireAdmin()) return;

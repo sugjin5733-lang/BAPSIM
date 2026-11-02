@@ -50,7 +50,8 @@ function loadTierFromUser(val) {
   refreshTierUI();
   if (!depositDirty) {
     const d = val && val.deposit;
-    myDeposit = { amt: Math.max(0, Number(d && d.amt) || 0), since: Number(d && d.since) || 0 };
+    myDeposit = { amt: Math.max(0, Number(d && d.amt) || 0), since: Number(d && d.since) || 0, int: Math.max(0, Number(d && d.int) || 0) };
+    if (myDeposit.amt > 0) setTimeout(() => accrueDeposit(), 3000);
   }
 }
 // syncUserPointToCloud 에서 호출: 등급/예치금은 포인트와 같은 저장에 실어야 규칙 검사 통과
@@ -61,7 +62,7 @@ function tierSyncFields(put) {
     tierDirty = false;
   }
   if (depositDirty) {
-    put('deposit', myDeposit.amt > 0 ? { amt: myDeposit.amt, since: myDeposit.since } : null);
+    put('deposit', myDeposit.amt > 0 ? { amt: myDeposit.amt, since: myDeposit.since, int: Math.min(myDeposit.int || 0, myDeposit.amt) } : null);
     depositDirty = false;
   }
 }
@@ -136,55 +137,126 @@ setInterval(refreshTierUI, 60 * 1000);
 // ------------------------------------------------------------------
 // 🏦 블랙 전용 은행 예치 (이자는 금고에서)
 // ------------------------------------------------------------------
+// 매일 오전 8시(한국 시각)마다 3% 복리. 이자는 원금에 붙고(복리), 붙은 이자만큼은 따로 꺼낼 수 있음
+//  deposit = { amt: 원금+붙은 이자, since: 마지막으로 이자 계산한 8시 시각, int: 꺼낼 수 있는 이자 }
+const DAY_MS = 86400000, KST8_SHIFT = 3600000; // KST 08:00 = UTC 23:00 → (t + 1h) 가 하루 단위로 떨어지는 순간
+function lastKst8(t) { return Math.floor((t + KST8_SHIFT) / DAY_MS) * DAY_MS - KST8_SHIFT; }
+function nextKst8(t) { return lastKst8(t) + DAY_MS; }
 function depositInterestDue() {
   if (!(myDeposit.amt > 0) || !myDeposit.since) return { days: 0, amt: 0 };
-  const days = Math.floor((tierNow() - myDeposit.since) / 86400000);
+  // 첫 이자는 넣은 뒤 12시간 이상 지난 오전 8시부터 (7시 59분에 넣고 8시에 3% 받는 꼼수 방지)
+  let first = nextKst8(myDeposit.since);
+  if (first - myDeposit.since < 12 * 3600000) first += DAY_MS;
+  const last = lastKst8(tierNow());
+  const days = last >= first ? Math.round((last - first) / DAY_MS) + 1 : 0;
   if (days <= 0) return { days: 0, amt: 0 };
-  return { days, amt: Math.floor(myDeposit.amt * DEPOSIT_RATE * days) };
+  return { days, amt: Math.floor(myDeposit.amt * (Math.pow(1 + DEPOSIT_RATE, days) - 1)) };
 }
-async function claimDepositInterest(silent = false) {
+let depositAccruing = false;
+async function accrueDeposit() {
+  if (depositAccruing || !canSyncToCloud() || !(myDeposit.amt > 0)) return 0;
   const due = depositInterestDue();
-  if (due.days <= 0) { if (!silent) alert('아직 24시간이 안 됐어요. 예치 후 24시간마다 이자가 붙어요.'); return 0; }
-  myDeposit.since += due.days * 86400000; // 이자 시계 이동 (블랙이 아니면 이자 없이 시계만 이동)
-  depositDirty = true;
-  let paid = 0;
-  if (isBlack() && due.amt > 0) {
-    try {
-      const r = await db.ref('bank/balance').transaction(c => { const b = Number(c) || 0; paid = Math.min(b, due.amt); return paid > 0 ? b - paid : undefined; });
-      if (!r.committed) paid = 0;
-    } catch (e) { paid = 0; }
-    if (paid > 0) addPoints(paid, `🏦 예치 이자 (${due.days}일)`);
-  }
-  updatePointsUI();
-  if (!silent) alert(paid > 0 ? `💰 예치 이자 ${paid.toLocaleString()}P를 받았어요!${paid < due.amt ? '\n(금고가 부족해서 일부만 지급됐어요)' : ''}` : isBlack() ? '금고가 비어 있어서 이자를 못 받았어요. 금고가 채워지면 다음에 받아요.' : '블랙 회원 기간이 아니라 이자가 없어요.');
-  renderTierBox();
-  return paid;
+  if (due.days <= 0) return 0;
+  depositAccruing = true;
+  try {
+    let from = nextKst8(myDeposit.since); if (from - myDeposit.since < 12 * 3600000) from += DAY_MS; from -= DAY_MS;
+    myDeposit.since = lastKst8(tierNow()); // 이자 시계를 오늘 8시로
+    depositDirty = true;
+    let paid = 0;
+    if (isBlack() && due.amt > 0) {
+      try {
+        const r = await db.ref('bank/balance').transaction(c => { const b = Number(c) || 0; paid = Math.min(b, due.amt); return paid > 0 ? b - paid : undefined; });
+        if (!r.committed) paid = 0;
+      } catch (e) { paid = 0; }
+    }
+    // 하루씩 복리로 나눠서 내역에 남김 (금고가 모자라 일부만 받았으면 비율대로)
+    const ratio = due.amt > 0 ? paid / due.amt : 0;
+    let bal = myDeposit.amt;
+    const nick = currentUser.nickname;
+    for (let i = 1; i <= due.days; i++) {
+      const add = Math.floor(bal * DEPOSIT_RATE * ratio);
+      bal += add;
+      db.ref(`deposit_log/${nick}`).push({ at: from + i * DAY_MS, interest: add, bal, rate: DEPOSIT_RATE, note: isBlack() ? (ratio < 1 ? '금고 부족으로 일부만' : '') : '블랙 아님 · 이자 없음' }).catch(() => {});
+    }
+    paid = bal - myDeposit.amt;
+    myDeposit.amt = bal;
+    myDeposit.int = (myDeposit.int || 0) + paid;
+    updatePointsUI();
+    renderTierBox();
+    if (paid > 0 && typeof bankToast === 'function') bankToast('🏦 예치 이자', `오늘 오전 8시 이자 <strong>${paid.toLocaleString()}P</strong>가 예치금에 붙었어요 (복리). 꺼낼 수 있는 이자 ${myDeposit.int.toLocaleString()}P`);
+    return paid;
+  } finally { depositAccruing = false; }
 }
-async function depositPoints() {
+setInterval(() => { accrueDeposit(); }, 5 * 60 * 1000);
+// 예전 버튼 호환
+async function claimDepositInterest() { const p = await accrueDeposit(); if (!p) alert(`이자는 매일 오전 8시에 예치금에 자동으로 붙어요 (복리).\n다음 이자: ${new Date(nextKst8(tierNow())).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`); return p; }
+async function withdrawInterest() {
+  if (!checkApprovalGuard()) return;
+  await accrueDeposit();
+  const max = Math.min(myDeposit.int || 0, myDeposit.amt);
+  if (!(max > 0)) return alert('아직 꺼낼 수 있는 이자가 없어요. 이자는 매일 오전 8시에 붙어요.');
+  const v = prompt(`💰 꺼낼 이자 금액 (최대 ${max.toLocaleString()}P):`, String(max));
+  if (v === null) return;
+  const amt = Math.floor(Number(String(v).replace(/[,\s]/g, '')) || 0);
+  if (amt <= 0 || amt > max) return alert(`1 ~ ${max.toLocaleString()}P 사이로 입력해 주세요.`);
+  myDeposit.amt -= amt;
+  myDeposit.int -= amt;
+  depositDirty = true;
+  addPoints(amt, '🏦 예치 이자 출금');
+  db.ref(`deposit_log/${currentUser.nickname}`).push({ at: firebase.database.ServerValue.TIMESTAMP, withdraw: amt, bal: myDeposit.amt }).catch(() => {});
+  updatePointsUI();
+  renderTierBox();
+  if (typeof renderBlackClub === 'function') renderBlackClub();
+}
+async function openDepositHistory(boxId = 'tierDepositHistory') {
+  let rows = [];
+  try { const s = await db.ref(`deposit_log/${currentUser.nickname}`).limitToLast(30).once('value'); s.forEach(c => { rows.push(c.val()); }); } catch (e) {}
+  rows.reverse();
+  const fmt = t => new Date(t).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const box = document.getElementById(boxId);
+  if (!box) return;
+  box.classList.toggle('hidden');
+  box.innerHTML = rows.length === 0 ? '<div class="text-[10px] text-slate-400 text-center py-2">아직 내역이 없어요. 첫 이자는 다음 오전 8시에 붙어요.</div>'
+    : rows.map(r => r.withdraw ? `<div class="flex justify-between text-[10px] py-0.5"><span class="text-slate-400">${fmt(r.at)} 이자 출금</span><span class="text-rose-300 font-bold">-${r.withdraw.toLocaleString()}P</span></div>`
+      : `<div class="flex justify-between text-[10px] py-0.5"><span class="text-slate-400">${fmt(r.at)} 이자 ${Math.round((r.rate || DEPOSIT_RATE) * 100)}%${r.note ? ` · ${esc(r.note)}` : ''}</span><span class="text-emerald-300 font-bold">+${(r.interest || 0).toLocaleString()}P <span class="text-slate-500">→ ${(r.bal || 0).toLocaleString()}</span></span></div>`).join('');
+}
+function depositPanelHTML(pfx = 'tier') {
+  const dep = depositInterestDue();
+  const nextAt = new Date(nextKst8(tierNow())).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  return `
+      <div class="text-[10px] text-slate-400">${myDeposit.amt > 0 ? `매일 오전 8시 3% 복리 · 다음 이자 ${nextAt}${dep.days > 0 ? ` (곧 +${dep.amt.toLocaleString()}P)` : ''}<br>꺼낼 수 있는 이자 <b class="text-emerald-300">${(myDeposit.int || 0).toLocaleString()}P</b>` : '매일 오전 8시 3% 복리 (상한 없음) · 이자는 은행 금고에서'}</div>
+      ${isBlack() ? `<div class="flex gap-1.5"><input id="${pfx}DepositAmount" type="number" min="${DEPOSIT_MIN}" step="10000" placeholder="예치 금액" class="flex-1 min-w-0 bg-black/40 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs text-white">
+        <button onclick="depositPoints('${pfx}DepositAmount')" class="bg-amber-400 text-slate-950 font-black px-3 rounded-xl text-[11px]">예치</button></div>` : ''}
+      ${myDeposit.amt > 0 ? `<div class="flex gap-1.5"><button onclick="withdrawInterest()" class="flex-1 bg-emerald-500/20 text-emerald-200 font-bold py-1.5 rounded-xl text-[11px]">이자 출금</button><button onclick="openDepositHistory('${pfx}DepositHistory')" class="flex-1 bg-white/10 text-white font-bold py-1.5 rounded-xl text-[11px]">이자 내역</button><button onclick="withdrawDeposit()" class="flex-1 bg-white/10 text-rose-200 font-bold py-1.5 rounded-xl text-[11px]">전액 출금</button></div>
+      <div id="${pfx}DepositHistory" class="hidden max-h-40 overflow-y-auto rounded-xl bg-black/30 px-2 py-1"></div>` : ''}`;
+}
+async function depositPoints(inputId = 'tierDepositAmount') {
   if (!checkApprovalGuard()) return;
   if (!isBlack()) return alert('🖤 프레스티지 블랙 회원만 예치할 수 있어요.');
-  const input = document.getElementById('tierDepositAmount');
+  const input = document.getElementById(inputId);
   const amount = Math.floor(Number(input && input.value) || 0);
   if (amount < DEPOSIT_MIN) return alert(`최소 ${DEPOSIT_MIN.toLocaleString()}P부터 예치할 수 있어요.`);
   if (amount > userPoints) return alert('❌ 포인트가 부족해요!');
-  if (!confirm(`🏦 ${amount.toLocaleString()}P를 예치할까요?\n\n· 24시간마다 3% 이자 (상한 없음 · 은행 금고에서 지급, 금고가 모자라면 있는 만큼만)\n· 추가로 넣으면 지금까지 붙은 이자를 먼저 받고 이자 시계가 다시 시작돼요\n· 꺼낼 때 큰 금액은 시간당 한도에 따라 ⏳보류로 천천히 들어와요`)) return;
-  if (myDeposit.amt > 0) await claimDepositInterest(true);
+  if (!confirm(`🏦 ${amount.toLocaleString()}P를 예치할까요?\n\n· 매일 오전 8시에 3% 이자가 예치금에 붙어요 (복리 · 은행 금고에서 지급)\n· 첫 이자는 넣고 12시간 이상 지난 오전 8시부터 · 추가로 넣으면 이자 시계가 다시 시작돼요\n· 붙은 이자만큼은 언제든 따로 꺼낼 수 있어요\n· 꺼낼 때 큰 금액은 시간당 한도에 따라 ⏳보류로 천천히 들어와요`)) return;
+  if (myDeposit.amt > 0) await accrueDeposit();
   updatePointsUI();
   addPoints(-amount, '🏦 은행 예치');
-  myDeposit = { amt: myDeposit.amt + amount, since: tierNow() };
+  myDeposit = { amt: myDeposit.amt + amount, since: tierNow(), int: myDeposit.int || 0 }; // 추가 예치하면 이자 시계 다시 시작
   depositDirty = true;
   updatePointsUI();
   if (input) input.value = '';
   renderTierBox();
+  if (typeof renderBlackClub === 'function') renderBlackClub();
 }
 async function withdrawDeposit() {
   if (!checkApprovalGuard()) return;
   if (!(myDeposit.amt > 0)) return alert('예치금이 없어요.');
-  const amt = myDeposit.amt;
+  let amt = myDeposit.amt;
   if (!confirm(`🏦 예치금 ${amt.toLocaleString()}P를 모두 꺼낼까요?\n(붙은 이자도 함께 받아요. 큰 금액은 ⏳보류로 천천히 들어와요)`)) return;
-  await claimDepositInterest(true);
+  await accrueDeposit();
   updatePointsUI();
-  myDeposit = { amt: 0, since: 0 };
+  amt = myDeposit.amt;
+  myDeposit = { amt: 0, since: 0, int: 0 };
   depositDirty = true;
   addPoints(amt, '🏦 예치금 출금');
   updatePointsUI();
@@ -266,17 +338,13 @@ function renderTierBox() {
       <ul class="text-[10px] leading-relaxed space-y-0.5 ${t.key === 'black' ? 'text-slate-300' : 'text-amber-950/80'}">${perks.map(p => `<li>· ${p}</li>`).join('')}</ul>
     </div>`;
   };
-  const dep = depositInterestDue();
   box.innerHTML = `${card(TIERS.gold)}${card(TIERS.black)}
     ${isBlack() || myDeposit.amt > 0 ? `<div class="rounded-2xl border border-white/15 bg-white/5 p-3 space-y-2">
       <div class="flex items-center justify-between">
         <span class="text-xs font-black text-white">🏦 블랙 예치금</span>
         <span class="text-xs font-black text-amber-200">${myDeposit.amt.toLocaleString()}P</span>
       </div>
-      <div class="text-[10px] text-slate-400">${myDeposit.amt > 0 ? `받을 이자 ${dep.amt.toLocaleString()}P (${dep.days}일) · 다음 이자까지 ${Math.max(0, Math.ceil(((myDeposit.since + (dep.days + 1) * 86400000) - now) / 3600000))}시간` : '24시간마다 3% (상한 없음) · 이자는 은행 금고에서 지급'}</div>
-      ${isBlack() ? `<div class="flex gap-1.5"><input id="tierDepositAmount" type="number" min="${DEPOSIT_MIN}" step="10000" placeholder="예치 금액" class="flex-1 min-w-0 bg-black/40 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs text-white">
-        <button onclick="depositPoints()" class="bg-amber-400 text-slate-950 font-black px-3 rounded-xl text-[11px]">예치</button></div>` : ''}
-      ${myDeposit.amt > 0 ? `<div class="flex gap-1.5"><button onclick="claimDepositInterest()" class="flex-1 bg-white/10 text-white font-bold py-1.5 rounded-xl text-[11px]">이자 받기</button><button onclick="withdrawDeposit()" class="flex-1 bg-white/10 text-rose-200 font-bold py-1.5 rounded-xl text-[11px]">전액 출금</button></div>` : ''}
+${depositPanelHTML()}
     </div>` : ''}
     ${isBlack() ? `<button onclick="openHotline()" class="w-full bg-white/10 hover:bg-white/15 border border-white/15 text-white font-black py-2 rounded-xl text-xs">📞 관리자 핫라인</button>` : ''}`;
 }

@@ -22,7 +22,7 @@ const tamperAttempts = [];
       Object.defineProperty(obj, key, {
         configurable: false, enumerable: false,
         get() { return impl; },
-        set() { tamperAttempts.push({ what: label, at: realNow() }); if (typeof reportTamper === 'function') reportTamper(label); }
+        set() { tamperAttempts.push({ what: label, at: realNow() }); if (typeof reportTamper === 'function') reportTamper(label); if (label !== 'Date.now' && typeof purgeTamperer === 'function') purgeTamperer(`난수 조작 시도 (${label})`); }
       });
     } catch (e) { /* 이미 잠겨 있으면 그대로 */ }
   };
