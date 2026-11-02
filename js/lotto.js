@@ -2,7 +2,7 @@
 //
 //  - 한 주 = 월요일 0시 ~ 다음 월요일 0시(한국 시각). 일요일 자정에 추첨
 //  - 티켓 1장 1만P · 1인 주당 최대 100장
-//  - 상금 = 티켓 판매액의 80% + 은행 보탬(최대 100만P, 금고에 1,000만P 이상 남을 때만)
+//  - 상금 = 티켓 판매액의 80% + 은행 보탬(최대 300만P, 금고에 1,000만P 이상 남을 때만)
 //    판매액의 나머지 20%는 은행 금고로
 //  - 당첨: 서로 다른 3명 · 1등 60% · 2등 25% · 3등 15% (티켓을 많이 살수록 확률↑)
 //  - 참가자가 3명 미만이면 추첨 없이 전원 티켓값 환불
@@ -13,7 +13,7 @@
 const LOTTO_PRICE = 10000;
 const LOTTO_MAX_PER_WEEK = 100;
 const LOTTO_POOL_RATE = 0.8;
-const LOTTO_SEED_MAX = 1000000;
+const LOTTO_SEED_MAX = 3000000;
 const LOTTO_RESERVE = 10000000;
 const LOTTO_SPLIT = [0.6, 0.25, 0.15];
 const WEEK_MS = 7 * 86400000;
@@ -181,7 +181,7 @@ function renderLotto() {
         <button onclick="buyLotto(10)" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-2 rounded-xl text-xs whitespace-nowrap">10장 · 10만P</button>
         <button onclick="buyLotto(50)" class="bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black py-2 rounded-xl text-xs whitespace-nowrap">50장 · 50만P</button>
       </div>
-      <p class="text-[10px] text-slate-400 leading-relaxed">매주 일요일 자정 추첨 · 서로 다른 3명이 당첨 · 상금은 판매액의 80% + 은행 보탬(최대 100만P) · 참가자가 3명 미만이면 전원 환불</p>
+      <p class="text-[10px] text-slate-400 leading-relaxed">매주 일요일 자정 추첨 · 서로 다른 3명이 당첨 · 상금은 판매액의 80% + 은행 보탬(최대 300만P) · 참가자가 3명 미만이면 전원 환불</p>
     </div>
     ${lottoHistoryHTML()}`;
 }

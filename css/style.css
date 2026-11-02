@@ -852,3 +852,11 @@ body { font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMac
 
 /* 🎟️ 밥심 복권 */
 .lotto-pot { background: radial-gradient(ellipse 80% 120% at 50% 0%, rgba(253,224,71,.25), transparent 60%), linear-gradient(135deg, #be123c, #db2777 55%, #9333ea); box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 10px 24px -10px rgba(190,18,60,.6); }
+
+/* 🧰 밥심 유틸리티 (기능별 묶음) */
+.util-group { display: flex; flex-direction: column; gap: 6px; padding: 8px; border-radius: 16px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07); }
+.util-label { font-size: 10px; font-weight: 900; letter-spacing: .12em; color: #94a3b8; padding: 0 2px 2px; }
+.util-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 6px; border-radius: 12px; font-size: 12px; font-weight: 900; white-space: nowrap; box-shadow: 0 2px 6px rgba(0,0,0,.18); transition: filter .15s, transform .1s; }
+.util-btn:hover { filter: brightness(1.1); }
+.util-btn:active { transform: scale(.97); }
+.util-btn.hidden { display: none !important; }

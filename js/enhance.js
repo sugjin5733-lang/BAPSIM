@@ -909,7 +909,7 @@ function doDoubleUp() {
       renderDoubleUp(`🎉 성공! 지금 <strong class="text-emerald-300">${doubleUp.amount.toLocaleString()}P</strong>`, 'win');
     } else {
       if (stake >= 30000) postFeed('doubleup', `🎲 더블업 실패... ${stake.toLocaleString()}P가 한순간에 사라졌어요 😭`, 'normal');
-      const lost = stake;
+      const lost = stake, failedStage = doubleUp.round + 1;
       const safeRest = Math.max(0, (doubleUp.sale || 0) - (doubleUp.original || 0));
       doubleUp = null;
       const b = document.getElementById('doubleUpPanel');
@@ -918,12 +918,12 @@ function doDoubleUp() {
         b.innerHTML = `<div class="text-rose-300 font-black">💸 실패! 건 ${lost.toLocaleString()}P를 잃었어요... 다음엔 꼭!</div><div id="doubleUpComfort" class="text-[11px] text-amber-200 font-bold mt-1"></div>${safeRest > 0 ? `<div class="text-[10px] text-slate-400 mt-1">판매금 나머지 ${safeRest.toLocaleString()}P는 그대로 있어요</div>` : ''}`;
         setTimeout(() => { if (!doubleUp) b.classList.add('hidden'); }, 4500);
       }
-      payDoubleUpComfort(lost);
+      if (failedStage >= 2) payDoubleUpComfort(lost); // 위로금은 2·3단계 실패만
     }
   }, 700);
 }
 
-// 🏦 더블 도전 위로금: 실패해서 잃은 금액의 30%를 은행 금고에서 돌려줌 (금고에 1,000만P 이상 남을 때만)
+// 🏦 더블 도전 위로금: 2·3단계에서 실패해서 잃은 금액의 30%를 은행 금고에서 돌려줌 (금고에 1,000만P 이상 남을 때만)
 const DOUBLE_UP_COMFORT_RATE = 0.3;
 const DOUBLE_UP_COMFORT_RESERVE = 10000000;
 async function payDoubleUpComfort(lost) {
