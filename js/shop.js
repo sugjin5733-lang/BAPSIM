@@ -127,7 +127,7 @@ function renderShopUI() {
 function renderColorCards(box, list) {
   if (!box) return;
   const me = esc(currentUser && currentUser.nickname || '닉네임');
-  const sorted = [...list].sort((x, y) => x.cost - y.cost);
+  const sorted = [...list].sort((x, y) => y.cost - x.cost); // 비싼 것부터
   const premiumList = sorted.some(c => isPrestigeItem(c.cost));
   const card = col => {
     const isOwned = (myInventory.colors || []).includes(col.hex);
@@ -151,7 +151,7 @@ function renderColorCards(box, list) {
     </div>`;
   };
   if (!premiumList) { box.innerHTML = sorted.map(card).join(''); return; }
-  const groups = [['💎 1천만P대', sorted.filter(c => c.cost < 100000000)], ['👑 1억P 이상', sorted.filter(c => c.cost >= 100000000)]];
+  const groups = [['👑 1억P 이상', sorted.filter(c => c.cost >= 100000000)], ['💎 1천만P대', sorted.filter(c => c.cost < 100000000)]];
   box.innerHTML = groups.filter(g => g[1].length).map(([t, l]) => `<div class="col-span-full text-[11px] font-black text-amber-200 mt-1">${t}</div>${l.map(card).join('')}`).join('');
 }
 function renderBadgeCards(bgContainer, list) {
