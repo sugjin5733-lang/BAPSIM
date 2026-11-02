@@ -651,7 +651,9 @@ body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 
 @keyframes speakerOut { to { opacity: 0; transform: translateY(-16px) scale(.96); } }
 @keyframes speakerBar { from { transform: scaleX(1); } to { transform: scaleX(0); } }
 
-/* ☁️ 천외천 (프레스티지 화이트) */
+/* 🤍 프레스티지 화이트 클럽 */
+.white-side-card { background: linear-gradient(160deg, #ffffff 0%, #fffbeb 55%, #ffffff 100%); border: 1.5px solid #fde68a; box-shadow: 0 10px 30px rgba(253,230,138,.35); }
+.white-side-card:hover { box-shadow: 0 12px 34px rgba(245,158,11,.35); }
 .white-throne-banner { background: linear-gradient(110deg, #ffffff 0%, #fffbeb 40%, #ffffff 60%, #f0f9ff 100%); background-size: 220% 100%; border: 1.5px solid #fde68a; box-shadow: 0 6px 24px rgba(253,230,138,.35), inset 0 0 0 1px #fff; animation: whiteSheen 5s linear infinite; }
 .white-banner-label { font-size: 10px; font-weight: 900; letter-spacing: .3em; color: #b45309; }
 @keyframes whiteSheen { from { background-position: 0% 0; } to { background-position: 220% 0; } }
