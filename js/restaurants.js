@@ -90,6 +90,15 @@ async function syncFromGoogleSheet(isManual = false) {
   }
 }
 
+// 🍱 식당 소개글 (이름에 포함된 단어로 찾음)
+const RESTAURANT_INTROS = [
+  ['정석', '3개의 우빵 메뉴로 세계를 평정하다'],
+  ['데일리', '매일마다 가고싶어지는 그리운 그곳'],
+  ['일루', '오도짜세해병님의 기합찬 손맛'],
+  ['늘솜', '아 예? 토요일에도 한다구요? 늘~솜']
+];
+function restaurantIntro(name) { const n = String(name || ''); const f = RESTAURANT_INTROS.find(([k]) => n.includes(k)); return f ? f[1] : ''; }
+
 function renderCards() {
   const container = document.getElementById('restaurantCardsContainer');
   if (!container) return;
@@ -130,7 +139,6 @@ function renderCards() {
     const percent = totalVotes > 0 ? Math.round((votesCount / totalVotes) * 100) : 0;
     
     const dateInfo = formatPrettyDate(r.menuDate);
-    const mapUrl = safeUrl(r.mapUrl) || `https://map.naver.com/p/search/${encodeURIComponent('문정동 ' + r.name)}`;
 
     let displayPrice = String(r.price || "가격미정");
     if (!displayPrice.includes("원") && !displayPrice.includes("₩") && !isNaN(parseInt(displayPrice, 10))) {
@@ -230,11 +238,8 @@ function renderCards() {
               <span class="truncate">${esc(r.name)}</span>
               ${isTop ? '<span class="text-[10px] bg-amber-400 text-amber-950 font-black px-1.5 py-0.5 rounded-md shadow-xs shrink-0">👑 1위</span>' : ''}
             </h4>
-            <div class="mt-1 flex items-center gap-1.5 text-[11px] font-bold text-slate-400">
-              <span class="${dateInfo.isToday ? 'text-emerald-600' : ''}">${dateInfo.text}</span>
-              <span class="text-slate-300">·</span>
-              <a href="${esc(mapUrl)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="hover:text-emerald-600 transition-colors"><b class="text-emerald-500">N</b> 지도</a>
-            </div>
+            <div class="mt-1 text-[11px] font-bold ${dateInfo.isToday ? 'text-emerald-600' : 'text-slate-400'}">${dateInfo.text}</div>
+            ${restaurantIntro(r.name) ? `<div class="mt-1 text-xs font-medium text-slate-500 break-keep">${esc(restaurantIntro(r.name))}</div>` : ''}
           </div>
           <div class="shrink-0 text-right">
             <div class="text-lg font-black text-slate-900 tracking-tight leading-none">${esc(displayPrice)}</div>
