@@ -114,7 +114,9 @@ function renderCards() {
     });
   }
 
-  list.forEach(rRaw => {
+  const ACCENTS = ['#f97316', '#10b981', '#0ea5e9', '#e11d48', '#8b5cf6', '#f59e0b'];
+  list.forEach((rRaw, idx) => {
+    const accent = ACCENTS[idx % ACCENTS.length];
     // 데이터 형식이 섞여 들어와도(숫자 가격, 문자열 메뉴 등) 화면이 통째로 멈추지 않도록 정규화
     const r = Object.assign({}, rRaw, {
       id: String(rRaw.id || ''),
@@ -139,12 +141,13 @@ function renderCards() {
     const isNotToday = !dateInfo.isToday;
 
     const card = document.createElement('div');
-    card.className = `group bg-white rounded-3xl p-5 border transition-all duration-300 flex flex-col justify-between shadow-xs hover:shadow-xl hover:-translate-y-1 ${isVoted ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-slate-200/80'}`;
+    card.className = `menu-card group relative overflow-hidden bg-white rounded-3xl p-5 sm:p-6 border transition-all duration-300 flex flex-col justify-between hover:-translate-y-0.5 ${isVoted ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-slate-200/70'}`;
+    card.style.setProperty('--accent', accent);
 
     let bottomActionHTML = '';
     if (isLobby) {
       bottomActionHTML = `
-        <div class="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
+        <div class="mt-5 pt-4 border-t border-dashed border-slate-200 flex items-center justify-between">
           <button onclick="openEditModal(${jsArg(r.id)})" class="text-[11px] text-slate-400 hover:text-orange-500 font-semibold flex items-center gap-1">
             <i data-lucide="settings-2" class="w-3.5 h-3.5"></i>
             정보 수정
@@ -199,26 +202,21 @@ function renderCards() {
         </div>
       `;
     } else {
+      const mainsHTML = (r.mains || []).map(m => {
+        const mm = String(m).match(/^\s*\[([^\]]{1,6})\]\s*(.*)$/);
+        const tag = mm ? `<span class="menu-tag">${esc(mm[1])}</span>` : '';
+        return `<li class="menu-item"><span class="menu-dot"></span>${tag}<span class="min-w-0 break-keep">${esc(mm ? mm[2] : m)}</span></li>`;
+      }).join('');
       menuBodyHTML = `
-        <div class="mt-4 space-y-2">
-          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">오늘의 메인 메뉴</span>
-          <div class="flex flex-wrap gap-1.5">
-            ${(r.mains || []).map(m => `
-              <span class="bg-gradient-to-r from-slate-50 to-slate-100 text-slate-800 border border-slate-200/90 px-2.5 py-1 rounded-xl text-xs font-bold shadow-2xs leading-snug">
-                ${esc(m)}
-              </span>
-            `).join('')}
+        <ul class="mt-4 space-y-0.5">${mainsHTML}</ul>
+        <div class="mt-4 grid grid-cols-2 gap-2 text-xs">
+          <div class="menu-side">
+            <span class="menu-side-label">🍲 국 · 탕</span>
+            <span class="menu-side-value">${esc(r.soup || '-')}</span>
           </div>
-        </div>
-
-        <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs">
-          <div class="flex items-center">
-            <span class="shrink-0 text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 px-1.5 py-0.5 rounded-md mr-2">국/탕</span>
-            <span class="text-slate-700 font-medium truncate">${esc(r.soup || '-')}</span>
-          </div>
-          <div class="flex items-center">
-            <span class="shrink-0 text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-md mr-2">서비스</span>
-            <span class="text-slate-600 font-medium truncate">${esc(r.dessert || '-')}</span>
+          <div class="menu-side">
+            <span class="menu-side-label">☕ 서비스</span>
+            <span class="menu-side-value">${esc(r.dessert || '-')}</span>
           </div>
         </div>
       `;
@@ -226,24 +224,20 @@ function renderCards() {
 
     card.innerHTML = `
       <div>
-        <div class="flex items-start justify-between gap-2 mb-3">
+        <div class="flex items-start justify-between gap-3">
           <div class="min-w-0">
-            <div class="flex items-center gap-1.5 flex-wrap mb-1">
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1 ${dateInfo.isToday ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500'}">
-                <i data-lucide="calendar" class="w-3 h-3"></i>
-                ${dateInfo.text}
-              </span>
-            </div>
-            <h4 class="font-black text-slate-900 text-lg tracking-tight flex items-center gap-1.5">
+            <h4 class="font-black text-slate-900 text-xl tracking-tight flex items-center gap-2">
               <span class="truncate">${esc(r.name)}</span>
               ${isTop ? '<span class="text-[10px] bg-amber-400 text-amber-950 font-black px-1.5 py-0.5 rounded-md shadow-xs shrink-0">👑 1위</span>' : ''}
             </h4>
+            <div class="mt-1 flex items-center gap-1.5 text-[11px] font-bold text-slate-400">
+              <span class="${dateInfo.isToday ? 'text-emerald-600' : ''}">${dateInfo.text}</span>
+              <span class="text-slate-300">·</span>
+              <a href="${esc(mapUrl)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="hover:text-emerald-600 transition-colors"><b class="text-emerald-500">N</b> 지도</a>
+            </div>
           </div>
-          <div class="flex flex-col items-end gap-1 shrink-0">
-            <span class="text-xs font-black text-slate-800 bg-slate-100 px-2 py-1 rounded-xl border border-slate-200">${esc(displayPrice)}</span>
-            <a href="${esc(mapUrl)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200 transition-colors">
-              <span class="font-black">N</span> 지도
-            </a>
+          <div class="shrink-0 text-right">
+            <div class="text-lg font-black text-slate-900 tracking-tight leading-none">${esc(displayPrice)}</div>
           </div>
         </div>
 
