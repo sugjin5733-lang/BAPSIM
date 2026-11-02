@@ -391,7 +391,7 @@ function updateGroupUI() {
 
   if (isLobby) {
     if (mainTitle) mainTitle.textContent = "오늘의 한식뷔페 식단표";
-    if (subTitle) subTitle.textContent = "투표는 상단 '비밀 그룹 찾기 & 만들기'를 통해 그룹에 입장한 뒤 진행할 수 있습니다.";
+    if (subTitle) subTitle.textContent = "그룹 투표는 맨 위 그룹 버튼(전체 공개 로비)에서 그룹에 들어간 뒤 할 수 있어요.";
     if (activeBadge) activeBadge.classList.add('hidden');
     if (accordionBtn) accordionBtn.classList.remove('hidden');
     if (!isMenuExpanded && cardsWrapper) {
