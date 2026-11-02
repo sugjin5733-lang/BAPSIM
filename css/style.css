@@ -885,3 +885,25 @@ body { font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMac
 .statue-say { position: relative; margin-left: 4px; font-size: 10px; font-weight: 900; color: #9a3412; background: #fffbeb; border: 1px solid #fcd34d; border-radius: 9px; padding: 0 7px; line-height: 16px; white-space: nowrap; animation: statueCheer 2.6s ease-in-out infinite; transform-origin: left center; }
 .statue-say::before { content: ''; position: absolute; left: -5px; top: 4px; border: 4px solid transparent; border-right-color: #fcd34d; border-left: 0; }
 .statue-md .statue-bubble { top: -12px; left: 55%; }
+
+/* 🗿 동상 재질 · 왕관 · 박수 */
+.statue-fig { overflow: visible; }
+.statue-t-bronze .statue-body { filter: sepia(1) saturate(2.2) hue-rotate(-28deg) brightness(.82) drop-shadow(0 1px 0 #5b2a0e) drop-shadow(0 0 3px rgba(180,83,9,.45)); }
+.statue-t-bronze .statue-base { background: linear-gradient(180deg, #e7b98a, #9a5a2b 60%, #5b2a0e); }
+.statue-t-silver .statue-body { filter: grayscale(1) brightness(1.35) contrast(1.15) drop-shadow(0 1px 0 #475569) drop-shadow(0 0 4px rgba(226,232,240,.9)); }
+.statue-t-silver .statue-base { background: linear-gradient(180deg, #f8fafc, #94a3b8 60%, #475569); }
+.statue-t-diamond .statue-body { animation: statueBob 2.6s ease-in-out infinite, statueRainbow 3.5s linear infinite; }
+.statue-t-diamond .statue-base { background: linear-gradient(90deg, #a5f3fc, #c4b5fd, #f9a8d4, #a5f3fc); background-size: 200% 100%; animation: statueBaseShine 3s linear infinite; }
+@keyframes statueRainbow { from { filter: sepia(.6) saturate(4) hue-rotate(0deg) brightness(1.15) drop-shadow(0 0 5px rgba(196,181,253,.9)); } to { filter: sepia(.6) saturate(4) hue-rotate(360deg) brightness(1.15) drop-shadow(0 0 5px rgba(196,181,253,.9)); } }
+@keyframes statueBaseShine { to { background-position: 200% 0; } }
+.statue-crown { position: absolute; z-index: 3; top: -7px; left: 50%; transform: translateX(-50%) rotate(-8deg); font-size: 11px; animation: statueBob 2.6s ease-in-out infinite; }
+.statue-md .statue-crown { top: -9px; font-size: 13px; }
+.statue-spark { position: absolute; z-index: 3; font-size: 9px; color: #c4b5fd; animation: statueTwinkle 1.6s ease-in-out infinite; }
+.statue-spark.s1 { top: 2px; left: -2px; } .statue-spark.s2 { top: 10px; right: -3px; animation-delay: .8s; }
+@keyframes statueTwinkle { 0%, 100% { opacity: 0; transform: scale(.5); } 50% { opacity: 1; transform: scale(1.2); } }
+.statue-clap-zone { cursor: pointer; display: inline-flex; }
+.statue-jump .statue-body { animation: statueJump .5s ease-out !important; }
+@keyframes statueJump { 0% { transform: translateY(0) scale(1); } 35% { transform: translateY(-9px) scale(1.15); } 100% { transform: translateY(0) scale(1); } }
+.statue-float { position: fixed; z-index: 80; pointer-events: none; font-size: 15px; animation: statueFloat 1.3s ease-out forwards; }
+@keyframes statueFloat { 0% { opacity: 0; transform: translateY(0) scale(.6); } 20% { opacity: 1; } 100% { opacity: 0; transform: translateY(-48px) scale(1.2); } }
+.statue-tag { display: inline-block; margin-left: 2px; font-size: .85em; vertical-align: middle; filter: sepia(1) saturate(3.2) hue-rotate(-12deg) brightness(1.08) drop-shadow(0 0 2px rgba(251,191,36,.7)); }

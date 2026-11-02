@@ -102,8 +102,9 @@ function nickHTML(u, extraClass = '') {
   if (badge === 'nb-angel' && typeof angelHolderKnown !== 'undefined' && angelHolderKnown && u.nickname !== angelHolderNick) badge = 'nb-none';
   if (badge === 'nb-season-1' || badge === 'nb-season-2' || badge === 'nb-season-3') badge = 'nb-none';
   const pet = u.petTag ? `<span class="pet-tag">${esc(String(u.petTag).slice(0, 16))}</span>` : '';
+  const statue = !u.noStatueTag && typeof isStatueOwner === 'function' && isStatueOwner(u.nickname) ? `<span class="statue-tag" title="밥심 동상 주인">${statueShape(statueState.shape).icon}</span>` : '';
   const name = pcol ? `<span class="pcol ${pcol}">${esc(u.nickname)}</span>` : esc(u.nickname);
-  return `<span class="${safeClass(badge)} ${extraClass} inline-block" style="${color ? `color:${color} !important;` : ''}">${name}</span>${pet}`;
+  return `<span class="${safeClass(badge)} ${extraClass} inline-block" style="${color ? `color:${color} !important;` : ''}">${name}</span>${statue}${pet}`;
 }
 // 비밀번호 해시 (DB에 평문 저장 방지)
 async function sha256(text) {
