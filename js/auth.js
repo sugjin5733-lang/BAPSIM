@@ -349,7 +349,7 @@ let serverTimeOffset = 0;
 db.ref('.info/serverTimeOffset').on('value', s => { serverTimeOffset = s.val() || 0; });
 
 function availableBudget() {
-  if (isAdmin) return Infinity; // 관리자는 규칙에서도 예외
+  // 관리자도 일반 회원과 같은 시간당 한도 적용 (보류 있음)
   if (myBudgetAt == null) return 0;
   const estNow = Date.now() + serverTimeOffset - 2000; // 서버 시각보다 2초 보수적으로
   const rate = typeof budgetRate === 'function' ? budgetRate() : BUDGET_RATE; // 💎 골드·블랙은 시간당 한도↑
@@ -452,7 +452,7 @@ function syncUserPointToCloud() {
   put('updatedAt', Date.now());
 
   if (userPoints !== serverPoints || myOwed !== (lastServerState.owed || 0)) {
-    if (myBudgetAt == null && !isAdmin) { initBudgetIfNeeded(); return; }
+    if (myBudgetAt == null) { initBudgetIfNeeded(); return; }
     const credit = (typeof boostCredit === 'number') ? boostCredit : 0; // ⏩ 보류 단축으로 산 한도
     const avail = availableBudget() + credit;
     let delta = userPoints - serverPoints;
@@ -513,7 +513,7 @@ function maybePruneLogs(nick) {
 
 // 보류 포인트를 한도가 차는 대로 지급 (30초마다)
 setInterval(() => {
-  if (!canSyncToCloud() || myOwed <= 0 || (myBudgetAt == null && !isAdmin)) return;
+  if (!canSyncToCloud() || myOwed <= 0 || myBudgetAt == null) return;
   const room = Math.floor(availableBudget() - (userPoints - serverPoints));
   const pay = Math.min(myOwed, room);
   if (pay < Math.min(myOwed, 300)) return; // 너무 잘게 쪼개지 않기

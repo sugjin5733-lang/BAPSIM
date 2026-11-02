@@ -586,7 +586,7 @@ async function shortenOwed(h) {
   const fee = boostFee(h);
   if (userPoints + myOwed < fee) return alert(`❌ 수수료 ${fmtP(fee)}가 부족해요.`);
   if (!confirm(`⏩ 보류 ${h}시간 단축\n\n즉시 지급: 최대 ${fmtP(Math.min(myOwed, BOOST_HOUR_P * h))}\n수수료: ${fmtP(fee)} (은행 금고로)\n\n진행할까요?`)) return;
-  if (myBudgetAt == null && !isAdmin) return alert('잠시 후 다시 시도해 주세요.');
+  if (myBudgetAt == null) return alert('잠시 후 다시 시도해 주세요.');
 
   if (!boostWindowActive()) { myBoost = { since: bankNow(), used: 0 }; boostNewWindow = true; }
   const fromPts = Math.min(fee, userPoints);
