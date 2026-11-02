@@ -93,14 +93,14 @@ async function joinWhite() {
   if (whiteState.throne) return alert('이미 화이트 클럽의 주인이 있어요. 도전장을 내야 해요.');
   const why = whiteEligible(); if (why) return alert(why);
   if (userPoints < WHITE_PRICE) return alert(`❌ 포인트가 부족해요! (${WHITE_PRICE.toLocaleString()}P)`);
-  if (!confirm(`☁️ ${WHITE_PRICE.toLocaleString()}P를 내고 프레스티지 화이트 클럽의 주인이 될까요?\n(가입비는 전부 소각 · 자리는 단 하나 · 도전에 지면 잃을 수 있어요 · 누가 주인인지는 공개되지 않아요)`)) return;
+  if (!confirm(`☁️ ${WHITE_PRICE.toLocaleString()}P를 내고 프레스티지 화이트 클럽의 주인이 될까요?\n(자리는 단 하나 · 도전에 지면 잃을 수 있어요 · 누가 주인인지는 공개되지 않아요)`)) return;
   let ok = false;
   try {
     const r = await db.ref('bank/white/throne').transaction(cur => cur ? undefined : { nick: currentUser.nickname, uid: authUser.uid, since: firebase.database.ServerValue.TIMESTAMP });
     ok = r.committed;
   } catch (e) {}
   if (!ok) return alert('한 발 늦었어요! 방금 다른 사람이 화이트 클럽에 들어갔어요. (결제되지 않았어요)');
-  addPoints(-WHITE_PRICE, '🤍 프레스티지 화이트 클럽 가입 (소각)');
+  addPoints(-WHITE_PRICE, '🤍 프레스티지 화이트 클럽 가입');
   grantHeavenBadge();
   db.ref('bank/white/history').push({ type: 'crown', nick: currentUser.nickname, at: firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
   updatePointsUI();
@@ -119,7 +119,7 @@ async function challengeWhite() {
   if (whiteState.challenge) return alert('이미 진행 중인 도전이 있어요.');
   const why = whiteEligible(); if (why) return alert(why);
   if (userPoints < WHITE_CHALLENGE_PRICE) return alert(`❌ 포인트가 부족해요! (도전장 ${WHITE_CHALLENGE_PRICE.toLocaleString()}P)`);
-  if (!confirm(`⚔️ 화이트 클럽의 주인에게 도전장을 낼까요?\n\n· 도전장 ${WHITE_CHALLENGE_PRICE.toLocaleString()}P (소각, 이기든 지든 돌려받지 못함)\n· 24시간 동안 자산(포인트+보류+예치금)이 더 많이 늘어난 쪽이 화이트\n· 비기면 지금 주인이 지켜요`)) return;
+  if (!confirm(`⚔️ 화이트 클럽의 주인에게 도전장을 낼까요?\n\n· 도전장 ${WHITE_CHALLENGE_PRICE.toLocaleString()}P (이기든 지든 돌려받지 못함)\n· 24시간 동안 자산(포인트+보류+예치금)이 더 많이 늘어난 쪽이 화이트\n· 비기면 지금 주인이 지켜요`)) return;
   let holder = {};
   try { holder = (await db.ref(`user_points/${t.nick}`).once('value')).val() || {}; } catch (e) {}
   // 내 자산은 도전장 값을 낸 뒤 기준
@@ -134,7 +134,7 @@ async function challengeWhite() {
     ok = r.committed;
   } catch (e) {}
   if (!ok) return alert('한 발 늦었어요! 다른 도전이 먼저 시작됐어요. (결제되지 않았어요)');
-  addPoints(-WHITE_CHALLENGE_PRICE, '⚔️ 화이트 클럽 도전장 (소각)');
+  addPoints(-WHITE_CHALLENGE_PRICE, '⚔️ 화이트 클럽 도전장');
   updatePointsUI();
   whiteFeed('⚔️ 누군가 프레스티지 화이트에게 도전장을 던졌습니다! 24시간 왕좌 쟁탈전 시작');
   renderWhiteClub();
@@ -221,7 +221,7 @@ async function useWhitePower(type) {
     updates[`policies/${type}`] = rec;
     feed = type === 'rain' ? '🌤️ 화이트가 축복의 비를 내립니다. 1시간 동안 모든 강화 성공 확률 ×1.2' : `👑 화이트의 칙령: ${text}`;
   }
-  if (!confirm(`${d.icon} [${d.name}] — ${d.price.toLocaleString()}P (소각)\n${d.desc}\n\n발동할까요?`)) return;
+  if (!confirm(`${d.icon} [${d.name}] — ${d.price.toLocaleString()}P\n${d.desc}\n\n발동할까요?`)) return;
   // 쿨타임 선점 (동시에 두 번 못 쓰게)
   let ok = false;
   try {
@@ -229,7 +229,7 @@ async function useWhitePower(type) {
     ok = r.committed;
   } catch (e) {}
   if (!ok) return alert('쿨타임 중이에요. (결제되지 않았어요)');
-  addPoints(-d.price, `${d.icon} 화이트 권능: ${d.name}${targetNick ? ` → ${targetNick}` : ''} (소각)`);
+  addPoints(-d.price, `${d.icon} 화이트 권능: ${d.name}${targetNick ? ` → ${targetNick}` : ''}`);
   updatePointsUI();
   try { if (Object.keys(updates).length) await db.ref().update(updates); } catch (e) { console.warn('권능 기록 실패', e && e.message); }
   if (targetNick) db.ref(`judgments/${targetNick}`).push({ by: currentUser.nickname, uid: authUser.uid, type, at: firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
@@ -352,7 +352,7 @@ async function renderWhiteClub() {
         <li>${typeof isBlack === 'function' && isBlack() ? '✅' : '⬜'} 프레스티지 블랙 회원</li>
         <li>${currentEnhanceLevel >= WHITE_MIN_LVL ? '✅' : '⬜'} 지금 밥 +${WHITE_MIN_LVL}강 이상 <span class="text-slate-400">(지금 +${currentEnhanceLevel}강)</span></li>
         <li>${hasAngelWings() ? '✅' : '⬜'} 😇 대천사의 날개 보유 <span class="text-slate-400">(지금 누적 기부 1위)</span></li>
-        <li>${userPoints >= (t ? WHITE_CHALLENGE_PRICE : WHITE_PRICE) ? '✅' : '⬜'} ${t ? `도전장 ${WHITE_CHALLENGE_PRICE.toLocaleString()}P` : `즉위 ${WHITE_PRICE.toLocaleString()}P`} <span class="text-slate-400">(소각)</span></li>
+        <li>${userPoints >= (t ? WHITE_CHALLENGE_PRICE : WHITE_PRICE) ? '✅' : '⬜'} ${t ? `도전장 ${WHITE_CHALLENGE_PRICE.toLocaleString()}P` : `즉위 ${WHITE_PRICE.toLocaleString()}P`}</li>
       </ul>`;
     join.innerHTML = me ? duel : `${duel}
       <div class="white-card p-3 space-y-2">

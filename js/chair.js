@@ -94,14 +94,14 @@ async function runForChair() {
   const wk = weekKey(chairNow());
   if ((curElection().candidates || {})[authUser.uid]) return alert('이미 이번 주 선거에 출마했어요.');
   if (userPoints < CHAIR_RUN_FEE) return alert(`❌ 포인트가 부족해요! (출마 ${CHAIR_RUN_FEE.toLocaleString()}P)`);
-  if (!confirm(`🏛️ 이번 주 블랙 클럽 의장 선거에 출마할까요?\n\n· 출마비 ${CHAIR_RUN_FEE.toLocaleString()}P (소각, 돌려받지 못함)\n· 일요일 자정까지 표를 가장 많이 받으면 다음 주 1주일 동안 의장\n· 의장이 되면 의장 배지·색상이 강제로 착용돼요`)) return;
+  if (!confirm(`🏛️ 이번 주 블랙 클럽 의장 선거에 출마할까요?\n\n· 출마비 ${CHAIR_RUN_FEE.toLocaleString()}P (돌려받지 못함)\n· 일요일 자정까지 표를 가장 많이 받으면 다음 주 1주일 동안 의장\n· 의장이 되면 의장 배지·색상이 강제로 착용돼요`)) return;
   let ok = false;
   try {
     const r = await db.ref(`bank/chair/elections/${wk}/candidates/${authUser.uid}`).transaction(cur => cur ? undefined : { nick: currentUser.nickname, at: chairNow(), votes: 0 });
     ok = r.committed;
   } catch (e) {}
   if (!ok) return alert('출마 등록에 실패했어요. (결제되지 않았어요)');
-  addPoints(-CHAIR_RUN_FEE, '🏛️ 블랙 의장 출마 (소각)');
+  addPoints(-CHAIR_RUN_FEE, '🏛️ 블랙 의장 출마');
   updatePointsUI();
   renderChairSection();
 }
@@ -110,7 +110,7 @@ async function voteChair(uid) {
   if (!(typeof isBlack === 'function' && isBlack())) return alert('🖤 블랙 회원만 투표할 수 있어요.');
   const c = (curElection().candidates || {})[uid];
   if (!c) return;
-  const n = Math.floor(Number(prompt(`🗳️ [${c.nick}] 님에게 몇 표를 줄까요? (1표 ${CHAIR_VOTE_PRICE.toLocaleString()}P · 소각)`, '1')) || 0);
+  const n = Math.floor(Number(prompt(`🗳️ [${c.nick}] 님에게 몇 표를 줄까요? (1표 ${CHAIR_VOTE_PRICE.toLocaleString()}P)`, '1')) || 0);
   if (n <= 0) return;
   const cost = n * CHAIR_VOTE_PRICE;
   if (userPoints < cost) return alert(`❌ 포인트가 부족해요! (${cost.toLocaleString()}P)`);
@@ -121,7 +121,7 @@ async function voteChair(uid) {
     ok = r.committed;
   } catch (e) {}
   if (!ok) return alert('투표에 실패했어요. (결제되지 않았어요)');
-  addPoints(-cost, `🗳️ 블랙 의장 투표 → ${c.nick} ${n}표 (소각)`);
+  addPoints(-cost, `🗳️ 블랙 의장 투표 → ${c.nick} ${n}표`);
   updatePointsUI();
 }
 let electionResolving = false;
@@ -179,15 +179,15 @@ async function chairWithdrawVault() {
 }
 async function chairExpel() {
   if (!isChair()) return alert('의장만 쓸 수 있어요.');
-  const target = (prompt(`🚪 블랙 클럽에서 추방할 회원 닉네임 (${CHAIR_EXPEL_PRICE.toLocaleString()}P · 소각):`, '') || '').trim();
+  const target = (prompt(`🚪 블랙 클럽에서 추방할 회원 닉네임 (${CHAIR_EXPEL_PRICE.toLocaleString()}P):`, '') || '').trim();
   if (!target) return;
   if (target === currentUser.nickname) return alert('자기 자신은 추방할 수 없어요.');
   let tu = null;
   try { tu = (await db.ref(`user_points/${target}`).once('value')).val(); } catch (e) {}
   if (!tu || !((Number(tu.blackUntil) || 0) > chairNow())) return alert(`[${target}] 님은 블랙 회원이 아니에요.`);
   if (userPoints < CHAIR_EXPEL_PRICE) return alert(`❌ 포인트가 부족해요! (${CHAIR_EXPEL_PRICE.toLocaleString()}P)`);
-  if (!confirm(`🚪 정말 [${target}] 님을 블랙 클럽에서 추방할까요?\n${CHAIR_EXPEL_PRICE.toLocaleString()}P가 소각되고 되돌릴 수 없어요.`)) return;
-  addPoints(-CHAIR_EXPEL_PRICE, `🚪 의장 추방 → ${target} (소각)`);
+  if (!confirm(`🚪 정말 [${target}] 님을 블랙 클럽에서 추방할까요?\n${CHAIR_EXPEL_PRICE.toLocaleString()}P가 사용되고 되돌릴 수 없어요.`)) return;
+  addPoints(-CHAIR_EXPEL_PRICE, `🚪 의장 추방 → ${target}`);
   updatePointsUI();
   await db.ref(`judgments/${target}`).push({ type: 'chair_expel', by: currentUser.nickname, uid: authUser.uid, at: firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
   db.ref('policy_log').push({ type: 'chair_expel', by: currentUser.nickname, target, at: firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
@@ -279,7 +279,7 @@ function renderChairSection() {
             <li>🚪 블랙 회원 추방 (3,000만P) · 📈 블랙 회원권 가격 인상 (하루 최대 5%)</li>
             <li>📜 의장 제안: 클럽 맨 위에 공지하고 관리자에게 정책 제안 → 관리자는 2시간 안에 답변</li>
           </ul>
-          <p class="text-slate-400">출마 ${(CHAIR_RUN_FEE / 10000)}만P · 투표 1표 ${(CHAIR_VOTE_PRICE / 10000)}만P (블랙만, 여러 표 가능) · 전부 소각</p>
+          <p class="text-slate-400">출마 ${(CHAIR_RUN_FEE / 10000)}만P · 투표 1표 ${(CHAIR_VOTE_PRICE / 10000)}만P (블랙만, 여러 표 가능)</p>
         </div>
       </details>
       <div class="flex items-center justify-between gap-2">
@@ -304,7 +304,7 @@ function renderChairSection() {
         ${!open ? `<div class="text-[11px] text-slate-400">블랙 회원이 ${CHAIR_MIN_BLACK}명 이상일 때부터 선거가 열려요. (지금 ${count}명)</div>` : `
           ${cands.length ? cands.map(c => `<div class="flex items-center justify-between gap-2 text-xs"><span class="font-bold text-white">${esc(c.nick)}</span><span class="flex items-center gap-1.5"><b class="text-amber-200">${(c.votes || 0).toLocaleString()}표</b>${black ? `<button onclick="voteChair('${esc(c.uid)}')" class="bg-white/10 hover:bg-white/20 px-2 py-0.5 rounded text-[10px] font-black">투표</button>` : ''}</span></div>`).join('') : '<div class="text-[11px] text-slate-400">아직 출마한 사람이 없어요.</div>'}
           ${black && !(el.candidates || {})[authUser && authUser.uid] ? `<button onclick="runForChair()" class="w-full bg-amber-300 text-slate-950 font-black py-1.5 rounded-lg text-[11px]">🏛️ 출마하기 · ${(CHAIR_RUN_FEE / 10000).toLocaleString()}만P</button>` : ''}
-          <div class="text-[10px] text-slate-500">1표 ${(CHAIR_VOTE_PRICE / 10000)}만P · 출마비·투표비 전액 소각 · 의장 혜택: 강화비 −5% · 판매가 +10% · 금고 · 추방 · 회원권 인상 · 제안권</div>`}
+          <div class="text-[10px] text-slate-500">1표 ${(CHAIR_VOTE_PRICE / 10000)}만P · 의장 혜택: 강화비 −5% · 판매가 +10% · 금고 · 추방 · 회원권 인상 · 제안권</div>`}
       </div>
     </div>`;
 }

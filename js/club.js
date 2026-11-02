@@ -79,7 +79,7 @@ async function activatePolicy(type) {
     text = (prompt('📢 전광판에 10분 동안 띄울 메시지 (40자):', '') || '').trim().slice(0, 40);
     if (!text) return;
   }
-  if (!confirm(`${def.icon} [${def.name}] 발동\n\n${def.desc}\n비용: ${def.price.toLocaleString()}P (10%는 은행 금고, 나머지 소각)\n쿨타임: ${def.cooldownMin}분\n\n진행할까요?`)) return;
+  if (!confirm(`${def.icon} [${def.name}] 발동\n\n${def.desc}\n비용: ${def.price.toLocaleString()}P\n쿨타임: ${def.cooldownMin}분\n\n진행할까요?`)) return;
 
   const now = clubNow();
   const rec = { by: currentUser.nickname, uid: authUser.uid, from: now, until: now + def.mins * 60000, type };

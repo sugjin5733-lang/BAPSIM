@@ -70,7 +70,7 @@ async function bidNameplate() {
   const msg = (msgEl && msgEl.value || '').trim().slice(0, 30);
   if (amount < min) return alert(`최소 ${min.toLocaleString()}P 이상 불러야 해요.`);
   if (amount > userPoints) return alert(`❌ 포인트가 부족해요! (보유 ${userPoints.toLocaleString()}P)`);
-  if (!confirm(`🏷️ ${amount.toLocaleString()}P에 입찰할까요?\n\n· 지금 바로 포인트가 맡겨져요 (더 높은 입찰이 오면 자동 환급)\n· ${roundLabel(r.id)} 경매 마감 때 1등이면 「명판」 배지를 영구히 받아요\n· 낙찰되면 금액은 전부 소각돼요`)) return;
+  if (!confirm(`🏷️ ${amount.toLocaleString()}P에 입찰할까요?\n\n· 지금 바로 포인트가 맡겨져요 (더 높은 입찰이 오면 자동 환급)\n· ${roundLabel(r.id)} 경매 마감 때 1등이면 「명판」 배지를 영구히 받아요`)) return;
   let prev = null, ok = false;
   try {
     const res = await db.ref(`bank/nameplate/${r.id}`).transaction(cur => {
@@ -163,7 +163,7 @@ function renderPlateModal() {
       <div class="text-center"><span class="nb-plate text-sm">명판</span></div>
       <p class="text-[11px] text-slate-300 leading-relaxed text-center">분기에 단 한 번 열리는 경매. 가장 높게 부른 단 한 사람만<br><b class="text-[#f3e7c3]">돈으로는 살 수 없는 「명판」 배지</b>를 영구히 가질 수 있어요.</p>
       <ul class="text-[11px] text-[#e9dcb8] space-y-0.5">${PLATE_PERKS.map(([i, t]) => `<li>${i} ${t}</li>`).join('')}</ul>
-      <p class="text-[10px] text-slate-500 text-center">입찰금은 바로 맡겨지고, 누가 더 높게 부르면 자동으로 돌려받아요 · 1등 낙찰금만 소각</p>
+      <p class="text-[10px] text-slate-500 text-center">입찰금은 바로 맡겨지고, 누가 더 높게 부르면 자동으로 돌려받아요</p>
     </div>
     ${open ? `
     <div class="rounded-2xl plate-card p-4 text-center space-y-1">

@@ -120,8 +120,8 @@ async function buyPetEggs(n) {
   if (!petsLoaded || !petLedgerLoaded) return alert('펫 정보를 불러오는 중이에요. 잠시 후 다시 시도해 주세요.');
   const price = petEggPrice(n);
   if (userPoints < price) return alert(`❌ 포인트가 부족해요! (${price.toLocaleString()}P)`);
-  if (!confirm(`🥚 펫 알 ${n}개를 ${price.toLocaleString()}P에 깔까요?\n(알값은 소각 · 천장 없음)`)) return;
-  addPoints(-price, `🥚 펫 알 ${n}개${price < PET_EGG_PRICE * n ? ' (명판 10% 할인)' : ''} (소각)`);
+  if (!confirm(`🥚 펫 알 ${n}개를 ${price.toLocaleString()}P에 깔까요?\n(천장 없음)`)) return;
+  addPoints(-price, `🥚 펫 알 ${n}개${price < PET_EGG_PRICE * n ? ' (명판 10% 할인)' : ''}`);
   const got = [];
   for (let i = 0; i < n; i++) {
     const id = rollPet();
