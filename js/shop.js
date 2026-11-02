@@ -8,6 +8,9 @@ const PRESTIGE_PASS_PRICE = 1000000;
 let myPrestigePass = false;
 function loadPrestigeFromUser(val) { myPrestigePass = !!(val && val.prestigePass); }
 function isPrestigeItem(cost) { return cost >= PRESTIGE_MIN; }
+// 💸 프레스티지 배지 가격 10배 인상 (cost 는 등급 구분용 기준값으로 유지, 실제 결제가는 priceOf)
+const PRESTIGE_PRICE_MULT = 10;
+function priceOf(bg) { return bg && isPrestigeItem(bg.cost) ? bg.cost * PRESTIGE_PRICE_MULT : (bg ? bg.cost : 0); }
 
 // ==========================================
 // 4. 상점 메타데이터 및 밥키우기 레벨 제한 (5000P 이상은 12강부터)
@@ -160,8 +163,8 @@ function renderBadgeCards(bgContainer, list) {
         `;
       } else {
         actionBtnHTML = `
-          <button onclick="buyBg('${bg.class}', ${bg.cost}, '${bg.name}', ${reqLvl})" class="bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-black px-3 py-1.5 rounded-xl text-[11px] shadow-sm hover:brightness-105 active:scale-95 transition-all">
-            ${bg.cost.toLocaleString()}P
+          <button onclick="buyBg('${bg.class}', ${priceOf(bg)}, '${bg.name}', ${reqLvl})" class="bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-black px-3 py-1.5 rounded-xl text-[11px] shadow-sm hover:brightness-105 active:scale-95 transition-all">
+            ${priceOf(bg).toLocaleString()}P
           </button>
         `;
       }
@@ -172,7 +175,7 @@ function renderBadgeCards(bgContainer, list) {
             <span class="${bg.class} text-xs inline-block">${bg.name}</span>
             ${reqLvl > 0 && !isOwned ? `<span class="text-[9px] font-extrabold ${currentEnhanceLevel >= reqLvl ? 'text-emerald-400' : 'text-rose-400'}">(${reqLvl}강 달성 필수)</span>` : ''}
           </div>
-          <p class="text-[10px] text-slate-400 mt-1">${bg.desc} (${bg.cost.toLocaleString()}P)</p>
+          <p class="text-[10px] text-slate-400 mt-1">${bg.desc} (${priceOf(bg).toLocaleString()}P)</p>
         </div>
         <div class="shrink-0">
           ${actionBtnHTML}
@@ -248,6 +251,7 @@ function buyBg(bgClass, cost, bgName, reqLvl = 0) {
     return alert('👑 프레스티지 상점 상품이에요!\n먼저 프레스티지 상점 입장권(1,000,000P)을 구매해야 살 수 있어요.');
   }
   const meta = SHOP_DATA.bgs.find(b => b.class === bgClass);
+  if (meta) cost = priceOf(meta); // 화면에서 넘어온 값 대신 항상 실제 가격으로
   if (meta && meta.unlock === 'jackpot' && !myJackpotUnlocked) {
     return alert('🔒 이 배지는 💎💎💎 슬롯 초특급 잭팟을 터뜨린 사람만 살 수 있어요!');
   }
