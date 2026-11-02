@@ -178,12 +178,12 @@ function renderStatueShop() {
       </div>
       <button onclick="buyStatue()" class="w-full bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 font-black py-2.5 rounded-xl text-xs shadow-lg hover:brightness-105 active:scale-95">🗿 ${price.toLocaleString()}P로 ${st && st.nick ? '동상 갈아끼우기' : '동상 세우기'}</button>
       ${best && best.nick ? `<div class="text-[10px] text-amber-100/90 text-center">🏆 최장 기록 <b>${esc(best.nick)}</b> · ${statueDur(best.ms)}${best.live ? ' (지금도 서 있는 중)' : ''}</div>` : ''}
-      <ul class="text-[10px] text-slate-400 leading-relaxed list-disc pl-4">
-        <li>왼쪽 위에서 동상이 내 닉네임을 응원해요 · 동상 주인은 어디서든 닉네임 옆에 작은 동상이 붙어요</li>
-        <li>갈아끼울수록 동상이 화려해져요: 청동 → 은 → 황금👑 → 다이아몬드👑</li>
-        <li>누구나 동상을 눌러 하루 한 번 박수👏를 보낼 수 있어요</li>
-        <li>갈아끼우려면 직전 가격 + 10만P를 정확히 내야 해요 · 낸 포인트는 돌려받지 않아요</li>
-      </ul>
+      <div class="grid grid-cols-3 gap-1.5 text-center">
+        <div class="statue-perk"><span class="text-base">👑</span><span>어디서든<br>닉네임 옆 동상</span></div>
+        <div class="statue-perk"><span class="text-base">💎</span><span>바뀔수록<br>더 화려하게</span></div>
+        <div class="statue-perk"><span class="text-base">👏</span><span>하루 한 번<br>박수 받기</span></div>
+      </div>
+      <p class="text-[10px] text-slate-400 text-center">다음 동상은 직전 가격 + 10만P</p>
     </div>`;
 }
 function renderStatuePreview() {
@@ -199,7 +199,7 @@ async function buyStatue() {
   if (userPoints < price) return alert(`❌ 포인트가 부족해요! (${price.toLocaleString()}P)`);
   const sh = statueShape(statuePick), tier = statueTier(price);
   const msg = String((document.getElementById('statueMsgInput') || {}).value || '').trim().slice(0, 8) || sh.cheer;
-  if (!confirm(`🗿 ${price.toLocaleString()}P로 밥심 동상을 ${expectPrev ? '갈아끼울까요?' : '세울까요?'}\n\n· ${tier.icon} ${tier.name} ${sh.icon} ${sh.name} 동상 · 응원: "${msg}"\n· 다음 사람이 ${(price + STATUE_STEP).toLocaleString()}P를 내면 바뀌어요\n· 낸 포인트는 돌려받지 않아요`)) return;
+  if (!confirm(`🗿 ${price.toLocaleString()}P로 밥심 동상을 ${expectPrev ? '갈아끼울까요?' : '세울까요?'}\n\n· ${tier.icon} ${tier.name} ${sh.icon} ${sh.name} 동상 · 응원: "${msg}"\n· 다음 사람이 ${(price + STATUE_STEP).toLocaleString()}P를 내면 바뀌어요`)) return;
   const now = statueNow();
   let before = null;
   const rec = { nick: currentUser.nickname, uid: authUser.uid, shape: statuePick, msg, price, at: now, badge: myNickBg || 'nb-none', color: myNickColor || '', claps: 0 };

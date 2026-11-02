@@ -119,7 +119,7 @@ async function challengeWhite() {
   if (whiteState.challenge) return alert('이미 진행 중인 도전이 있어요.');
   const why = whiteEligible(); if (why) return alert(why);
   if (userPoints < WHITE_CHALLENGE_PRICE) return alert(`❌ 포인트가 부족해요! (도전장 ${WHITE_CHALLENGE_PRICE.toLocaleString()}P)`);
-  if (!confirm(`⚔️ 화이트 클럽의 주인에게 도전장을 낼까요?\n\n· 도전장 ${WHITE_CHALLENGE_PRICE.toLocaleString()}P (이기든 지든 돌려받지 못함)\n· 24시간 동안 자산(포인트+보류+예치금)이 더 많이 늘어난 쪽이 화이트\n· 비기면 지금 주인이 지켜요`)) return;
+  if (!confirm(`⚔️ 화이트 클럽의 주인에게 도전장을 낼까요?\n\n· 도전장 ${WHITE_CHALLENGE_PRICE.toLocaleString()}P\n· 24시간 동안 자산(포인트+보류+예치금)이 더 많이 늘어난 쪽이 화이트\n· 비기면 지금 주인이 지켜요`)) return;
   let holder = {};
   try { holder = (await db.ref(`user_points/${t.nick}`).once('value')).val() || {}; } catch (e) {}
   // 내 자산은 도전장 값을 낸 뒤 기준

@@ -94,7 +94,7 @@ async function runForChair() {
   const wk = weekKey(chairNow());
   if ((curElection().candidates || {})[authUser.uid]) return alert('이미 이번 주 선거에 출마했어요.');
   if (userPoints < CHAIR_RUN_FEE) return alert(`❌ 포인트가 부족해요! (출마 ${CHAIR_RUN_FEE.toLocaleString()}P)`);
-  if (!confirm(`🏛️ 이번 주 블랙 클럽 의장 선거에 출마할까요?\n\n· 출마비 ${CHAIR_RUN_FEE.toLocaleString()}P (돌려받지 못함)\n· 일요일 자정까지 표를 가장 많이 받으면 다음 주 1주일 동안 의장\n· 의장이 되면 의장 배지·색상이 강제로 착용돼요`)) return;
+  if (!confirm(`🏛️ 이번 주 블랙 클럽 의장 선거에 출마할까요?\n\n· 출마비 ${CHAIR_RUN_FEE.toLocaleString()}P\n· 일요일 자정까지 표를 가장 많이 받으면 다음 주 1주일 동안 의장\n· 의장이 되면 의장 배지·색상이 강제로 착용돼요`)) return;
   let ok = false;
   try {
     const r = await db.ref(`bank/chair/elections/${wk}/candidates/${authUser.uid}`).transaction(cur => cur ? undefined : { nick: currentUser.nickname, at: chairNow(), votes: 0 });

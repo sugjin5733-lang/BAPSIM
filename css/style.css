@@ -909,3 +909,4 @@ body { font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMac
 .statue-tag { display: inline-block; margin-left: 2px; font-size: .85em; vertical-align: middle; filter: sepia(1) saturate(3.2) hue-rotate(-12deg) brightness(1.08) drop-shadow(0 0 2px rgba(251,191,36,.7)); }
 .statue-hall { background: linear-gradient(135deg, #fef3c7, #fde68a); border: 1.5px solid #f59e0b66; }
 .statue-md .statue-bubble { top: -14px; left: 74%; }
+.statue-perk { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 7px 2px; border-radius: 12px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); font-size: 10px; font-weight: 800; color: #e2e8f0; line-height: 1.3; word-break: keep-all; }
