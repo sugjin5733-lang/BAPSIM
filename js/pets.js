@@ -51,6 +51,7 @@ function loadPetsFromUser(val) {
   petsLoaded = true;
   renderPetModal();
 }
+// 펫을 바꾼 직후 곧바로 저장해야 함 (포인트 저장이 먼저 일어나면 서버의 옛 펫 정보로 되돌려짐)
 function savePets(extra) {
   if (typeof canSyncToCloud !== 'function' || !canSyncToCloud()) return;
   const upd = { pets: myPets, petTag: activePetTag() };
@@ -131,8 +132,8 @@ async function buyPetEggs(n) {
     got.push({ id, note });
   }
   if (!myPets.active && got.length) myPets.active = got[0].id;
+  savePets(); // ⚠️ 반드시 updatePointsUI 보다 먼저: 포인트 저장 시 서버 값으로 펫 정보가 되돌려져서 방금 뽑은 펫이 사라지던 버그
   updatePointsUI();
-  savePets();
   got.filter(x => ['legend', 'mythic', 'hero'].includes(PETS[x.id].g)).forEach(x => {
     const p = PETS[x.id];
     if (typeof postFeed === 'function') postFeed('pet', `🥚 펫 알에서 ${PET_GRADES[p.g].name} 펫 ${p.icon} [${p.name}]이(가) 나왔어요!`, p.g === 'hero' ? 'big' : 'legendary', p.g !== 'hero');
@@ -172,8 +173,8 @@ function feedPet() {
   addPoints(-c, `🍚 펫 먹이 (${p.name})`);
   if (typeof payFee === 'function') payFee(c);
   myPets.fedDay = petToday();
+  savePets(); // ⚠️ 반드시 updatePointsUI 보다 먼저: 포인트 저장 시 서버 값으로 펫 정보가 되돌려져서 방금 뽑은 펫이 사라지던 버그
   updatePointsUI();
-  savePets();
   renderPetModal();
 }
 function buyPetSnack() {
@@ -182,8 +183,8 @@ function buyPetSnack() {
   addPoints(-PET_SNACK_PRICE, '🍖 펫 간식 구매');
   if (typeof payFee === 'function') payFee(Math.round(PET_SNACK_PRICE * 0.1));
   myPets.snacks += 1;
+  savePets(); // ⚠️ 반드시 updatePointsUI 보다 먼저: 포인트 저장 시 서버 값으로 펫 정보가 되돌려져서 방금 뽑은 펫이 사라지던 버그
   updatePointsUI();
-  savePets();
   renderPetModal();
 }
 
@@ -222,8 +223,8 @@ function enhancePet(id) {
     msg = `<span class="text-amber-600 font-bold">⚠️ 실패! +${lv} 유지</span>`;
   }
   petLedgerAdd(id, { lv: Math.max(o.lv, (petLedger[id] && petLedger[id].lv) || 0) });
+  savePets(); // ⚠️ 반드시 updatePointsUI 보다 먼저: 포인트 저장 시 서버 값으로 펫 정보가 되돌려져서 방금 뽑은 펫이 사라지던 버그
   updatePointsUI();
-  savePets();
   renderPetModal();
   const r = document.getElementById(`petUpMsg_${id}`);
   if (r) r.innerHTML = msg;
