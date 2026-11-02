@@ -12,7 +12,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Black+Han+Sans&family=Rubik+Glitch&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-  <link rel="stylesheet" href="css/style.css?v=20261103c">
+  <link rel="stylesheet" href="css/style.css?v=20261103d">
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white relative">
 
@@ -889,7 +889,7 @@
             <div class="font-black text-sm">🎁 반찬 카드팩</div>
             <div class="text-[10px] text-violet-100">3장 랜덤 · 전설 1% · 영웅 7% · 희귀 24%</div>
           </div>
-          <button onclick="buyCardPack()" class="bg-white text-violet-700 hover:bg-violet-50 font-black px-4 py-2.5 rounded-xl text-xs shadow-lg active:scale-95 transition-transform">500P 개봉!</button>
+          <button onclick="buyCardPack()" class="shrink-0 whitespace-nowrap bg-white text-violet-700 hover:bg-violet-50 font-black px-4 py-2.5 rounded-xl text-xs shadow-lg active:scale-95 transition-transform">500P 개봉!</button>
         </div>
         <div id="cardPackStage" class="hidden grid grid-cols-3 gap-2"></div>
       </div>
@@ -955,25 +955,25 @@
       </div>
 
       <div class="bg-slate-100/90 p-1.5 rounded-2xl grid grid-cols-3 gap-1.5 text-xs font-bold">
-        <button onclick="switchGameTab('clicker')" id="tabBtn_clicker" class="py-2.5 px-2 rounded-xl bg-white shadow-xs text-slate-900 font-extrabold flex items-center justify-center gap-1.5 transition-all">
+        <button onclick="switchGameTab('clicker')" id="tabBtn_clicker" class="py-2.5 px-1 sm:px-2 rounded-xl bg-white shadow-xs text-slate-900 font-extrabold flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap transition-all">
           <span>🍚</span><span>밥알광클</span>
         </button>
-        <button onclick="switchGameTab('speed')" id="tabBtn_speed" class="py-2.5 px-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-white/50 flex items-center justify-center gap-1.5 transition-all">
+        <button onclick="switchGameTab('speed')" id="tabBtn_speed" class="py-2.5 px-1 sm:px-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-white/50 flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap transition-all">
           <span>⚡</span><span>스피드</span>
         </button>
-        <button onclick="switchGameTab('memory')" id="tabBtn_memory" class="py-2.5 px-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-white/50 flex items-center justify-center gap-1.5 transition-all">
+        <button onclick="switchGameTab('memory')" id="tabBtn_memory" class="py-2.5 px-1 sm:px-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-white/50 flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap transition-all">
           <span>🧠</span><span>식단암기</span>
         </button>
-        <button onclick="switchGameTab('slot')" id="tabBtn_slot" class="py-2.5 px-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-white/50 flex items-center justify-center gap-1.5 transition-all">
+        <button onclick="switchGameTab('slot')" id="tabBtn_slot" class="py-2.5 px-1 sm:px-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-white/50 flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap transition-all">
           <span>🎰</span><span>슬롯머신</span>
         </button>
-        <button onclick="switchGameTab('coin')" id="tabBtn_coin" class="py-2.5 px-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-white/50 flex items-center justify-center gap-1.5 transition-all">
+        <button onclick="switchGameTab('coin')" id="tabBtn_coin" class="py-2.5 px-1 sm:px-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-white/50 flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap transition-all">
           <span>💰</span><span>동전던지기</span>
         </button>
-        <button onclick="switchGameTab('dice')" id="tabBtn_dice" class="py-2.5 px-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-white/50 flex items-center justify-center gap-1.5 transition-all">
+        <button onclick="switchGameTab('dice')" id="tabBtn_dice" class="py-2.5 px-1 sm:px-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-white/50 flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap transition-all">
           <span>🎲</span><span>주사위홀짝</span>
         </button>
-        <button onclick="switchGameTab('duel')" id="tabBtn_duel" class="col-span-3 py-2.5 px-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-white/50 flex items-center justify-center gap-1.5 transition-all">
+        <button onclick="switchGameTab('duel')" id="tabBtn_duel" class="col-span-3 py-2.5 px-1 sm:px-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-white/50 flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap transition-all">
           <span>⚔️</span><span>1:1 주사위 결투</span><span id="duelOpenBadge" class="hidden bg-rose-500 text-white text-[10px] font-black rounded-full px-1.5">0</span>
         </button>
       </div>
@@ -1212,7 +1212,7 @@
           <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-lg">💰</div>
           <div>
             <h3 class="font-black text-slate-900 text-base">밥심 상점 & 인벤토리</h3>
-            <p class="text-[11px] text-slate-400">내 보유: <strong id="shopCurrentPoints" class="text-amber-600">0P</strong> | 밥 등급: <strong id="shopCurrentEnhanceLvl" class="text-orange-600">+0강</strong></p>
+            <p class="text-[11px] text-slate-400">내 보유: <strong id="shopCurrentPoints" class="text-amber-600">0P</strong> | 밥 등급: <strong id="shopCurrentEnhanceLvl" class="text-orange-600 whitespace-nowrap">+0강</strong></p>
           </div>
         </div>
         <button onclick="closeShopModal()" class="text-slate-400 hover:text-slate-600 text-xs p-1">✕</button>
@@ -1714,28 +1714,28 @@
     </div>
   </div>
 
-  <script src="js/core.js?v=20261103c"></script>
-  <script src="js/auth.js?v=20261103c"></script>
-  <script src="js/enhance.js?v=20261103c"></script>
-  <script src="js/shop.js?v=20261103c"></script>
-  <script src="js/chat.js?v=20261103c"></script>
-  <script src="js/games.js?v=20261103c"></script>
-  <script src="js/admin.js?v=20261103c"></script>
-  <script src="js/ranking.js?v=20261103c"></script>
-  <script src="js/restaurants.js?v=20261103c"></script>
-  <script src="js/tools.js?v=20261103c"></script>
-  <script src="js/feed.js?v=20261103c"></script>
-  <script src="js/bank.js?v=20261103c"></script>
-  <script src="js/tier.js?v=20261103c"></script>
-  <script src="js/club.js?v=20261103c"></script>
-  <script src="js/white.js?v=20261103c"></script>
-  <script src="js/pets.js?v=20261103c"></script>
-  <script src="js/chair.js?v=20261103c"></script>
-  <script src="js/nameplate.js?v=20261103c"></script>
-  <script src="js/cards.js?v=20261103c"></script>
-  <script src="js/season.js?v=20261103c"></script>
-  <script src="js/duel.js?v=20261103c"></script>
-  <script src="js/predict.js?v=20261103c"></script>
-  <script src="js/main.js?v=20261103c"></script>
+  <script src="js/core.js?v=20261103d"></script>
+  <script src="js/auth.js?v=20261103d"></script>
+  <script src="js/enhance.js?v=20261103d"></script>
+  <script src="js/shop.js?v=20261103d"></script>
+  <script src="js/chat.js?v=20261103d"></script>
+  <script src="js/games.js?v=20261103d"></script>
+  <script src="js/admin.js?v=20261103d"></script>
+  <script src="js/ranking.js?v=20261103d"></script>
+  <script src="js/restaurants.js?v=20261103d"></script>
+  <script src="js/tools.js?v=20261103d"></script>
+  <script src="js/feed.js?v=20261103d"></script>
+  <script src="js/bank.js?v=20261103d"></script>
+  <script src="js/tier.js?v=20261103d"></script>
+  <script src="js/club.js?v=20261103d"></script>
+  <script src="js/white.js?v=20261103d"></script>
+  <script src="js/pets.js?v=20261103d"></script>
+  <script src="js/chair.js?v=20261103d"></script>
+  <script src="js/nameplate.js?v=20261103d"></script>
+  <script src="js/cards.js?v=20261103d"></script>
+  <script src="js/season.js?v=20261103d"></script>
+  <script src="js/duel.js?v=20261103d"></script>
+  <script src="js/predict.js?v=20261103d"></script>
+  <script src="js/main.js?v=20261103d"></script>
 </body>
 </html>

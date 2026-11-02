@@ -8,8 +8,8 @@ function switchGameTab(tabName) {
     if (view) view.classList.toggle('hidden', t !== tabName);
     if (tab) {
       tab.className = span + (t === tabName
-        ? "py-2.5 px-2 rounded-xl bg-white shadow-xs text-slate-900 font-extrabold flex items-center justify-center gap-1.5 transition-all"
-        : "py-2.5 px-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-white/50 flex items-center justify-center gap-1.5 transition-all");
+        ? "py-2.5 px-1 sm:px-2 rounded-xl bg-white shadow-xs text-slate-900 font-extrabold flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap transition-all"
+        : "py-2.5 px-1 sm:px-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-white/50 flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap transition-all");
     }
   });
   const ml = document.getElementById('miningLeftText');

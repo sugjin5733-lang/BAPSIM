@@ -173,7 +173,7 @@ function updateEnhanceUI() {
       const on = petFedToday(ap);
       const base = getEnhanceCost(currentEnhanceLevel) * (gambleMode ? 2 : 1);
       petBox.innerHTML = on
-        ? `${ap.icon} ${esc(ap.name)} +${ap.lv} 효과 적용 중 · 강화비 −${fmtPct(petCostPct(ap))}% <span class="opacity-70">(${base.toLocaleString()}→${currentAttemptCost().toLocaleString()}P)</span> · 판매가 +${fmtPct(petSalePct(ap))}%${petSpecialText(ap) ? ` · ${petSpecialText(ap)}` : ''}`
+        ? [`${ap.icon} ${esc(ap.name)} +${ap.lv} 효과 적용 중`, `강화비 −${fmtPct(petCostPct(ap))}% <span class="opacity-70">(${base.toLocaleString()}→${currentAttemptCost().toLocaleString()}P)</span>`, `판매가 +${fmtPct(petSalePct(ap))}%`, petSpecialText(ap)].filter(Boolean).map(t => `<span class="whitespace-nowrap">${t}</span>`).join(' · ')
         : `${ap.icon} ${esc(ap.name)} 배고파서 효과 꺼짐 · 🐾 펫 창에서 먹이를 주세요`;
     }
   }
