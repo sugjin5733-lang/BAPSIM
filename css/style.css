@@ -56,7 +56,8 @@ body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 
    - overflow:hidden 으로 효과를 배지 안에 가두고, 바깥 발광은 box-shadow
    ========================================== */
 .nb-cosmic, .nb-solar, .nb-abyss, .nb-cyberaurora, .nb-infinity,
-.nb-blackhole, .nb-matrix, .nb-universe, .nb-ricegod, .nb-najeon, .nb-jackpot {
+.nb-blackhole, .nb-matrix, .nb-universe, .nb-ricegod, .nb-najeon, .nb-jackpot,
+.nb-sapphire, .nb-bloodrose, .nb-emperor, .nb-azuredragon {
   position: relative; isolation: isolate; overflow: hidden; display: inline-block; vertical-align: middle;
   padding: 2px 10px; border-radius: 9px; font-weight: 900; letter-spacing: -0.01em; line-height: 1.5; white-space: nowrap;
 }
@@ -64,7 +65,9 @@ body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 
 .nb-cyberaurora::before, .nb-cyberaurora::after, .nb-infinity::before, .nb-infinity::after,
 .nb-blackhole::before, .nb-blackhole::after, .nb-matrix::before, .nb-matrix::after,
 .nb-universe::before, .nb-universe::after, .nb-ricegod::before, .nb-ricegod::after,
-.nb-najeon::before, .nb-najeon::after, .nb-jackpot::before, .nb-jackpot::after {
+.nb-najeon::before, .nb-najeon::after, .nb-jackpot::before, .nb-jackpot::after,
+.nb-sapphire::before, .nb-sapphire::after, .nb-bloodrose::before, .nb-bloodrose::after,
+.nb-emperor::before, .nb-emperor::after, .nb-azuredragon::before, .nb-azuredragon::after {
   content: ''; position: absolute; pointer-events: none; z-index: -1;
 }
 
@@ -748,3 +751,47 @@ body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 
 .color-card-premium { background: linear-gradient(160deg, #0f172a, #020617); border-color: rgba(251,191,36,.45); }
 .color-card-premium .color-card-preview { background: radial-gradient(ellipse at 50% 120%, rgba(251,191,36,.18), transparent 70%), #020617; border-bottom-color: rgba(251,191,36,.25); }
 .color-card-on { border-color: #6366f1 !important; box-shadow: 0 0 0 2px rgba(99,102,241,.35); }
+
+/* 💠 사파이어 결정 (2천만P): 결정면 패턴 + 굴절 빛 */
+.nb-sapphire { color: #e0f2fe !important; border: 1.5px solid #7dd3fc;
+  background: conic-gradient(from 45deg at 30% 50%, #0c4a6e, #0369a1, #1e3a8a, #0c4a6e, #0284c7, #0c4a6e);
+  text-shadow: 0 0 4px #38bdf8, 0 1px 1px #082f49; animation: bsSapGlow 2.6s ease-in-out infinite alternate; }
+.nb-sapphire::before { inset: 0; background: repeating-linear-gradient(60deg, rgba(255,255,255,.08) 0 6px, transparent 6px 12px), repeating-linear-gradient(-60deg, rgba(186,230,253,.1) 0 6px, transparent 6px 12px); }
+.nb-sapphire::after { inset: 0; background: linear-gradient(110deg, transparent 35%, rgba(224,242,254,.9) 48%, rgba(125,211,252,.5) 52%, transparent 65%); background-size: 300% 100%; animation: bsSweep 3s ease-in-out infinite; }
+@keyframes bsSapGlow { from { box-shadow: 0 0 8px rgba(56,189,248,.55); } to { box-shadow: 0 0 16px rgba(56,189,248,.95), 0 0 26px rgba(30,58,138,.6); } }
+
+/* 🌹 블러드 로즈 (3천만P): 벨벳 + 꽃잎 + 심장박동 */
+.nb-bloodrose { color: #ffe4e6 !important; border: 1.5px solid #be123c;
+  background: radial-gradient(ellipse 80% 120% at 50% 120%, #9f1239, #4c0519 60%, #1c0209);
+  text-shadow: 0 0 4px #fb7185, 0 0 10px #e11d48; animation: bsRoseBeat 1.6s ease-in-out infinite; }
+.nb-bloodrose::before { inset: 0;
+  background: radial-gradient(4px 3px at 12% 30%, #fb7185 90%, transparent), radial-gradient(3px 2px at 35% 75%, #f43f5e 90%, transparent),
+    radial-gradient(4px 3px at 62% 25%, #fda4af 90%, transparent), radial-gradient(3px 2px at 85% 70%, #e11d48 90%, transparent);
+  background-size: 100% 200%; animation: bsPetal 3.5s linear infinite; }
+.nb-bloodrose::after { inset: 0; background: linear-gradient(110deg, transparent 40%, rgba(255,228,230,.55) 50%, transparent 60%); background-size: 300% 100%; animation: bsSweep 3.4s ease-in-out infinite; }
+@keyframes bsRoseBeat { 0%, 100% { box-shadow: 0 0 8px rgba(225,29,72,.6); } 15% { box-shadow: 0 0 18px rgba(244,63,94,1), 0 0 28px rgba(159,18,57,.7); } 30% { box-shadow: 0 0 9px rgba(225,29,72,.65); } 45% { box-shadow: 0 0 15px rgba(244,63,94,.9); } }
+@keyframes bsPetal { from { background-position: 0 -100%; } to { background-position: 0 100%; } }
+
+/* ⚜️ 황제의 문장 (5천만P): 자줏빛 벨벳 + 금실 문양 + 회전하는 황금 테두리 */
+.nb-emperor { color: #fde68a !important; padding: 3px 12px; border-radius: 10px; background: #2e1065;
+  text-shadow: 0 0 3px #fbbf24, 0 1px 1px #1e1b4b; animation: bsEmpGlow 3s ease-in-out infinite alternate; }
+.nb-emperor::before { inset: -200%; background: conic-gradient(from 0deg, #fde68a, #b45309, #fbbf24, #fff7d6, #92400e, #fde68a); animation: bsSpin 4s linear infinite; }
+.nb-emperor::after { inset: 2px; border-radius: 8px;
+  background: linear-gradient(110deg, transparent 40%, rgba(253,230,138,.5) 50%, transparent 60%),
+    repeating-linear-gradient(45deg, rgba(251,191,36,.12) 0 2px, transparent 2px 9px), repeating-linear-gradient(-45deg, rgba(251,191,36,.12) 0 2px, transparent 2px 9px),
+    radial-gradient(ellipse at 50% 0%, #6d28d9, #3b0764 70%);
+  background-size: 300% 100%, 100% 100%, 100% 100%, 100% 100%; animation: bsEmpInner 3.2s ease-in-out infinite; }
+@keyframes bsEmpInner { from { background-position: 150% 0, 0 0, 0 0, 0 0; } to { background-position: -150% 0, 0 0, 0 0, 0 0; } }
+@keyframes bsEmpGlow { from { box-shadow: 0 0 10px rgba(251,191,36,.6), 0 0 18px rgba(109,40,217,.5); } to { box-shadow: 0 0 18px rgba(253,230,138,.95), 0 0 30px rgba(124,58,237,.8); } }
+
+/* 🐲 청룡 (7천만P): 비취 용비늘 물결 + 푸른 번개 */
+.nb-azuredragon { color: #ecfeff !important; padding: 3px 12px; border-radius: 10px; border: 1.5px solid #5eead4;
+  background: radial-gradient(circle at 0 100%, transparent 5px, rgba(20,184,166,.35) 6px, transparent 7px) 0 0 / 12px 10px,
+    radial-gradient(circle at 100% 100%, transparent 5px, rgba(20,184,166,.35) 6px, transparent 7px) 0 0 / 12px 10px,
+    linear-gradient(180deg, #134e4a, #042f2e 60%, #0c4a6e);
+  text-shadow: 0 0 4px #2dd4bf, 0 0 10px #0ea5e9; animation: bsDragonScale 4s linear infinite, bsDragonGlow 2.2s ease-in-out infinite alternate; }
+.nb-azuredragon::before { inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(94,234,212,.35) 45%, rgba(224,242,254,.95) 50%, rgba(56,189,248,.35) 55%, transparent 70%); background-size: 300% 100%; animation: bsSweep 2.2s cubic-bezier(.7,0,.3,1) infinite; }
+.nb-azuredragon::after { inset: 0; background: linear-gradient(170deg, transparent 46%, #e0f2fe 48%, #38bdf8 49%, transparent 51%) no-repeat; background-size: 30% 100%; opacity: 0; animation: bsBolt 3.6s steps(1) infinite; }
+@keyframes bsDragonScale { from { background-position: 0 0, 6px 0, 0 0; } to { background-position: 0 -40px, 6px -40px, 0 0; } }
+@keyframes bsDragonGlow { from { box-shadow: 0 0 8px rgba(45,212,191,.6); } to { box-shadow: 0 0 18px rgba(45,212,191,1), 0 0 28px rgba(14,165,233,.7); } }
+@keyframes bsBolt { 0%, 82%, 100% { opacity: 0; background-position: 20% 0; } 84% { opacity: 1; background-position: 30% 0; } 86% { opacity: 0; } 88% { opacity: 1; background-position: 70% 0; } 90% { opacity: 0; } }
