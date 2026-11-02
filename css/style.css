@@ -827,3 +827,29 @@ body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 
 .nb-chair::after { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(105deg, transparent 40%, rgba(245,230,179,.35) 50%, transparent 60%); background-size: 300% 100%; animation: bsSweep 3s ease-in-out infinite; }
 @keyframes chairGlow { from { box-shadow: 0 0 0 1px #000, 0 0 8px rgba(212,175,55,.5); } to { box-shadow: 0 0 0 1px #000, 0 0 18px rgba(212,175,55,.95), 0 0 28px rgba(255,255,255,.15); } }
 .pc-chair { background-image: linear-gradient(100deg, #b8860b 0%, #f5e6b3 30%, #ffffff 45%, #d4af37 60%, #8b6914 100%); animation: pcolFlow 3.2s linear infinite; filter: drop-shadow(0 0 2px rgba(212,175,55,.8)); }
+
+/* 🏷️ 명판 (분기마다 단 한 명 · 돈으로 살 수 없는 배지)
+   흑단 바탕 + 백금·금 테두리 + 진주빛 광택이 천천히 지나가고, 이름이 테두리와 같은 박자로 은은하게 빛남 */
+@property --plate-a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+.nb-plate { position: relative; isolation: isolate; overflow: hidden; display: inline-block; vertical-align: middle; white-space: nowrap;
+  padding: 2px 12px 2px 24px; border-radius: 6px; font-weight: 900; letter-spacing: .04em;
+  border: 1.5px solid transparent;
+  background: linear-gradient(180deg, #1a1714, #0b0a09) padding-box,
+    conic-gradient(from var(--plate-a), #f5f0e1, #a8a29e, #d4af37, #fff8e1, #78716c, #e7d9a8, #f5f0e1) border-box;
+  color: #f3e7c3 !important;
+  animation: plateRim 8s linear infinite, plateBreath 3.2s ease-in-out infinite; }
+.nb-plate::before { content: '◆'; position: absolute; left: 9px; top: 50%; transform: translateY(-52%); font-size: .7em; color: #d4af37; text-shadow: 0 0 6px rgba(212,175,55,.9); }
+.nb-plate::after { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(110deg, transparent 35%, rgba(255,250,235,.16) 46%, rgba(255,255,255,.32) 50%, rgba(255,250,235,.16) 54%, transparent 65%); background-size: 300% 100%; animation: bsSweep 5s ease-in-out infinite; }
+@keyframes plateRim { to { --plate-a: 360deg; } }
+@keyframes plateBreath {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(0,0,0,.6), 0 0 6px rgba(212,175,55,.35); text-shadow: 0 0 2px rgba(255,248,225,.6), 0 0 6px rgba(212,175,55,.35); }
+  50% { box-shadow: 0 0 0 1px rgba(0,0,0,.6), 0 0 16px rgba(212,175,55,.75), 0 0 28px rgba(245,240,225,.25); text-shadow: 0 0 3px #fff8e1, 0 0 10px rgba(212,175,55,.95), 0 0 18px rgba(245,240,225,.5); } }
+.plate-side-card { background: radial-gradient(ellipse 90% 60% at 50% 0%, rgba(212,175,55,.14), transparent 70%), linear-gradient(180deg, #16130f, #0a0907); border: 1px solid rgba(212,175,55,.45); box-shadow: 0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(245,240,225,.08); }
+.plate-side-card:hover { border-color: rgba(212,175,55,.75); }
+.plate-side-status { font-size: 10px; font-weight: 700; color: #cfc3a0; border-top: 1px solid rgba(212,175,55,.2); padding-top: 6px; }
+.plate-side-status b { color: #f3e7c3; }
+.plate-live { color: #f87171; font-weight: 900; animation: plateLive 1.4s ease-in-out infinite; }
+@keyframes plateLive { 50% { opacity: .35; } }
+.plate-explain { background: linear-gradient(180deg, #16130f, #0a0907); border: 1px solid rgba(212,175,55,.45); }
+.plate-hall { background: linear-gradient(180deg, #16130f, #0a0907) !important; border: 1px solid rgba(212,175,55,.45) !important; }
