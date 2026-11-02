@@ -721,3 +721,22 @@ body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 
 .pet-hatch-legend { border-color: #fcd34d; background: linear-gradient(135deg, #fffbeb, #fff); box-shadow: 0 0 24px rgba(251,191,36,.5); }
 .pet-hatch-mythic { border-color: #f472b6; background: linear-gradient(135deg, #fdf2f8, #eff6ff, #ecfdf5); box-shadow: 0 0 30px rgba(244,114,182,.55); }
 @keyframes petPop { from { transform: scale(.85); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* 👑 프레스티지 닉네임 색상 (글자에 흐르는 그라데이션) */
+.pcol { background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: transparent !important; background-size: 250% 100%; animation: pcolFlow 4s linear infinite; font-weight: 900; }
+@keyframes pcolFlow { from { background-position: 0% 50%; } to { background-position: 250% 50%; } }
+.pc-sunset { background-image: linear-gradient(90deg, #f97316, #fb7185, #f472b6, #fb923c, #f97316); }
+.pc-ocean { background-image: linear-gradient(90deg, #0e7490, #06b6d4, #2563eb, #0ea5e9, #0e7490); animation-duration: 6s; }
+.pc-aurora { background-image: linear-gradient(90deg, #22c55e, #2dd4bf, #38bdf8, #a78bfa, #22c55e); }
+.pc-sakura { background-image: linear-gradient(90deg, #f9a8d4, #fbcfe8, #ec4899, #fda4af, #f9a8d4); filter: drop-shadow(0 0 2px rgba(244,114,182,.5)); }
+.pc-neon { background-image: linear-gradient(90deg, #22d3ee, #e879f9, #22d3ee, #a3e635, #22d3ee); filter: drop-shadow(0 0 3px rgba(34,211,238,.8)) drop-shadow(0 0 6px rgba(232,121,249,.6)); animation-duration: 2.5s; }
+.pc-ice { background-image: linear-gradient(100deg, #7dd3fc 0%, #e0f2fe 35%, #ffffff 45%, #bae6fd 55%, #38bdf8 100%); filter: drop-shadow(0 0 2px rgba(186,230,253,.9)); }
+.pc-gold { background-image: linear-gradient(100deg, #92400e 0%, #f59e0b 25%, #fde68a 45%, #fffbeb 50%, #fbbf24 60%, #b45309 100%); animation-duration: 3s; filter: drop-shadow(0 0 2px rgba(251,191,36,.7)); }
+.pc-rainbow { background-image: linear-gradient(90deg, #ef4444, #f97316, #eab308, #22c55e, #06b6d4, #3b82f6, #a855f7, #ef4444); animation-duration: 2.2s; filter: drop-shadow(0 0 3px rgba(255,255,255,.6)); }
+.pc-galaxy { background-image: radial-gradient(circle at 20% 40%, #fff 0 1px, transparent 2px), radial-gradient(circle at 70% 60%, #fff 0 1px, transparent 2px), linear-gradient(90deg, #312e81, #7c3aed, #c026d3, #4338ca, #312e81); background-size: 40px 100%, 55px 100%, 250% 100%; animation: pcolFlow 5s linear infinite, pcolTwinkle 1.6s ease-in-out infinite alternate; }
+@keyframes pcolTwinkle { from { filter: drop-shadow(0 0 2px rgba(196,181,253,.6)); } to { filter: drop-shadow(0 0 7px rgba(232,121,249,1)); } }
+.pc-flame { background-image: linear-gradient(0deg, #7f1d1d, #dc2626, #f97316, #facc15, #fff7ed, #f97316, #dc2626); background-size: 100% 300%; animation: pcolBurn 1.2s linear infinite, pcolHeat .5s ease-in-out infinite alternate; }
+@keyframes pcolBurn { from { background-position: 50% 100%; } to { background-position: 50% 0%; } }
+@keyframes pcolHeat { from { filter: drop-shadow(0 -1px 2px rgba(249,115,22,.7)); } to { filter: drop-shadow(0 -2px 6px rgba(239,68,68,1)); } }
+.pc-holy { background-image: linear-gradient(100deg, #fde68a 0%, #ffffff 30%, #fef3c7 50%, #ffffff 70%, #fbbf24 100%); animation: pcolFlow 3s linear infinite, pcolHoly 2s ease-in-out infinite alternate; }
+@keyframes pcolHoly { from { filter: drop-shadow(0 0 3px rgba(253,230,138,.9)) drop-shadow(0 0 1px #fff); } to { filter: drop-shadow(0 0 10px rgba(251,191,36,1)) drop-shadow(0 0 4px #fff); } }

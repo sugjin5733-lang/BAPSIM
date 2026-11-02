@@ -11,7 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Black+Han+Sans&family=Rubik+Glitch&family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261102n">
+  <link rel="stylesheet" href="css/style.css?v=20261102o">
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white relative">
 
@@ -584,6 +584,13 @@
         <div class="space-y-2 text-xs" id="prestigeBadgeList"></div>
       </div>
       <div class="space-y-2.5">
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+          <span class="text-xs font-extrabold text-amber-100">🎨 프레스티지 닉네임 색상</span>
+          <span class="text-[10px] text-amber-200/80 font-bold bg-amber-400/10 border border-amber-400/30 px-2 py-0.5 rounded-full">흐르는 그라데이션 · 1천만P~3억P</span>
+        </div>
+        <div class="grid grid-cols-1 gap-2 text-xs" id="prestigeColorList"></div>
+      </div>
+      <div class="space-y-2.5">
         <span class="text-xs font-extrabold text-amber-100">✏️ 닉네임 변경권 (1,000,000P)</span>
         <div id="renameSection" class="space-y-1.5"></div>
       </div>
@@ -709,6 +716,20 @@
           🍚 먹이(하루 1번): 일반 무료 · 희귀 1천 · 영웅 1만 · 전설 5만 · 신화 20만P (×강화 단계마다 +20%) — 안 주면 그날 효과 꺼짐
         </div>
       </div>
+    </div>
+  </div>
+
+
+  <!-- 📏 닉네임 패치: 3글자 넘는 닉네임은 변경 신청 필수 (닫을 수 없음) -->
+  <div id="forcedRenameModal" class="hidden fixed inset-0 z-[90] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 space-y-4 text-center">
+      <div class="text-4xl">📏</div>
+      <h3 class="font-black text-slate-900 text-base">밥심 닉네임 패치 안내</h3>
+      <p class="text-xs text-slate-600 leading-relaxed">이제 밥심 닉네임은 <b class="text-rose-500">3글자 이내</b>만 쓸 수 있어요.<br>
+        지금 닉네임 <b id="forcedRenameCurrent" class="text-slate-900"></b> 은(는) 3글자가 넘어서<br><b>새 닉네임을 신청해야 밥심을 계속 이용할 수 있어요.</b></p>
+      <input id="forcedRenameInput" type="text" maxlength="3" placeholder="새 닉네임 (한글·영문·숫자 3글자 이내)" onkeydown="if(event.key==='Enter') submitForcedRename()" class="w-full border-2 border-slate-200 focus:border-indigo-500 rounded-xl p-3 text-center text-sm font-black outline-none" />
+      <button onclick="submitForcedRename()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-xl text-sm">무료로 변경 신청하기</button>
+      <p class="text-[10px] text-slate-400">신청 후 관리자가 승인하면 바뀌어요. 승인 전까지는 지금 닉네임으로 평소처럼 이용할 수 있어요.<br>포인트·아이템·기록은 모두 그대로 옮겨져요.</p>
     </div>
   </div>
 
@@ -1166,13 +1187,9 @@
         <button onclick="unequipAll()" class="text-[11px] bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-2.5 py-1 rounded-lg">전체 해제</button>
       </div>
 
-      <div class="space-y-2.5">
-        <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><span>✨</span> 닉네임 칭호 심볼 (각 150P)</span>
-        <div class="grid grid-cols-2 gap-2 text-xs" id="shopSymbolList"></div>
-      </div>
 
       <div class="space-y-2.5">
-        <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><span>🎨</span> 닉네임 글자 색상 (각 300P)</span>
+        <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><span>🎨</span> 닉네임 글자 색상 (30만P대 · 특별한 색은 👑 프레스티지 상점)</span>
         <div class="grid grid-cols-2 gap-2 text-xs" id="shopColorList"></div>
       </div>
 
@@ -1640,26 +1657,26 @@
     </div>
   </div>
 
-  <script src="js/core.js?v=20261102n"></script>
-  <script src="js/auth.js?v=20261102n"></script>
-  <script src="js/enhance.js?v=20261102n"></script>
-  <script src="js/shop.js?v=20261102n"></script>
-  <script src="js/chat.js?v=20261102n"></script>
-  <script src="js/games.js?v=20261102n"></script>
-  <script src="js/admin.js?v=20261102n"></script>
-  <script src="js/ranking.js?v=20261102n"></script>
-  <script src="js/restaurants.js?v=20261102n"></script>
-  <script src="js/tools.js?v=20261102n"></script>
-  <script src="js/feed.js?v=20261102n"></script>
-  <script src="js/bank.js?v=20261102n"></script>
-  <script src="js/tier.js?v=20261102n"></script>
-  <script src="js/club.js?v=20261102n"></script>
-  <script src="js/white.js?v=20261102n"></script>
-  <script src="js/pets.js?v=20261102n"></script>
-  <script src="js/cards.js?v=20261102n"></script>
-  <script src="js/season.js?v=20261102n"></script>
-  <script src="js/duel.js?v=20261102n"></script>
-  <script src="js/predict.js?v=20261102n"></script>
-  <script src="js/main.js?v=20261102n"></script>
+  <script src="js/core.js?v=20261102o"></script>
+  <script src="js/auth.js?v=20261102o"></script>
+  <script src="js/enhance.js?v=20261102o"></script>
+  <script src="js/shop.js?v=20261102o"></script>
+  <script src="js/chat.js?v=20261102o"></script>
+  <script src="js/games.js?v=20261102o"></script>
+  <script src="js/admin.js?v=20261102o"></script>
+  <script src="js/ranking.js?v=20261102o"></script>
+  <script src="js/restaurants.js?v=20261102o"></script>
+  <script src="js/tools.js?v=20261102o"></script>
+  <script src="js/feed.js?v=20261102o"></script>
+  <script src="js/bank.js?v=20261102o"></script>
+  <script src="js/tier.js?v=20261102o"></script>
+  <script src="js/club.js?v=20261102o"></script>
+  <script src="js/white.js?v=20261102o"></script>
+  <script src="js/pets.js?v=20261102o"></script>
+  <script src="js/cards.js?v=20261102o"></script>
+  <script src="js/season.js?v=20261102o"></script>
+  <script src="js/duel.js?v=20261102o"></script>
+  <script src="js/predict.js?v=20261102o"></script>
+  <script src="js/main.js?v=20261102o"></script>
 </body>
 </html>

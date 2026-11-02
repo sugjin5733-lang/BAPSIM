@@ -162,7 +162,7 @@ function detachUserListeners() {
   if (typeof myTier !== 'undefined') { myTier = { goldUntil: 0, blackUntil: 0, blessDay: '', vipDay: '' }; myDeposit = { amt: 0, since: 0 }; tierDirty = false; depositDirty = false; }
   if (myPointsRef) { myPointsRef.off(); myPointsRef = null; }
   if (myRequestRef) { myRequestRef.off(); myRequestRef = null; }
-  if (typeof renameRef !== 'undefined' && renameRef) { renameRef.off(); renameRef = null; myRenameRequest = null; }
+  if (typeof renameRef !== 'undefined' && renameRef) { renameRef.off(); renameRef = null; myRenameRequest = null; renamePrefetched = false; }
   if (presenceRefs) {
     presenceRefs.connected.off();
     presenceRefs.mine.onDisconnect().cancel();
@@ -224,6 +224,10 @@ function bindNickname(nick) {
 function isValidNickname(nickname) {
   return /^[가-힣a-zA-Z0-9]{1,20}$/.test(nickname);
 }
+// 📏 2026-11 닉네임 패치: 새 닉네임은 3글자 이내 (기존 긴 닉네임은 '변경 신청'을 해야 계속 이용 가능)
+const NICK_MAX = 3;
+function nickLen(n) { return Array.from(String(n || '')).length; }
+function isValidNewNickname(n) { return isValidNickname(n) && nickLen(n) <= NICK_MAX; }
 
 async function submitSignupRequest() {
   if (!isGoogleUser()) return signInWithGoogle();
@@ -232,7 +236,8 @@ async function submitSignupRequest() {
   const btn = document.getElementById('signupSubmitBtn');
 
   if (!nick) return alert('닉네임을 입력해주세요.');
-  if (!isValidNickname(nick)) return alert('⚠️ 닉네임은 한글, 영문, 숫자로 20자 이내만 가능해요.');
+  if (!isValidNickname(nick)) return alert('⚠️ 닉네임은 한글, 영문, 숫자만 가능해요.');
+  if (type === 'new' && !isValidNewNickname(nick)) return alert(`⚠️ 새 닉네임은 ${NICK_MAX}글자 이내로 정해주세요. (한글·영문·숫자)`);
   if (nick === GUEST_NICK) return alert('사용할 수 없는 닉네임이에요.');
 
   btn.disabled = true;
@@ -711,9 +716,10 @@ function updatePreviewBox() {
   const textEl = document.getElementById('previewNicknameText');
 
   if (prefixEl && suffixEl && textEl) {
-    prefixEl.textContent = myNickSymbol ? `${myNickSymbol} ` : '';
-    suffixEl.textContent = myNickSymbol ? ` ${myNickSymbol}` : '';
-    textEl.textContent = currentUser.nickname;
+    prefixEl.textContent = '';
+    suffixEl.textContent = '';
+    const pc = safePremiumColor(myNickColor);
+    textEl.innerHTML = pc ? `<span class="pcol ${pc}">${esc(currentUser.nickname)}</span>` : esc(currentUser.nickname);
     textEl.className = `${safeClass(myNickBg)} text-xs inline-block`;
     textEl.style.color = safeColor(myNickColor);
   }
@@ -782,13 +788,43 @@ function attachOnlineUsersListener() {
 // ==========================================
 const RENAME_PRICE = 1000000;
 let myRenameRequest = null;
-let renameRef = null;
+let renameRef = null, renamePrefetched = false;
+
+// 📏 닉네임 패치: 3글자 넘는 닉네임은 무료 변경 신청을 해야 밥심을 이용할 수 있음 (신청 후 승인 전까지는 평소처럼 이용)
+function needsForcedRename() {
+  return typeof canSyncToCloud === 'function' && canSyncToCloud() && !isAdmin && nickLen(currentUser.nickname) > NICK_MAX && renamePrefetched && !myRenameRequest;
+}
+function checkForcedRename() {
+  const m = document.getElementById('forcedRenameModal');
+  if (!m) return;
+  const need = needsForcedRename();
+  m.classList.toggle('hidden', !need);
+  const cur = document.getElementById('forcedRenameCurrent');
+  if (cur) cur.textContent = currentUser.nickname;
+}
+setInterval(checkForcedRename, 5000);
+async function submitForcedRename() {
+  const to = (document.getElementById('forcedRenameInput')?.value || '').trim();
+  if (!to) return alert('새 닉네임을 입력해주세요.');
+  if (!isValidNewNickname(to) || to === GUEST_NICK) return alert(`⚠️ 닉네임은 한글, 영문, 숫자로 ${NICK_MAX}글자 이내만 가능해요.`);
+  try {
+    const [exist, banned, pending] = await Promise.all([db.ref(`user_points/${to}`).once('value'), db.ref(`banned_users/${to}`).once('value'), db.ref('rename_requests').once('value')]);
+    if (exist.exists()) return alert(`[${to}] 은(는) 이미 누군가 쓰고 있는 닉네임이에요.`);
+    if (banned.exists()) return alert(`[${to}] 은(는) 사용할 수 없는 닉네임이에요.`);
+    if (Object.values(pending.val() || {}).some(r => r && r.to === to)) return alert(`[${to}] 은(는) 다른 사람이 먼저 신청한 닉네임이에요.`);
+  } catch (e) {}
+  if (!confirm(`[${currentUser.nickname}] → [${to}] 로 변경 신청할까요?\n(무료 · 관리자가 승인하면 바뀌고, 그 전까지는 지금처럼 이용할 수 있어요)`)) return;
+  try {
+    await db.ref(`rename_requests/${authUser.uid}`).set({ uid: authUser.uid, from: currentUser.nickname, to, paid: 0, forced: true, createdAt: firebase.database.ServerValue.TIMESTAMP });
+    alert('✅ 변경 신청 완료! 관리자 승인 후 새 닉네임으로 바뀌어요.');
+  } catch (err) { alert('신청하지 못했어요: ' + err.message); }
+}
 
 function attachRenameRequestListener() {
   if (renameRef) renameRef.off();
   if (!authUser || authUser.isAnonymous) return;
   renameRef = db.ref(`rename_requests/${authUser.uid}`);
-  renameRef.on('value', s => { myRenameRequest = s.val(); renderRenameSection(); }, () => {});
+  renameRef.on('value', s => { myRenameRequest = s.val(); renamePrefetched = true; renderRenameSection(); checkForcedRename(); }, () => {});
 }
 
 function renderRenameSection() {
@@ -797,7 +833,7 @@ function renderRenameSection() {
   if (myRenameRequest) {
     box.innerHTML = `<div class="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900">
       ⏳ <strong>${esc(myRenameRequest.from)} → ${esc(myRenameRequest.to)}</strong> 변경 요청이 관리자 승인 대기 중이에요.<br>
-      <span class="text-[10px] text-amber-700">승인되면 포인트·아이템·기록이 모두 새 닉네임으로 옮겨져요. 거절되면 1,000,000P가 환불돼요.</span></div>`;
+      <span class="text-[10px] text-amber-700">승인되면 포인트·아이템·기록이 모두 새 닉네임으로 옮겨져요.${myRenameRequest.paid ? ` 거절되면 ${Number(myRenameRequest.paid).toLocaleString()}P가 환불돼요.` : ' (닉네임 패치 무료 변경)'}</span></div>`;
     return;
   }
   if (typeof myPrestigePass !== 'undefined' && !myPrestigePass) {
@@ -808,7 +844,7 @@ function renderRenameSection() {
   }
   box.innerHTML = `
     <div class="flex gap-1.5">
-      <input id="renameInput" type="text" maxlength="20" placeholder="새 닉네임 (한글·영문·숫자 20자 이내)" class="flex-1 min-w-0 border rounded-xl p-2 text-xs font-bold outline-none focus:border-indigo-500" />
+      <input id="renameInput" type="text" maxlength="20" placeholder="새 닉네임 (한글·영문·숫자 3글자 이내)" maxlength="3" class="flex-1 min-w-0 border rounded-xl p-2 text-xs font-bold outline-none focus:border-indigo-500" />
       <button onclick="buyRenameTicket()" class="shrink-0 bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-black px-3 py-2 rounded-xl text-[11px] shadow-sm">1,000,000P 구매</button>
     </div>
     <p class="text-[10px] text-slate-400">구매하면 관리자 승인 후 바뀌어요. 포인트·강화·아이템·카드·내역이 그대로 옮겨져요.</p>`;
@@ -819,7 +855,7 @@ async function buyRenameTicket() {
   if (myRenameRequest) return alert('이미 승인 대기 중인 변경 요청이 있어요.');
   const to = (document.getElementById('renameInput')?.value || '').trim();
   if (!to) return alert('새 닉네임을 입력해주세요.');
-  if (!isValidNickname(to) || to === GUEST_NICK) return alert('⚠️ 닉네임은 한글, 영문, 숫자로 20자 이내만 가능해요.');
+  if (!isValidNewNickname(to) || to === GUEST_NICK) return alert(`⚠️ 닉네임은 한글, 영문, 숫자로 ${NICK_MAX}글자 이내만 가능해요.`);
   if (to === currentUser.nickname) return alert('지금 닉네임과 같아요.');
   if (typeof myPrestigePass !== 'undefined' && !myPrestigePass) return alert('👑 닉네임 변경권은 프레스티지 상점 상품이에요!\n먼저 프레스티지 상점 입장권(1,000,000P)을 구매해주세요.');
   if (userPoints < RENAME_PRICE) return alert(`❌ 포인트가 부족해요! (닉네임 변경권 ${RENAME_PRICE.toLocaleString()}P)`);

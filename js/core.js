@@ -80,6 +80,8 @@ function esc(s) {
 function jsArg(s) { return esc(JSON.stringify(String(s == null ? '' : s))); }
 // 색상은 #hex 만 허용
 function safeColor(c) { return /^#[0-9a-fA-F]{3,8}$/.test(c || '') ? c : ''; }
+// 👑 프레스티지 닉네임 색상 (그라데이션·애니메이션): 'pc-이름' 형태
+function safePremiumColor(c) { return /^pc-[a-z]{2,20}$/.test(c || '') ? c : ''; }
 // CSS 클래스명은 영문/숫자/-/_ 만 허용
 function safeClass(c) { return /^[a-zA-Z0-9_-]+$/.test(c || '') ? c : 'nb-none'; }
 // URL 은 http(s) 만 허용
@@ -93,14 +95,15 @@ function toArr(v) {
 }
 // 닉네임 + 배지/색/칭호 렌더링 공통 함수
 function nickHTML(u, extraClass = '') {
-  const sym = u.symbol ? esc(u.symbol) : '';
-  const color = safeColor(u.color);
+  // 칭호(심볼)는 폐지 → 표시하지 않음
+  const color = safeColor(u.color), pcol = safePremiumColor(u.color);
   let badge = u.badge || u.bg;
   // 대천사의 날개는 현재 주인(기부 1위)만 표시
   if (badge === 'nb-angel' && typeof angelHolderKnown !== 'undefined' && angelHolderKnown && u.nickname !== angelHolderNick) badge = 'nb-none';
   if (badge === 'nb-season-1' || badge === 'nb-season-2' || badge === 'nb-season-3') badge = 'nb-none';
   const pet = u.petTag ? `<span class="pet-tag">${esc(String(u.petTag).slice(0, 16))}</span>` : '';
-  return `<span class="${safeClass(badge)} ${extraClass} inline-block" style="${color ? `color:${color} !important;` : ''}">${sym ? sym + ' ' : ''}${esc(u.nickname)}${sym ? ' ' + sym : ''}</span>${pet}`;
+  const name = pcol ? `<span class="pcol ${pcol}">${esc(u.nickname)}</span>` : esc(u.nickname);
+  return `<span class="${safeClass(badge)} ${extraClass} inline-block" style="${color ? `color:${color} !important;` : ''}">${name}</span>${pet}`;
 }
 // 비밀번호 해시 (DB에 평문 저장 방지)
 async function sha256(text) {

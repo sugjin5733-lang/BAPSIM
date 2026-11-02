@@ -36,14 +36,28 @@ const SHOP_DATA = {
     { id: "sym_target", name: "명사수 칭호", char: "🎯", cost: 150 }
   ],
   colors: [
-    { id: "col_gold", name: "골드 옐로우", hex: "#f59e0b", cost: 300 },
-    { id: "col_violet", name: "네온 바이올렛", hex: "#a855f7", cost: 300 },
-    { id: "col_emerald", name: "에메랄드 그린", hex: "#10b981", cost: 300 },
-    { id: "col_red", name: "파이어 레드", hex: "#ef4444", cost: 300 },
-    { id: "col_cyan", name: "사이버 사이안", hex: "#06b6d4", cost: 300 },
-    { id: "col_rose", name: "핫핑크 로즈", hex: "#f43f5e", cost: 300 },
-    { id: "col_blue", name: "일렉트릭 블루", hex: "#2563eb", cost: 300 },
-    { id: "col_dark", name: "다크 나이트", hex: "#0f172a", cost: 300 }
+    // 일반 색상: 30만P대
+    { id: "col_gold", name: "골드 옐로우", hex: "#f59e0b", cost: 300000 },
+    { id: "col_violet", name: "네온 바이올렛", hex: "#a855f7", cost: 320000 },
+    { id: "col_emerald", name: "에메랄드 그린", hex: "#10b981", cost: 330000 },
+    { id: "col_red", name: "파이어 레드", hex: "#ef4444", cost: 350000 },
+    { id: "col_cyan", name: "사이버 사이안", hex: "#06b6d4", cost: 360000 },
+    { id: "col_rose", name: "핫핑크 로즈", hex: "#f43f5e", cost: 370000 },
+    { id: "col_blue", name: "일렉트릭 블루", hex: "#2563eb", cost: 380000 },
+    { id: "col_dark", name: "다크 나이트", hex: "#0f172a", cost: 390000 },
+    // 👑 프레스티지 색상 (그라데이션·애니메이션 · 입장권 필요): 1천만P대
+    { id: "pc_sunset", name: "🌅 선셋 그라데이션", hex: "pc-sunset", cost: 10000000, desc: "주황에서 분홍으로 물드는 노을빛" },
+    { id: "pc_ocean", name: "🌊 딥 오션", hex: "pc-ocean", cost: 11000000, desc: "깊은 바다의 청록 물결이 천천히 흐름" },
+    { id: "pc_aurora", name: "🌌 오로라", hex: "pc-aurora", cost: 12000000, desc: "초록·하늘·보라가 일렁이는 극광" },
+    { id: "pc_sakura", name: "🌸 벚꽃 흩날림", hex: "pc-sakura", cost: 13000000, desc: "연분홍 꽃잎빛이 반짝이며 흐름" },
+    { id: "pc_neon", name: "⚡ 네온 사이버", hex: "pc-neon", cost: 15000000, desc: "형광 시안·마젠타 + 네온 발광" },
+    { id: "pc_ice", name: "🧊 빙하 크리스탈", hex: "pc-ice", cost: 17000000, desc: "얼음 결정 위로 하얀 빛이 스침" },
+    { id: "pc_gold", name: "🥇 순금 메탈", hex: "pc-gold", cost: 19000000, desc: "금속 광택이 번쩍이는 24K 골드" },
+    // 1억P 이상
+    { id: "pc_rainbow", name: "🌈 프리즘 레인보우", hex: "pc-rainbow", cost: 100000000, desc: "일곱 빛깔이 쉬지 않고 흐르는 무지개" },
+    { id: "pc_galaxy", name: "🪐 은하수", hex: "pc-galaxy", cost: 150000000, desc: "보랏빛 우주 사이로 별빛이 깜빡임" },
+    { id: "pc_flame", name: "🔥 지옥불", hex: "pc-flame", cost: 200000000, desc: "타오르는 불꽃 그라데이션 + 이글거리는 열기" },
+    { id: "pc_holy", name: "😇 신성", hex: "pc-holy", cost: 300000000, desc: "순백과 금빛 후광이 숨 쉬듯 빛나는 밥심 최고의 이름" }
   ],
   bgs: [
     { id: "nb-jackpot", name: "🎰 잭팟 777 (전설의 손)", class: "nb-jackpot", cost: 777777, unlock: 'jackpot', desc: "카지노 전광 전구가 질주하고 금빛 릴이 돌아가는 배지 · 💎💎💎 슬롯 초특급 잭팟을 터뜨린 사람만 구매 가능" },
@@ -103,35 +117,31 @@ function renderShopUI() {
   }
 
   const colContainer = document.getElementById('shopColorList');
-  if (colContainer) {
-    colContainer.innerHTML = '';
-    SHOP_DATA.colors.forEach(col => {
-      const isOwned = (myInventory.colors || []).includes(col.hex);
-      const isEquipped = myNickColor === col.hex;
-      const card = document.createElement('div');
-      card.className = "p-3 border rounded-2xl flex items-center justify-between bg-slate-50";
-      card.innerHTML = `
-        <div>
-          <span class="font-extrabold text-xs" style="color: ${col.hex}">${col.name}</span>
-          <p class="text-[10px] text-slate-400 mt-0.5">${col.cost}P</p>
-        </div>
-        <div>
-          ${isEquipped 
-            ? `<button onclick="unequipColor()" class="bg-rose-500 text-white font-bold px-2.5 py-1 rounded-xl text-[11px]">해제</button>`
-            : isOwned 
-              ? `<button onclick="equipColor('${col.hex}')" class="bg-indigo-600 text-white font-bold px-2.5 py-1 rounded-xl text-[11px]">장착</button>`
-              : `<button onclick="buyColor('${col.hex}', ${col.cost})" class="bg-slate-900 text-amber-300 font-bold px-2.5 py-1 rounded-xl text-[11px]">구매</button>`
-          }
-        </div>
-      `;
-      colContainer.appendChild(card);
-    });
-  }
+  renderColorCards(colContainer, SHOP_DATA.colors.filter(c => !isPrestigeItem(c.cost)));
+  renderColorCards(document.getElementById('prestigeColorList'), SHOP_DATA.colors.filter(c => isPrestigeItem(c.cost)));
 
   renderBadgeCards(document.getElementById('shopBadgeList'), SHOP_DATA.bgs.filter(b => !isPrestigeItem(b.cost)));
   renderPrestigeShop();
 }
 
+function renderColorCards(box, list) {
+  if (!box) return;
+  box.innerHTML = list.map(col => {
+    const isOwned = (myInventory.colors || []).includes(col.hex);
+    const isEquipped = myNickColor === col.hex;
+    const premium = isPrestigeItem(col.cost);
+    const locked = premium && !myPrestigePass && !isOwned;
+    const sample = premium ? `<span class="pcol ${col.hex} font-black text-xs">${esc(col.name)}</span>` : `<span class="font-extrabold text-xs" style="color:${col.hex}">${esc(col.name)}</span>`;
+    return `<div class="p-3 border rounded-2xl flex items-center justify-between gap-2 ${premium ? 'border-2 border-amber-400/60 bg-slate-950' : 'bg-slate-50'}">
+      <div class="min-w-0">${sample}<p class="text-[10px] ${premium ? 'text-slate-400' : 'text-slate-400'} mt-0.5">${col.desc ? esc(col.desc) + ' · ' : ''}${col.cost.toLocaleString()}P</p></div>
+      <div class="shrink-0">${isEquipped
+        ? `<button onclick="unequipColor()" class="bg-rose-500 text-white font-bold px-2.5 py-1 rounded-xl text-[11px]">해제</button>`
+        : isOwned ? `<button onclick="equipColor('${col.hex}')" class="bg-indigo-600 text-white font-bold px-2.5 py-1 rounded-xl text-[11px]">장착</button>`
+        : locked ? `<button disabled class="bg-slate-800 text-slate-400 font-bold px-2.5 py-1 rounded-xl text-[11px] border border-slate-700 opacity-75">🔒 입장권 필요</button>`
+        : `<button onclick="buyColor('${col.hex}', ${col.cost})" class="${premium ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950' : 'bg-slate-900 text-amber-300'} font-bold px-2.5 py-1 rounded-xl text-[11px]">${premium ? `${(col.cost / 10000).toLocaleString()}만P` : '구매'}</button>`}</div>
+    </div>`;
+  }).join('');
+}
 function renderBadgeCards(bgContainer, list) {
   if (bgContainer) {
     bgContainer.innerHTML = '';
@@ -228,6 +238,7 @@ function openShopModal() {
 function closeShopModal() { document.getElementById('shopModal').classList.add('hidden'); }
 
 function buySymbol(char, cost) {
+  return alert('닉네임 칭호는 폐지됐어요.');
   const sm = SHOP_DATA.symbols.find(x => x.char === char); if (sm) cost = sm.cost;
   if (userPoints < cost) return alert(`❌ 포인트가 부족합니다!`);
   if (!confirm(`${cost}P로 [${char}] 심볼을 구매하시겠습니까?`)) return;
@@ -239,13 +250,15 @@ function buySymbol(char, cost) {
   updatePointsUI();
   renderShopUI();
 }
-function equipSymbol(char) { myNickSymbol = char; updatePointsUI(); renderShopUI(); }
+function equipSymbol(char) { return; myNickSymbol = char; updatePointsUI(); renderShopUI(); }
 function unequipSymbol() { myNickSymbol = ''; updatePointsUI(); renderShopUI(); }
 
 function buyColor(hex, cost) {
   const cm = SHOP_DATA.colors.find(x => x.hex === hex); if (cm) cost = cm.cost;
+  if (!cm) return;
+  if (isPrestigeItem(cost) && !myPrestigePass) return alert('👑 프레스티지 상점 상품이에요!\n먼저 프레스티지 상점 입장권(1,000,000P)을 구매해야 살 수 있어요.');
   if (userPoints < cost) return alert(`❌ 포인트가 부족합니다!`);
-  if (!confirm(`${cost}P로 해당 색상을 구매하시겠습니까?`)) return;
+  if (!confirm(`${cost.toLocaleString()}P로 [${cm.name}] 닉네임 색상을 구매하시겠습니까?`)) return;
   addPoints(-cost, '상점 구매');
   if (!myInventory.colors) myInventory.colors = [];
   myInventory.colors.push(hex);
@@ -323,6 +336,7 @@ function renderPrestigeShop() {
   const pts = document.getElementById('prestigeCurrentPoints');
   if (pts) pts.textContent = `${userPoints.toLocaleString()}P`;
   renderBadgeCards(document.getElementById('prestigeBadgeList'), SHOP_DATA.bgs.filter(b => isPrestigeItem(b.cost)));
+  renderColorCards(document.getElementById('prestigeColorList'), SHOP_DATA.colors.filter(c => isPrestigeItem(c.cost)));
   renderRenameSection();
   if (typeof renderDonorBadgeBox === 'function') renderDonorBadgeBox();
   if (typeof renderTierBox === 'function') renderTierBox();
