@@ -1045,11 +1045,9 @@ async function adminApproveRename(uid) {
     updates[`rename_requests/${uid}`] = null;
     // 내역은 통째로 옮기고, '닉네임 변경' 기록은 옮기는 내역 안에 같이 넣음
     //  (point_logs/새닉 과 point_logs/새닉/키 를 한 번에 쓰면 Firebase가 거부해서 승인이 실패하던 버그)
-    const movedLogs = Object.assign({}, logSnap.val() || {});
+    //  내역이 많으면(수만 건) 한 번에 못 써서 WRITE_TOO_BIG → 승인 후 나눠서 옮김
     const logKey = db.ref(`point_logs/${to}`).push().key;
-    movedLogs[logKey] = { d: 0, r: `닉네임 변경: ${from} → ${to}`, bal: u.points || 0, ts: firebase.database.ServerValue.TIMESTAMP };
-    updates[`point_logs/${to}`] = movedLogs;
-    if (logSnap.exists()) updates[`point_logs/${from}`] = null;
+    updates[`point_logs/${to}/${logKey}`] = { d: 0, r: `닉네임 변경: ${from} → ${to}`, bal: u.points || 0, ts: firebase.database.ServerValue.TIMESTAMP };
     // 닉네임으로 저장된 다른 기록들도 같이 이전 (펫 장부가 안 옮겨지면 펫이 '기록 없음'으로 회수되는 문제 방지)
     for (const p of ['bank/pet_ledger', 'bank/deposit_log', 'judgments']) {
       try { const s = await db.ref(`${p}/${from}`).once('value'); if (s.exists()) { updates[`${p}/${to}`] = s.val(); updates[`${p}/${from}`] = null; } } catch (e) {}
@@ -1064,7 +1062,21 @@ async function adminApproveRename(uid) {
       updates[`seasons/${weekKey()}/${from}`] = null;
     }
     await db.ref().update(updates);
-    alert(`✅ [${from}] → [${to}] 변경 완료!`);
+    // 포인트 내역은 2,000건씩 나눠서 새 닉네임으로 복사 → 다 옮긴 뒤 옛 내역 삭제
+    const logs = logSnap.val() || {};
+    const keys = Object.keys(logs);
+    const CHUNK = 2000;
+    for (let i = 0; i < keys.length; i += CHUNK) {
+      const part = {};
+      keys.slice(i, i + CHUNK).forEach(k => { part[k] = logs[k]; });
+      await db.ref(`point_logs/${to}`).update(part);
+    }
+    for (let i = 0; i < keys.length; i += CHUNK) {
+      const del = {};
+      keys.slice(i, i + CHUNK).forEach(k => { del[k] = null; });
+      await db.ref(`point_logs/${from}`).update(del);
+    }
+    alert(`✅ [${from}] → [${to}] 변경 완료!${keys.length ? `\n(포인트 내역 ${keys.length.toLocaleString()}건 이전)` : ''}`);
   } catch (err) {
     alert('변경 중 오류: ' + err.message);
   }
