@@ -36,10 +36,10 @@ function watchStatue() {
 setTimeout(watchStatue, 1500);
 
 // 작은 금동상 하나 (받침대 + 동물 + 응원 말풍선)
-function statueFigureHTML(shapeKey, msg, size = 'sm') {
+function statueFigureHTML(shapeKey, msg, size = 'sm', bubble = false) {
   const sh = statueShape(shapeKey);
   return `<span class="statue-fig statue-${size}">
-    <span class="statue-bubble">${esc(msg || sh.cheer)}</span>
+    ${bubble ? `<span class="statue-bubble">${esc(msg || sh.cheer)}</span>` : ''}
     <span class="statue-body">${sh.icon}</span>
     <span class="statue-base"></span>
   </span>`;
@@ -49,9 +49,9 @@ function renderStatue() {
   const st = statueState;
   const html = st && st.nick
     ? `<span class="shrink-0">${statueFigureHTML(st.shape, st.msg)}</span>
-       <span class="min-w-0 leading-tight">
-         <span class="block text-[9px] font-black tracking-[0.2em] text-amber-600/80">🗿 밥심 동상</span>
-         <span class="statue-name block truncate">${nickHTML({ nickname: st.nick, badge: st.badge, color: st.color }, 'text-xs')}</span>
+       <span class="min-w-0 flex flex-col items-start gap-0.5">
+         <span class="statue-name max-w-full truncate">${nickHTML({ nickname: st.nick, badge: st.badge, color: st.color }, 'text-xs')}</span>
+         <span class="statue-say">${esc(st.msg || statueShape(st.shape).cheer)}</span>
        </span>`
     : `<span class="shrink-0 statue-fig statue-sm statue-empty"><span class="statue-body">❔</span><span class="statue-base"></span></span>
        <span class="min-w-0 leading-tight">
@@ -83,7 +83,7 @@ function renderStatueShop() {
         </div>
       </div>
       <div class="rounded-xl bg-black/30 border border-white/10 px-3 py-2.5 flex items-center gap-3">
-        ${st && st.nick ? `${statueFigureHTML(st.shape, st.msg, 'md')}
+        ${st && st.nick ? `${statueFigureHTML(st.shape, st.msg, 'md', true)}
           <div class="min-w-0"><div class="text-[10px] text-slate-400">지금 동상의 주인</div><div class="truncate">${nickHTML({ nickname: st.nick, badge: st.badge, color: st.color }, 'text-sm')}</div>
           <div class="text-[10px] text-slate-500">${(st.price || 0).toLocaleString()}P에 세워짐</div></div>`
         : `<span class="statue-fig statue-md statue-empty"><span class="statue-body">❔</span><span class="statue-base"></span></span><div class="text-[11px] text-slate-300">아직 아무도 동상을 세우지 않았어요.<br><b class="text-amber-200">첫 번째 주인</b>이 되어보세요!</div>`}
@@ -95,7 +95,7 @@ function renderStatueShop() {
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <div class="shrink-0 bg-white/5 rounded-xl px-2 py-1">${statueFigureHTML(statuePick, keepMsg.trim() || statueShape(statuePick).cheer, 'md')}</div>
+        <div class="shrink-0 bg-white/5 rounded-xl px-2 pt-3 pb-1">${statueFigureHTML(statuePick, keepMsg.trim() || statueShape(statuePick).cheer, 'md', true)}</div>
         <input id="statueMsgInput" maxlength="8" value="${esc(keepMsg)}" oninput="renderStatuePreview()" placeholder="응원 한마디 (8자 · 비우면 '${statueShape(statuePick).cheer}')" class="flex-1 min-w-0 bg-black/40 border border-white/15 rounded-xl px-2.5 py-2 text-xs text-white">
       </div>
       <button onclick="buyStatue()" class="w-full bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 font-black py-2.5 rounded-xl text-xs shadow-lg hover:brightness-105 active:scale-95">🗿 ${price.toLocaleString()}P로 ${st && st.nick ? '동상 갈아끼우기' : '동상 세우기'}</button>
