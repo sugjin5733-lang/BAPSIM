@@ -506,12 +506,19 @@ function syncUserPointToCloud() {
   db.ref().update(updates).catch(err => console.warn('포인트 저장 거부됨:', err && err.message));
 }
 
-// 2주 지난 내역은 가끔 정리 (DB 용량 관리)
+// 3일 지난 내역은 자주 정리 (DB 용량 관리 · 닉변/부검 속도)
 let logWrites = 0;
+function pushKeyAt(ms) { // 이 시각에 만들어진 푸시 키의 앞 8글자(+끝 문자) → 이 시각 이전 키들의 상한
+  const C = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
+  let k = ''; for (let i = 0; i < 8; i++) { k = C.charAt(ms % 64) + k; ms = Math.floor(ms / 64); }
+  return k;
+}
 function maybePruneLogs(nick) {
-  if (++logWrites % 40 !== 1) return;
-  const cutoff = Date.now() + serverTimeOffset - 15 * 86400000;
-  db.ref(`point_logs/${nick}`).orderByChild('ts').endAt(cutoff).limitToFirst(100).once('value').then(snap => {
+  if (++logWrites % 20 !== 1) return;
+  const cutoff = Date.now() + serverTimeOffset - 3 * 86400000;
+  // ⚡ 'ts' 색인이 없어서 orderByChild('ts') 는 내역 전체를 내려받은 뒤 걸러냈음(수만 건이면 수 MB).
+  //    푸시 키 자체가 시간순이라, 키로 잘라서 오래된 것만 정확히 받아옴
+  db.ref(`point_logs/${nick}`).orderByKey().endAt(pushKeyAt(cutoff)).limitToFirst(500).once('value').then(snap => {
     const del = {};
     snap.forEach(c => { del[c.key] = null; });
     if (Object.keys(del).length) db.ref(`point_logs/${nick}`).update(del).catch(() => {});

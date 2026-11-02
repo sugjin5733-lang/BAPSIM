@@ -29,7 +29,7 @@ function loadDuelSettlementsFromUser(val) {
 }
 
 function attachDuelListener() {
-  db.ref('duels').orderByChild('createdAt').limitToLast(40).on('value', snap => {
+  db.ref('duels').orderByKey().limitToLast(40).on('value', snap => {
     allDuels = snap.val() || {};
     settleMyDuels();
     renderDuelArena();

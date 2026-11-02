@@ -49,7 +49,8 @@ function watchPolicies() {
   }, () => { policiesWatching = false; });
 }
 setTimeout(watchPolicies, 2500);
-setInterval(() => { renderPolicyBanner(); const m = document.getElementById('blackClubModal'); if (m && !m.classList.contains('hidden')) renderBlackClubPolicies(); }, 1000);
+// ⚡ 정책이 켜져 있거나 띠가 떠 있을 때만 1초마다 다시 그림 (평소엔 아무것도 안 함)
+setInterval(() => { const bar = document.getElementById('policyBanner'); if (Object.keys(activePolicies || {}).some(t => policyActive(t)) || (bar && !bar.classList.contains('hidden'))) renderPolicyBanner(); const m = document.getElementById('blackClubModal'); if (m && !m.classList.contains('hidden')) renderBlackClubPolicies(); }, 1000);
 
 async function activatePolicy(type) {
   if (!checkApprovalGuard()) return;
@@ -154,7 +155,8 @@ function renderPolicyBanner() {
     }
   }
   bar.classList.toggle('hidden', items.length === 0);
-  bar.innerHTML = items.join('');
+  const html = items.join('');
+  if (bar._last !== html) { bar._last = html; bar.innerHTML = html; }
 }
 
 // ------------------------------------------------------------------
