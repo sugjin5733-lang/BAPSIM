@@ -164,6 +164,7 @@ function openLottoModal() { document.getElementById('lottoModal').classList.remo
 function closeLottoModal() { document.getElementById('lottoModal').classList.add('hidden'); }
 
 function renderLotto() {
+  renderLottoHero();
   const box = document.getElementById('lottoBox');
   if (!box) return;
   const cur = lottoCur();
@@ -245,3 +246,43 @@ function renderCouponBalance() {
     el.classList.toggle('hidden', !(myCoupon > 0));
   });
 }
+
+// ------------------------------------------------------------------
+// 🏠 메인 카드: 이번 주 복권 잭팟 + 명판 경매 현황
+// ------------------------------------------------------------------
+function renderLottoHero() {
+  const box = document.getElementById('lottoHeroBox');
+  if (!box) return;
+  const cur = lottoCur();
+  const w = lottoState[cur.id] || {};
+  const pz = lottoPrizes(cur.id, w, lottoSeedNow());
+  const carry = lottoCarryBefore(cur.id);
+  const rolls = (() => { let n = 0; const ids = Object.keys(lottoState).filter(k => k < cur.id && lottoState[k].result).sort().reverse(); for (const k of ids) { const r = lottoState[k].result; if (r.refund) continue; if (r.hit) break; n++; } return n; })();
+  const left = Math.max(0, cur.end - lottoNow());
+  const dd = Math.floor(left / 86400000), hh = Math.floor(left % 86400000 / 3600000), mm = Math.floor(left % 3600000 / 60000);
+  const people = Object.keys(lottoTickets(w)).length, sold = lottoSold(w);
+  // 명판
+  let plate = '';
+  if (typeof plateRounds === 'function') {
+    const { open, next } = plateRounds();
+    const top = open && (plateState[open.id] || {}).top;
+    const pl = typeof plateLeftText === 'function' ? plateLeftText : () => '';
+    plate = open
+      ? `<span class="font-black">🏷️ 명판 경매 진행 중</span><span class="text-white/80">${top ? `최고 ${top.amount.toLocaleString()}P · ${esc(top.nick)}` : `${(PLATE_START / 10000)}만P부터 · 아직 입찰 없음`}</span><span class="text-white/60">${pl(open.end)} 남음</span>`
+      : `<span class="font-black">🏷️ 명판 경매</span><span class="text-white/80">다음 경매 ${new Date(next.start).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric' })}</span>`;
+  }
+  box.innerHTML = `
+    <div class="flex items-center justify-between gap-2">
+      <span class="text-xs font-black text-white/85 tracking-wide">🎟️ 이번 주 밥심 복권 · 1등 잭팟</span>
+      ${carry > 0 ? `<span class="text-[10px] font-black text-amber-950 bg-amber-300 rounded-full px-2 py-0.5 whitespace-nowrap">🔥 ${rolls ? `${rolls}주 ` : ''}이월</span>` : ''}
+    </div>
+    <div class="text-3xl sm:text-4xl font-black tracking-tight leading-none">🎫 ${pz.jackpot.toLocaleString()}<span class="text-xl">P</span></div>
+    <div class="text-[11px] text-white/80 font-bold">추첨까지 ${dd ? `${dd}일 ` : ''}${hh}시간 ${mm}분 · 참가 ${people}명 · ${sold}장 · 1등 확률 ${Math.round(lottoHitChance(w) * 100)}%</div>
+    <div onclick="event.stopPropagation(); openPlateModal()" class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] bg-black/20 hover:bg-black/30 border border-white/15 rounded-xl px-3 py-2 transition-colors">${plate}<span class="ml-auto text-white/70">›</span></div>
+    <div class="flex items-center justify-between pt-1">
+      <span class="text-xs font-bold text-white/85 group-hover:underline">복권 사러 가기 · 1장 1만P</span>
+      <div class="w-8 h-8 rounded-full bg-white text-rose-600 flex items-center justify-center font-black shadow-md group-hover:scale-110 transition-transform">→</div>
+    </div>`;
+}
+setInterval(renderLottoHero, 30000);
+setTimeout(renderLottoHero, 3000);

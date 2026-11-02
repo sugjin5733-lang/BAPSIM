@@ -52,7 +52,7 @@ function watchPlate() {
   db.ref('bank/nameplate').on('value', s => {
     plateState = s.val() || {};
     plateLoaded = true;
-    renderPlateBanner();
+    renderPlateBanner(); if (typeof renderLottoHero === 'function') renderLottoHero();
     renderPlateModal();
     claimPlateBadge();
   }, () => { plateWatching = false; });
