@@ -203,10 +203,10 @@ function renderBadgeCards(bgContainer, list) {
       }
 
       card.innerHTML = `
-        <div class="pr-2">
-          <div class="flex items-center gap-1.5">
-            <span class="${bg.class} text-xs inline-block">${bg.name}</span>
-            ${reqLvl > 0 && !isOwned ? `<span class="text-[9px] font-extrabold ${currentEnhanceLevel >= reqLvl ? 'text-emerald-400' : 'text-rose-400'}">(${reqLvl}강 달성 필수)</span>` : ''}
+        <div class="pr-2 min-w-0 flex-1">
+          <div class="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+            <span class="${bg.class} text-xs inline-block whitespace-nowrap">${bg.name}</span>
+            ${reqLvl > 0 && !isOwned ? `<span class="whitespace-nowrap text-[9px] font-extrabold ${currentEnhanceLevel >= reqLvl ? 'text-emerald-400' : 'text-rose-400'}">(${reqLvl}강 달성 필수)</span>` : ''}
           </div>
           <p class="text-[10px] text-slate-400 mt-1">${bg.desc} (${priceOf(bg).toLocaleString()}P)</p>
         </div>

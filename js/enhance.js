@@ -498,8 +498,8 @@ function renderEnhanceItems() {
     if (!b) return;
     const on = !!autoUse[k];
     const dim = k === 'recOnly' && !(autoUse.protect || autoUse.bless) ? ' opacity-40' : '';
-    b.className = `py-2.5 px-1 rounded-xl text-[11px] font-black border-2 transition-all active:scale-95 ${on ? c.on : 'bg-slate-900 text-slate-400 border-slate-700 hover:border-slate-500'}${dim}`;
-    b.innerHTML = `${c.label}<span class="block text-[10px] font-bold ${on ? '' : 'text-slate-500'}">${on ? 'ON' : 'OFF'}</span>`;
+    b.className = `py-2.5 px-1 rounded-xl text-[10px] sm:text-[11px] font-black border-2 transition-all active:scale-95 ${on ? c.on : 'bg-slate-900 text-slate-400 border-slate-700 hover:border-slate-500'}${dim}`;
+    b.innerHTML = `<span class="whitespace-nowrap tracking-tight">${c.label}</span><span class="block text-[10px] font-bold ${on ? '' : 'text-slate-500'}">${on ? 'ON' : 'OFF'}</span>`;
   });
   ['protect', 'bless'].forEach(kind => {
     const b = document.getElementById(`enhBuy_${kind}`);
@@ -757,7 +757,7 @@ function renderRiceMarket() {
       <span class="text-[10px] text-slate-500">다음 변동 ${mm}:${String(ss).padStart(2, '0')}</span>
     </div>
     <div class="flex items-end justify-between gap-2 mt-1">
-      <div class="${color} font-black text-lg leading-none ${mk.tone === 'up2' || mk.tone === 'up3' ? 'animate-pulse' : ''}">${mk.label} x${mk.mult.toFixed(2)}</div>
+      <div class="${color} font-black text-base sm:text-lg leading-none whitespace-nowrap ${mk.tone === 'up2' || mk.tone === 'up3' ? 'animate-pulse' : ''}">${mk.label} x${mk.mult.toFixed(2)}</div>
       <div class="flex items-end gap-0.5 h-7">
         ${hist.map((h, i) => h.pending ? `<div title="기록 없음" class="w-2 rounded-sm bg-slate-700 opacity-40" style="height:20%"></div>` : `<div title="x${h.mult.toFixed(2)}" class="w-2 rounded-sm ${h.mult >= 1.6 ? 'bg-fuchsia-400' : h.mult >= 1.15 ? 'bg-emerald-400' : h.mult >= 0.95 ? 'bg-slate-500' : 'bg-rose-400'} ${i === hist.length - 1 ? 'ring-1 ring-amber-300' : 'opacity-70'}" style="height:${Math.min(100, Math.round((h.mult - 0.5) / 2.0 * 100))}%"></div>`).join('')}
       </div>
