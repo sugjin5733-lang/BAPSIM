@@ -5,8 +5,8 @@
 //  - 혜택: 시간당 한도 30만P · 판매 수수료 0% · 분당 강화 1,000회 · 하루 1번 초월 보험 · 전용 배지 · 강림 연출
 //  - 권능: 천명(블랙 정책 중단+1시간 금지) · 천벌(블랙에게도 통하는 망치+블랙 박탈) · 추방(블랙 탈퇴)
 //          · 축복의 비(1시간 강화 확률 ×1.2) · 칙령(1시간 맨 위 고정 문구)
-//  데이터: white/throne {nick, uid, since} · white/challenge · white/cool/{power} · white/history
-//          policies/rain · policies/edict (기존 정책 감시에 같이 실림) · policy_ban/{블랙정책} · judgments/{nick}
+//  데이터(보안 규칙상 bank 아래): bank/white/throne · bank/white/challenge · bank/white/cool/{power} · bank/white/history
+//          policies/rain · policies/edict (기존 정책 감시에 같이 실림) · bank/policy_ban/{블랙정책} · judgments/{nick}
 
 const WHITE_PRICE = 77770000;
 const WHITE_MIN_LVL = 25;
@@ -32,7 +32,7 @@ function assetsOf(u) { return (Number(u && u.points) || 0) + (Number(u && u.owed
 function watchWhite() {
   if (whiteWatching || typeof db === 'undefined') return;
   whiteWatching = true;
-  db.ref('white').on('value', s => {
+  db.ref('bank/white').on('value', s => {
     const v = s.val() || {};
     whiteState = { throne: v.throne || null, challenge: v.challenge || null, cool: v.cool || {} };
     const me = isWhite();
@@ -96,13 +96,13 @@ async function joinWhite() {
   if (!confirm(`☁️ ${WHITE_PRICE.toLocaleString()}P를 내고 프레스티지 화이트 클럽의 주인이 될까요?\n(가입비는 전부 소각 · 자리는 단 하나 · 도전에 지면 잃을 수 있어요 · 누가 주인인지는 공개되지 않아요)`)) return;
   let ok = false;
   try {
-    const r = await db.ref('white/throne').transaction(cur => cur ? undefined : { nick: currentUser.nickname, uid: authUser.uid, since: firebase.database.ServerValue.TIMESTAMP });
+    const r = await db.ref('bank/white/throne').transaction(cur => cur ? undefined : { nick: currentUser.nickname, uid: authUser.uid, since: firebase.database.ServerValue.TIMESTAMP });
     ok = r.committed;
   } catch (e) {}
   if (!ok) return alert('한 발 늦었어요! 방금 다른 사람이 화이트 클럽에 들어갔어요. (결제되지 않았어요)');
   addPoints(-WHITE_PRICE, '🤍 프레스티지 화이트 클럽 가입 (소각)');
   grantHeavenBadge();
-  db.ref('white/history').push({ type: 'crown', nick: currentUser.nickname, at: firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
+  db.ref('bank/white/history').push({ type: 'crown', nick: currentUser.nickname, at: firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
   updatePointsUI();
   announceWhite(true);
   renderWhiteClub();
@@ -127,7 +127,7 @@ async function challengeWhite() {
   const now = whiteNow();
   let ok = false;
   try {
-    const r = await db.ref('white/challenge').transaction(cur => cur ? undefined : {
+    const r = await db.ref('bank/white/challenge').transaction(cur => cur ? undefined : {
       challenger: currentUser.nickname, cuid: authUser.uid, holder: t.nick, huid: t.uid,
       startAt: now, endAt: now + WHITE_CHALLENGE_MS, baseC, baseH: assetsOf(holder)
     });
@@ -155,7 +155,7 @@ async function maybeResolveChallenge() {
     const gc = assetsOf(cu.val()) - (c.baseC || 0), gh = assetsOf(hu.val()) - (c.baseH || 0);
     const challengerWins = gc > gh && !!cu.val();
     let done = false;
-    await db.ref('white').transaction(cur => {
+    await db.ref('bank/white').transaction(cur => {
       if (!cur || !cur.challenge || cur.challenge.startAt !== c.startAt) return undefined;
       cur.challenge = null;
       if (challengerWins) cur.throne = { nick: c.challenger, uid: c.cuid, since: whiteNow() };
@@ -163,7 +163,7 @@ async function maybeResolveChallenge() {
       return cur;
     });
     if (done) {
-      db.ref('white/history').push({ type: 'duel', challenger: c.challenger, holder: c.holder, gc, gh, winner: challengerWins ? c.challenger : c.holder, at: firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
+      db.ref('bank/white/history').push({ type: 'duel', challenger: c.challenger, holder: c.holder, gc, gh, winner: challengerWins ? c.challenger : c.holder, at: firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
       whiteFeed(challengerWins ? '🤍 프레스티지 화이트의 주인이 바뀌었습니다. 새 주인이 누구인지는 아무도 모릅니다…' : '🤍 프레스티지 화이트가 왕좌를 지켜냈습니다');
     }
   } catch (e) {} finally { resolving = false; }
@@ -195,7 +195,7 @@ async function useWhitePower(type) {
     polType = live.length === 1 ? pick : live[(parseInt(pick, 10) || 0) - 1];
     if (!polType) return;
     updates[`policies/${polType}/until`] = now;
-    updates[`policy_ban/${polType}`] = now + 3600000;
+    updates[`bank/policy_ban/${polType}`] = now + 3600000;
     feed = `🕊️ 천명이 내려졌습니다. 블랙의 [${BLACK_POLICIES[polType].name}]이 멈추고 1시간 동안 금지됩니다`;
   } else if (type === 'smite' || type === 'expel') {
     targetNick = (prompt(`${d.icon} [${d.name}]을 내릴 회원의 닉네임:`, '') || '').trim();
@@ -225,7 +225,7 @@ async function useWhitePower(type) {
   // 쿨타임 선점 (동시에 두 번 못 쓰게)
   let ok = false;
   try {
-    const r = await db.ref(`white/cool/${type}`).transaction(cur => (Number(cur) || 0) + d.cooldownMin * 60000 > now ? undefined : now);
+    const r = await db.ref(`bank/white/cool/${type}`).transaction(cur => (Number(cur) || 0) + d.cooldownMin * 60000 > now ? undefined : now);
     ok = r.committed;
   } catch (e) {}
   if (!ok) return alert('쿨타임 중이에요. (결제되지 않았어요)');
@@ -233,14 +233,14 @@ async function useWhitePower(type) {
   updatePointsUI();
   try { if (Object.keys(updates).length) await db.ref().update(updates); } catch (e) { console.warn('권능 기록 실패', e && e.message); }
   if (targetNick) db.ref(`judgments/${targetNick}`).push({ by: currentUser.nickname, uid: authUser.uid, type, at: firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
-  db.ref('white/history').push({ type: 'power', power: type, by: currentUser.nickname, target: targetNick || null, policy: polType || null, at: firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
+  db.ref('bank/white/history').push({ type: 'power', power: type, by: currentUser.nickname, target: targetNick || null, policy: polType || null, at: firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
   whiteFeed(feed);
   if (type === 'edict') showEdictPopup(text);
   renderWhiteClub();
 }
 // 천명으로 막힌 블랙 정책인지
 let policyBans = {};
-setTimeout(() => { if (typeof db !== 'undefined') db.ref('policy_ban').on('value', s => { policyBans = s.val() || {}; }, () => {}); }, 3000);
+setTimeout(() => { if (typeof db !== 'undefined') db.ref('bank/policy_ban').on('value', s => { policyBans = s.val() || {}; }, () => {}); }, 3000);
 function policyBannedLeft(type) { return Math.max(0, (Number(policyBans[type]) || 0) - whiteNow()); }
 function whiteRainMult() { return typeof policyActive === 'function' && policyActive('rain') ? WHITE_RAIN_MULT : 1; }
 

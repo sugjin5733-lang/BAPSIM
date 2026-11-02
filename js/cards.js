@@ -176,8 +176,8 @@ function claimSetReward(setId) {
 
   addPoints(set.points, `세트 보상: ${set.name}`);
   mySetsClaimed[setId] = true;
-  if (set.badge && !myInventory.bgs.includes(set.badge)) myInventory.bgs.push(set.badge);
-  if (set.symbol && !myInventory.symbols.includes(set.symbol)) myInventory.symbols.push(set.symbol);
+  if (set.badge && !myInventory.bgs.includes(set.badge)) { myInventory.bgs.push(set.badge); if (typeof ledgerAdd === 'function') ledgerAdd('bgs', set.badge, 0); }
+  if (set.symbol && !myInventory.symbols.includes(set.symbol)) { myInventory.symbols.push(set.symbol); if (typeof ledgerAdd === 'function') ledgerAdd('symbols', set.symbol, 0); }
   db.ref(`user_points/${currentUser.nickname}/setsClaimed/${setId}`).set(true);
   updatePointsUI();
   if (set.id === 'all') postFeed('set', `📒 이번 주 반찬 도감을 모두 채웠어요! +${set.points.toLocaleString()}P`, 'legendary', true);
@@ -278,8 +278,8 @@ function restoreSetCosmetics() {
   let fixed = false;
   CARD_SETS.forEach(s => {
     if (!mySetsClaimed[s.id]) return;
-    if (s.badge && !myInventory.bgs.includes(s.badge)) { myInventory.bgs.push(s.badge); fixed = true; }
-    if (s.symbol && !myInventory.symbols.includes(s.symbol)) { myInventory.symbols.push(s.symbol); fixed = true; }
+    if (s.badge && !myInventory.bgs.includes(s.badge)) { myInventory.bgs.push(s.badge); if (typeof ledgerAdd === 'function') ledgerAdd('bgs', s.badge, 0); fixed = true; }
+    if (s.symbol && !myInventory.symbols.includes(s.symbol)) { myInventory.symbols.push(s.symbol); if (typeof ledgerAdd === 'function') ledgerAdd('symbols', s.symbol, 0); fixed = true; }
   });
   return fixed;
 }

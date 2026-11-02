@@ -228,11 +228,13 @@ function openShopModal() {
 function closeShopModal() { document.getElementById('shopModal').classList.add('hidden'); }
 
 function buySymbol(char, cost) {
+  const sm = SHOP_DATA.symbols.find(x => x.char === char); if (sm) cost = sm.cost;
   if (userPoints < cost) return alert(`❌ 포인트가 부족합니다!`);
   if (!confirm(`${cost}P로 [${char}] 심볼을 구매하시겠습니까?`)) return;
   addPoints(-cost, '상점 구매');
   if (!myInventory.symbols) myInventory.symbols = [];
   myInventory.symbols.push(char);
+  ledgerAdd('symbols', char, cost);
   myNickSymbol = char;
   updatePointsUI();
   renderShopUI();
@@ -241,11 +243,13 @@ function equipSymbol(char) { myNickSymbol = char; updatePointsUI(); renderShopUI
 function unequipSymbol() { myNickSymbol = ''; updatePointsUI(); renderShopUI(); }
 
 function buyColor(hex, cost) {
+  const cm = SHOP_DATA.colors.find(x => x.hex === hex); if (cm) cost = cm.cost;
   if (userPoints < cost) return alert(`❌ 포인트가 부족합니다!`);
   if (!confirm(`${cost}P로 해당 색상을 구매하시겠습니까?`)) return;
   addPoints(-cost, '상점 구매');
   if (!myInventory.colors) myInventory.colors = [];
   myInventory.colors.push(hex);
+  ledgerAdd('colors', hex, cost);
   myNickColor = hex;
   updatePointsUI();
   renderShopUI();
@@ -270,6 +274,7 @@ function buyBg(bgClass, cost, bgName, reqLvl = 0) {
   addPoints(-cost, '상점 구매');
   if (!myInventory.bgs) myInventory.bgs = ['nb-none'];
   myInventory.bgs.push(bgClass);
+  ledgerAdd('bgs', bgClass, cost);
   myNickBg = bgClass;
   updatePointsUI();
   renderShopUI();
@@ -336,3 +341,66 @@ function buyPrestigePass() {
   if (typeof loadPrestigeMembers === 'function') setTimeout(loadPrestigeMembers, 2000);
   if (window.confetti) confetti({ particleCount: 160, spread: 110, colors: ['#fde047', '#f59e0b', '#ffffff'] });
 }
+
+
+// ==========================================
+// 🧾 구매 장부: 상점 아이템은 '산 기록(purchases/{닉네임})'이 있어야만 가질 수 있음
+//  - 콘솔로 인벤토리에 몰래 넣으면 → 1분 안에 자동으로 빼고 숙청
+//  - 다른 기기에서 막 산 경우를 위해 1분 동안은 기다려 줌
+//  - 산 적 없는 배지·색·칭호를 장착만 해둔 경우는 조용히 해제
+// ==========================================
+let myLedger = { bgs: {}, colors: {}, symbols: {} }, ledgerLoaded = false, ledgerRef = null, ledgerNick = '';
+function ledgerKey(x) { return encodeURIComponent(String(x)).replace(/\./g, '%2E'); }
+function ledgerAdd(kind, item, cost) {
+  myLedger[kind][ledgerKey(item)] = true;
+  if (typeof canSyncToCloud === 'function' && canSyncToCloud())
+    db.ref(`bank/purchases/${currentUser.nickname}/${kind}/${ledgerKey(item)}`).set({ cost: Number(cost) || 0, at: firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
+}
+function attachLedger() {
+  if (typeof canSyncToCloud !== 'function' || !canSyncToCloud()) return;
+  if (ledgerRef && ledgerNick === currentUser.nickname) return;
+  if (ledgerRef) ledgerRef.off();
+  ledgerNick = currentUser.nickname; ledgerLoaded = false;
+  ledgerRef = db.ref(`bank/purchases/${ledgerNick}`);
+  ledgerRef.on('value', snap => {
+    const v = snap.val() || {};
+    const local = myLedger;
+    myLedger = { bgs: Object.assign({}, v.bgs || {}), colors: Object.assign({}, v.colors || {}), symbols: Object.assign({}, v.symbols || {}) };
+    ['bgs', 'colors', 'symbols'].forEach(k => Object.keys(local[k] || {}).forEach(x => { myLedger[k][x] = true; })); // 방금 산 것(아직 서버 반영 전) 유지
+    ledgerLoaded = true;
+  }, () => { ledgerRef = null; });
+}
+const ledgerSuspect = {};
+function checkInventoryIntegrity() {
+  attachLedger();
+  if (!ledgerLoaded || (typeof isAdmin !== 'undefined' && isAdmin) || typeof myInventory === 'undefined') return;
+  const shop = { bgs: new Set(SHOP_DATA.bgs.map(b => b.class)), colors: new Set(SHOP_DATA.colors.map(c => c.hex)), symbols: new Set(SHOP_DATA.symbols.map(x => x.char)) };
+  const now = Date.now(), bad = [];
+  ['bgs', 'colors', 'symbols'].forEach(kind => {
+    (myInventory[kind] || []).forEach(it => {
+      const k = kind + '|' + it;
+      if (!shop[kind].has(it) || myLedger[kind][ledgerKey(it)]) { delete ledgerSuspect[k]; return; }
+      if (!ledgerSuspect[k]) ledgerSuspect[k] = now;
+      if (now - ledgerSuspect[k] > 60000) bad.push([kind, it]);
+    });
+  });
+  let changed = false;
+  if (bad.length) {
+    bad.forEach(([kind, it]) => { myInventory[kind] = (myInventory[kind] || []).filter(x => x !== it); delete ledgerSuspect[kind + '|' + it]; });
+    changed = true;
+  }
+  // 갖고 있지 않은 걸 장착만 해둔 경우 해제
+  if (myNickBg && myNickBg !== 'nb-none' && !(myInventory.bgs || []).includes(myNickBg)) { myNickBg = 'nb-none'; changed = true; }
+  if (myNickColor && !(myInventory.colors || []).includes(myNickColor)) { myNickColor = ''; changed = true; }
+  if (myNickSymbol && !(myInventory.symbols || []).includes(myNickSymbol)) { myNickSymbol = ''; changed = true; }
+  if (changed) { updatePointsUI(); if (typeof renderShopUI === 'function') try { renderShopUI(); } catch (e) {} }
+  if (bad.length) {
+    try { if (typeof reportTamper === 'function') reportTamper('구매 기록 없는 상점 아이템'); } catch (e) {}
+    // 관리자가 '이번만 봐주기'(purgeGraceUntil)를 걸어둔 회원은 아이템만 빼고 숙청은 안 함
+    db.ref(`user_points/${currentUser.nickname}/purgeGraceUntil`).once('value').then(g => {
+      if ((Number(g.val()) || 0) > Date.now()) return;
+      if (typeof purgeTamperer === 'function') purgeTamperer(`구매 기록 없는 상점 아이템 ${bad.length}개`);
+    }).catch(() => {});
+  }
+}
+setInterval(checkInventoryIntegrity, 20000);

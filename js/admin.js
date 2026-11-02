@@ -423,6 +423,7 @@ async function adminGrantBadge() {
   const upd = { inventory: inv };
   if (equip) upd.badge = cls;
   await db.ref(`user_points/${nick}`).update(upd);
+  db.ref(`bank/purchases/${nick}/bgs/${ledgerKey(cls)}`).set({ cost: 0, by: 'admin', at: firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
   alert(`✅ [${nick}] 님에게 배지를 지급했어요.`);
 }
 async function adminRevokeBadge() {
@@ -461,7 +462,7 @@ function adminManageUserItems(nick) {
       const inv = u.inventory || { colors: [], bgs: ['nb-none'], symbols: [] };
       if (!inv.bgs) inv.bgs = ['nb-none'];
       if (!inv.bgs.includes('nb-cosmic')) inv.bgs.push('nb-cosmic');
-      db.ref(`user_points/${nick}`).update({ badge: 'nb-cosmic', inventory: inv });
+      db.ref(`user_points/${nick}`).update({ badge: 'nb-cosmic', inventory: inv }); db.ref(`bank/purchases/${nick}/bgs/${ledgerKey('nb-cosmic')}`).set({ cost: 0, by: 'admin', at: firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
       alert(`[${nick}] 회원에게 코스믹 레인보우 배지를 지급 및 장착시켰습니다.`);
     });
   } else if (choice === '3') {
@@ -470,7 +471,7 @@ function adminManageUserItems(nick) {
       const inv = u.inventory || { colors: [], bgs: ['nb-none'], symbols: [] };
       if (!inv.bgs) inv.bgs = ['nb-none'];
       if (!inv.bgs.includes('nb-solar')) inv.bgs.push('nb-solar');
-      db.ref(`user_points/${nick}`).update({ badge: 'nb-solar', inventory: inv });
+      db.ref(`user_points/${nick}`).update({ badge: 'nb-solar', inventory: inv }); db.ref(`bank/purchases/${nick}/bgs/${ledgerKey('nb-solar')}`).set({ cost: 0, by: 'admin', at: firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
       alert(`[${nick}] 회원에게 태양의 겁화 배지를 지급 및 장착시켰습니다.`);
     });
   } else if (choice === '4') {
@@ -481,7 +482,7 @@ function adminManageUserItems(nick) {
         const inv = u.inventory || { colors: [], bgs: ['nb-none'], symbols: [] };
         if (!inv.bgs) inv.bgs = ['nb-none'];
         if (!inv.bgs.includes(bgName)) inv.bgs.push(bgName);
-        db.ref(`user_points/${nick}`).update({ badge: bgName, inventory: inv });
+        db.ref(`user_points/${nick}`).update({ badge: bgName, inventory: inv }); db.ref(`bank/purchases/${nick}/bgs/${ledgerKey(bgName)}`).set({ cost: 0, by: 'admin', at: firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
         alert(`[${nick}] 회원에게 ${bgName} 배지를 지급 및 장착시켰습니다.`);
       });
     }
@@ -1043,6 +1044,7 @@ async function adminApproveRename(uid) {
     updates[`online_users/${from}`] = null;
     updates[`rename_requests/${uid}`] = null;
     if (logSnap.exists()) { updates[`point_logs/${to}`] = logSnap.val(); updates[`point_logs/${from}`] = null; }
+    try { const ps = await db.ref(`bank/purchases/${from}`).once('value'); if (ps.exists()) { updates[`bank/purchases/${to}`] = ps.val(); updates[`bank/purchases/${from}`] = null; } } catch (e) {}
     if (seasonSnap.exists()) {
       updates[`seasons/${weekKey()}/${to}`] = Object.assign({}, seasonSnap.val(), { nickname: to });
       updates[`seasons/${weekKey()}/${from}`] = null;

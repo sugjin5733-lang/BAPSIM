@@ -178,7 +178,7 @@ async function accrueDeposit() {
     for (let i = 1; i <= due.days; i++) {
       const add = Math.floor(bal * DEPOSIT_RATE * ratio);
       bal += add;
-      db.ref(`deposit_log/${nick}`).push({ at: from + i * DAY_MS, interest: add, bal, rate: DEPOSIT_RATE, note: isBlack() ? (ratio < 1 ? '금고 부족으로 일부만' : '') : '블랙 아님 · 이자 없음' }).catch(() => {});
+      db.ref(`bank/deposit_log/${nick}`).push({ at: from + i * DAY_MS, interest: add, bal, rate: DEPOSIT_RATE, note: isBlack() ? (ratio < 1 ? '금고 부족으로 일부만' : '') : '블랙 아님 · 이자 없음' }).catch(() => {});
     }
     paid = bal - myDeposit.amt;
     myDeposit.amt = bal;
@@ -205,14 +205,14 @@ async function withdrawInterest() {
   myDeposit.int -= amt;
   depositDirty = true;
   addPoints(amt, '🏦 예치 이자 출금');
-  db.ref(`deposit_log/${currentUser.nickname}`).push({ at: firebase.database.ServerValue.TIMESTAMP, withdraw: amt, bal: myDeposit.amt }).catch(() => {});
+  db.ref(`bank/deposit_log/${currentUser.nickname}`).push({ at: firebase.database.ServerValue.TIMESTAMP, withdraw: amt, bal: myDeposit.amt }).catch(() => {});
   updatePointsUI();
   renderTierBox();
   if (typeof renderBlackClub === 'function') renderBlackClub();
 }
 async function openDepositHistory(boxId = 'tierDepositHistory') {
   let rows = [];
-  try { const s = await db.ref(`deposit_log/${currentUser.nickname}`).limitToLast(30).once('value'); s.forEach(c => { rows.push(c.val()); }); } catch (e) {}
+  try { const s = await db.ref(`bank/deposit_log/${currentUser.nickname}`).limitToLast(30).once('value'); s.forEach(c => { rows.push(c.val()); }); } catch (e) {}
   rows.reverse();
   const fmt = t => new Date(t).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   const box = document.getElementById(boxId);
