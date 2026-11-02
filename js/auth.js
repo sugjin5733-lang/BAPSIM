@@ -206,6 +206,7 @@ function loadGameStateFromUser(val) {
   if (typeof loadBoostFromUser === "function") loadBoostFromUser(val);
   if (typeof loadBowlFromUser === "function") loadBowlFromUser(val);
   if (typeof loadTierFromUser === "function") loadTierFromUser(val);
+  if (typeof loadCouponFromUser === 'function') loadCouponFromUser(val);
   loadBestEnhance(val);
   if (typeof loadWhiteFromUser === 'function') loadWhiteFromUser(val);
   if (typeof loadPetsFromUser === 'function') loadPetsFromUser(val);
@@ -486,6 +487,7 @@ function syncUserPointToCloud() {
   }
 
   if (typeof tierSyncFields === 'function') tierSyncFields(put); // (분기 안에서 이미 실었으면 아무것도 안 함)
+  if (typeof couponSyncFields === 'function') couponSyncFields(put);
   if (pendingLog.length) {
     // 같은 사유는 하나로 합쳐서 기록
     const merged = [];

@@ -119,9 +119,9 @@ async function buyPetEggs(n) {
   attachPetLedger();
   if (!petsLoaded || !petLedgerLoaded) return alert('펫 정보를 불러오는 중이에요. 잠시 후 다시 시도해 주세요.');
   const price = petEggPrice(n);
-  if (userPoints < price) return alert(`❌ 포인트가 부족해요! (${price.toLocaleString()}P)`);
+  if (!canPayWithCoupon(price)) return alert(`❌ 포인트가 부족해요! (${price.toLocaleString()}P)`);
   if (!confirm(`🥚 펫 알 ${n}개를 ${price.toLocaleString()}P에 깔까요?\n(천장 없음)`)) return;
-  addPoints(-price, `🥚 펫 알 ${n}개${price < PET_EGG_PRICE * n ? ' (명판 10% 할인)' : ''}`);
+  payWithCoupon(price, `🥚 펫 알 ${n}개${price < PET_EGG_PRICE * n ? ' (명판 10% 할인)' : ''}`);
   const got = [];
   for (let i = 0; i < n; i++) {
     const id = rollPet();
@@ -171,9 +171,9 @@ function feedPet() {
   if (!p) return alert('데리고 다니는 펫이 없어요.');
   if (petFedToday(p)) return alert('오늘은 이미 배불러요! 🍚');
   const c = petFeedCost(p);
-  if (userPoints < c) return alert(`❌ 포인트가 부족해요! (먹이 ${c.toLocaleString()}P)`);
-  addPoints(-c, `🍚 펫 먹이 (${p.name})`);
-  if (typeof payFee === 'function') payFee(c);
+  if (!canPayWithCoupon(c)) return alert(`❌ 포인트가 부족해요! (먹이 ${c.toLocaleString()}P)`);
+  const cu = payWithCoupon(c, `🍚 펫 먹이 (${p.name})`);
+  if (typeof payFee === 'function' && c - cu > 0) payFee(c - cu);
   myPets.fedDay = petToday();
   savePets(); // ⚠️ 반드시 updatePointsUI 보다 먼저: 포인트 저장 시 서버 값으로 펫 정보가 되돌려져서 방금 뽑은 펫이 사라지던 버그
   updatePointsUI();
@@ -181,9 +181,9 @@ function feedPet() {
 }
 function buyPetSnack() {
   if (!checkApprovalGuard()) return;
-  if (userPoints < PET_SNACK_PRICE) return alert(`❌ 포인트가 부족해요! (${PET_SNACK_PRICE.toLocaleString()}P)`);
-  addPoints(-PET_SNACK_PRICE, '🍖 펫 간식 구매');
-  if (typeof payFee === 'function') payFee(Math.round(PET_SNACK_PRICE * 0.1));
+  if (!canPayWithCoupon(PET_SNACK_PRICE)) return alert(`❌ 포인트가 부족해요! (${PET_SNACK_PRICE.toLocaleString()}P)`);
+  const cu = payWithCoupon(PET_SNACK_PRICE, '🍖 펫 간식 구매');
+  if (typeof payFee === 'function') payFee(Math.round((PET_SNACK_PRICE - cu) * 0.1));
   myPets.snacks += 1;
   savePets(); // ⚠️ 반드시 updatePointsUI 보다 먼저: 포인트 저장 시 서버 값으로 펫 정보가 되돌려져서 방금 뽑은 펫이 사라지던 버그
   updatePointsUI();
@@ -206,11 +206,11 @@ function enhancePet(id) {
   if (lv >= 10) return alert('이미 +10 최고 단계예요!');
   if (lv >= PET_STAR_CAP[star]) return alert(`★${star}는 +${PET_STAR_CAP[star]}까지만 강화할 수 있어요.\n같은 펫을 또 뽑으면 별이 올라가서 상한이 열려요.`);
   const cost = petUpCost(id);
-  if (userPoints < cost) return alert(`❌ 포인트가 부족해요! (${cost.toLocaleString()}P)`);
+  if (!canPayWithCoupon(cost)) return alert(`❌ 포인트가 부족해요! (${cost.toLocaleString()}P)`);
   const snack = petUseSnack && myPets.snacks > 0;
   const rate = Math.min(100, PET_UP_RATE[lv] + (snack ? 10 : 0));
-  addPoints(-cost, `⚒️ 펫 강화 ${PETS[id].icon} +${lv}→+${lv + 1}${snack ? ' (간식)' : ''}`);
-  if (typeof payFee === 'function') payFee(Math.round(cost * 0.1));
+  const cu = payWithCoupon(cost, `⚒️ 펫 강화 ${PETS[id].icon} +${lv}→+${lv + 1}${snack ? ' (간식)' : ''}`);
+  if (typeof payFee === 'function') payFee(Math.round((cost - cu) * 0.1));
   if (snack) myPets.snacks -= 1;
   const roll = Math.random() * 100;
   let msg;

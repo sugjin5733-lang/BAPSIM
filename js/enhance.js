@@ -555,14 +555,16 @@ function runEnhancement() {
 
   const cost = currentAttemptCost();
   const tpCost = tprotectActive() ? tprotectPrice(currentEnhanceLevel) : 0;
-  if (tpCost && userPoints < cost + tpCost) return alert(`❌ 포인트가 부족해요! (강화 ${cost.toLocaleString()}P + 초월 방지권 ${tpCost.toLocaleString()}P)`);
-  if (userPoints < cost) {
-    return alert(`❌ 강화 비용이 부족합니다! (필요: ${cost}P / 보유: ${userPoints}P)`);
+  const coup = typeof myCoupon === 'number' ? Math.min(myCoupon, cost) : 0; // 🎫 상품권은 강화비에만
+  if (tpCost && userPoints + coup < cost + tpCost) return alert(`❌ 포인트가 부족해요! (강화 ${cost.toLocaleString()}P + 초월 방지권 ${tpCost.toLocaleString()}P)`);
+  if (userPoints + coup < cost) {
+    return alert(`❌ 강화 비용이 부족합니다! (필요: ${cost}P / 보유: ${userPoints}P${coup ? ` + 🎫${coup}P` : ''})`);
   }
 
   applyAutoItems();
-  const autoBought = autoBuyForAttempt(cost);
-  addPoints(-cost, `${gambleMode ? '도박 ' : ''}강화 시도 +${currentEnhanceLevel}→+${currentEnhanceLevel + 1}`);
+  const autoBought = autoBuyForAttempt(cost - coup);
+  const atReason = `${gambleMode ? '도박 ' : ''}강화 시도 +${currentEnhanceLevel}→+${currentEnhanceLevel + 1}`;
+  if (typeof payWithCoupon === 'function') payWithCoupon(cost, atReason); else addPoints(-cost, atReason);
   if (tpCost) {
     addPoints(-tpCost, `🌌 초월 방지권 (+${currentEnhanceLevel})`);
     if (typeof payFee === 'function') payFee(Math.round(tpCost * 0.1));
