@@ -740,3 +740,11 @@ body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 
 @keyframes pcolHeat { from { filter: drop-shadow(0 -1px 2px rgba(249,115,22,.7)); } to { filter: drop-shadow(0 -2px 6px rgba(239,68,68,1)); } }
 .pc-holy { background-image: linear-gradient(100deg, #fde68a 0%, #ffffff 30%, #fef3c7 50%, #ffffff 70%, #fbbf24 100%); animation: pcolFlow 3s linear infinite, pcolHoly 2s ease-in-out infinite alternate; }
 @keyframes pcolHoly { from { filter: drop-shadow(0 0 3px rgba(253,230,138,.9)) drop-shadow(0 0 1px #fff); } to { filter: drop-shadow(0 0 10px rgba(251,191,36,1)) drop-shadow(0 0 4px #fff); } }
+
+/* 🎨 닉네임 색상 카드 */
+.color-card { background: #fff; border: 1.5px solid #e2e8f0; transition: transform .15s ease, box-shadow .15s ease; }
+.color-card:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(15,23,42,.08); }
+.color-card .color-card-preview { background: repeating-linear-gradient(45deg, #f8fafc 0 8px, #f1f5f9 8px 16px); border-bottom: 1px solid #e2e8f0; }
+.color-card-premium { background: linear-gradient(160deg, #0f172a, #020617); border-color: rgba(251,191,36,.45); }
+.color-card-premium .color-card-preview { background: radial-gradient(ellipse at 50% 120%, rgba(251,191,36,.18), transparent 70%), #020617; border-bottom-color: rgba(251,191,36,.25); }
+.color-card-on { border-color: #6366f1 !important; box-shadow: 0 0 0 2px rgba(99,102,241,.35); }

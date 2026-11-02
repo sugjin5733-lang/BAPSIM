@@ -1043,14 +1043,26 @@ async function adminApproveRename(uid) {
     updates[`user_uids/${uid}`] = to;
     updates[`online_users/${from}`] = null;
     updates[`rename_requests/${uid}`] = null;
-    if (logSnap.exists()) { updates[`point_logs/${to}`] = logSnap.val(); updates[`point_logs/${from}`] = null; }
+    // 내역은 통째로 옮기고, '닉네임 변경' 기록은 옮기는 내역 안에 같이 넣음
+    //  (point_logs/새닉 과 point_logs/새닉/키 를 한 번에 쓰면 Firebase가 거부해서 승인이 실패하던 버그)
+    const movedLogs = Object.assign({}, logSnap.val() || {});
+    const logKey = db.ref(`point_logs/${to}`).push().key;
+    movedLogs[logKey] = { d: 0, r: `닉네임 변경: ${from} → ${to}`, bal: u.points || 0, ts: firebase.database.ServerValue.TIMESTAMP };
+    updates[`point_logs/${to}`] = movedLogs;
+    if (logSnap.exists()) updates[`point_logs/${from}`] = null;
+    // 닉네임으로 저장된 다른 기록들도 같이 이전 (펫 장부가 안 옮겨지면 펫이 '기록 없음'으로 회수되는 문제 방지)
+    for (const p of ['bank/pet_ledger', 'bank/deposit_log', 'judgments']) {
+      try { const s = await db.ref(`${p}/${from}`).once('value'); if (s.exists()) { updates[`${p}/${to}`] = s.val(); updates[`${p}/${from}`] = null; } } catch (e) {}
+    }
+    for (const p of ['bank/donors', 'bank/taxTotal']) {
+      try { const s = await db.ref(`${p}/${from}`).once('value'); if (s.exists()) { updates[`${p}/${to}`] = s.val(); updates[`${p}/${from}`] = null; } } catch (e) {}
+    }
+    try { const t = (await db.ref('bank/white/throne').once('value')).val(); if (t && t.uid === uid) updates['bank/white/throne/nick'] = to; } catch (e) {}
     try { const ps = await db.ref(`bank/purchases/${from}`).once('value'); if (ps.exists()) { updates[`bank/purchases/${to}`] = ps.val(); updates[`bank/purchases/${from}`] = null; } } catch (e) {}
     if (seasonSnap.exists()) {
       updates[`seasons/${weekKey()}/${to}`] = Object.assign({}, seasonSnap.val(), { nickname: to });
       updates[`seasons/${weekKey()}/${from}`] = null;
     }
-    const key = db.ref(`point_logs/${to}`).push().key;
-    updates[`point_logs/${to}/${key}`] = { d: 0, r: `닉네임 변경: ${from} → ${to}`, bal: u.points || 0, ts: firebase.database.ServerValue.TIMESTAMP };
     await db.ref().update(updates);
     alert(`✅ [${from}] → [${to}] 변경 완료!`);
   } catch (err) {

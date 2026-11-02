@@ -126,21 +126,33 @@ function renderShopUI() {
 
 function renderColorCards(box, list) {
   if (!box) return;
-  box.innerHTML = list.map(col => {
+  const me = esc(currentUser && currentUser.nickname || '닉네임');
+  const sorted = [...list].sort((x, y) => x.cost - y.cost);
+  const premiumList = sorted.some(c => isPrestigeItem(c.cost));
+  const card = col => {
     const isOwned = (myInventory.colors || []).includes(col.hex);
     const isEquipped = myNickColor === col.hex;
     const premium = isPrestigeItem(col.cost);
     const locked = premium && !myPrestigePass && !isOwned;
-    const sample = premium ? `<span class="pcol ${col.hex} font-black text-xs">${esc(col.name)}</span>` : `<span class="font-extrabold text-xs" style="color:${col.hex}">${esc(col.name)}</span>`;
-    return `<div class="p-3 border rounded-2xl flex items-center justify-between gap-2 ${premium ? 'border-2 border-amber-400/60 bg-slate-950' : 'bg-slate-50'}">
-      <div class="min-w-0">${sample}<p class="text-[10px] ${premium ? 'text-slate-400' : 'text-slate-400'} mt-0.5">${col.desc ? esc(col.desc) + ' · ' : ''}${col.cost.toLocaleString()}P</p></div>
-      <div class="shrink-0">${isEquipped
-        ? `<button onclick="unequipColor()" class="bg-rose-500 text-white font-bold px-2.5 py-1 rounded-xl text-[11px]">해제</button>`
-        : isOwned ? `<button onclick="equipColor('${col.hex}')" class="bg-indigo-600 text-white font-bold px-2.5 py-1 rounded-xl text-[11px]">장착</button>`
-        : locked ? `<button disabled class="bg-slate-800 text-slate-400 font-bold px-2.5 py-1 rounded-xl text-[11px] border border-slate-700 opacity-75">🔒 입장권 필요</button>`
-        : `<button onclick="buyColor('${col.hex}', ${col.cost})" class="${premium ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950' : 'bg-slate-900 text-amber-300'} font-bold px-2.5 py-1 rounded-xl text-[11px]">${premium ? `${(col.cost / 10000).toLocaleString()}만P` : '구매'}</button>`}</div>
+    const preview = premium ? `<span class="pcol ${col.hex} text-lg">${me}</span>` : `<span class="text-lg font-black" style="color:${col.hex}">${me}</span>`;
+    const price = col.cost >= 100000000 ? `${(col.cost / 100000000).toLocaleString()}억P` : `${(col.cost / 10000).toLocaleString()}만P`;
+    const btn = isEquipped
+      ? `<button onclick="unequipColor()" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-black py-1.5 rounded-xl text-[11px]">✓ 장착 중 · 해제</button>`
+      : isOwned ? `<button onclick="equipColor('${col.hex}')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-1.5 rounded-xl text-[11px]">장착하기</button>`
+      : locked ? `<button disabled class="w-full bg-slate-800 text-slate-400 font-bold py-1.5 rounded-xl text-[11px] border border-slate-700">🔒 입장권 필요</button>`
+      : `<button onclick="buyColor('${col.hex}', ${col.cost})" class="w-full ${premium ? 'bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950' : 'bg-slate-900 text-amber-300'} hover:brightness-105 font-black py-1.5 rounded-xl text-[11px]">${price} 구매</button>`;
+    return `<div class="color-card ${premium ? 'color-card-premium' : ''} ${isEquipped ? 'color-card-on' : ''} rounded-2xl overflow-hidden flex flex-col">
+      <div class="color-card-preview flex items-center justify-center h-14 px-2">${preview}</div>
+      <div class="p-2.5 flex-1 flex flex-col gap-1.5">
+        <div class="flex items-center justify-between gap-1"><span class="text-[11px] font-black ${premium ? 'text-amber-100' : 'text-slate-800'} truncate">${esc(col.name)}</span><span class="shrink-0 text-[10px] font-black px-1.5 py-0.5 rounded-full ${premium ? 'bg-amber-400/15 text-amber-200 border border-amber-400/30' : 'bg-slate-100 text-slate-600'}">${price}</span></div>
+        ${col.desc ? `<p class="text-[10px] leading-snug ${premium ? 'text-slate-400' : 'text-slate-500'} flex-1">${esc(col.desc)}</p>` : '<div class="flex-1"></div>'}
+        ${btn}
+      </div>
     </div>`;
-  }).join('');
+  };
+  if (!premiumList) { box.innerHTML = sorted.map(card).join(''); return; }
+  const groups = [['💎 1천만P대', sorted.filter(c => c.cost < 100000000)], ['👑 1억P 이상', sorted.filter(c => c.cost >= 100000000)]];
+  box.innerHTML = groups.filter(g => g[1].length).map(([t, l]) => `<div class="col-span-full text-[11px] font-black text-amber-200 mt-1">${t}</div>${l.map(card).join('')}`).join('');
 }
 function renderBadgeCards(bgContainer, list) {
   if (bgContainer) {
