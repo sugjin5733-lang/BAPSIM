@@ -908,3 +908,4 @@ body { font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMac
 @keyframes statueFloat { 0% { opacity: 0; transform: translateY(0) scale(.6); } 20% { opacity: 1; } 100% { opacity: 0; transform: translateY(-48px) scale(1.2); } }
 .statue-tag { display: inline-block; margin-left: 2px; font-size: .85em; vertical-align: middle; filter: sepia(1) saturate(3.2) hue-rotate(-12deg) brightness(1.08) drop-shadow(0 0 2px rgba(251,191,36,.7)); }
 .statue-hall { background: linear-gradient(135deg, #fef3c7, #fde68a); border: 1.5px solid #f59e0b66; }
+.statue-md .statue-bubble { top: -14px; left: 74%; }
