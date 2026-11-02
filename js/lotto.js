@@ -261,27 +261,40 @@ function renderLottoHero() {
   const left = Math.max(0, cur.end - lottoNow());
   const dd = Math.floor(left / 86400000), hh = Math.floor(left % 86400000 / 3600000), mm = Math.floor(left % 3600000 / 60000);
   const people = Object.keys(lottoTickets(w)).length, sold = lottoSold(w);
-  // 명판
+  // 명판 (오른쪽 칸)
   let plate = '';
   if (typeof plateRounds === 'function') {
     const { open, next } = plateRounds();
     const top = open && (plateState[open.id] || {}).top;
     const pl = typeof plateLeftText === 'function' ? plateLeftText : () => '';
+    const holders = typeof plateWinners === 'function' ? plateWinners() : [];
     plate = open
-      ? `<span class="font-black">명판 경매 진행 중</span><span class="text-white/80">${top ? `최고 ${top.amount.toLocaleString()}P · ${esc(top.nick)}` : `${(PLATE_START / 10000)}만P부터 · 아직 입찰 없음`}</span><span class="text-white/60">${pl(open.end)} 남음</span>`
-      : `<span class="font-black">명판 경매</span><span class="text-white/80">다음 경매 ${new Date(next.start).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric' })}</span>`;
+      ? `<div class="text-xs font-bold text-white/80">🏷️ 명판 경매 · ${roundLabel(open.id)}</div>
+         <div class="text-2xl sm:text-3xl font-black tracking-tight leading-none">${top ? top.amount.toLocaleString() : (PLATE_START).toLocaleString()}<span class="text-base font-bold">P</span></div>
+         <div class="text-[11px] text-white/75 truncate">${top ? `최고 입찰 ${esc(top.nick)}` : '시작가 · 아직 입찰 없음'}</div>
+         <div class="text-[11px] text-white/75">마감까지 ${pl(open.end)}</div>`
+      : `<div class="text-xs font-bold text-white/80">🏷️ 명판</div>
+         <div class="text-sm font-black truncate">${holders[0] ? esc(holders[0].nick) : '아직 주인 없음'}</div>
+         <div class="text-[11px] text-white/75">다음 경매 ${new Date(next.start).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: 'numeric', day: 'numeric' })}</div>`;
   }
   box.innerHTML = `
-    <div class="flex items-center justify-between gap-2">
-      <span class="text-xs font-bold text-white/80">이번 주 밥심 복권 1등</span>
-      ${carry > 0 ? `<span class="text-[10px] font-black text-rose-600 bg-white rounded-full px-2 py-0.5 whitespace-nowrap">${rolls ? `${rolls}주 ` : ''}이월</span>` : ''}
-    </div>
-    <div class="text-3xl sm:text-4xl font-black tracking-tight leading-none">${pz.jackpot.toLocaleString()}<span class="text-xl font-bold">P</span></div>
-    <div class="text-[11px] text-white/75 font-medium">추첨까지 ${dd ? `${dd}일 ` : ''}${hh}시간 ${mm}분 · 참가 ${people}명 · ${sold}장 · 1등 확률 ${Math.round(lottoHitChance(w) * 100)}%</div>
-    <div onclick="event.stopPropagation(); openPlateModal()" class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] bg-white/10 hover:bg-white/15 rounded-xl px-3 py-2 transition-colors">${plate}<span class="ml-auto text-white/70">›</span></div>
-    <div class="flex items-center justify-between pt-1">
-      <span class="text-xs font-bold text-white/85 group-hover:underline">복권 사러 가기</span>
-      <div class="w-8 h-8 rounded-full bg-white text-rose-600 flex items-center justify-center font-black group-hover:scale-110 transition-transform">→</div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 h-full">
+      <div onclick="openLottoModal()" class="hero-half group cursor-pointer rounded-2xl p-4 flex flex-col justify-between gap-2">
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs font-bold text-white/80">🎟️ 이번 주 복권 1등</span>
+            ${carry > 0 ? `<span class="text-[10px] font-black text-indigo-700 bg-white rounded-full px-2 py-0.5 whitespace-nowrap">${rolls ? `${rolls}주 ` : ''}이월</span>` : ''}
+          </div>
+          <div class="text-2xl sm:text-3xl font-black tracking-tight leading-none">${pz.jackpot.toLocaleString()}<span class="text-base font-bold">P</span></div>
+          <div class="text-[11px] text-white/75">참가 ${people}명 · ${sold}장 · 1등 확률 ${Math.round(lottoHitChance(w) * 100)}%</div>
+          <div class="text-[11px] text-white/75">추첨까지 ${dd ? `${dd}일 ` : ''}${hh}시간 ${mm}분</div>
+        </div>
+        <div class="flex items-center justify-between"><span class="text-xs font-bold group-hover:underline">복권 사기</span><span class="w-7 h-7 rounded-full bg-white text-indigo-700 flex items-center justify-center font-black text-sm group-hover:scale-110 transition-transform">→</span></div>
+      </div>
+      <div onclick="openPlateModal()" class="hero-half group cursor-pointer rounded-2xl p-4 flex flex-col justify-between gap-2">
+        <div class="space-y-1.5">${plate}</div>
+        <div class="flex items-center justify-between"><span class="text-xs font-bold group-hover:underline">입찰하러 가기</span><span class="w-7 h-7 rounded-full bg-white text-indigo-700 flex items-center justify-center font-black text-sm group-hover:scale-110 transition-transform">→</span></div>
+      </div>
     </div>`;
 }
 setInterval(renderLottoHero, 30000);

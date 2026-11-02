@@ -850,7 +850,7 @@ body { font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMac
 .menu-side-value { font-size: 12px; font-weight: 700; color: #334155; line-height: 1.35; word-break: keep-all; }
 
 /* 🎟️ 밥심 복권 */
-.lotto-pot { background: #e11d48; }
+.lotto-pot { background: #4f46e5; }
 
 /* 🧰 밥심 유틸리티 (기능별 묶음) */
 .util-group { display: flex; flex-direction: column; gap: 6px; padding: 8px; border-radius: 16px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07); }
@@ -909,4 +909,6 @@ body { font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMac
 .statue-hall { background: linear-gradient(135deg, #fef3c7, #fde68a); border: 1.5px solid #f59e0b66; }
 .statue-md .statue-bubble { top: -14px; left: 74%; }
 .statue-perk { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 7px 2px; border-radius: 12px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); font-size: 10px; font-weight: 800; color: #e2e8f0; line-height: 1.3; word-break: keep-all; }
-.lotto-hero { background: #e11d48; }
+.lotto-hero { background: #4f46e5; }
+.hero-half { background: rgba(255,255,255,.10); transition: background .15s; }
+.hero-half:hover { background: rgba(255,255,255,.17); }
