@@ -912,3 +912,8 @@ body { font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMac
 .lotto-hero { background: #4f46e5; }
 .hero-half { background: rgba(255,255,255,.10); transition: background .15s; }
 .hero-half:hover { background: rgba(255,255,255,.17); }
+/* 식단표 카드 압축: 한 화면에 4곳이 다 보이도록 */
+.menu-card .menu-item { padding: 4px 0; font-size: 13.5px; }
+.menu-card .menu-side { padding: 6px 10px; border-radius: 12px; flex-direction: row; align-items: baseline; gap: 6px; }
+.menu-card .menu-side-label { flex-shrink: 0; }
+.menu-card .menu-side-value { font-size: 11.5px; }

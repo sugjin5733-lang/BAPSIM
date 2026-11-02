@@ -149,13 +149,13 @@ function renderCards() {
     const isNotToday = !dateInfo.isToday;
 
     const card = document.createElement('div');
-    card.className = `menu-card group relative overflow-hidden bg-white rounded-3xl p-5 sm:p-6 border transition-all duration-300 flex flex-col justify-between hover:-translate-y-0.5 ${isVoted ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-slate-200/70'}`;
+    card.className = `menu-card group relative overflow-hidden bg-white rounded-3xl px-5 pt-5 pb-3.5 border transition-all duration-300 flex flex-col justify-between hover:-translate-y-0.5 ${isVoted ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-slate-200/70'}`;
     card.style.setProperty('--accent', accent);
 
     let bottomActionHTML = '';
     if (isLobby) {
       bottomActionHTML = `
-        <div class="mt-5 pt-4 border-t border-dashed border-slate-200 flex items-center justify-between">
+        <div class="mt-3 pt-2.5 border-t border-dashed border-slate-200 flex items-center justify-between">
           <button onclick="openEditModal(${jsArg(r.id)})" class="text-[11px] text-slate-400 hover:text-orange-500 font-semibold flex items-center gap-1">
             <i data-lucide="settings-2" class="w-3.5 h-3.5"></i>
             정보 수정
@@ -216,8 +216,8 @@ function renderCards() {
         return `<li class="menu-item"><span class="menu-dot"></span>${tag}<span class="min-w-0 break-keep">${esc(mm ? mm[2] : m)}</span></li>`;
       }).join('');
       menuBodyHTML = `
-        <ul class="mt-4 space-y-0.5">${mainsHTML}</ul>
-        <div class="mt-4 grid grid-cols-2 gap-2 text-xs">
+        <ul class="mt-2.5">${mainsHTML}</ul>
+        <div class="mt-2.5 grid grid-cols-2 gap-2 text-xs">
           <div class="menu-side">
             <span class="menu-side-label">🍲 국 · 탕</span>
             <span class="menu-side-value">${esc(r.soup || '-')}</span>
@@ -238,8 +238,7 @@ function renderCards() {
               <span class="truncate">${esc(r.name)}</span>
               ${isTop ? '<span class="text-[10px] bg-amber-400 text-amber-950 font-black px-1.5 py-0.5 rounded-md shadow-xs shrink-0">👑 1위</span>' : ''}
             </h4>
-            <div class="mt-1 text-[11px] font-bold ${dateInfo.isToday ? 'text-emerald-600' : 'text-slate-400'}">${dateInfo.text}</div>
-            ${restaurantIntro(r.name) ? `<div class="mt-1 text-xs font-medium text-slate-500 break-keep">${esc(restaurantIntro(r.name))}</div>` : ''}
+            <div class="mt-0.5 text-[11px] font-medium text-slate-400 truncate"><b class="${dateInfo.isToday ? 'text-emerald-600' : 'text-slate-400'}">${dateInfo.text}</b>${restaurantIntro(r.name) ? ` · <span class="break-keep">${esc(restaurantIntro(r.name))}</span>` : ''}</div>
           </div>
           <div class="shrink-0 text-right">
             <div class="text-lg font-black text-slate-900 tracking-tight leading-none">${esc(displayPrice)}</div>
