@@ -113,6 +113,7 @@ function openAdminDashboard() {
   renderAdminUserList();
   renderAdminGroupList();
   renderAdminRestaurantList();
+  renderAdminOwedList();
   renderAdminSignupRequests();
   renderAdminRenameRequests();
 }
@@ -681,6 +682,34 @@ async function handleAdminResetAllVotes() {
   });
   await db.ref().update(updates);
   alert('투표 리셋 완료');
+}
+
+// ⏳ 회원 보류 포인트 현황
+function renderAdminOwedList() {
+  let whiteUid = null;
+  const draw = (users) => {
+    const box = document.getElementById('adminOwedList');
+    if (!box) return;
+    const now = Date.now();
+    const rows = Object.values(users || {}).filter(u => u && u.nickname).map(u => {
+      const owed = Number(u.owed) || 0, pts = Number(u.points) || 0;
+      const tier = u.uid && u.uid === whiteUid ? ['🤍 화이트', 300000] : (Number(u.blackUntil) || 0) > now ? ['🖤 블랙', 150000] : (Number(u.goldUntil) || 0) > now ? ['🥇 골드', 100000] : ['일반', 72000];
+      return { nick: u.nickname, owed, pts, tier: tier[0], rate: tier[1], hours: owed / tier[1], seen: Number(u.updatedAt) || 0 };
+    }).sort((x, y) => y.owed - x.owed);
+    const total = rows.reduce((t, r) => t + r.owed, 0);
+    const tEl = document.getElementById('adminOwedTotal');
+    if (tEl) tEl.textContent = `총 ${total.toLocaleString()}P · ${rows.filter(r => r.owed > 0).length}명`;
+    const fmtH = h => h < 1 ? `${Math.ceil(h * 60)}분` : h < 48 ? `${h.toFixed(1)}시간` : `${(h / 24).toFixed(1)}일`;
+    box.innerHTML = rows.filter(r => r.owed > 0).length === 0 ? '<div class="text-center text-slate-400 py-3">보류 포인트가 있는 회원이 없어요.</div>'
+      : rows.filter(r => r.owed > 0).map(r => `<div class="p-2 bg-white border rounded-xl flex items-center justify-between gap-2">
+          <div class="min-w-0"><div class="font-bold text-slate-800 truncate">${esc(r.nick)} <span class="text-[10px] text-slate-400 font-medium">${r.tier}</span></div>
+            <div class="text-[10px] text-slate-400">포인트 ${r.pts.toLocaleString()}P · 시간당 ${(r.rate / 10000).toLocaleString()}만 · 마지막 접속 ${r.seen ? new Date(r.seen).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }) : '-'}</div></div>
+          <div class="text-right shrink-0"><div class="font-black text-amber-600">⏳ ${r.owed.toLocaleString()}P</div><div class="text-[10px] text-slate-500">다 받는 데 약 ${fmtH(r.hours)} (접속 기준)</div></div>
+        </div>`).join('');
+  };
+  let last = {};
+  db.ref('bank/white/throne').on('value', s => { const t = s.val(); whiteUid = t && t.uid || null; draw(last); }, () => {});
+  db.ref('user_points').on('value', s => { last = s.val() || {}; draw(last); }, onDbError);
 }
 
 // 🍽️ 등록 식당 관리 (관리자 전용 삭제)
