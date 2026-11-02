@@ -206,6 +206,7 @@ function loadGameStateFromUser(val) {
   if (typeof loadBoostFromUser === "function") loadBoostFromUser(val);
   if (typeof loadBowlFromUser === "function") loadBowlFromUser(val);
   if (typeof loadTierFromUser === "function") loadTierFromUser(val);
+  loadBestEnhance(val);
 }
 
 function bindNickname(nick) {
@@ -409,6 +410,30 @@ function miningNote(asked, got) {
     : `\n⛏️ 오늘 채굴 한도(${MINING_DAILY_CAP.toLocaleString()}P)에 도달해서 ${got}P만 지급됐어요.`;
 }
 
+// 🍚 밥키우기 최고 기록 (블랙 정책 조건용). 판매하면 0강으로 돌아가니 '달성한 적 있는 최고 단계'를 따로 저장
+let myBestEnhance = 0, bestEnhanceChecked = false;
+function loadBestEnhance(val) {
+  const srvBest = Math.max(Number(val && val.bestEnhance) || 0, Number(val && val.enhanceLevel) || 0);
+  if (srvBest > myBestEnhance) myBestEnhance = srvBest;
+  if (bestEnhanceChecked || !canSyncToCloud()) return;
+  bestEnhanceChecked = true;
+  if (typeof val.bestEnhance === 'number') return;
+  // 처음 한 번: 이번 시즌 내 강화 기록에서 최고 단계를 찾아 채움
+  db.ref(`point_logs/${currentUser.nickname}`).once('value').then(s => {
+    let mx = myBestEnhance;
+    s.forEach(c => {
+      const r = String((c.val() || {}).r || '');
+      const a = r.match(/강화 시도 \+(\d+)→/); if (a) mx = Math.max(mx, +a[1]);
+      const b = r.match(/\+(\d+)강 밥 판매/); if (b) mx = Math.max(mx, +b[1]);
+    });
+    myBestEnhance = Math.min(30, mx);
+    db.ref(`user_points/${currentUser.nickname}/bestEnhance`).set(myBestEnhance).catch(() => {});
+  }).catch(() => {});
+}
+function bumpBestEnhance(updates, base) {
+  if (currentEnhanceLevel > myBestEnhance) { myBestEnhance = currentEnhanceLevel; updates[`${base}/bestEnhance`] = myBestEnhance; }
+}
+
 function syncUserPointToCloud() {
   if (!canSyncToCloud()) return;
   const nick = currentUser.nickname;
@@ -416,6 +441,7 @@ function syncUserPointToCloud() {
   const updates = {};
   const put = (k, v) => { updates[`${base}/${k}`] = v; };
   put('enhanceLevel', currentEnhanceLevel);
+  bumpBestEnhance(updates, base);
   put('badge', myNickBg);
   put('color', myNickColor);
   put('symbol', myNickSymbol);

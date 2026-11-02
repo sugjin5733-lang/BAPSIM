@@ -917,10 +917,9 @@ function syncEnhanceToCloud() {
   if (!canSyncToCloud()) return;
   // 서버 값과 같으면 저장하지 않음 (화면 갱신 → 저장 → 서버 응답 → 화면 갱신 ... 무한 반복 방지)
   if (currentEnhanceLevel === lastServerState.enhanceLevel) return;
-  db.ref(`user_points/${currentUser.nickname}`).update({
-    enhanceLevel: currentEnhanceLevel,
-    enhanceUpdated: Date.now()
-  });
+  const up = { enhanceLevel: currentEnhanceLevel, enhanceUpdated: Date.now() };
+  if (currentEnhanceLevel > myBestEnhance) { myBestEnhance = currentEnhanceLevel; up.bestEnhance = myBestEnhance; }
+  db.ref(`user_points/${currentUser.nickname}`).update(up);
 }
 
 // 밥키우기 스페이스바로 강화 시도

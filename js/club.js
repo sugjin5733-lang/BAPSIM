@@ -7,11 +7,11 @@
 //     - policies/{종류} = { by, from, until, ... }  · 발동 기록은 policy_log 에 (관리자 조작 검사용)
 
 const BLACK_POLICIES = {
-  market:  { icon: '💹', name: '시세 부양',  price: 3000000, mins: 3,  cooldownMin: 60,  desc: '3분 동안 밥 시세를 x2.00 으로 고정 (모든 회원)', mult: 2.0 },
-  fest:    { icon: '🍀', name: '강화 축제',  price: 5000000, mins: 30, cooldownMin: 180, desc: '30분 동안 모든 회원 강화 성공 확률 ×1.1' },
-  nofee:   { icon: '🆓', name: '수수료 휴일', price: 2000000, mins: 30, cooldownMin: 180, desc: '30분 동안 모든 회원 밥 판매 수수료 0%' },
+  market:  { icon: '💹', name: '시세 부양',  minLevel: 23, price: 3000000, mins: 3,  cooldownMin: 60,  desc: '3분 동안 밥 시세를 x2.00 으로 고정 (모든 회원)', mult: 2.0 },
+  fest:    { icon: '🍀', name: '강화 축제',  minLevel: 23, price: 5000000, mins: 30, cooldownMin: 180, desc: '30분 동안 모든 회원 강화 성공 확률 ×1.1' },
+  nofee:   { icon: '🆓', name: '수수료 휴일', minLevel: 23, price: 2000000, mins: 30, cooldownMin: 180, desc: '30분 동안 모든 회원 밥 판매 수수료 0%' },
   speaker: { icon: '📢', name: '블랙 확성기', price: 500000,  mins: 10, cooldownMin: 10,  desc: '내 메시지를 전광판 맨 위에 10분 동안 고정' },
-  hammer:  { icon: '⚖️', name: '심판의 망치', price: 10000000, mins: 0, cooldownMin: 1440, desc: '블랙이 아닌 회원 1명의 포인트(보류 포함)를 0으로 (예치금 제외) · 블랙끼리는 안 통함 · 24시간에 한 번' },
+  hammer:  { icon: '⚖️', name: '심판의 망치', minLevel: 25, price: 10000000, mins: 0, cooldownMin: 1440, desc: '블랙이 아닌 회원 1명의 포인트(보류 포함)를 0으로 (예치금 제외) · 블랙끼리는 안 통함 · 24시간에 한 번' },
   reset:   { icon: '⏱️', name: '쿨타임 초기화', price: 10000000, mins: 0, cooldownMin: 0, desc: '블랙 클럽의 모든 정책 쿨타임을 지금 바로 초기화 (진행 중인 정책은 그대로)' }
 };
 const FEST_MULT = 1.1;
@@ -56,6 +56,7 @@ async function activatePolicy(type) {
   const def = BLACK_POLICIES[type];
   if (!def) return;
   if (!(typeof isBlack === 'function' && isBlack())) return alert('🖤 프레스티지 블랙 회원만 정책을 행사할 수 있어요.');
+  if (def.minLevel && myBestEnhance < def.minLevel) return alert(`🍚 [${def.name}]은 밥키우기 +${def.minLevel}강을 달성한 적이 있어야 쓸 수 있어요.\n(내 최고 기록: +${myBestEnhance}강)`);
   if (policyActive(type)) return alert(`이미 [${def.name}]이 진행 중이에요. (${policyLeftText(type)} 남음)`);
   const cd = policyCooldownLeft(type);
   if (cd > 0) return alert(`[${def.name}] 쿨타임: ${Math.ceil(cd / 60000)}분 뒤에 다시 쓸 수 있어요.`);
@@ -244,8 +245,9 @@ function renderBlackClubPolicies() {
         <div class="text-xs font-black">${d.icon} ${d.name}</div>
         <div class="text-[10px] text-slate-400">${d.desc}</div>
         <div class="text-[10px] font-bold mt-0.5">${state}</div>
+        ${d.minLevel ? `<div class="text-[10px] mt-0.5 ${myBestEnhance >= d.minLevel ? 'text-emerald-300/80' : 'text-rose-300'}">🍚 +${d.minLevel}강 달성 필요 ${myBestEnhance >= d.minLevel ? '✓' : `(내 최고 +${myBestEnhance}강)`}</div>` : ''}
       </div>
-      <button ${!black || on || cd > 0 ? 'disabled' : ''} onclick="activatePolicy('${t}')" class="shrink-0 bg-amber-300 disabled:bg-white/10 disabled:text-slate-500 text-slate-950 font-black px-2.5 py-1.5 rounded-lg text-[11px]">${(d.price / 10000).toLocaleString()}만P</button>
+      <button ${!black || on || cd > 0 || (d.minLevel && myBestEnhance < d.minLevel) ? 'disabled' : ''} onclick="activatePolicy('${t}')" class="shrink-0 bg-amber-300 disabled:bg-white/10 disabled:text-slate-500 text-slate-950 font-black px-2.5 py-1.5 rounded-lg text-[11px]">${(d.price / 10000).toLocaleString()}만P</button>
     </div>`;
   }).join('');
 }
