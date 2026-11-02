@@ -12,7 +12,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Black+Han+Sans&family=Rubik+Glitch&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-  <link rel="stylesheet" href="css/style.css?v=20261103g">
+  <link rel="stylesheet" href="css/style.css?v=20261103h">
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white relative">
 
@@ -319,10 +319,14 @@
             <span>상점</span>
           </button>
 
-          <button onclick="openPlateModal()" class="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-yellow-600 to-amber-500 hover:from-yellow-700 hover:to-amber-600 text-white font-black px-2 py-2.5 rounded-xl text-xs shadow-md transition-all">
-            <span>🏷️</span>
-            <span>경매</span>
-          </button>
+          <div class="w-full grid grid-cols-2 rounded-xl overflow-hidden shadow-md text-xs font-black text-white">
+            <button onclick="openPlateModal()" class="flex items-center justify-center gap-1 bg-gradient-to-r from-yellow-600 to-amber-500 hover:brightness-110 px-1 py-2.5 whitespace-nowrap transition-all border-r border-white/30">
+              <span>🏷️</span><span>경매</span>
+            </button>
+            <button onclick="openLottoModal()" class="flex items-center justify-center gap-1 bg-gradient-to-r from-rose-500 to-pink-500 hover:brightness-110 px-1 py-2.5 whitespace-nowrap transition-all">
+              <span>🎟️</span><span>로또</span>
+            </button>
+          </div>
 
           <button onclick="openBankModal()" class="w-full flex items-center justify-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white font-black px-2 py-2.5 rounded-xl text-xs shadow-md transition-all">
             <span>🏦</span>
@@ -767,6 +771,19 @@
 
 
   <!-- 🏷️ 닉네임 명판 경매 -->
+  <div id="lottoModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this) closeLottoModal()">
+    <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-5 space-y-3 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+        <div>
+          <h3 class="font-black text-slate-900 text-base">🎟️ 밥심 복권</h3>
+          <p class="text-[11px] text-slate-400">매주 일요일 자정 추첨 · 장당 1만P</p>
+        </div>
+        <button onclick="closeLottoModal()" class="text-slate-400 hover:text-slate-700 text-sm p-1">✕</button>
+      </div>
+      <div id="lottoBox" class="space-y-3"></div>
+    </div>
+  </div>
+
   <div id="plateModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this) closePlateModal()">
     <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-5 space-y-3 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
@@ -829,7 +846,7 @@
         <div class="text-[10px] font-black tracking-widest text-sky-200">은행 금고 (재난지원금 재원)</div>
         <div id="bankBalance" class="text-2xl font-black mt-0.5">0P</div>
         <div id="bankFeeTotal" class="text-[10px] font-bold text-sky-200"></div>
-        <div class="text-[10px] text-sky-100/80 mt-1 leading-relaxed">재원: 부자세(매일 자산 20만P 이상 1·2·3위 3만·2만·1만P) + 수수료(밥 판매 10% · 강화 아이템 10% · 보류 단축) + 기부 → 매일 자산 3만P 이하 회원 모두에게 2만P씩 재난지원금</div>
+        <div class="text-[10px] text-sky-100/80 mt-1 leading-relaxed">재원: 부자세(매일 자산 100만P 이상 1·2·3위 10만·7만·5만P) + 수수료(밥 판매 10% · 강화 아이템 10% · 보류 단축) + 기부 → 매일 자산 3만P 이하 회원 모두에게 10만P씩 재난지원금</div>
       </div>
 
       <div class="space-y-2">
@@ -1722,28 +1739,29 @@
     </div>
   </div>
 
-  <script src="js/core.js?v=20261103g"></script>
-  <script src="js/auth.js?v=20261103g"></script>
-  <script src="js/enhance.js?v=20261103g"></script>
-  <script src="js/shop.js?v=20261103g"></script>
-  <script src="js/chat.js?v=20261103g"></script>
-  <script src="js/games.js?v=20261103g"></script>
-  <script src="js/admin.js?v=20261103g"></script>
-  <script src="js/ranking.js?v=20261103g"></script>
-  <script src="js/restaurants.js?v=20261103g"></script>
-  <script src="js/tools.js?v=20261103g"></script>
-  <script src="js/feed.js?v=20261103g"></script>
-  <script src="js/bank.js?v=20261103g"></script>
-  <script src="js/tier.js?v=20261103g"></script>
-  <script src="js/club.js?v=20261103g"></script>
-  <script src="js/white.js?v=20261103g"></script>
-  <script src="js/pets.js?v=20261103g"></script>
-  <script src="js/chair.js?v=20261103g"></script>
-  <script src="js/nameplate.js?v=20261103g"></script>
-  <script src="js/cards.js?v=20261103g"></script>
-  <script src="js/season.js?v=20261103g"></script>
-  <script src="js/duel.js?v=20261103g"></script>
-  <script src="js/predict.js?v=20261103g"></script>
-  <script src="js/main.js?v=20261103g"></script>
+  <script src="js/core.js?v=20261103h"></script>
+  <script src="js/auth.js?v=20261103h"></script>
+  <script src="js/enhance.js?v=20261103h"></script>
+  <script src="js/shop.js?v=20261103h"></script>
+  <script src="js/chat.js?v=20261103h"></script>
+  <script src="js/games.js?v=20261103h"></script>
+  <script src="js/admin.js?v=20261103h"></script>
+  <script src="js/ranking.js?v=20261103h"></script>
+  <script src="js/restaurants.js?v=20261103h"></script>
+  <script src="js/tools.js?v=20261103h"></script>
+  <script src="js/feed.js?v=20261103h"></script>
+  <script src="js/bank.js?v=20261103h"></script>
+  <script src="js/tier.js?v=20261103h"></script>
+  <script src="js/club.js?v=20261103h"></script>
+  <script src="js/white.js?v=20261103h"></script>
+  <script src="js/pets.js?v=20261103h"></script>
+  <script src="js/chair.js?v=20261103h"></script>
+  <script src="js/nameplate.js?v=20261103h"></script>
+  <script src="js/lotto.js?v=20261103h"></script>
+  <script src="js/cards.js?v=20261103h"></script>
+  <script src="js/season.js?v=20261103h"></script>
+  <script src="js/duel.js?v=20261103h"></script>
+  <script src="js/predict.js?v=20261103h"></script>
+  <script src="js/main.js?v=20261103h"></script>
 </body>
 </html>

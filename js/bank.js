@@ -3,8 +3,8 @@
 //  💸 송금: 다른 회원에게 포인트 보내기 (transfers/{받는사람}/{id} → 받는 사람 화면이 열리면 자동 수령)
 //  🎗️ 기부: 은행 금고에 기부, 누적 10,000,000P 이상이면 '대천사의 날개' 배지 (프레스티지 상점에서 수령)
 //  🧾 수수료: 밥 판매·강화 아이템·보류 단축 수수료는 전부 금고로 (payFee)
-//  🏛️ 부자세: 매일(KST) 자산 1·2·3위에게 30,000 / 20,000 / 10,000P
-//  🆘 재난지원금: 매일 자산(포인트+보류) 3만P 이하인 회원(최근 3일 활동) 모두에게 20,000P씩 (금고에서)
+//  🏛️ 부자세: 매일(KST) 자산 1·2·3위에게 100,000 / 70,000 / 50,000P
+//  🆘 재난지원금: 매일 자산(포인트+보류) 3만P 이하인 회원(최근 3일 활동) 모두에게 100,000P씩 (금고에서)
 //
 //  서버가 없으므로: 그날 첫 접속자가 정산표(bank/days/{날짜})를 한 번만 만들고,
 //  각자 접속하면 자기 몫(세금 납부 / 지원금 수령)을 자동 처리함.
@@ -14,13 +14,13 @@
 const TRANSFER_MIN = 100;
 const DONOR_BADGE_GOAL = 10000000;
 const DONOR_BADGE = 'nb-angel';
-const TAX_TABLE = [30000, 20000, 10000];
-const RELIEF_AMOUNT = 20000;
+const TAX_TABLE = [100000, 70000, 50000];
+const RELIEF_AMOUNT = 100000;
 const RELIEF_ACTIVE_DAYS = 3;
 const RELIEF_LIMIT = 30000; // 자산(포인트+보류) 3만P 이하면 누구나 지원
 // '잃은 금액' 계산에서 빼는 항목 (게임이 아닌 소비/이동)
 const NET_EXCLUDE = /상점|입장권|변경권|송금|기부|부자세|재난지원금|보류|환불|환급|관리자|배지/;
-const TAX_MIN_ASSETS = 200000; // 자산(포인트+보류+예치) 20만P 이상만 부자세 대상
+const TAX_MIN_ASSETS = 1000000; // 자산(포인트+보류+예치) 100만P 이상만 부자세 대상
 
 let myDayNet = { d: '', v: 0, pd: '', pv: 0 };
 let dayNetLoaded = false;
@@ -433,7 +433,7 @@ function renderBankModal() {
 
   const taxers = Object.entries(bankState.taxTotal || {}).filter(([, v]) => Number(v) > 0).sort((a, b) => b[1] - a[1]).slice(0, 10);
   set('bankTaxRank', taxers.length === 0
-    ? '<div class="text-center text-slate-400 py-2">아직 부자세를 낸 사람이 없어요 (자산 20만P 이상 상위 3명이 매일 납부)</div>'
+    ? '<div class="text-center text-slate-400 py-2">아직 부자세를 낸 사람이 없어요 (자산 100만P 이상 상위 3명이 매일 납부)</div>'
     : taxers.map(([n, v], i) => `<div class="flex justify-between py-1 border-b border-slate-100 last:border-0"><span class="font-bold text-slate-700">${['🥇', '🥈', '🥉'][i] || (i + 1)} ${esc(n)}${n === me ? ' (나)' : ''}</span><span class="font-black text-emerald-700">${fmtP(v)}</span></div>`).join(''));
   const donors = Object.entries(bankState.donors || {}).sort((a, b) => b[1] - a[1]).slice(0, 5);
   set('bankDonorRank', donors.length === 0

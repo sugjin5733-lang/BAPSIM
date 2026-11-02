@@ -915,11 +915,30 @@ function doDoubleUp() {
       const b = document.getElementById('doubleUpPanel');
       if (b) {
         b.className = 'p-3 rounded-2xl border-2 border-rose-500/70 bg-rose-950/40 text-xs';
-        b.innerHTML = `<div class="text-rose-300 font-black">💸 실패! 건 ${lost.toLocaleString()}P를 잃었어요... 다음엔 꼭!</div>${safeRest > 0 ? `<div class="text-[10px] text-slate-400 mt-1">판매금 나머지 ${safeRest.toLocaleString()}P는 그대로 있어요</div>` : ''}`;
-        setTimeout(() => { if (!doubleUp) b.classList.add('hidden'); }, 3500);
+        b.innerHTML = `<div class="text-rose-300 font-black">💸 실패! 건 ${lost.toLocaleString()}P를 잃었어요... 다음엔 꼭!</div><div id="doubleUpComfort" class="text-[11px] text-amber-200 font-bold mt-1"></div>${safeRest > 0 ? `<div class="text-[10px] text-slate-400 mt-1">판매금 나머지 ${safeRest.toLocaleString()}P는 그대로 있어요</div>` : ''}`;
+        setTimeout(() => { if (!doubleUp) b.classList.add('hidden'); }, 4500);
       }
+      payDoubleUpComfort(lost);
     }
   }, 700);
+}
+
+// 🏦 더블 도전 위로금: 실패해서 잃은 금액의 30%를 은행 금고에서 돌려줌 (금고에 1,000만P 이상 남을 때만)
+const DOUBLE_UP_COMFORT_RATE = 0.3;
+const DOUBLE_UP_COMFORT_RESERVE = 10000000;
+async function payDoubleUpComfort(lost) {
+  const amt = Math.floor(lost * DOUBLE_UP_COMFORT_RATE);
+  if (amt <= 0 || !canSyncToCloud()) return;
+  let ok = false;
+  try {
+    const r = await db.ref('bank/balance').transaction(c => { const v = Number(c) || 0; return v - amt >= DOUBLE_UP_COMFORT_RESERVE ? v - amt : undefined; });
+    ok = r.committed;
+  } catch (e) { ok = false; }
+  const el = document.getElementById('doubleUpComfort');
+  if (!ok) { if (el) el.textContent = '🏦 은행 금고가 넉넉하지 않아 이번엔 위로금이 없어요'; return; }
+  addPoints(amt, `🏦 더블 도전 위로금 (잃은 ${lost.toLocaleString()}P의 30%)`);
+  updatePointsUI();
+  if (el) el.innerHTML = `🏦 밥심 은행 위로금 <b>+${amt.toLocaleString()}P</b> (잃은 금액의 30%)`;
 }
 
 function stopDoubleUp() {
