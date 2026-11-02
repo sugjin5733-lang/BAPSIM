@@ -1,4 +1,4 @@
-body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+body { font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -834,3 +834,6 @@ body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 
 @keyframes plateLive { 50% { opacity: .35; } }
 .plate-explain { background: linear-gradient(180deg, #16130f, #0a0907); border: 1px solid rgba(212,175,55,.45); }
 .plate-hall { background: linear-gradient(180deg, #16130f, #0a0907) !important; border: 1px solid rgba(212,175,55,.45) !important; }
+
+/* 한글 단어 중간에서 줄이 끊기지 않게 */
+.break-keep { word-break: keep-all; }
