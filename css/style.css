@@ -860,3 +860,25 @@ body { font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMac
 .util-btn:hover { filter: brightness(1.1); }
 .util-btn:active { transform: scale(.97); }
 .util-btn.hidden { display: none !important; }
+
+/* 🗿 밥심 동상 — 작고 귀여운 금동상이 주인 이름을 응원 */
+.statue-corner { transition: transform .15s; }
+.statue-corner:hover { transform: translateY(-1px); }
+.statue-fig { position: relative; display: inline-flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+.statue-sm { width: 38px; height: 44px; }
+.statue-md { width: 46px; height: 54px; }
+.statue-body { position: relative; z-index: 1; line-height: 1; filter: sepia(1) saturate(3.2) hue-rotate(-12deg) brightness(1.08) drop-shadow(0 1px 0 #92400e) drop-shadow(0 0 4px rgba(251,191,36,.55)); animation: statueBob 2.6s ease-in-out infinite; }
+.statue-sm .statue-body { font-size: 22px; }
+.statue-md .statue-body { font-size: 27px; }
+.statue-base { width: 78%; height: 7px; margin-top: -1px; border-radius: 3px 3px 5px 5px; background: linear-gradient(180deg, #fde68a, #d97706 60%, #92400e); box-shadow: 0 2px 3px rgba(120,53,15,.35), inset 0 1px 0 rgba(255,255,255,.6); }
+.statue-bubble { position: absolute; top: -3px; left: 62%; z-index: 2; white-space: nowrap; font-size: 9px; font-weight: 900; color: #9a3412; background: #fff; border: 1px solid #fcd34d; border-radius: 9px 9px 9px 2px; padding: 1px 5px; box-shadow: 0 2px 5px rgba(217,119,6,.25); animation: statueCheer 2.6s ease-in-out infinite; transform-origin: bottom left; }
+.statue-empty .statue-body { filter: grayscale(1) opacity(.45); animation: none; }
+.statue-name .nick-text, .statue-name > * { animation: statueNameGlow 2.6s ease-in-out infinite; }
+@keyframes statueBob { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-3px) rotate(4deg); } }
+@keyframes statueCheer { 0%, 100% { transform: scale(1) rotate(-3deg); } 50% { transform: scale(1.12) rotate(3deg); } }
+@keyframes statueNameGlow { 0%, 100% { filter: drop-shadow(0 0 0 rgba(251,191,36,0)); } 50% { filter: drop-shadow(0 0 5px rgba(251,191,36,.75)); } }
+.statue-shop { background: radial-gradient(ellipse 70% 100% at 50% 0%, rgba(251,191,36,.18), transparent 65%), rgba(255,255,255,.04); border: 1px solid rgba(251,191,36,.35); }
+.statue-pick { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 5px 0; border-radius: 12px; background: rgba(255,255,255,.05); border: 1.5px solid rgba(255,255,255,.08); color: #e2e8f0; transition: all .15s; }
+.statue-pick:hover { background: rgba(255,255,255,.1); }
+.statue-pick.on { border-color: #fbbf24; background: rgba(251,191,36,.15); color: #fde68a; }
+.statue-pick-icon { font-size: 20px; filter: sepia(1) saturate(3.2) hue-rotate(-12deg) brightness(1.08); }

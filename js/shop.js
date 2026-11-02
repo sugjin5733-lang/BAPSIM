@@ -357,6 +357,7 @@ function renderPrestigeShop() {
   renderRenameSection();
   if (typeof renderDonorBadgeBox === 'function') renderDonorBadgeBox();
   if (typeof renderTierBox === 'function') renderTierBox();
+  if (typeof renderStatueShop === 'function') renderStatueShop();
 }
 
 function buyPrestigePass() {
