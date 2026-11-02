@@ -1,12 +1,13 @@
 // 밥심 - 🏷️ 닉네임 명판 경매
 //
 //  - 매주(월~일) 경매 → 가장 높게 부른 사람이 '다음 주' 1주일 동안 메인 화면 맨 위 명판에 이름과 한마디를 걸어둠
-//  - 시작가 100만P · 다음 입찰은 현재 최고가의 +10% 이상
+//  - 시작가 30만P · 다음 입찰은 현재 최고가의 +10% 이상
+//  - 명판 주인 혜택: 1주일 메인 맨 위 노출 · 🥚 펫 알 10% 할인 · 시즌 도감 '명판 명예의 전당' 영구 등재
 //  - 입찰하는 순간 포인트를 맡김(차감). 더 높은 입찰이 들어오면 앞사람 돈은 자동 환급(bank/refunds)
 //  - 경매가 끝나면 낙찰금은 전액 소각 (인플레 억제)
 //  데이터: bank/nameplate/{주 시작일}/top { nick, uid, amount, msg, badge, color, at } · bank/nameplate/{주}/log
 
-const PLATE_START = 1000000;
+const PLATE_START = 300000;
 const PLATE_STEP = 0.1;
 let plateState = {};
 let plateWatching = false;
@@ -14,6 +15,10 @@ function plateNow() { return typeof ServerClock !== 'undefined' ? ServerClock.no
 function plateWeek() { return weekKey(plateNow()); }
 function platePrevWeek() { return prevWeekKey(plateNow()); }
 function plateWeekEnd() { return Date.parse(`${plateWeek()}T00:00:00+09:00`) + 7 * 86400000; }
+function plateHolder() { return (plateState[platePrevWeek()] || {}).top || null; }
+function isPlateHolder() { const h = plateHolder(); return !!(h && typeof authUser !== 'undefined' && authUser && h.uid === authUser.uid); }
+function plateLeftText() { const left = Math.max(0, plateWeekEnd() - plateNow()); const d = Math.floor(left / 86400000), h = Math.floor(left % 86400000 / 3600000), m = Math.floor(left % 3600000 / 60000); return `${d ? `${d}일 ` : ''}${h}시간 ${m}분`; }
+const PLATE_PERKS = [['📣', '1주일 동안 밥심 맨 위에 내 이름과 한마디'], ['🥚', '펫 알 10% 할인'], ['🏅', '시즌 도감 「명판 명예의 전당」 영구 등재']];
 function plateMinBid() {
   const top = (plateState[plateWeek()] || {}).top;
   return top ? Math.ceil(top.amount * (1 + PLATE_STEP) / 10000) * 10000 : PLATE_START;
@@ -68,16 +73,22 @@ async function bidNameplate() {
 function renderPlateBanner() {
   const el = document.getElementById('nameplateBanner');
   if (!el) return;
-  const holder = (plateState[platePrevWeek()] || {}).top;
+  const holder = plateHolder();
   const cur = (plateState[plateWeek()] || {}).top;
-  el.innerHTML = holder
-    ? `<div class="plate-label">🏷️ 이번 주 명판</div>
-       <div class="plate-name">${nickHTML({ nickname: holder.nick, badge: holder.badge, color: holder.color }, 'text-sm')}</div>
-       ${holder.msg ? `<div class="plate-msg">“${esc(holder.msg)}”</div>` : ''}
-       <div class="plate-sub">${holder.amount.toLocaleString()}P 낙찰 · 다음 주 경매 ${cur ? `최고 ${cur.amount.toLocaleString()}P` : '진행 중'} ›</div>`
-    : `<div class="plate-label">🏷️ 이번 주 명판</div>
-       <div class="plate-name text-slate-400 text-xs font-bold">주인 없음</div>
-       <div class="plate-sub">다음 주 명판 경매 ${cur ? `최고 ${cur.amount.toLocaleString()}P (${esc(cur.nick)})` : `시작가 ${(PLATE_START / 10000)}만P`} · 입찰하기 ›</div>`;
+  el.innerHTML = `
+    <div class="plate-plaque">
+      <div class="plate-label">🏷️ THIS WEEK'S NAMEPLATE</div>
+      ${holder
+        ? `<div class="plate-name">${nickHTML({ nickname: holder.nick, badge: holder.badge, color: holder.color }, 'text-base')}</div>${holder.msg ? `<div class="plate-msg">“${esc(holder.msg)}”</div>` : ''}`
+        : `<div class="plate-empty">당신의 이름이 걸릴 자리</div><div class="plate-msg">다음 주, 밥심 맨 위에 이름을 새겨보세요</div>`}
+    </div>
+    <div class="plate-perks">${PLATE_PERKS.map(([i, t]) => `<span>${i} ${t}</span>`).join('')}</div>
+    <div class="plate-auction">
+      <div class="plate-a-title">다음 주 명판 경매</div>
+      <div class="plate-a-bid">${cur ? `${cur.amount.toLocaleString()}P` : `${(PLATE_START / 10000)}만P부터`}</div>
+      <div class="plate-a-sub">${cur ? `현재 1위 ${esc(cur.nick)}` : '아직 아무도 안 불렀어요 · 지금이 기회!'} · ⏳ ${plateLeftText()}</div>
+      <span class="plate-cta">입찰하기 →</span>
+    </div>`;
 }
 function openPlateModal() { document.getElementById('plateModal').classList.remove('hidden'); renderPlateModal(); }
 function closePlateModal() { document.getElementById('plateModal').classList.add('hidden'); }
@@ -89,6 +100,12 @@ function renderPlateModal() {
   const d = Math.floor(left / 86400000), h = Math.floor(left % 86400000 / 3600000), mi = Math.floor(left % 3600000 / 60000);
   const box = document.getElementById('plateAuctionBox');
   if (box) box.innerHTML = `
+    <div class="rounded-2xl bg-slate-900 text-white p-3 space-y-1.5">
+      <div class="text-xs font-black text-amber-300">🏷️ 명판이 뭐예요?</div>
+      <p class="text-[11px] text-slate-300 leading-relaxed">매주 단 한 명만 가질 수 있는 밥심의 <b class="text-white">간판 자리</b>예요. 이번 주 경매에서 가장 높게 부른 사람이 <b class="text-white">다음 주 월요일부터 1주일 동안</b> 명판의 주인이 돼요.</p>
+      <ul class="text-[11px] text-amber-100 space-y-0.5">${PLATE_PERKS.map(([i, t]) => `<li>${i} ${t}</li>`).join('')}</ul>
+      <p class="text-[10px] text-slate-400">입찰금은 바로 맡겨지고, 누가 더 높게 부르면 자동으로 돌려받아요. 1등 낙찰금만 소각돼요.</p>
+    </div>
     <div class="rounded-2xl plate-card p-4 text-center space-y-1">
       <div class="text-[10px] font-black tracking-[0.3em] text-amber-700">NEXT WEEK'S NAMEPLATE</div>
       ${cur ? `<div class="text-xs text-slate-500">현재 최고 입찰</div><div class="text-2xl font-black text-slate-900">${cur.amount.toLocaleString()}P</div><div>${nickHTML({ nickname: cur.nick, badge: cur.badge, color: cur.color }, 'text-xs')}</div>${cur.msg ? `<div class="text-[11px] text-slate-500 italic">“${esc(cur.msg)}”</div>` : ''}`

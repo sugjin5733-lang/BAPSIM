@@ -268,6 +268,20 @@ function renderChairSection() {
   box.innerHTML = `
     ${proposalRowsHTML(3)}
     <div class="rounded-2xl border border-amber-300/40 bg-gradient-to-br from-amber-300/10 to-transparent p-3 space-y-2">
+      <details class="chair-explain rounded-xl bg-black/30 border border-white/10 px-2.5 py-2" ${active ? '' : 'open'}>
+        <summary class="text-[11px] font-black text-amber-200 cursor-pointer">🏛️ 블랙 클럽 의장이란?</summary>
+        <div class="text-[11px] text-slate-300 leading-relaxed mt-1.5 space-y-1">
+          <p>블랙 회원들이 <b class="text-white">매주 투표로 뽑는 클럽의 대표</b>예요. 블랙이 ${CHAIR_MIN_BLACK}명 이상일 때부터 선거가 열리고, 일요일 자정에 표를 가장 많이 받은 사람이 다음 주 1주일 동안 의장이 돼요.</p>
+          <ul class="space-y-0.5 text-amber-100">
+            <li>👑 의장 배지 + 금빛 의장 닉네임 색상 (임기 동안 강제 착용)</li>
+            <li>🍚 밥키우기 강화비 −5% · 판매가 +10%</li>
+            <li>🏦 클럽 금고: 블랙 정책 비용의 1%가 쌓이고, 의장이 전부 가져감 (금액은 의장만 앎)</li>
+            <li>🚪 블랙 회원 추방 (3,000만P) · 📈 블랙 회원권 가격 인상 (하루 최대 5%)</li>
+            <li>📜 의장 제안: 클럽 맨 위에 공지하고 관리자에게 정책 제안 → 관리자는 2시간 안에 답변</li>
+          </ul>
+          <p class="text-slate-400">출마 ${(CHAIR_RUN_FEE / 10000)}만P · 투표 1표 ${(CHAIR_VOTE_PRICE / 10000)}만P (블랙만, 여러 표 가능) · 전부 소각</p>
+        </div>
+      </details>
       <div class="flex items-center justify-between gap-2">
         <span class="text-xs font-extrabold text-amber-100">🏛️ 블랙 클럽 의장</span>
         <span class="text-[10px] text-slate-400">블랙 회원권 지금 ${TIERS.black.price.toLocaleString()}P</span>

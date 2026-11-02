@@ -9,6 +9,8 @@
 //         bank/pet_ledger/{닉}/{id} { copies, lv }  ← 뽑기·강화 기록 (콘솔로 펫을 몰래 넣으면 회수 + 숙청)
 
 const PET_EGG_PRICE = 200000;
+// 🏷️ 이번 주 명판 주인은 펫 알 10% 할인
+function petEggPrice(n) { return Math.round(PET_EGG_PRICE * n * (typeof isPlateHolder === 'function' && isPlateHolder() ? 0.9 : 1)); }
 const PET_GRADES = {
   common: { name: '일반', rate: 84.778, cost: 0.2, sale: 0.5, feed: 0,      up: 10000,    color: 'text-slate-500',  ring: 'pet-g-common' },
   rare:   { name: '희귀', rate: 15,     cost: 0.5, sale: 1,   feed: 1000,   up: 50000,    color: 'text-sky-500',    ring: 'pet-g-rare' },
@@ -116,10 +118,10 @@ async function buyPetEggs(n) {
   if (!checkApprovalGuard()) return;
   attachPetLedger();
   if (!petsLoaded || !petLedgerLoaded) return alert('펫 정보를 불러오는 중이에요. 잠시 후 다시 시도해 주세요.');
-  const price = PET_EGG_PRICE * n;
+  const price = petEggPrice(n);
   if (userPoints < price) return alert(`❌ 포인트가 부족해요! (${price.toLocaleString()}P)`);
   if (!confirm(`🥚 펫 알 ${n}개를 ${price.toLocaleString()}P에 깔까요?\n(알값은 소각 · 천장 없음)`)) return;
-  addPoints(-price, `🥚 펫 알 ${n}개 (소각)`);
+  addPoints(-price, `🥚 펫 알 ${n}개${price < PET_EGG_PRICE * n ? ' (명판 10% 할인)' : ''} (소각)`);
   const got = [];
   for (let i = 0; i < n; i++) {
     const id = rollPet();
@@ -277,6 +279,13 @@ function renderPetModal() {
     const s = document.getElementById(`petSec_${t}`);
     if (s) s.classList.toggle('hidden', petTab !== t);
   });
+  const disc = typeof isPlateHolder === 'function' && isPlateHolder();
+  const fmtE = v => v >= 10000 ? `${(v / 10000).toLocaleString()}만P` : `${v.toLocaleString()}P`;
+  const l1 = document.getElementById('petEggBtn1'), l10 = document.getElementById('petEggBtn10'), lp = document.getElementById('petEggPriceLabel'), pd = document.getElementById('petPlateDiscount');
+  if (l1) l1.textContent = `🥚 1개 · ${fmtE(petEggPrice(1))}`;
+  if (l10) l10.textContent = `🥚×10 · ${fmtE(petEggPrice(10))}`;
+  if (lp) lp.innerHTML = disc ? `<s class="text-slate-400">200,000P</s> ${petEggPrice(1).toLocaleString()}P` : '200,000P';
+  if (pd) pd.classList.toggle('hidden', !disc);
   const pts = document.getElementById('petMyPoints'); if (pts) pts.textContent = `${userPoints.toLocaleString()}P`;
   // 데리고 다니는 펫
   const a = activePet(), head = document.getElementById('petActiveBox');

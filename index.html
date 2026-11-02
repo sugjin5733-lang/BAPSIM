@@ -11,7 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Black+Han+Sans&family=Rubik+Glitch&family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261102u">
+  <link rel="stylesheet" href="css/style.css?v=20261102v">
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white relative">
 
@@ -33,7 +33,7 @@
         </div>
         <span id="whiteSideState" class="text-[10px] font-black px-2 py-0.5 rounded-full border">…</span>
       </div>
-      <p id="whiteSideText" class="relative text-[10.5px] leading-relaxed text-slate-500">블랙 위의 단 하나의 자리.</p>
+      <p id="whiteSideText" class="relative text-[11px] font-black tracking-wide text-amber-700">세상을 비추는 환한 빛 ›</p>
     </div>
     <!-- 👑 프레스티지 회원 (넓은 화면에서는 왼쪽에) -->
     <div id="prestigeSideCard" onclick="openBlackClub()" class="hidden prestige-member-banner cursor-pointer rounded-3xl p-4 shadow-xl space-y-2.5">
@@ -46,8 +46,7 @@
       </div>
       <div id="prestigeSideList" class="flex flex-col items-start gap-1.5 max-h-56 overflow-y-auto no-scrollbar"></div>
       <div class="black-club-motto border-t border-amber-400/20 pt-2">
-        <p>프레스티지 블랙은 밥심에 영향력을 행사할 수 있습니다.</p>
-        <p class="text-amber-200">프레스티지 블랙 클럽에서 뵙겠습니다. ›</p>
+        <p class="text-amber-200 font-black tracking-wide">세상을 움직이는 어두운 힘 ›</p>
       </div>
     </div>
 
@@ -208,7 +207,7 @@
   <!-- 메인 본문 -->
   <main class="max-w-6xl mx-auto px-4 pt-6 space-y-7">
     <!-- 🏷️ 이번 주 닉네임 명판 -->
-    <div id="nameplateBanner" onclick="openPlateModal()" class="nameplate-banner cursor-pointer rounded-2xl px-4 py-2.5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1"></div>
+    <div id="nameplateBanner" onclick="openPlateModal()" class="nameplate-banner cursor-pointer rounded-3xl"></div>
     <!-- 👑 프레스티지 회원 배너 -->
     <div id="prestigeMemberBanner" onclick="openBlackClub()" class="hidden 2xl:!hidden prestige-member-banner cursor-pointer rounded-2xl px-4 py-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
       <div class="shrink-0 text-center leading-tight">
@@ -218,9 +217,8 @@
       <div class="h-8 w-px bg-amber-400/30 shrink-0"></div>
       <div id="prestigeMemberList" class="flex-1 min-w-0 flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5"></div>
       <span class="shrink-0 text-amber-300 font-black">›</span>
-      <div class="black-club-motto basis-full border-t border-amber-400/20 pt-1.5 flex flex-wrap gap-x-2">
-        <p>프레스티지 블랙은 밥심에 영향력을 행사할 수 있습니다.</p>
-        <p class="text-amber-200">프레스티지 블랙 클럽에서 뵙겠습니다.</p>
+      <div class="black-club-motto basis-full border-t border-amber-400/20 pt-1.5">
+        <p class="text-amber-200 font-black tracking-wide">세상을 움직이는 어두운 힘</p>
       </div>
     </div>
 
@@ -294,6 +292,11 @@
           <button onclick="openShopModal()" class="w-full flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-amber-300 font-bold px-2 py-2.5 rounded-xl text-xs shadow-md transition-all">
             <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i>
             <span>상점</span>
+          </button>
+
+          <button onclick="openPlateModal()" class="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-yellow-600 to-amber-500 hover:from-yellow-700 hover:to-amber-600 text-white font-black px-2 py-2.5 rounded-xl text-xs shadow-md transition-all">
+            <span>🏷️</span>
+            <span>경매</span>
           </button>
 
           <button onclick="openBankModal()" class="w-full flex items-center justify-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white font-black px-2 py-2.5 rounded-xl text-xs shadow-md transition-all">
@@ -700,11 +703,12 @@
       <div id="petSec_gacha" class="hidden space-y-2">
         <div class="pet-egg-card rounded-2xl p-4 text-center space-y-2">
           <div class="text-5xl pet-egg-wobble">🥚</div>
-          <div class="text-xs font-black text-slate-800">펫 알 · 200,000P <span class="text-slate-400 font-bold">(소각 · 천장 없음)</span></div>
+          <div class="text-xs font-black text-slate-800">펫 알 · <span id="petEggPriceLabel">200,000P</span> <span class="text-slate-400 font-bold">(소각 · 천장 없음)</span></div>
+          <div id="petPlateDiscount" class="hidden text-[11px] font-black text-amber-600">🏷️ 이번 주 명판 주인 혜택 · 펫 알 10% 할인 중!</div>
           <div class="text-[10px] text-slate-500">일반 84.778% · 희귀 15% · <span class="text-violet-500 font-bold">영웅 0.2%</span> · <span class="text-amber-500 font-bold">전설 0.02%</span> · <span class="text-fuchsia-500 font-bold">신화 0.002%</span></div>
           <div class="grid grid-cols-2 gap-2">
-            <button onclick="buyPetEggs(1)" class="bg-slate-900 text-white font-black py-2.5 rounded-xl text-xs">🥚 1개 · 20만P</button>
-            <button onclick="buyPetEggs(10)" class="bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black py-2.5 rounded-xl text-xs">🥚×10 · 200만P</button>
+            <button onclick="buyPetEggs(1)" class="bg-slate-900 text-white font-black py-2.5 rounded-xl text-xs"><span id="petEggBtn1">🥚 1개 · 20만P</span></button>
+            <button onclick="buyPetEggs(10)" class="bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black py-2.5 rounded-xl text-xs"><span id="petEggBtn10">🥚×10 · 200만P</span></button>
           </div>
           <div class="text-[10px] text-slate-400">같은 펫이 또 나오면 ★이 올라 강화 상한이 열려요 (★5 이후엔 🍖 간식 3개)</div>
         </div>
@@ -1693,28 +1697,28 @@
     </div>
   </div>
 
-  <script src="js/core.js?v=20261102u"></script>
-  <script src="js/auth.js?v=20261102u"></script>
-  <script src="js/enhance.js?v=20261102u"></script>
-  <script src="js/shop.js?v=20261102u"></script>
-  <script src="js/chat.js?v=20261102u"></script>
-  <script src="js/games.js?v=20261102u"></script>
-  <script src="js/admin.js?v=20261102u"></script>
-  <script src="js/ranking.js?v=20261102u"></script>
-  <script src="js/restaurants.js?v=20261102u"></script>
-  <script src="js/tools.js?v=20261102u"></script>
-  <script src="js/feed.js?v=20261102u"></script>
-  <script src="js/bank.js?v=20261102u"></script>
-  <script src="js/tier.js?v=20261102u"></script>
-  <script src="js/club.js?v=20261102u"></script>
-  <script src="js/white.js?v=20261102u"></script>
-  <script src="js/pets.js?v=20261102u"></script>
-  <script src="js/chair.js?v=20261102u"></script>
-  <script src="js/nameplate.js?v=20261102u"></script>
-  <script src="js/cards.js?v=20261102u"></script>
-  <script src="js/season.js?v=20261102u"></script>
-  <script src="js/duel.js?v=20261102u"></script>
-  <script src="js/predict.js?v=20261102u"></script>
-  <script src="js/main.js?v=20261102u"></script>
+  <script src="js/core.js?v=20261102v"></script>
+  <script src="js/auth.js?v=20261102v"></script>
+  <script src="js/enhance.js?v=20261102v"></script>
+  <script src="js/shop.js?v=20261102v"></script>
+  <script src="js/chat.js?v=20261102v"></script>
+  <script src="js/games.js?v=20261102v"></script>
+  <script src="js/admin.js?v=20261102v"></script>
+  <script src="js/ranking.js?v=20261102v"></script>
+  <script src="js/restaurants.js?v=20261102v"></script>
+  <script src="js/tools.js?v=20261102v"></script>
+  <script src="js/feed.js?v=20261102v"></script>
+  <script src="js/bank.js?v=20261102v"></script>
+  <script src="js/tier.js?v=20261102v"></script>
+  <script src="js/club.js?v=20261102v"></script>
+  <script src="js/white.js?v=20261102v"></script>
+  <script src="js/pets.js?v=20261102v"></script>
+  <script src="js/chair.js?v=20261102v"></script>
+  <script src="js/nameplate.js?v=20261102v"></script>
+  <script src="js/cards.js?v=20261102v"></script>
+  <script src="js/season.js?v=20261102v"></script>
+  <script src="js/duel.js?v=20261102v"></script>
+  <script src="js/predict.js?v=20261102v"></script>
+  <script src="js/main.js?v=20261102v"></script>
 </body>
 </html>

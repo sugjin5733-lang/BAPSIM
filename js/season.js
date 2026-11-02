@@ -108,8 +108,7 @@ async function renderSeasonRanking(container, summaryEl, myPointEl) {
 //  { id, cls, name, season, desc } — 지금은 아직 없음
 // ==========================================
 const SEASON_BADGE_BOOK = [
-  { id: 'beta-rich', cls: 'nb-richking', name: '💰 부자왕', season: '베타 시즌 (~10.23)', desc: '부자 랭킹 시즌 1위' },
-  { id: 'beta-bap',  cls: 'nb-bapking',  name: '🍚 밥신', season: '베타 시즌 (~10.23)', desc: '밥키우기 시즌 1위' }
+  { id: 'beta-rich', cls: 'nb-richking', name: '💰 부자왕', season: '베타 시즌 (~10.23)', desc: '부자 랭킹 시즌 1위' }
 ];
 async function openSeasonBadgeBook() {
   const box = document.getElementById('seasonBadgeBookList');
@@ -142,6 +141,18 @@ async function openSeasonBadgeBook() {
           <div class="text-[10px] ${who.length ? 'text-amber-700 font-black' : 'text-slate-300'}">${who.length ? `👑 ${who.map(u => esc(u.nickname)).join(', ')}` : '주인 없음'}${has ? ' · 내 배지' : ''}</div>
         </div>`;
       }).join('');
+  // 🏷️ 명판 명예의 전당: 역대 명판 주인 (주마다 1명, 영구 기록)
+  try {
+    const plates = (await db.ref('bank/nameplate').once('value')).val() || {};
+    const cw = weekKey(typeof ServerClock !== 'undefined' ? ServerClock.now() : Date.now());
+    const hall = Object.entries(plates).filter(([w, v]) => w < cw && v && v.top).sort((a, b) => b[0].localeCompare(a[0]));
+    const nextMon = w => { const d = new Date(Date.parse(`${w}T00:00:00+09:00`) + 7 * 86400000); return `${d.getMonth() + 1}.${d.getDate()}`; };
+    if (box) box.insertAdjacentHTML('beforeend', `<div class="col-span-full mt-2 rounded-2xl plate-hall p-3 space-y-2">
+      <div class="flex items-center justify-between"><span class="text-xs font-black text-amber-900">🏷️ 명판 명예의 전당</span><span class="text-[10px] font-bold text-amber-700">매주 경매 1등 · 영구 기록</span></div>
+      ${hall.length ? hall.map(([w, v]) => `<div class="flex items-center justify-between gap-2 bg-white/80 rounded-xl px-2.5 py-1.5 text-[11px]"><span class="text-amber-700 font-bold">${nextMon(w)} 주</span><span class="min-w-0 truncate">${nickHTML({ nickname: v.top.nick, badge: v.top.badge, color: v.top.color }, 'text-[11px]')}${v.top.msg ? ` <span class="text-slate-500 italic">“${esc(v.top.msg)}”</span>` : ''}</span><b class="text-amber-800 shrink-0">${Number(v.top.amount).toLocaleString()}P</b></div>`).join('')
+        : '<div class="text-[11px] text-amber-800/80 text-center py-1.5">첫 번째 명판 주인의 자리가 비어 있어요. 이번 주 경매 1등이 이곳에 영원히 기록돼요.</div>'}
+    </div>`);
+  } catch (e) {}
   document.getElementById('seasonBadgeBookModal').classList.remove('hidden');
 }
 function closeSeasonBadgeBook() { document.getElementById('seasonBadgeBookModal').classList.add('hidden'); }
