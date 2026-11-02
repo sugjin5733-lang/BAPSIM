@@ -57,7 +57,7 @@ async function activatePolicy(type) {
   if (!def) return;
   if (!(typeof isBlack === 'function' && isBlack())) return alert('🖤 프레스티지 블랙 회원만 정책을 행사할 수 있어요.');
   if (def.minLevel && currentEnhanceLevel < def.minLevel) return alert(`🍚 [${def.name}]은 지금 밥이 +${def.minLevel}강 이상이어야 쓸 수 있어요.\n(지금 내 밥: +${currentEnhanceLevel}강)`);
-  if (typeof policyBannedLeft === 'function' && policyBannedLeft(type) > 0) return alert(`🕊️ 천외천의 천명으로 [${def.name}]은 ${Math.ceil(policyBannedLeft(type) / 60000)}분 동안 금지돼 있어요.`);
+  if (typeof policyBannedLeft === 'function' && policyBannedLeft(type) > 0) return alert(`🕊️ 화이트의 천명으로 [${def.name}]은 ${Math.ceil(policyBannedLeft(type) / 60000)}분 동안 금지돼 있어요.`);
   if (policyActive(type)) return alert(`이미 [${def.name}]이 진행 중이에요. (${policyLeftText(type)} 남음)`);
   const cd = policyCooldownLeft(type);
   if (cd > 0) return alert(`[${def.name}] 쿨타임: ${Math.ceil(cd / 60000)}분 뒤에 다시 쓸 수 있어요.`);

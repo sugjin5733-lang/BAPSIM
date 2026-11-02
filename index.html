@@ -11,7 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Black+Han+Sans&family=Rubik+Glitch&family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261102g">
+  <link rel="stylesheet" href="css/style.css?v=20261102h">
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white relative">
 
@@ -23,6 +23,17 @@
 
   <!-- [좌측 날개 배너] -->
   <aside class="hidden 2xl:block fixed left-4 top-20 z-30 w-64 space-y-4">
+    <!-- 🤍 프레스티지 화이트 클럽: 주인이 있는지만 공개 (누구인지는 비밀) -->
+    <div id="whiteSideCard" onclick="openWhiteClub()" class="white-side-card cursor-pointer rounded-3xl p-4 shadow-xl space-y-2">
+      <div class="flex items-center justify-between border-b border-amber-300/50 pb-2">
+        <div>
+          <div class="text-[9px] font-black tracking-[0.25em] text-amber-500">PRESTIGE WHITE</div>
+          <div class="text-xs font-black text-slate-900">🤍 화이트 클럽</div>
+        </div>
+        <span id="whiteSideState" class="text-[10px] font-black px-2 py-0.5 rounded-full border">…</span>
+      </div>
+      <p id="whiteSideText" class="text-[10.5px] leading-relaxed text-slate-500">블랙 위의 단 하나의 자리.</p>
+    </div>
     <!-- 👑 프레스티지 회원 (넓은 화면에서는 왼쪽에) -->
     <div id="prestigeSideCard" onclick="openBlackClub()" class="hidden prestige-member-banner cursor-pointer rounded-3xl p-4 shadow-xl space-y-2.5">
       <div class="flex items-center justify-between border-b border-amber-400/25 pb-2">
@@ -195,8 +206,6 @@
 
   <!-- 메인 본문 -->
   <main class="max-w-6xl mx-auto px-4 pt-6 space-y-7">
-    <!-- ☁️ 천외천 (프레스티지 화이트) 배너 -->
-    <div id="whiteThroneBanner" onclick="openWhiteClub()" class="hidden white-throne-banner cursor-pointer rounded-2xl px-4 py-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1"></div>
     <!-- 👑 프레스티지 회원 배너 -->
     <div id="prestigeMemberBanner" onclick="openBlackClub()" class="hidden 2xl:!hidden prestige-member-banner cursor-pointer rounded-2xl px-4 py-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
       <div class="shrink-0 text-center leading-tight">
@@ -246,62 +255,58 @@
           밥심 유틸리티
         </span>
 
-        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-          <button onclick="openMiniGameModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-2 rounded-xl text-xs shadow-md transition-all">
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 w-full">
+          <button onclick="openMiniGameModal()" class="w-full flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2 py-2.5 rounded-xl text-xs shadow-md transition-all">
             <i data-lucide="gamepad-2" class="w-3.5 h-3.5"></i>
             <span>포인트 게임장</span>
           </button>
 
-          <!-- 밥키우기 강화 버튼 -->
-          <button onclick="openEnhanceModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-black px-3 py-2 rounded-xl text-xs shadow-md transition-all">
+          <button onclick="openEnhanceModal()" class="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-black px-2 py-2.5 rounded-xl text-xs shadow-md transition-all">
             <span>🍚</span>
             <span>밥키우기</span>
             <span id="headerEnhanceBadge" class="text-[10px] bg-slate-900 text-amber-300 px-1.5 py-0.2 rounded-full font-bold">+0강</span>
           </button>
 
-          <button onclick="openCardModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white font-black px-3 py-2 rounded-xl text-xs shadow-md transition-all">
+          <button onclick="openCardModal()" class="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white font-black px-2 py-2.5 rounded-xl text-xs shadow-md transition-all">
             <span>🃏</span>
             <span>반찬 도감</span>
             <span id="headerCardCount" class="text-[10px] bg-white/20 px-1.5 py-0.2 rounded-full font-bold">0/24</span>
           </button>
 
-          <button onclick="openShopModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-amber-300 font-bold px-3 py-2 rounded-xl text-xs shadow-md transition-all">
-            <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i>
-            <span>상점</span>
-          </button>
-
-          <button onclick="openBankModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white font-black px-3 py-2 rounded-xl text-xs shadow-md transition-all">
-            <span>🏦</span>
-            <span>은행</span>
-          </button>
-
-          <button id="whiteToolbarBtn" onclick="openWhiteClub()" class="hidden flex-1 sm:flex-initial items-center justify-center gap-1.5 white-btn font-black px-3 py-2 rounded-xl text-xs shadow-md transition-all">
-            <span>☁️</span>
-            <span>천외천</span>
-          </button>
-
-          <button id="hotlineToolbarBtn" onclick="openBlackClub()" class="hidden flex-1 sm:flex-initial items-center justify-center gap-1.5 bg-black hover:bg-slate-900 text-amber-200 font-black px-3 py-2 rounded-xl text-xs border border-amber-300/60 shadow-md transition-all">
-            <span>🖤</span>
-            <span>블랙 클럽</span>
-          </button>
-
-          <button onclick="openPrestigeModal()" class="prestige-btn flex-1 sm:flex-initial flex items-center justify-center gap-1.5 text-amber-200 font-black px-3 py-2 rounded-xl text-xs shadow-md transition-all">
-            <span>👑</span>
-            <span>프레스티지</span>
-          </button>
-
-          <button onclick="openSeasonBadgeBook()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-amber-200 font-bold px-3 py-2 rounded-xl text-xs border border-slate-700 transition-all">
+          <button onclick="openSeasonBadgeBook()" class="w-full flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-amber-200 font-bold px-2 py-2.5 rounded-xl text-xs border border-slate-700 transition-all">
             <span>🏅</span>
             <span>시즌 도감</span>
           </button>
 
-          <button onclick="openRankModal('points')" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-3 py-2 rounded-xl text-xs shadow-md transition-all">
+          <button onclick="openRankModal('points')" class="w-full flex items-center justify-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-2 py-2.5 rounded-xl text-xs shadow-md transition-all">
             <i data-lucide="award" class="w-3.5 h-3.5"></i>
             <span>랭킹 전당</span>
           </button>
 
+          <button onclick="openShopModal()" class="w-full flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-amber-300 font-bold px-2 py-2.5 rounded-xl text-xs shadow-md transition-all">
+            <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i>
+            <span>상점</span>
+          </button>
 
+          <button onclick="openBankModal()" class="w-full flex items-center justify-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white font-black px-2 py-2.5 rounded-xl text-xs shadow-md transition-all">
+            <span>🏦</span>
+            <span>은행</span>
+          </button>
 
+          <button onclick="openPrestigeModal()" class="prestige-btn w-full flex items-center justify-center gap-1.5 text-amber-200 font-black px-2 py-2.5 rounded-xl text-xs shadow-md transition-all">
+            <span>👑</span>
+            <span>프레스티지</span>
+          </button>
+
+          <button id="hotlineToolbarBtn" onclick="openBlackClub()" class="hidden w-full flex items-center justify-center gap-1.5 bg-black hover:bg-slate-900 text-amber-200 font-black px-2 py-2.5 rounded-xl text-xs border border-amber-300/60 shadow-md transition-all">
+            <span>🖤</span>
+            <span>블랙 클럽</span>
+          </button>
+
+          <button id="whiteToolbarBtn" onclick="openWhiteClub()" class="hidden w-full flex items-center justify-center gap-1.5 bg-white hover:bg-slate-50 text-slate-900 border border-amber-300 font-black px-2 py-2.5 rounded-xl text-xs shadow-md transition-all">
+            <span>🤍</span>
+            <span>화이트 클럽</span>
+          </button>
         </div>
       </div>
       <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -631,25 +636,25 @@
   </div>
 
 
-  <!-- ☁️ 천외천 (프레스티지 화이트) -->
+  <!-- 🤍 프레스티지 화이트 클럽 -->
   <div id="whiteClubModal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4" onclick="if(event.target===this) closeWhiteClub()">
     <div class="white-club-panel w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto overflow-x-hidden">
       <div class="flex items-start justify-between border-b border-amber-200/70 pb-3">
         <div>
-          <div class="text-[10px] font-black tracking-[0.35em] text-amber-500">天 外 天 · PRESTIGE WHITE</div>
-          <h3 class="font-black text-lg text-slate-900">☁️ 천외천</h3>
-          <p class="text-[11px] text-slate-500 mt-0.5">블랙 위의 단 하나의 자리. 하늘 밖의 하늘.</p>
+          <div class="text-[10px] font-black tracking-[0.35em] text-amber-500">PRESTIGE WHITE CLUB</div>
+          <h3 class="font-black text-lg text-slate-900">🤍 프레스티지 화이트 클럽</h3>
+          <p class="text-[11px] text-slate-500 mt-0.5">블랙 위의 단 하나의 자리. 주인이 누구인지는 아무도 모릅니다.</p>
           <div id="whiteClubStatus" class="text-[11px] mt-1.5"></div>
         </div>
         <button onclick="closeWhiteClub()" class="text-slate-400 hover:text-slate-700 text-sm p-1">✕</button>
       </div>
       <div id="whiteJoinBox" class="space-y-2"></div>
       <div id="whiteSecPowers" class="space-y-2 hidden">
-        <span class="text-xs font-extrabold text-slate-800">⚡ 천외천의 권능 <span class="text-[10px] font-bold text-slate-400">· 비용은 전부 소각</span></span>
+        <span class="text-xs font-extrabold text-slate-800">⚡ 화이트의 권능 <span class="text-[10px] font-bold text-slate-400">· 비용은 전부 소각</span></span>
         <div id="whitePowers" class="space-y-1.5"></div>
       </div>
       <div class="space-y-1.5">
-        <span class="text-xs font-extrabold text-slate-800">✨ 천외천의 혜택</span>
+        <span class="text-xs font-extrabold text-slate-800">✨ 화이트의 혜택</span>
         <ul id="whitePerks" class="text-[11px] text-slate-600 space-y-0.5"></ul>
       </div>
     </div>
@@ -1583,25 +1588,25 @@
     </div>
   </div>
 
-  <script src="js/core.js?v=20261102g"></script>
-  <script src="js/auth.js?v=20261102g"></script>
-  <script src="js/enhance.js?v=20261102g"></script>
-  <script src="js/shop.js?v=20261102g"></script>
-  <script src="js/chat.js?v=20261102g"></script>
-  <script src="js/games.js?v=20261102g"></script>
-  <script src="js/admin.js?v=20261102g"></script>
-  <script src="js/ranking.js?v=20261102g"></script>
-  <script src="js/restaurants.js?v=20261102g"></script>
-  <script src="js/tools.js?v=20261102g"></script>
-  <script src="js/feed.js?v=20261102g"></script>
-  <script src="js/bank.js?v=20261102g"></script>
-  <script src="js/tier.js?v=20261102g"></script>
-  <script src="js/club.js?v=20261102g"></script>
-  <script src="js/white.js?v=20261102g"></script>
-  <script src="js/cards.js?v=20261102g"></script>
-  <script src="js/season.js?v=20261102g"></script>
-  <script src="js/duel.js?v=20261102g"></script>
-  <script src="js/predict.js?v=20261102g"></script>
-  <script src="js/main.js?v=20261102g"></script>
+  <script src="js/core.js?v=20261102h"></script>
+  <script src="js/auth.js?v=20261102h"></script>
+  <script src="js/enhance.js?v=20261102h"></script>
+  <script src="js/shop.js?v=20261102h"></script>
+  <script src="js/chat.js?v=20261102h"></script>
+  <script src="js/games.js?v=20261102h"></script>
+  <script src="js/admin.js?v=20261102h"></script>
+  <script src="js/ranking.js?v=20261102h"></script>
+  <script src="js/restaurants.js?v=20261102h"></script>
+  <script src="js/tools.js?v=20261102h"></script>
+  <script src="js/feed.js?v=20261102h"></script>
+  <script src="js/bank.js?v=20261102h"></script>
+  <script src="js/tier.js?v=20261102h"></script>
+  <script src="js/club.js?v=20261102h"></script>
+  <script src="js/white.js?v=20261102h"></script>
+  <script src="js/cards.js?v=20261102h"></script>
+  <script src="js/season.js?v=20261102h"></script>
+  <script src="js/duel.js?v=20261102h"></script>
+  <script src="js/predict.js?v=20261102h"></script>
+  <script src="js/main.js?v=20261102h"></script>
 </body>
 </html>
