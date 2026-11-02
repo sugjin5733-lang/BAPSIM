@@ -98,7 +98,9 @@ async function activatePolicy(type) {
 
   updatePointsUI();
   addPoints(-def.price, `🖤 블랙 정책: ${def.name}`);
-  if (typeof payFee === 'function') payFee(Math.round(def.price * 0.1));
+  // 비용의 9%는 은행 금고, 1%는 블랙 클럽 금고(의장 몫), 나머지 소각
+  if (typeof payFee === 'function') payFee(Math.round(def.price * 0.09));
+  if (typeof addToChairVault === 'function') addToChairVault(def.price * 0.01);
   updatePointsUI();
   db.ref('policy_log').push(Object.assign({}, rec, { at: firebase.database.ServerValue.TIMESTAMP })).catch(() => {});
   if (type === 'reset') {
@@ -173,6 +175,7 @@ function setVipAlert(on) {
 }
 
 function renderBlackClub() {
+  if (typeof renderChairSection === 'function') try { renderChairSection(); } catch (e) {}
   const m = document.getElementById('blackClubModal');
   if (!m || m.classList.contains('hidden')) return;
   const member = typeof isBlack === 'function' && isBlack();
@@ -264,6 +267,7 @@ async function executeJudgment(ref) {
     const r = await ref.transaction(cur => { got = cur || null; return cur ? null : undefined; });
     if (!r.committed || !got) return;
   } catch (e) { return; }
+  if (got.type === 'chair_expel') { if (typeof executeChairExpel === 'function') executeChairExpel(got); return; }
   if (got.type === 'smite' || got.type === 'expel') { if (typeof executeWhiteJudgment === 'function') executeWhiteJudgment(got); return; }
   // 🛡️ 관리자 포인트 조정: 회원 화면이 꺼져 있거나 끊겨 있다가 옛 포인트로 덮어써도, 다음 접속 때 다시 적용됨
   if (got.type === 'admin_set') {

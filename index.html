@@ -11,7 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Black+Han+Sans&family=Rubik+Glitch&family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261102t">
+  <link rel="stylesheet" href="css/style.css?v=20261102u">
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white relative">
 
@@ -207,6 +207,8 @@
 
   <!-- 메인 본문 -->
   <main class="max-w-6xl mx-auto px-4 pt-6 space-y-7">
+    <!-- 🏷️ 이번 주 닉네임 명판 -->
+    <div id="nameplateBanner" onclick="openPlateModal()" class="nameplate-banner cursor-pointer rounded-2xl px-4 py-2.5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1"></div>
     <!-- 👑 프레스티지 회원 배너 -->
     <div id="prestigeMemberBanner" onclick="openBlackClub()" class="hidden 2xl:!hidden prestige-member-banner cursor-pointer rounded-2xl px-4 py-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
       <div class="shrink-0 text-center leading-tight">
@@ -629,6 +631,7 @@
         </div>
         <button onclick="closeBlackClub()" class="text-slate-400 hover:text-white text-sm p-1">✕</button>
       </div>
+      <div id="clubChairBox" class="hidden space-y-2"></div>
       <div id="clubTeaser" class="text-center py-8 space-y-3">
         <div class="text-5xl opacity-80">🖤</div>
         <div class="text-sm font-black text-amber-200 tracking-wide">초대받은 자만 들어올 수 있습니다</div>
@@ -730,6 +733,25 @@
       <input id="forcedRenameInput" type="text" maxlength="3" placeholder="새 닉네임 (한글·영문·숫자 3글자 이내)" onkeydown="if(event.key==='Enter') submitForcedRename()" class="w-full border-2 border-slate-200 focus:border-indigo-500 rounded-xl p-3 text-center text-sm font-black outline-none" />
       <button onclick="submitForcedRename()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-xl text-sm">무료로 변경 신청하기</button>
       <p class="text-[10px] text-slate-400">신청 후 관리자가 승인하면 바뀌어요. 승인 전까지는 지금 닉네임으로 평소처럼 이용할 수 있어요.<br>포인트·아이템·기록은 모두 그대로 옮겨져요.</p>
+    </div>
+  </div>
+
+
+  <!-- 🏷️ 닉네임 명판 경매 -->
+  <div id="plateModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this) closePlateModal()">
+    <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-5 space-y-3 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+        <div>
+          <h3 class="font-black text-slate-900 text-base">🏷️ 닉네임 명판 경매</h3>
+          <p class="text-[11px] text-slate-400">이번 주 1등이 다음 주 내내 메인 화면 맨 위에 이름을 걸어요</p>
+        </div>
+        <button onclick="closePlateModal()" class="text-slate-400 hover:text-slate-700 text-sm p-1">✕</button>
+      </div>
+      <div id="plateAuctionBox" class="space-y-3"></div>
+      <div class="space-y-1">
+        <div class="text-[11px] font-black text-slate-700">📜 지난 명판 주인</div>
+        <div id="plateHistory"></div>
+      </div>
     </div>
   </div>
 
@@ -1328,6 +1350,13 @@
         <div id="adminPendingUsersContainer" class="space-y-2 max-h-36 overflow-y-auto border rounded-2xl p-2 bg-slate-50 text-xs"></div>
       </div>
 
+      <!-- 🏛️ 블랙 의장 제안 · 클럽 금고 -->
+      <div class="space-y-3">
+        <h4 class="font-extrabold text-xs text-slate-800 flex items-center gap-1.5">🏛️ 블랙 의장 제안 <span id="adminChairPending" class="text-[11px] bg-rose-100 text-rose-700 font-bold px-2 py-0.5 rounded-full">0건 대기</span></h4>
+        <p id="adminChairInfo" class="text-[10px] text-slate-400 -mt-2"></p>
+        <div id="adminChairList" class="space-y-1.5 max-h-72 overflow-y-auto border rounded-2xl p-2 bg-slate-50 text-xs"></div>
+      </div>
+
       <!-- ⏳ 회원 보류 포인트 현황 -->
       <div class="space-y-3">
         <h4 class="font-extrabold text-xs text-slate-800 flex items-center gap-1.5">⏳ 회원 보류 포인트 현황 <span id="adminOwedTotal" class="text-[11px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full">-</span></h4>
@@ -1664,26 +1693,28 @@
     </div>
   </div>
 
-  <script src="js/core.js?v=20261102t"></script>
-  <script src="js/auth.js?v=20261102t"></script>
-  <script src="js/enhance.js?v=20261102t"></script>
-  <script src="js/shop.js?v=20261102t"></script>
-  <script src="js/chat.js?v=20261102t"></script>
-  <script src="js/games.js?v=20261102t"></script>
-  <script src="js/admin.js?v=20261102t"></script>
-  <script src="js/ranking.js?v=20261102t"></script>
-  <script src="js/restaurants.js?v=20261102t"></script>
-  <script src="js/tools.js?v=20261102t"></script>
-  <script src="js/feed.js?v=20261102t"></script>
-  <script src="js/bank.js?v=20261102t"></script>
-  <script src="js/tier.js?v=20261102t"></script>
-  <script src="js/club.js?v=20261102t"></script>
-  <script src="js/white.js?v=20261102t"></script>
-  <script src="js/pets.js?v=20261102t"></script>
-  <script src="js/cards.js?v=20261102t"></script>
-  <script src="js/season.js?v=20261102t"></script>
-  <script src="js/duel.js?v=20261102t"></script>
-  <script src="js/predict.js?v=20261102t"></script>
-  <script src="js/main.js?v=20261102t"></script>
+  <script src="js/core.js?v=20261102u"></script>
+  <script src="js/auth.js?v=20261102u"></script>
+  <script src="js/enhance.js?v=20261102u"></script>
+  <script src="js/shop.js?v=20261102u"></script>
+  <script src="js/chat.js?v=20261102u"></script>
+  <script src="js/games.js?v=20261102u"></script>
+  <script src="js/admin.js?v=20261102u"></script>
+  <script src="js/ranking.js?v=20261102u"></script>
+  <script src="js/restaurants.js?v=20261102u"></script>
+  <script src="js/tools.js?v=20261102u"></script>
+  <script src="js/feed.js?v=20261102u"></script>
+  <script src="js/bank.js?v=20261102u"></script>
+  <script src="js/tier.js?v=20261102u"></script>
+  <script src="js/club.js?v=20261102u"></script>
+  <script src="js/white.js?v=20261102u"></script>
+  <script src="js/pets.js?v=20261102u"></script>
+  <script src="js/chair.js?v=20261102u"></script>
+  <script src="js/nameplate.js?v=20261102u"></script>
+  <script src="js/cards.js?v=20261102u"></script>
+  <script src="js/season.js?v=20261102u"></script>
+  <script src="js/duel.js?v=20261102u"></script>
+  <script src="js/predict.js?v=20261102u"></script>
+  <script src="js/main.js?v=20261102u"></script>
 </body>
 </html>

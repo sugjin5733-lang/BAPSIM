@@ -199,7 +199,7 @@ function updateEnhanceUI() {
   if (shopEnhanceTxt) shopEnhanceTxt.textContent = `+${currentEnhanceLevel}강 (${bowlName})`;
 
   const mk = riceMarket();
-  const baseSell = currentEnhanceLevel > 0 ? Math.round(ENHANCE_PROBABILITIES[currentEnhanceLevel - 1].reward * (typeof petSaleMult === 'function' ? petSaleMult() : 1)) : 0;
+  const baseSell = currentEnhanceLevel > 0 ? Math.round(ENHANCE_PROBABILITIES[currentEnhanceLevel - 1].reward * (typeof petSaleMult === 'function' ? petSaleMult() : 1) * (typeof chairSaleMult === 'function' ? chairSaleMult() : 1)) : 0;
   const bs = document.getElementById('enhanceBowlStats');
   if (bs) bs.innerHTML = currentEnhanceLevel > 0 || myBowl.tries > 0
     ? `🧾 이 밥: 0강부터 <strong class="text-slate-200">${myBowl.tries.toLocaleString()}회</strong> 강화 · 들인 돈 <strong class="text-amber-300">${myBowl.cost.toLocaleString()}P</strong>${baseSell > 0 && !mk.pending ? ` · 지금 팔면 ${(() => { const r = Math.round(baseSell * mk.mult); const n = r - Math.round(r * curSellFee()) - myBowl.cost; return `<strong class="${n >= 0 ? 'text-emerald-300' : 'text-rose-300'}">${n >= 0 ? '+' : ''}${n.toLocaleString()}P</strong>`; })()}` : ''}`
@@ -309,7 +309,8 @@ function renderEnhanceRecommend() {
 
 function currentAttemptCost() {
   const base = getEnhanceCost(currentEnhanceLevel) * (gambleMode ? 2 : 1);
-  return typeof petCostMult === 'function' ? Math.max(1, Math.round(base * petCostMult())) : base;
+  const mult = (typeof petCostMult === 'function' ? petCostMult() : 1) * (typeof chairCostMult === 'function' ? chairCostMult() : 1);
+  return Math.max(1, Math.round(base * mult));
 }
 function toggleGambleMode() {
   gambleMode = !gambleMode;
@@ -804,7 +805,7 @@ function sellEnhancedBowl() {
   const mk = riceMarket();
   if (mk.pending) return alert('⏳ 이번 분 시세를 확인하는 중이에요. 1~2초 뒤에 다시 눌러주세요!');
   const base = ENHANCE_PROBABILITIES[currentEnhanceLevel - 1].reward;
-  const reward = Math.round(base * mk.mult * (typeof petSaleMult === 'function' ? petSaleMult() : 1));
+  const reward = Math.round(base * mk.mult * (typeof petSaleMult === 'function' ? petSaleMult() : 1) * (typeof chairSaleMult === 'function' ? chairSaleMult() : 1));
   const currentName = BOWL_EVOLUTION[currentEnhanceLevel]?.name || '밥';
   const fee0 = Math.round(reward * curSellFee());
   const inv = myBowl.cost, tries = myBowl.tries;

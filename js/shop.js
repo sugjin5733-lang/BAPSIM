@@ -222,7 +222,7 @@ function renderBadgeCards(bgContainer, list) {
 // 상점에서 팔지 않는 특별 배지 (세트 완성, 시즌 보상, 관리자 지급 등)
 const SPECIAL_BADGE_NAMES = {
   'nb-buffet': '🍱 한식뷔페 마스터', 'nb-royal': '👑 수라상 미식가', 'nb-collector': '📒 반찬 도감 완성자',
-  'nb-admin': '🛡️ 관리자', 'nb-angel': '😇 대천사의 날개', 'nb-richking': '💰 베타 시즌 부자왕', 'nb-bapking': '🍚 베타 시즌 밥신', 'nb-heaven': '🤍 프레스티지 화이트'
+  'nb-admin': '🛡️ 관리자', 'nb-angel': '😇 대천사의 날개', 'nb-richking': '💰 베타 시즌 부자왕', 'nb-bapking': '🍚 베타 시즌 밥신', 'nb-heaven': '🤍 프레스티지 화이트', 'nb-chair': '🏛️ 블랙 클럽 의장'
 };
 
 function renderOwnedSpecialBadges() {
@@ -283,8 +283,8 @@ function buyColor(hex, cost) {
   updatePointsUI();
   renderShopUI();
 }
-function equipColor(hex) { myNickColor = hex; updatePointsUI(); renderShopUI(); }
-function unequipColor() { myNickColor = ''; updatePointsUI(); renderShopUI(); }
+function equipColor(hex) { if (typeof chairBlocksEquip === 'function' && chairBlocksEquip()) return; myNickColor = hex; updatePointsUI(); renderShopUI(); }
+function unequipColor() { if (typeof chairBlocksEquip === 'function' && chairBlocksEquip()) return; myNickColor = ''; updatePointsUI(); renderShopUI(); }
 
 function buyBg(bgClass, cost, bgName, reqLvl = 0) {
   if (isPrestigeItem(cost) && !myPrestigePass) {
@@ -310,10 +310,11 @@ function buyBg(bgClass, cost, bgName, reqLvl = 0) {
   if (window.confetti) confetti({ particleCount: 120, spread: 80 });
   if (cost >= 100000000) postFeed('badge', `🐚 ${bgName} 배지를 손에 넣었어요!`, 'legendary', true);
 }
-function equipBg(bgClass) { if (bgClass === 'nb-heaven' && !(typeof isWhite === 'function' && isWhite())) return alert('🤍 프레스티지 화이트만 장착할 수 있어요.'); myNickBg = bgClass; updatePointsUI(); renderShopUI(); }
-function unequipBg() { myNickBg = 'nb-none'; updatePointsUI(); renderShopUI(); }
+function equipBg(bgClass) { if (typeof chairBlocksEquip === 'function' && chairBlocksEquip()) return; if (bgClass === 'nb-heaven' && !(typeof isWhite === 'function' && isWhite())) return alert('🤍 프레스티지 화이트만 장착할 수 있어요.'); myNickBg = bgClass; updatePointsUI(); renderShopUI(); }
+function unequipBg() { if (typeof chairBlocksEquip === 'function' && chairBlocksEquip()) return; myNickBg = 'nb-none'; updatePointsUI(); renderShopUI(); }
 
 function unequipAll() {
+  if (typeof chairBlocksEquip === 'function' && chairBlocksEquip()) return;
   myNickColor = '';
   myNickBg = 'nb-none';
   myNickSymbol = '';
@@ -420,8 +421,9 @@ function checkInventoryIntegrity() {
     changed = true;
   }
   // 갖고 있지 않은 걸 장착만 해둔 경우 해제
-  if (myNickBg && myNickBg !== 'nb-none' && !(myInventory.bgs || []).includes(myNickBg)) { myNickBg = 'nb-none'; changed = true; }
-  if (myNickColor && !(myInventory.colors || []).includes(myNickColor)) { myNickColor = ''; changed = true; }
+  const chairOn = typeof isChair === 'function' && isChair(); // 의장 배지·색상은 인벤토리에 없어도 강제 착용
+  if (myNickBg && myNickBg !== 'nb-none' && !(chairOn && myNickBg === 'nb-chair') && !(myInventory.bgs || []).includes(myNickBg)) { myNickBg = 'nb-none'; changed = true; }
+  if (myNickColor && !(chairOn && myNickColor === 'pc-chair') && !(myInventory.colors || []).includes(myNickColor)) { myNickColor = ''; changed = true; }
   if (myNickSymbol && !(myInventory.symbols || []).includes(myNickSymbol)) { myNickSymbol = ''; changed = true; }
   if (changed) { updatePointsUI(); if (typeof renderShopUI === 'function') try { renderShopUI(); } catch (e) {} }
   if (bad.length) {

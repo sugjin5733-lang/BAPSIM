@@ -684,6 +684,37 @@ async function handleAdminResetAllVotes() {
   alert('투표 리셋 완료');
 }
 
+// 🏛️ 블랙 의장 제안 답변 (2시간 안에) · 클럽 금고
+function renderAdminChair() {
+  const box = document.getElementById('adminChairList');
+  if (!box || typeof chairState === 'undefined') return;
+  const now = typeof chairNow === 'function' ? chairNow() : Date.now();
+  const t = chairState.term;
+  const info = document.getElementById('adminChairInfo');
+  if (info) info.innerHTML = `${t && t.until > now ? `현 의장: <b>${esc(t.nick)}</b> (임기 ${new Date(t.until).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false })}까지)` : '현재 의장 없음'} · 클럽 금고 <b>${(chairState.vault || 0).toLocaleString()}P</b> · 블랙 회원권 ${TIERS.black.price.toLocaleString()}P · 블랙 ${typeof blackMemberCount === 'function' ? blackMemberCount() : '?'}명`;
+  const rows = Object.entries(chairState.proposals || {}).map(([id, p]) => Object.assign({ id }, p)).sort((a, b) => (!!a.answer - !!b.answer) || b.at - a.at);
+  const pend = rows.filter(r => !r.answer).length;
+  const pe = document.getElementById('adminChairPending'); if (pe) pe.textContent = `${pend}건 대기`;
+  box.innerHTML = rows.length === 0 ? '<div class="text-center text-slate-400 py-3">의장 제안이 없어요.</div>' : rows.slice(0, 15).map(p => {
+    const late = !p.answer && now > p.deadline;
+    return `<div class="p-2.5 bg-white border ${p.answer ? 'border-slate-200' : late ? 'border-rose-400' : 'border-amber-300'} rounded-xl space-y-1.5">
+      <div class="flex justify-between gap-2"><strong>🏛️ ${esc(p.nick)}</strong><span class="text-[10px] ${late ? 'text-rose-600 font-black' : 'text-slate-400'}">${p.answer ? '답변 완료' : late ? `⏰ 기한 ${fmtLeftMs(now - p.deadline)} 지남` : `⏳ 기한까지 ${fmtLeftMs(p.deadline - now)}`}</span></div>
+      <div class="whitespace-pre-line text-slate-800">${esc(p.text)}</div>
+      ${p.answer ? `<div class="bg-sky-50 border border-sky-200 rounded-lg p-1.5 text-sky-900 whitespace-pre-line">↳ ${esc(p.answer)}</div>`
+        : `<textarea id="cp_${esc(p.id)}" rows="3" placeholder="심도 깊은 답변을 적어주세요 (블랙 클럽 맨 위에 공개돼요)" class="w-full border rounded-lg p-2 text-[11px]"></textarea>
+           <button onclick="adminAnswerProposal(${jsArg(p.id)})" class="w-full bg-slate-900 text-white font-bold py-1.5 rounded-lg text-[11px]">답변 등록</button>`}
+    </div>`;
+  }).join('');
+}
+async function adminAnswerProposal(id) {
+  if (!requireAdmin()) return;
+  const el = document.getElementById(`cp_${id}`);
+  const answer = (el && el.value || '').trim().slice(0, 2000);
+  if (answer.length < 10) return alert('답변을 조금 더 자세히 적어주세요. (10자 이상)');
+  await db.ref(`bank/chair/proposals/${id}`).update({ answer, answeredAt: firebase.database.ServerValue.TIMESTAMP, answeredBy: currentUser.nickname });
+}
+setInterval(() => { if (typeof isAdmin !== 'undefined' && isAdmin) renderAdminChair(); }, 60000);
+
 // ⏳ 회원 보류 포인트 현황
 function renderAdminOwedList() {
   let whiteUid = null;
