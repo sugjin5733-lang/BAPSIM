@@ -460,9 +460,14 @@ function adminQuickSetPoint(nick) {
   if (val === null) return;
   const num = parseInt(String(val).replace(/[,\s]/g, ''), 10);
   if (isNaN(num) || num < 0) return alert("0 이상의 숫자만 입력 가능합니다.");
-  db.ref(`user_points/${nick}/points`).once('value').then(snap => {
-    const old = Number(snap.val()) || 0;
-    db.ref(`user_points/${nick}/points`).set(num, (err) => {
+  db.ref(`user_points/${nick}`).once('value').then(snap => {
+    const uv = snap.val() || {};
+    const old = Number(uv.points) || 0;
+    const owedNow = Number(uv.owed) || 0;
+    const clearOwed = owedNow > 0 && confirm(`[${nick}] 님은 보류 포인트 ${owedNow.toLocaleString()}P 가 있어요.\n보류도 0으로 만들까요?\n(취소 = 보류는 그대로 두고 포인트만 변경)`);
+    const upd = { points: num };
+    if (clearOwed) upd.owed = 0;
+    db.ref(`user_points/${nick}`).update(upd, (err) => {
       if (err) {
         const hint = /PERMISSION_DENIED/i.test(err.message || err.code || '')
           ? `\n\n※ 서버 보안 규칙이 이 값을 막았어요. 대부분 '포인트 최대값' 제한 때문이에요.\nFirebase 콘솔 → Realtime Database → 규칙에서 points 의 최대값(예: 100000000)을 더 크게 바꾸고 게시해 주세요.`
@@ -471,7 +476,9 @@ function adminQuickSetPoint(nick) {
       }
       // 내역에 남김 (나중에 "기록 없는 포인트"로 오해하지 않도록)
       const key = db.ref(`point_logs/${nick}`).push().key;
-      db.ref(`point_logs/${nick}/${key}`).set({ d: num - old, r: '🛡️ 관리자 포인트 조정', bal: num, ts: firebase.database.ServerValue.TIMESTAMP, by: currentUser.nickname, byUid: authUser && authUser.uid }).catch(() => {});
+      db.ref(`point_logs/${nick}/${key}`).set({ d: num - old, r: `🛡️ 관리자 포인트 조정${clearOwed ? ` (보류 ${owedNow.toLocaleString()}P도 0)` : ''}`, bal: num, ts: firebase.database.ServerValue.TIMESTAMP, by: currentUser.nickname, byUid: authUser && authUser.uid }).catch(() => {});
+      // 회원 화면이 꺼져 있다가 옛 포인트로 덮어쓰는 걸 막기 위해, 회원 쪽에서도 다시 적용하게 남겨둠
+      if (currentUser.nickname !== nick) db.ref(`judgments/${nick}`).push({ type: 'admin_set', points: num, owed: clearOwed ? 0 : null, by: currentUser.nickname, uid: authUser && authUser.uid, at: firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
       if (currentUser.nickname === nick) {
         userPoints = num;
         updatePointsUI(false);

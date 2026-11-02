@@ -265,6 +265,17 @@ async function executeJudgment(ref) {
     const r = await ref.transaction(cur => { got = cur || null; return cur ? null : undefined; });
     if (!r.committed || !got) return;
   } catch (e) { return; }
+  // 🛡️ 관리자 포인트 조정: 회원 화면이 꺼져 있거나 끊겨 있다가 옛 포인트로 덮어써도, 다음 접속 때 다시 적용됨
+  if (got.type === 'admin_set') {
+    const target = Math.max(0, Math.round(Number(got.points) || 0));
+    if (userPoints !== target) {
+      pendingLog.push({ d: target - userPoints, r: '🛡️ 관리자 포인트 조정 (재적용)', ct: (typeof ServerClock === 'object' ? ServerClock.now() : Date.now()) });
+      userPoints = target;
+    }
+    if (typeof got.owed === 'number') myOwed = Math.max(0, got.owed);
+    updatePointsUI();
+    return;
+  }
   if (typeof isBlack === 'function' && isBlack()) { // 그 사이 블랙이 됐으면 무효
     if (typeof bankToast === 'function') bankToast('⚖️ 심판의 망치 무효', `[${esc(got.by)}] 님의 판결이 있었지만, 블랙 회원이라 통하지 않았어요.`);
     return;
