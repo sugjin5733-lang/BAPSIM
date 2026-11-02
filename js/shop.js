@@ -196,7 +196,7 @@ function renderBadgeCards(bgContainer, list) {
 // 상점에서 팔지 않는 특별 배지 (세트 완성, 시즌 보상, 관리자 지급 등)
 const SPECIAL_BADGE_NAMES = {
   'nb-buffet': '🍱 한식뷔페 마스터', 'nb-royal': '👑 수라상 미식가', 'nb-collector': '📒 반찬 도감 완성자',
-  'nb-admin': '🛡️ 관리자', 'nb-angel': '😇 대천사의 날개', 'nb-richking': '💰 베타 시즌 부자왕', 'nb-bapking': '🍚 베타 시즌 밥신'
+  'nb-admin': '🛡️ 관리자', 'nb-angel': '😇 대천사의 날개', 'nb-richking': '💰 베타 시즌 부자왕', 'nb-bapking': '🍚 베타 시즌 밥신', 'nb-heaven': '☁️ 천외천'
 };
 
 function renderOwnedSpecialBadges() {
@@ -276,7 +276,7 @@ function buyBg(bgClass, cost, bgName, reqLvl = 0) {
   if (window.confetti) confetti({ particleCount: 120, spread: 80 });
   if (cost >= 100000000) postFeed('badge', `🐚 ${bgName} 배지를 손에 넣었어요!`, 'legendary', true);
 }
-function equipBg(bgClass) { myNickBg = bgClass; updatePointsUI(); renderShopUI(); }
+function equipBg(bgClass) { if (bgClass === 'nb-heaven' && !(typeof isWhite === 'function' && isWhite())) return alert('☁️ 천외천, 프레스티지 화이트만 장착할 수 있어요.'); myNickBg = bgClass; updatePointsUI(); renderShopUI(); }
 function unequipBg() { myNickBg = 'nb-none'; updatePointsUI(); renderShopUI(); }
 
 function unequipAll() {

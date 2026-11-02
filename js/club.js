@@ -34,7 +34,7 @@ function policyCooldownLeft(type) {
 }
 // 다른 파일에서 쓰는 효과들
 function policyMarket() { return policyActive('market') ? { mult: activePolicies.market.mult || 2, by: activePolicies.market.by } : null; }
-function policyFestMult() { return policyActive('fest') ? FEST_MULT : 1; }
+function policyFestMult() { return (policyActive('fest') ? FEST_MULT : 1) * (typeof whiteRainMult === 'function' ? whiteRainMult() : 1); }
 function policyNoFee() { return policyActive('nofee'); }
 
 function watchPolicies() {
@@ -57,6 +57,7 @@ async function activatePolicy(type) {
   if (!def) return;
   if (!(typeof isBlack === 'function' && isBlack())) return alert('🖤 프레스티지 블랙 회원만 정책을 행사할 수 있어요.');
   if (def.minLevel && currentEnhanceLevel < def.minLevel) return alert(`🍚 [${def.name}]은 지금 밥이 +${def.minLevel}강 이상이어야 쓸 수 있어요.\n(지금 내 밥: +${currentEnhanceLevel}강)`);
+  if (typeof policyBannedLeft === 'function' && policyBannedLeft(type) > 0) return alert(`🕊️ 천외천의 천명으로 [${def.name}]은 ${Math.ceil(policyBannedLeft(type) / 60000)}분 동안 금지돼 있어요.`);
   if (policyActive(type)) return alert(`이미 [${def.name}]이 진행 중이에요. (${policyLeftText(type)} 남음)`);
   const cd = policyCooldownLeft(type);
   if (cd > 0) return alert(`[${def.name}] 쿨타임: ${Math.ceil(cd / 60000)}분 뒤에 다시 쓸 수 있어요.`);
@@ -235,7 +236,8 @@ function renderBlackClubPolicies() {
   box.innerHTML = Object.entries(BLACK_POLICIES).map(([t, d]) => {
     const on = policyActive(t), cd = policyCooldownLeft(t);
     const last = activePolicies[t];
-    const state = t === 'reset' ? '<span class="text-amber-200">언제든 사용 가능</span>' : t === 'hammer' && last && cd > 0 ? `<span class="text-rose-300">최근 판결: ${esc(last.by)} → ${esc(last.target || '?')} · 쿨타임 ${Math.ceil(cd / 60000)}분</span>` : on ? `<span class="text-emerald-300">진행 중 · ${esc(activePolicies[t].by)} · ${policyLeftText(t)} 남음</span>`
+    const ban = typeof policyBannedLeft === 'function' ? policyBannedLeft(t) : 0;
+    const state = ban > 0 ? `<span class="text-sky-300">🕊️ 천명으로 금지 · ${Math.ceil(ban / 60000)}분</span>` : t === 'reset' ? '<span class="text-amber-200">언제든 사용 가능</span>' : t === 'hammer' && last && cd > 0 ? `<span class="text-rose-300">최근 판결: ${esc(last.by)} → ${esc(last.target || '?')} · 쿨타임 ${Math.ceil(cd / 60000)}분</span>` : on ? `<span class="text-emerald-300">진행 중 · ${esc(activePolicies[t].by)} · ${policyLeftText(t)} 남음</span>`
       : cd > 0 ? `<span class="text-slate-400">쿨타임 ${Math.ceil(cd / 60000)}분</span>` : '<span class="text-amber-200">발동 가능</span>';
     return `<div class="rounded-xl border border-white/10 bg-white/5 p-2.5 flex items-center justify-between gap-2">
       <div class="min-w-0">
@@ -262,6 +264,7 @@ async function executeJudgment(ref) {
     const r = await ref.transaction(cur => { got = cur || null; return cur ? null : undefined; });
     if (!r.committed || !got) return;
   } catch (e) { return; }
+  if (got.type === 'smite' || got.type === 'expel') { if (typeof executeWhiteJudgment === 'function') executeWhiteJudgment(got); return; }
   // 🛡️ 관리자 포인트 조정: 회원 화면이 꺼져 있거나 끊겨 있다가 옛 포인트로 덮어써도, 다음 접속 때 다시 적용됨
   if (got.type === 'admin_set') {
     const target = Math.max(0, Math.round(Number(got.points) || 0));

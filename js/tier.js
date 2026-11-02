@@ -31,8 +31,8 @@ function tierNow() { return typeof ServerClock !== 'undefined' ? ServerClock.now
 function isBlack() { return myTier.blackUntil > tierNow(); }
 function isGold() { return isBlack() || myTier.goldUntil > tierNow(); }
 function myTierKey() { return isBlack() ? 'black' : myTier.goldUntil > tierNow() ? 'gold' : null; }
-function sellFeeRate() { const k = myTierKey(); return k ? TIERS[k].fee : 0.1; }
-function budgetRate() { const k = myTierKey(); return k ? TIERS[k].perHour / 3600 : BUDGET_RATE; } // 초당 P
+function sellFeeRate() { if (typeof isWhite === 'function' && isWhite()) return 0; const k = myTierKey(); return k ? TIERS[k].fee : 0.1; }
+function budgetRate() { if (typeof isWhite === 'function' && isWhite()) return WHITE_PER_HOUR / 3600; const k = myTierKey(); return k ? TIERS[k].perHour / 3600 : BUDGET_RATE; } // 초당 P
 function slotMegaChance() { return SLOT_MEGA_CHANCE * (isBlack() ? BLACK_SLOT_MULT : 1); }
 function tierDaysLeft(until) { return Math.max(0, (until - tierNow()) / 86400000); }
 
@@ -131,6 +131,8 @@ function announceBlackEntrance(justJoined = false) {
 function refreshTierUI() {
   const hb = document.getElementById('hotlineToolbarBtn');
   if (hb) hb.classList.toggle('hidden', !(isBlack() || (typeof isAdmin !== 'undefined' && isAdmin)));
+  const wb = document.getElementById('whiteToolbarBtn');
+  if (wb) wb.classList.toggle('hidden', !(isBlack() || (typeof isWhite === 'function' && isWhite()) || (typeof isAdmin !== 'undefined' && isAdmin)));
 }
 setInterval(refreshTierUI, 60 * 1000);
 

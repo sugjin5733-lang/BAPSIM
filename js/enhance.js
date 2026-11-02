@@ -587,6 +587,8 @@ function runEnhancement() {
   } else {
     outcome = 'break';
     currentEnhanceLevel = enhanceCheckpoint(fromLevel);
+    const ins = typeof whiteInsurance === 'function' ? whiteInsurance(fromLevel) : null;
+    if (ins != null && ins > currentEnhanceLevel) { currentEnhanceLevel = ins; if (typeof bankToast === 'function') bankToast('🔥 초월 보험 발동', `천외천의 가호로 +${fromLevel}강 밥이 재가 되지 않고 +${ins}강으로 남았어요. (오늘 1번)`); }
     const near = roll - odds.success < 2 ? ' 😱 정말 아깝다!' : '';
     msg = `<span class="text-rose-500 font-black text-xs">💥 밥이 타버렸습니다!${near} ${currentEnhanceLevel > 0 ? `(안전 구간 +${currentEnhanceLevel}강으로 내려감)` : fromLevel >= 20 ? `(+${fromLevel}강 초월 밥이 재가 되어 +0강으로...)` : '(+0 따스한 햇쌀밥으로 리셋)'}</span>`;
   }

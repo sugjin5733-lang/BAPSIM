@@ -650,3 +650,38 @@ body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 
 @keyframes speakerIn { from { opacity: 0; transform: translateY(-24px) scale(.92); } to { opacity: 1; transform: none; } }
 @keyframes speakerOut { to { opacity: 0; transform: translateY(-16px) scale(.96); } }
 @keyframes speakerBar { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+
+/* ☁️ 천외천 (프레스티지 화이트) */
+.white-throne-banner { background: linear-gradient(110deg, #ffffff 0%, #fffbeb 40%, #ffffff 60%, #f0f9ff 100%); background-size: 220% 100%; border: 1.5px solid #fde68a; box-shadow: 0 6px 24px rgba(253,230,138,.35), inset 0 0 0 1px #fff; animation: whiteSheen 5s linear infinite; }
+.white-banner-label { font-size: 10px; font-weight: 900; letter-spacing: .3em; color: #b45309; }
+@keyframes whiteSheen { from { background-position: 0% 0; } to { background-position: 220% 0; } }
+.white-club-panel { background: radial-gradient(ellipse at 50% -10%, #ffffff 0%, #fffdf5 45%, #f8fafc 100%); border: 1.5px solid #fde68a; box-shadow: 0 30px 80px rgba(15,23,42,.25), 0 0 0 6px rgba(253,230,138,.18); }
+.white-card { background: linear-gradient(135deg, rgba(255,255,255,.95), rgba(255,251,235,.85)); border: 1px solid #fde68a; border-radius: 14px; }
+.white-btn { background: linear-gradient(135deg, #ffffff, #fef3c7 55%, #fde68a); color: #78350f; border: 1px solid #f59e0b55; box-shadow: 0 2px 10px rgba(245,158,11,.25); }
+.white-btn:not(:disabled):hover { filter: brightness(1.04); }
+.white-edict-bar { position: sticky; top: 0; z-index: 70; text-align: center; padding: 6px 12px; font-size: 12px; color: #78350f; background: linear-gradient(90deg, #fffbeb, #ffffff 40%, #ffffff 60%, #fffbeb); border-bottom: 1.5px solid #fcd34d; box-shadow: 0 4px 16px rgba(252,211,77,.35); }
+.white-edict-card { background: linear-gradient(135deg, #ffffff, #fffbeb) !important; color: #1f2937 !important; border-color: #f59e0b !important; }
+.white-edict-card .text-white { color: #1f2937 !important; }
+.white-flash { position: fixed; inset: 0; z-index: 130; pointer-events: none; display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 50% 45%, rgba(255,255,255,1) 0%, rgba(255,251,235,.95) 35%, rgba(255,255,255,0) 75%); animation: whiteFlash 3.2s ease-out both; }
+.white-flash-text { font-size: 44px; font-weight: 900; letter-spacing: .25em; color: #b45309; text-shadow: 0 0 24px #fde68a, 0 0 2px #fff; text-align: center; animation: whiteRise 3.2s ease-out both; }
+.white-flash-text small { display: block; font-size: 12px; letter-spacing: .6em; color: #92400e; margin-top: 6px; }
+@keyframes whiteFlash { 0% { opacity: 0; } 12% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes whiteRise { 0% { transform: translateY(18px) scale(.9); opacity: 0; } 20% { transform: none; opacity: 1; } 80% { opacity: 1; } 100% { transform: translateY(-10px); opacity: 0; } }
+@property --heaven-a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+.nb-heaven { position: relative; padding: 2px 14px; border-radius: 999px; font-weight: 900; white-space: nowrap; color: #78350f !important;
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(105deg, transparent 35%, rgba(255,255,255,.95) 50%, transparent 65%) padding-box,
+    radial-gradient(ellipse 120% 160% at 50% 130%, #fef3c7 0%, transparent 60%) padding-box,
+    linear-gradient(180deg, #ffffff, #fffdf7) padding-box,
+    conic-gradient(from var(--heaven-a), #fde68a, #ffffff, #fbbf24, #ffffff, #e0f2fe, #ffffff, #fde68a) border-box;
+  background-size: 260% 100%, 100% 100%, 100% 100%, 100% 100%; background-repeat: no-repeat;
+  animation: angelSweep 3.6s linear infinite, heavenSpin 6s linear infinite, heavenGlow 2.6s ease-in-out infinite alternate;
+  text-shadow: 0 0 6px #fff; }
+.nb-heaven::before { content: '☁'; position: absolute; left: -0.9em; top: 50%; transform: translateY(-55%); font-size: 1em; color: #fff; text-shadow: 0 0 6px #fde68a, 0 0 2px #f59e0b; animation: heavenCloud 3s ease-in-out infinite; }
+.nb-heaven::after { content: ''; position: absolute; left: 50%; top: -0.55em; width: 2.2em; height: .5em; transform: translateX(-50%); border-radius: 50%; border: 2px solid #fcd34d; box-shadow: 0 0 8px #fde68a; pointer-events: none; animation: heavenHalo 2.4s ease-in-out infinite; }
+@keyframes heavenSpin { to { --heaven-a: 360deg; } }
+@keyframes heavenGlow { from { box-shadow: 0 0 6px rgba(253,230,138,.6); } to { box-shadow: 0 0 16px rgba(253,230,138,1), 0 0 30px rgba(255,255,255,.9); } }
+@keyframes heavenHalo { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-2px); } }
+@keyframes heavenCloud { 0%,100% { transform: translateY(-55%) translateX(0); } 50% { transform: translateY(-55%) translateX(-2px); } }

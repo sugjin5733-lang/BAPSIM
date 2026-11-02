@@ -207,6 +207,7 @@ function loadGameStateFromUser(val) {
   if (typeof loadBowlFromUser === "function") loadBowlFromUser(val);
   if (typeof loadTierFromUser === "function") loadTierFromUser(val);
   loadBestEnhance(val);
+  if (typeof loadWhiteFromUser === 'function') loadWhiteFromUser(val);
 }
 
 function bindNickname(nick) {

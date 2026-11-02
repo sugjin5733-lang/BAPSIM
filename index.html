@@ -11,7 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Black+Han+Sans&family=Rubik+Glitch&family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261102f">
+  <link rel="stylesheet" href="css/style.css?v=20261102g">
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen pb-24 selection:bg-orange-500 selection:text-white relative">
 
@@ -195,6 +195,8 @@
 
   <!-- 메인 본문 -->
   <main class="max-w-6xl mx-auto px-4 pt-6 space-y-7">
+    <!-- ☁️ 천외천 (프레스티지 화이트) 배너 -->
+    <div id="whiteThroneBanner" onclick="openWhiteClub()" class="hidden white-throne-banner cursor-pointer rounded-2xl px-4 py-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1"></div>
     <!-- 👑 프레스티지 회원 배너 -->
     <div id="prestigeMemberBanner" onclick="openBlackClub()" class="hidden 2xl:!hidden prestige-member-banner cursor-pointer rounded-2xl px-4 py-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
       <div class="shrink-0 text-center leading-tight">
@@ -271,6 +273,11 @@
           <button onclick="openBankModal()" class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white font-black px-3 py-2 rounded-xl text-xs shadow-md transition-all">
             <span>🏦</span>
             <span>은행</span>
+          </button>
+
+          <button id="whiteToolbarBtn" onclick="openWhiteClub()" class="hidden flex-1 sm:flex-initial items-center justify-center gap-1.5 white-btn font-black px-3 py-2 rounded-xl text-xs shadow-md transition-all">
+            <span>☁️</span>
+            <span>천외천</span>
           </button>
 
           <button id="hotlineToolbarBtn" onclick="openBlackClub()" class="hidden flex-1 sm:flex-initial items-center justify-center gap-1.5 bg-black hover:bg-slate-900 text-amber-200 font-black px-3 py-2 rounded-xl text-xs border border-amber-300/60 shadow-md transition-all">
@@ -619,6 +626,31 @@
       <div id="clubSecPerks" class="space-y-2 hidden">
         <span class="text-xs font-extrabold text-amber-100">⚙️ 내 혜택 관리</span>
         <div id="blackClubPerks" class="space-y-1.5 text-xs"></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ☁️ 천외천 (프레스티지 화이트) -->
+  <div id="whiteClubModal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4" onclick="if(event.target===this) closeWhiteClub()">
+    <div class="white-club-panel w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto overflow-x-hidden">
+      <div class="flex items-start justify-between border-b border-amber-200/70 pb-3">
+        <div>
+          <div class="text-[10px] font-black tracking-[0.35em] text-amber-500">天 外 天 · PRESTIGE WHITE</div>
+          <h3 class="font-black text-lg text-slate-900">☁️ 천외천</h3>
+          <p class="text-[11px] text-slate-500 mt-0.5">블랙 위의 단 하나의 자리. 하늘 밖의 하늘.</p>
+          <div id="whiteClubStatus" class="text-[11px] mt-1.5"></div>
+        </div>
+        <button onclick="closeWhiteClub()" class="text-slate-400 hover:text-slate-700 text-sm p-1">✕</button>
+      </div>
+      <div id="whiteJoinBox" class="space-y-2"></div>
+      <div id="whiteSecPowers" class="space-y-2 hidden">
+        <span class="text-xs font-extrabold text-slate-800">⚡ 천외천의 권능 <span class="text-[10px] font-bold text-slate-400">· 비용은 전부 소각</span></span>
+        <div id="whitePowers" class="space-y-1.5"></div>
+      </div>
+      <div class="space-y-1.5">
+        <span class="text-xs font-extrabold text-slate-800">✨ 천외천의 혜택</span>
+        <ul id="whitePerks" class="text-[11px] text-slate-600 space-y-0.5"></ul>
       </div>
     </div>
   </div>
@@ -1551,24 +1583,25 @@
     </div>
   </div>
 
-  <script src="js/core.js?v=20261102f"></script>
-  <script src="js/auth.js?v=20261102f"></script>
-  <script src="js/enhance.js?v=20261102f"></script>
-  <script src="js/shop.js?v=20261102f"></script>
-  <script src="js/chat.js?v=20261102f"></script>
-  <script src="js/games.js?v=20261102f"></script>
-  <script src="js/admin.js?v=20261102f"></script>
-  <script src="js/ranking.js?v=20261102f"></script>
-  <script src="js/restaurants.js?v=20261102f"></script>
-  <script src="js/tools.js?v=20261102f"></script>
-  <script src="js/feed.js?v=20261102f"></script>
-  <script src="js/bank.js?v=20261102f"></script>
-  <script src="js/tier.js?v=20261102f"></script>
-  <script src="js/club.js?v=20261102f"></script>
-  <script src="js/cards.js?v=20261102f"></script>
-  <script src="js/season.js?v=20261102f"></script>
-  <script src="js/duel.js?v=20261102f"></script>
-  <script src="js/predict.js?v=20261102f"></script>
-  <script src="js/main.js?v=20261102f"></script>
+  <script src="js/core.js?v=20261102g"></script>
+  <script src="js/auth.js?v=20261102g"></script>
+  <script src="js/enhance.js?v=20261102g"></script>
+  <script src="js/shop.js?v=20261102g"></script>
+  <script src="js/chat.js?v=20261102g"></script>
+  <script src="js/games.js?v=20261102g"></script>
+  <script src="js/admin.js?v=20261102g"></script>
+  <script src="js/ranking.js?v=20261102g"></script>
+  <script src="js/restaurants.js?v=20261102g"></script>
+  <script src="js/tools.js?v=20261102g"></script>
+  <script src="js/feed.js?v=20261102g"></script>
+  <script src="js/bank.js?v=20261102g"></script>
+  <script src="js/tier.js?v=20261102g"></script>
+  <script src="js/club.js?v=20261102g"></script>
+  <script src="js/white.js?v=20261102g"></script>
+  <script src="js/cards.js?v=20261102g"></script>
+  <script src="js/season.js?v=20261102g"></script>
+  <script src="js/duel.js?v=20261102g"></script>
+  <script src="js/predict.js?v=20261102g"></script>
+  <script src="js/main.js?v=20261102g"></script>
 </body>
 </html>
