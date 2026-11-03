@@ -490,6 +490,28 @@ function adminManageUserItems(nick) {
   }
 }
 
+// ⏳ 관리자: 특정 회원의 보류 포인트 삭제(또는 원하는 금액으로 조정)
+async function adminClearOwed(nick) {
+  if (!requireAdmin()) return;
+  let uv = {};
+  try { uv = (await db.ref(`user_points/${nick}`).once('value')).val() || {}; } catch (e) {}
+  const owedNow = Number(uv.owed) || 0;
+  const v = prompt(`⏳ [${nick}] 님의 보류 포인트 ${owedNow.toLocaleString()}P\n\n남길 보류 금액을 입력하세요 (0 = 전부 삭제):`, '0');
+  if (v === null) return;
+  const num = parseInt(String(v).replace(/[,\s]/g, ''), 10);
+  if (isNaN(num) || num < 0) return alert('0 이상의 숫자만 입력할 수 있어요.');
+  if (!confirm(`[${nick}] 님의 보류 포인트를 ${owedNow.toLocaleString()}P → ${num.toLocaleString()}P 로 바꿀까요?`)) return;
+  try {
+    await db.ref(`user_points/${nick}/owed`).set(num);
+  } catch (err) { return alert('오류: ' + (err && err.message)); }
+  const key = db.ref(`point_logs/${nick}`).push().key;
+  db.ref(`point_logs/${nick}/${key}`).set({ d: 0, r: `🛡️ 관리자 보류 조정 (${owedNow.toLocaleString()}→${num.toLocaleString()})`, bal: Number(uv.points) || 0, ts: firebase.database.ServerValue.TIMESTAMP, by: currentUser.nickname, byUid: authUser && authUser.uid }).catch(() => {});
+  // 회원 화면이 켜져 있으면 옛 보류값으로 덮어쓰지 않도록 회원 쪽에서도 다시 적용
+  if (currentUser.nickname !== nick) db.ref(`judgments/${nick}`).push({ type: 'admin_owed', owed: num, by: currentUser.nickname, uid: authUser && authUser.uid, at: firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
+  else { myOwed = num; updatePointsUI(); }
+  alert(`[${nick}] 님의 보류 포인트가 ${num.toLocaleString()}P 로 바뀌었어요.`);
+}
+
 function adminQuickSetPoint(nick) {
   if (!requireAdmin()) return;
   const val = prompt(`[${nick}] 회원의 새 포인트 값을 입력하세요:`);
@@ -735,7 +757,8 @@ function renderAdminOwedList() {
       : rows.filter(r => r.owed > 0).map(r => `<div class="p-2 bg-white border rounded-xl flex items-center justify-between gap-2">
           <div class="min-w-0"><div class="font-bold text-slate-800 truncate">${esc(r.nick)} <span class="text-[10px] text-slate-400 font-medium">${r.tier}</span></div>
             <div class="text-[10px] text-slate-400">포인트 ${r.pts.toLocaleString()}P · 시간당 ${(r.rate / 10000).toLocaleString()}만 · 마지막 접속 ${r.seen ? new Date(r.seen).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }) : '-'}</div></div>
-          <div class="text-right shrink-0"><div class="font-black text-amber-600">⏳ ${r.owed.toLocaleString()}P</div><div class="text-[10px] text-slate-500">다 받는 데 약 ${fmtH(r.hours)} (접속 기준)</div></div>
+          <div class="flex items-center gap-2 shrink-0"><div class="text-right"><div class="font-black text-amber-600">⏳ ${r.owed.toLocaleString()}P</div><div class="text-[10px] text-slate-500">다 받는 데 약 ${fmtH(r.hours)} (접속 기준)</div></div>
+            <button onclick="adminClearOwed(${jsArg(r.nick)})" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-black px-2 py-1.5 rounded-lg text-[10px] whitespace-nowrap">보류 삭제</button></div>
         </div>`).join('');
   };
   let last = {};

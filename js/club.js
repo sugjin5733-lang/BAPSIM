@@ -272,6 +272,11 @@ async function executeJudgment(ref) {
   if (got.type === 'chair_expel') { if (typeof executeChairExpel === 'function') executeChairExpel(got); return; }
   if (got.type === 'smite' || got.type === 'expel') { if (typeof executeWhiteJudgment === 'function') executeWhiteJudgment(got); return; }
   // 🛡️ 관리자 포인트 조정: 회원 화면이 꺼져 있거나 끊겨 있다가 옛 포인트로 덮어써도, 다음 접속 때 다시 적용됨
+  if (got.type === 'admin_owed') {
+    myOwed = Math.max(0, Math.round(Number(got.owed) || 0));
+    updatePointsUI();
+    return;
+  }
   if (got.type === 'admin_set') {
     const target = Math.max(0, Math.round(Number(got.points) || 0));
     if (userPoints !== target) {
