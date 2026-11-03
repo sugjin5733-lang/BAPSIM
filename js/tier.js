@@ -50,7 +50,10 @@ function loadTierFromUser(val) {
   refreshTierUI();
   if (!depositDirty) {
     const d = val && val.deposit;
-    myDeposit = { amt: Math.max(0, Number(d && d.amt) || 0), since: Number(d && d.since) || 0, int: Math.max(0, Number(d && d.int) || 0) };
+    myDeposit = { amt: Math.max(0, Number(d && d.amt) || 0), since: Number(d && d.since) || 0, int: Math.max(0, Number(d && d.int) || 0), fresh: Math.max(0, Number(d && d.fresh) || 0), freshAt: Number(d && d.freshAt) || 0 };
+    // 예전 형식(fresh 없음): 원금 전체가 'since' 시각에 새로 들어온 것으로 취급 (예전 규칙과 같은 결과)
+    if (d && d.fresh === undefined && myDeposit.amt > 0) { myDeposit.fresh = myDeposit.amt; myDeposit.freshAt = myDeposit.since; }
+    myDeposit.fresh = Math.min(myDeposit.fresh, myDeposit.amt);
     if (myDeposit.amt > 0) setTimeout(() => accrueDeposit(), 3000);
   }
 }
@@ -62,7 +65,7 @@ function tierSyncFields(put) {
     tierDirty = false;
   }
   if (depositDirty) {
-    put('deposit', myDeposit.amt > 0 ? { amt: myDeposit.amt, since: myDeposit.since, int: Math.min(myDeposit.int || 0, myDeposit.amt) } : null);
+    put('deposit', myDeposit.amt > 0 ? { amt: myDeposit.amt, since: myDeposit.since, int: Math.min(myDeposit.int || 0, myDeposit.amt), fresh: Math.min(myDeposit.fresh || 0, myDeposit.amt), freshAt: myDeposit.freshAt || 0 } : null);
     depositDirty = false;
   }
 }
@@ -144,49 +147,67 @@ setInterval(refreshTierUI, 60 * 1000);
 const DAY_MS = 86400000, KST8_SHIFT = 3600000; // KST 08:00 = UTC 23:00 → (t + 1h) 가 하루 단위로 떨어지는 순간
 function lastKst8(t) { return Math.floor((t + KST8_SHIFT) / DAY_MS) * DAY_MS - KST8_SHIFT; }
 function nextKst8(t) { return lastKst8(t) + DAY_MS; }
-function depositInterestDue() {
-  if (!(myDeposit.amt > 0) || !myDeposit.since) return { days: 0, amt: 0 };
-  // 첫 이자는 넣은 뒤 12시간 이상 지난 오전 8시부터 (7시 59분에 넣고 8시에 3% 받는 꼼수 방지)
-  let first = nextKst8(myDeposit.since);
-  if (first - myDeposit.since < 12 * 3600000) first += DAY_MS;
+// 이자 계산: 이미 이자를 받던 원금(amt - fresh)은 매일 8시에 바로 3%,
+// 새로 넣은 돈(fresh)은 넣고 12시간 이상 지난 8시부터 원금에 합쳐져서 이자를 받음
+// (추가로 넣어도 기존 원금의 이자 시계는 그대로)
+function depositSimulate() {
+  const out = { days: 0, amt: 0, eligible: 0, fresh: 0, steps: [] };
+  if (!(myDeposit.amt > 0)) return out;
+  let el = Math.max(0, myDeposit.amt - (myDeposit.fresh || 0)), fr = Math.max(0, myDeposit.fresh || 0);
+  const fa = myDeposit.freshAt || myDeposit.since || 0;
   const last = lastKst8(tierNow());
-  const days = last >= first ? Math.round((last - first) / DAY_MS) + 1 : 0;
-  if (days <= 0) return { days: 0, amt: 0 };
-  return { days, amt: Math.floor(myDeposit.amt * (Math.pow(1 + DEPOSIT_RATE, days) - 1)) };
+  for (let t = nextKst8(myDeposit.since || fa); t <= last; t += DAY_MS) {
+    if (fr > 0 && t - fa >= 12 * 3600000) { el += fr; fr = 0; }
+    const add = Math.floor(el * DEPOSIT_RATE);
+    if (el > 0) { el += add; out.amt += add; out.days++; out.steps.push({ at: t, add, bal: el + fr }); }
+  }
+  out.eligible = el; out.fresh = fr;
+  return out;
+}
+function depositInterestDue() { const r = depositSimulate(); return { days: r.days, amt: r.amt }; }
+// 새로 넣은 돈이 이자를 받기 시작하는 8시
+function depositFreshStart() {
+  if (!(myDeposit.fresh > 0)) return 0;
+  let t = nextKst8(myDeposit.freshAt);
+  if (t - myDeposit.freshAt < 12 * 3600000) t += DAY_MS;
+  return t;
 }
 let depositAccruing = false;
 async function accrueDeposit() {
   if (depositAccruing || !canSyncToCloud() || !(myDeposit.amt > 0)) return 0;
-  const due = depositInterestDue();
-  if (due.days <= 0) return 0;
+  const sim = depositSimulate();
+  const lastB = lastKst8(tierNow());
+  if (sim.days <= 0) {
+    // 이자는 없지만 새 돈이 원금에 합쳐졌으면 반영
+    if (myDeposit.fresh > 0 && sim.fresh === 0) { myDeposit.fresh = 0; myDeposit.since = lastB; depositDirty = true; updatePointsUI(); }
+    return 0;
+  }
   depositAccruing = true;
   try {
-    let from = nextKst8(myDeposit.since); if (from - myDeposit.since < 12 * 3600000) from += DAY_MS; from -= DAY_MS;
-    myDeposit.since = lastKst8(tierNow()); // 이자 시계를 오늘 8시로
-    depositDirty = true;
     let paid = 0;
-    if (isBlack() && due.amt > 0) {
+    if (isBlack() && sim.amt > 0) {
       try {
-        const r = await db.ref('bank/balance').transaction(c => { const b = Number(c) || 0; paid = Math.min(b, due.amt); return paid > 0 ? b - paid : undefined; });
+        const r = await db.ref('bank/balance').transaction(c => { const b = Number(c) || 0; paid = Math.min(b, sim.amt); return paid > 0 ? b - paid : undefined; });
         if (!r.committed) paid = 0;
       } catch (e) { paid = 0; }
     }
-    // 하루씩 복리로 나눠서 내역에 남김 (금고가 모자라 일부만 받았으면 비율대로)
-    const ratio = due.amt > 0 ? paid / due.amt : 0;
-    let bal = myDeposit.amt;
+    const ratio = sim.amt > 0 ? paid / sim.amt : 0;
     const nick = currentUser.nickname;
-    for (let i = 1; i <= due.days; i++) {
-      const add = Math.floor(bal * DEPOSIT_RATE * ratio);
-      bal += add;
-      db.ref(`bank/deposit_log/${nick}`).push({ at: from + i * DAY_MS, interest: add, bal, rate: DEPOSIT_RATE, note: isBlack() ? (ratio < 1 ? '금고 부족으로 일부만' : '') : '블랙 아님 · 이자 없음' }).catch(() => {});
-    }
-    paid = bal - myDeposit.amt;
-    myDeposit.amt = bal;
-    myDeposit.int = (myDeposit.int || 0) + paid;
+    let given = 0;
+    sim.steps.forEach(st => {
+      const add = Math.floor(st.add * ratio);
+      given += add;
+      db.ref(`bank/deposit_log/${nick}`).push({ at: st.at, interest: add, bal: myDeposit.amt + given, rate: DEPOSIT_RATE, note: isBlack() ? (ratio < 1 ? '금고 부족으로 일부만' : '') : '블랙 아님 · 이자 없음' }).catch(() => {});
+    });
+    myDeposit.amt += given;
+    myDeposit.fresh = sim.fresh;
+    myDeposit.since = lastB; // 이자 시계를 오늘 8시로 (원금 쪽)
+    myDeposit.int = (myDeposit.int || 0) + given;
+    depositDirty = true;
     updatePointsUI();
     renderTierBox();
-    if (paid > 0 && typeof bankToast === 'function') bankToast('🏦 예치 이자', `오늘 오전 8시 이자 <strong>${paid.toLocaleString()}P</strong>가 예치금에 붙었어요 (복리). 꺼낼 수 있는 이자 ${myDeposit.int.toLocaleString()}P`);
-    return paid;
+    if (given > 0 && typeof bankToast === 'function') bankToast('🏦 예치 이자', `오전 8시 이자 <strong>${given.toLocaleString()}P</strong>가 예치금에 붙었어요 (복리). 꺼낼 수 있는 이자 ${myDeposit.int.toLocaleString()}P`);
+    return given;
   } finally { depositAccruing = false; }
 }
 setInterval(() => { accrueDeposit(); }, 5 * 60 * 1000);
@@ -226,7 +247,7 @@ function depositPanelHTML(pfx = 'tier') {
   const dep = depositInterestDue();
   const nextAt = new Date(nextKst8(tierNow())).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   return `
-      <div class="text-[10px] text-slate-400">${myDeposit.amt > 0 ? `매일 오전 8시 3% 복리 · 다음 이자 ${nextAt}${dep.days > 0 ? ` (곧 +${dep.amt.toLocaleString()}P)` : ''}<br>꺼낼 수 있는 이자 <b class="text-emerald-300">${(myDeposit.int || 0).toLocaleString()}P</b>` : '매일 오전 8시 3% 복리 (상한 없음) · 이자는 은행 금고에서'}</div>
+      <div class="text-[10px] text-slate-400">${myDeposit.amt > 0 ? `매일 오전 8시 3% 복리 · 다음 이자 ${nextAt}${dep.days > 0 ? ` (곧 +${dep.amt.toLocaleString()}P)` : ''}<br>꺼낼 수 있는 이자 <b class="text-emerald-300">${(myDeposit.int || 0).toLocaleString()}P</b>${myDeposit.fresh > 0 ? `<br>이자 받는 원금 ${(myDeposit.amt - myDeposit.fresh).toLocaleString()}P · 새로 넣은 ${myDeposit.fresh.toLocaleString()}P는 <b class="text-amber-200">${new Date(depositFreshStart()).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</b>부터 이자` : ''}` : '매일 오전 8시 3% 복리 (상한 없음) · 이자는 은행 금고에서'}</div>
       ${isBlack() ? `<div class="flex gap-1.5"><input id="${pfx}DepositAmount" type="number" min="${DEPOSIT_MIN}" step="10000" placeholder="예치 금액" class="flex-1 min-w-0 bg-black/40 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs text-white">
         <button onclick="depositPoints('${pfx}DepositAmount')" class="bg-amber-400 text-slate-950 font-black px-3 rounded-xl text-[11px]">예치</button></div>` : ''}
       ${myDeposit.amt > 0 ? `<div class="flex gap-1.5"><button onclick="withdrawInterest()" class="flex-1 bg-emerald-500/20 text-emerald-200 font-bold py-1.5 rounded-xl text-[11px]">이자 출금</button><button onclick="openDepositHistory('${pfx}DepositHistory')" class="flex-1 bg-white/10 text-white font-bold py-1.5 rounded-xl text-[11px]">이자 내역</button><button onclick="withdrawDeposit()" class="flex-1 bg-white/10 text-rose-200 font-bold py-1.5 rounded-xl text-[11px]">전액 출금</button></div>
@@ -239,11 +260,13 @@ async function depositPoints(inputId = 'tierDepositAmount') {
   const amount = Math.floor(Number(input && input.value) || 0);
   if (amount < DEPOSIT_MIN) return alert(`최소 ${DEPOSIT_MIN.toLocaleString()}P부터 예치할 수 있어요.`);
   if (amount > userPoints) return alert('❌ 포인트가 부족해요!');
-  if (!confirm(`🏦 ${amount.toLocaleString()}P를 예치할까요?\n\n· 매일 오전 8시에 3% 이자가 예치금에 붙어요 (복리 · 은행 금고에서 지급)\n· 첫 이자는 넣고 12시간 이상 지난 오전 8시부터 · 추가로 넣으면 이자 시계가 다시 시작돼요\n· 붙은 이자만큼은 언제든 따로 꺼낼 수 있어요\n· 꺼낼 때 큰 금액은 시간당 한도에 따라 ⏳보류로 천천히 들어와요`)) return;
+  if (!confirm(`🏦 ${amount.toLocaleString()}P를 예치할까요?\n\n· 매일 오전 8시에 3% 이자가 예치금에 붙어요 (복리 · 은행 금고에서 지급)\n· 새로 넣은 돈은 넣고 12시간 이상 지난 오전 8시부터 이자 · 이미 넣어둔 돈의 이자는 그대로 계속 붙어요\n· 붙은 이자만큼은 언제든 따로 꺼낼 수 있어요\n· 꺼낼 때 큰 금액은 시간당 한도에 따라 ⏳보류로 천천히 들어와요`)) return;
   if (myDeposit.amt > 0) await accrueDeposit();
   updatePointsUI();
   addPoints(-amount, '🏦 은행 예치');
-  myDeposit = { amt: myDeposit.amt + amount, since: tierNow(), int: myDeposit.int || 0 }; // 추가 예치하면 이자 시계 다시 시작
+  // 새로 넣은 돈만 따로 '대기'로 (기존 원금의 이자 시계는 그대로)
+  const nowT = tierNow();
+  myDeposit = { amt: myDeposit.amt + amount, since: myDeposit.amt > 0 && myDeposit.since ? myDeposit.since : nowT, int: myDeposit.int || 0, fresh: (myDeposit.fresh || 0) + amount, freshAt: nowT };
   depositDirty = true;
   updatePointsUI();
   if (input) input.value = '';
@@ -258,7 +281,7 @@ async function withdrawDeposit() {
   await accrueDeposit();
   updatePointsUI();
   amt = myDeposit.amt;
-  myDeposit = { amt: 0, since: 0, int: 0 };
+  myDeposit = { amt: 0, since: 0, int: 0, fresh: 0, freshAt: 0 };
   depositDirty = true;
   addPoints(amt, '🏦 예치금 출금');
   updatePointsUI();
