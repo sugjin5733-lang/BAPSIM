@@ -917,3 +917,6 @@ body { font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMac
 .menu-card .menu-side { padding: 6px 10px; border-radius: 12px; flex-direction: row; align-items: baseline; gap: 6px; }
 .menu-card .menu-side-label { flex-shrink: 0; }
 .menu-card .menu-side-value { font-size: 11.5px; }
+
+/* 넓은 화면: 양옆 패널을 넓히고(닉네임 안 잘리게) 가운데는 그만큼 좁힘 */
+@media (min-width: 1536px) { .site-col { max-width: min(72rem, calc(100vw - 42rem)) !important; } }
