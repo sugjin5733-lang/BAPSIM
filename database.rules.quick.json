@@ -71,7 +71,7 @@
       ".write": "auth != null",
       "$nick": {
         "$id": {
-          ".validate": "!newData.exists() || !(newData.child('type').val() === 'admin_set' || newData.child('type').val() === 'admin_owed') || (auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true)"
+          ".validate": "!newData.exists() || !(newData.child('type').val() === 'admin_set' || newData.child('type').val() === 'admin_owed' || newData.child('type').val() === 'admin_grant') || (auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true)"
         }
       }
     },
