@@ -378,7 +378,7 @@ async function renderWhiteClub() {
   }
   const perks = document.getElementById('whitePerks');
   if (perks) perks.innerHTML = [
-    '💧 시간당 한도 50만P · 판매 수수료 0% · 밥 판매가 ×1.5 · 일시불 수수료 50%',
+    '💧 시간당 한도 50만P · 판매 수수료 0% · 밥 판매가 ×2',
     '🔥 초월 보험: 하루 1번, +20강 이상에서 밥이 타면 +20강으로 복구',
     '🛡️ 심판의 망치·천벌·추방이 통하지 않음',
     '🤍 접속하면 강림 연출 + 익명 전광판 알림 · 전용 배지 「프레스티지 화이트」(장착하면 정체가 드러나요)',

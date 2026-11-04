@@ -660,7 +660,7 @@ function renderOwedModal() {
 //  수수료 90% (등급 무관)
 const OWED_SETTLE_RATE = 0.9; // 일시불은 수수료 90% (누구나 같음)
 const OWED_SETTLE_MAX = 50000000; // 5,000만P 넘는 보류는 일시불 불가 (조작 의심 → 관리자 확인)
-function owedSettleRate() { if ((typeof isWhite === 'function' && isWhite()) || (typeof isBlack === 'function' && isBlack())) return 0.5; return OWED_SETTLE_RATE; } // 🖤 블랙·🤍 화이트 50%
+function owedSettleRate() { return OWED_SETTLE_RATE; }
 function settleOwedAll() {
   if (!checkApprovalGuard()) return;
   if (!(myOwed > 0)) return alert('보류 포인트가 없어요.');
