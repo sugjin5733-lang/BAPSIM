@@ -48,8 +48,8 @@ const NO_PROTECT_FROM = 20; // +20 → +21 시도부터 파괴 방지권 사용 
 let useTProtect = false;
 // 분당 강화 한도: 모두 100 (자동 강화로 렉이 심해서 통일) · 대신 등급별 판매가 보너스
 function enhancePerMinLimit() { return 100; }
-// 💰 등급별 밥 판매가 보너스: 🥇 골드 +5% · 🖤 블랙 +10% · 🤍 화이트 +15%
-function tierSaleMult() { if (typeof isWhite === 'function' && isWhite()) return 1.15; const k = typeof myTierKey === 'function' ? myTierKey() : null; return k === 'black' ? 1.10 : k === 'gold' ? 1.05 : 1; }
+// 💰 등급별 밥 판매가 보너스: 🥇 골드 ×1.05 · 🖤 블랙 ×1.5 · 🤍 화이트 ×1.5
+function tierSaleMult() { if (typeof isWhite === 'function' && isWhite()) return 1.5; const k = typeof myTierKey === 'function' ? myTierKey() : null; return k === 'black' ? 1.5 : k === 'gold' ? 1.05 : 1; }
 function tprotectPrice(L) { return L < 22 ? 30000 : L < 24 ? 50000 : L < 26 ? 100000 : L < 28 ? 200000 : 300000; }
 function tprotectAvailable() { return typeof isBlack === 'function' && isBlack() && currentEnhanceLevel >= NO_PROTECT_FROM && currentEnhanceLevel < ENHANCE_MAX; }
 function tprotectActive() { return useTProtect && tprotectAvailable() && !gambleMode; }
@@ -242,7 +242,7 @@ function updateEnhanceUI() {
   const now = Date.now();
   enhanceActionTimestamps = enhanceActionTimestamps.filter(t => now - t < 60000);
   const cdEl = document.getElementById('enhanceCooldownText');
-  if (cdEl) cdEl.textContent = `분당 강화: ${enhanceActionTimestamps.length} / ${enhancePerMinLimit()}회${tierSaleMult() > 1 ? ` · 판매가 +${Math.round((tierSaleMult() - 1) * 100)}%` : ''}`;
+  if (cdEl) cdEl.textContent = `분당 강화: ${enhanceActionTimestamps.length} / ${enhancePerMinLimit()}회${tierSaleMult() > 1 ? ` · 판매가 ×${+tierSaleMult().toFixed(2)}` : ''}`;
 
   localStorage.setItem('bapsim_enhance_level', currentEnhanceLevel.toString());
   syncEnhanceToCloud();
