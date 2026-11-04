@@ -69,7 +69,9 @@ async function renderEconDashboard() {
   // 3) 일별 흐름
   const days = {}; // 날짜 → { src: {cat: P}, sink: {cat: P}, admin: P }
   const who = {};  // 날짜 → 닉 → 순증가 (상위 수입자)
+  const purged = Object.keys(users).filter(n => users[n] && users[n].purged);
   Object.entries(logs).forEach(([nick, rows]) => {
+    if (purged.includes(nick)) return; // 숙청된 조작범의 가짜 돈 흐름은 제외
     Object.values(rows || {}).forEach(e => {
       if (!e || typeof e.d !== 'number' || !e.ts) return;
       const d = todayKey(e.ts), c = econCat(e.r);
@@ -89,7 +91,7 @@ async function renderEconDashboard() {
     const x = days[d], s = tot(x.src), k = tot(x.sink), net = s + k;
     const max = Math.max(...Object.values(x.src).map(Math.abs), ...Object.values(x.sink).map(Math.abs), 1);
     const rows = (o, cls) => Object.entries(o).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1])).map(([n, v]) => `<div><div class="flex justify-between text-[10px]"><span class="text-slate-600">${esc(n)}</span><b class="text-slate-800">${econShort(v)}</b></div>${bar(v, max, cls)}</div>`).join('') || '<div class="text-[10px] text-slate-300">없음</div>';
-    const topEarn = Object.entries(who[d] || {}).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([n, v]) => `${esc(n)} ${econShort(v)}`).join(' · ');
+    const topEarn = Object.entries(who[d] || {}).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([n, v]) => `${esc(n)} ${econShort(v)}`).join(' · ');
     return `<div class="rounded-2xl border border-slate-200 p-3 space-y-2">
       <div class="flex items-center justify-between">
         <span class="text-xs font-black text-slate-800">${d}${d === today ? ' <span class="text-[10px] text-indigo-500">(오늘 · 진행 중)</span>' : ''}</span>
@@ -121,5 +123,5 @@ async function renderEconDashboard() {
     </div>
     ${histHTML ? `<div class="rounded-2xl border border-slate-200 p-3"><div class="text-[11px] font-black text-slate-700 mb-1">📈 총 통화량 추이 (관리자가 연 날 기준)</div>${histHTML}</div>` : ''}
     <div class="space-y-2">${dayHTML || '<div class="text-xs text-slate-400 text-center py-3">최근 내역이 없어요.</div>'}</div>
-    <p class="text-[10px] text-slate-400">내역은 3일만 보관돼서 일별 흐름은 최근 3~4일만 보여요 · 보류 이동·송금·예치 입출금은 돈이 옮겨가기만 해서 제외 · 사라진 돈 중 수수료·부자세·기부는 은행 금고로 가요</p>`;
+    <p class="text-[10px] text-slate-400">${purged.length ? `🚨 숙청된 회원(${purged.map(esc).join(', ')})의 조작 흐름은 제외 · ` : ''}내역은 3일만 보관돼서 일별 흐름은 최근 3~4일만 보여요 · 보류 이동·송금·예치 입출금은 돈이 옮겨가기만 해서 제외 · 사라진 돈 중 수수료·부자세·기부는 은행 금고로 가요</p>`;
 }
