@@ -41,7 +41,13 @@
       ".write": "auth != null"
     },
     "transfers": {
-      ".write": "auth != null"
+      ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true)",
+      "$to": {
+        "$id": {
+          ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || (auth != null && !data.exists() && newData.child('fromUid').val() === auth.uid && newData.child('from').val() === root.child('user_uids').child(auth.uid).val()) || (auth != null && !newData.exists() && root.child('user_uids').child(auth.uid).val() === $to)",
+          ".validate": "!newData.exists() || (newData.child('amount').isNumber() && newData.child('amount').val() >= 100 && newData.child('amount').val() <= 10000000)"
+        }
+      }
     },
     "bank": {
       ".write": "auth != null"
@@ -62,7 +68,12 @@
       ".write": "auth != null"
     },
     "judgments": {
-      ".write": "auth != null"
+      ".write": "auth != null",
+      "$nick": {
+        "$id": {
+          ".validate": "!newData.exists() || !(newData.child('type').val() === 'admin_set' || newData.child('type').val() === 'admin_owed') || (auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true)"
+        }
+      }
     },
     "site_notice": {
       ".write": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true)"
@@ -93,10 +104,10 @@
           ".validate": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || newData.val() === data.val()"
         },
         "points": {
-          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000000000"
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000000"
         },
         "owed": {
-          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000000000"
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000000"
         },
         "enhanceLevel": {
           ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 30"
