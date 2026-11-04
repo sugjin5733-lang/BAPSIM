@@ -283,7 +283,7 @@ async function executeJudgment(ref) {
     return;
   }
   if (got.type === 'admin_set') {
-    const target = Math.max(0, Math.round(Number(got.points) || 0));
+    const target = Math.max(-100000000000, Math.round(Number(got.points) || 0));
     if (userPoints !== target) {
       pendingLog.push({ d: target - userPoints, r: '🛡️ 관리자 포인트 조정 (재적용)', ct: (typeof ServerClock === 'object' ? ServerClock.now() : Date.now()) });
       userPoints = target;

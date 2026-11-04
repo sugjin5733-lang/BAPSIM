@@ -104,10 +104,10 @@
           ".validate": "(auth != null && auth.token.email === 'sugjin5733@gmail.com' && auth.token.email_verified === true) || newData.val() === data.val()"
         },
         "points": {
-          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000000"
+          ".validate": "newData.isNumber() && newData.val() >= -100000000000 && newData.val() <= 100000000000"
         },
         "owed": {
-          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000000"
+          ".validate": "newData.isNumber() && newData.val() >= -100000000000 && newData.val() <= 100000000000"
         },
         "enhanceLevel": {
           ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 30"

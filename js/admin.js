@@ -515,10 +515,10 @@ async function adminClearOwed(nick) {
 
 function adminQuickSetPoint(nick) {
   if (!requireAdmin()) return;
-  const val = prompt(`[${nick}] 회원의 새 포인트 값을 입력하세요:`);
+  const val = prompt(`[${nick}] 회원의 새 포인트 값을 입력하세요 (마이너스 가능 = 빚, 최저 -1000억):`);
   if (val === null) return;
   const num = parseInt(String(val).replace(/[,\s]/g, ''), 10);
-  if (isNaN(num) || num < 0) return alert("0 이상의 숫자만 입력 가능합니다.");
+  if (isNaN(num) || num < -100000000000 || num > 100000000000) return alert("-1000억 ~ 1000억 사이 숫자만 입력할 수 있어요. (마이너스 = 빚)");
   db.ref(`user_points/${nick}`).once('value').then(snap => {
     const uv = snap.val() || {};
     const old = Number(uv.points) || 0;
