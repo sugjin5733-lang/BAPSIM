@@ -657,14 +657,10 @@ function renderOwedModal() {
 }
 
 // ⚡ 보류 일시불 정산: 보류 전액을 한 번에 받고, 전체 금액의 일정 비율을 수수료로 뗌 (수수료는 그대로 사라짐)
-//  일반·골드 30% · 블랙 20% · 화이트 10%
-const OWED_SETTLE_RATE = 0.3;
+//  수수료 90% (등급 무관)
+const OWED_SETTLE_RATE = 0.9; // 일시불은 수수료 90% (누구나 같음)
 const OWED_SETTLE_MAX = 50000000; // 5,000만P 넘는 보류는 일시불 불가 (조작 의심 → 관리자 확인)
-function owedSettleRate() {
-  if (typeof isWhite === 'function' && isWhite()) return 0.1;
-  if (typeof isBlack === 'function' && isBlack()) return 0.2;
-  return OWED_SETTLE_RATE;
-}
+function owedSettleRate() { return OWED_SETTLE_RATE; }
 function settleOwedAll() {
   if (!checkApprovalGuard()) return;
   if (!(myOwed > 0)) return alert('보류 포인트가 없어요.');
