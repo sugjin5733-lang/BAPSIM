@@ -46,8 +46,10 @@ const NO_PROTECT_FROM = 20; // +20 → +21 시도부터 파괴 방지권 사용 
 //    → 축복+초월 방지권으로 +27강 약 1,300만P · +30강 약 4,700만P (방지권 없이는 +30강 평균 12억P)
 //  - 가격의 10%는 은행 금고로(수수료), 나머지는 소각
 let useTProtect = false;
-// 분당 강화 한도: 기본 100 · 🥇 골드 300 · 🖤 블랙 1000
-function enhancePerMinLimit() { const k = typeof myTierKey === 'function' ? myTierKey() : null; return k === 'black' ? 1000 : k === 'gold' ? 300 : 100; }
+// 분당 강화 한도: 모두 100 (자동 강화로 렉이 심해서 통일) · 대신 등급별 판매가 보너스
+function enhancePerMinLimit() { return 100; }
+// 💰 등급별 밥 판매가 보너스: 🥇 골드 +5% · 🖤 블랙 +10% · 🤍 화이트 +15%
+function tierSaleMult() { if (typeof isWhite === 'function' && isWhite()) return 1.15; const k = typeof myTierKey === 'function' ? myTierKey() : null; return k === 'black' ? 1.10 : k === 'gold' ? 1.05 : 1; }
 function tprotectPrice(L) { return L < 22 ? 30000 : L < 24 ? 50000 : L < 26 ? 100000 : L < 28 ? 200000 : 300000; }
 function tprotectAvailable() { return typeof isBlack === 'function' && isBlack() && currentEnhanceLevel >= NO_PROTECT_FROM && currentEnhanceLevel < ENHANCE_MAX; }
 function tprotectActive() { return useTProtect && tprotectAvailable() && !gambleMode; }
@@ -199,7 +201,7 @@ function updateEnhanceUI() {
   if (shopEnhanceTxt) shopEnhanceTxt.textContent = `+${currentEnhanceLevel}강 (${bowlName})`;
 
   const mk = riceMarket();
-  const baseSell = currentEnhanceLevel > 0 ? Math.round(ENHANCE_PROBABILITIES[currentEnhanceLevel - 1].reward * (typeof petSaleMult === 'function' ? petSaleMult() : 1) * (typeof chairSaleMult === 'function' ? chairSaleMult() : 1)) : 0;
+  const baseSell = currentEnhanceLevel > 0 ? Math.round(ENHANCE_PROBABILITIES[currentEnhanceLevel - 1].reward * (typeof petSaleMult === 'function' ? petSaleMult() : 1) * (typeof chairSaleMult === 'function' ? chairSaleMult() : 1) * tierSaleMult()) : 0;
   const bs = document.getElementById('enhanceBowlStats');
   if (bs) bs.innerHTML = currentEnhanceLevel > 0 || myBowl.tries > 0
     ? `🧾 이 밥: 0강부터 <strong class="text-slate-200">${myBowl.tries.toLocaleString()}회</strong> 강화 · 들인 돈 <strong class="text-amber-300">${myBowl.cost.toLocaleString()}P</strong>${baseSell > 0 && !mk.pending ? ` · 지금 팔면 ${(() => { const r = Math.round(baseSell * mk.mult); const n = r - Math.round(r * curSellFee()) - myBowl.cost; return `<strong class="${n >= 0 ? 'text-emerald-300' : 'text-rose-300'}">${n >= 0 ? '+' : ''}${n.toLocaleString()}P</strong>`; })()}` : ''}`
@@ -240,7 +242,7 @@ function updateEnhanceUI() {
   const now = Date.now();
   enhanceActionTimestamps = enhanceActionTimestamps.filter(t => now - t < 60000);
   const cdEl = document.getElementById('enhanceCooldownText');
-  if (cdEl) cdEl.textContent = `분당 강화: ${enhanceActionTimestamps.length} / ${enhancePerMinLimit()}회${typeof myTierKey === 'function' && myTierKey() ? ` (${myTierKey() === 'black' ? '🖤 블랙' : '🥇 골드'})` : ''}`;
+  if (cdEl) cdEl.textContent = `분당 강화: ${enhanceActionTimestamps.length} / ${enhancePerMinLimit()}회${tierSaleMult() > 1 ? ` · 판매가 +${Math.round((tierSaleMult() - 1) * 100)}%` : ''}`;
 
   localStorage.setItem('bapsim_enhance_level', currentEnhanceLevel.toString());
   syncEnhanceToCloud();
@@ -807,7 +809,7 @@ function sellEnhancedBowl() {
   const mk = riceMarket();
   if (mk.pending) return alert('⏳ 이번 분 시세를 확인하는 중이에요. 1~2초 뒤에 다시 눌러주세요!');
   const base = ENHANCE_PROBABILITIES[currentEnhanceLevel - 1].reward;
-  const reward = Math.round(base * mk.mult * (typeof petSaleMult === 'function' ? petSaleMult() : 1) * (typeof chairSaleMult === 'function' ? chairSaleMult() : 1));
+  const reward = Math.round(base * mk.mult * (typeof petSaleMult === 'function' ? petSaleMult() : 1) * (typeof chairSaleMult === 'function' ? chairSaleMult() : 1) * tierSaleMult());
   const currentName = BOWL_EVOLUTION[currentEnhanceLevel]?.name || '밥';
   const fee0 = Math.round(reward * curSellFee());
   const inv = myBowl.cost, tries = myBowl.tries;
