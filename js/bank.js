@@ -627,9 +627,14 @@ function renderOwedModal() {
   set('owedSummary', `
     <div class="text-2xl font-black text-amber-700">⏳ ${fmtP(myOwed)}</div>
     <div class="text-xs text-slate-600 mt-1">예상 완료 <strong>${fmtEtaClock(sec)}</strong> (${fmtDuration(sec)}) · 시간당 ${fmtP(BOOST_HOUR_P)}씩 30초마다 지급</div>`);
+  const rate = owedSettleRate(), fee = Math.ceil(myOwed * rate);
+  const lump = `<button onclick="settleOwedAll()" class="w-full rounded-xl bg-slate-900 hover:bg-slate-800 text-white px-3 py-2.5 text-left flex items-center justify-between gap-2">
+      <span class="text-xs font-black">⚡ 일시불 정산 · 지금 전부 받기<br><span class="text-[10px] font-bold text-slate-300">수수료 ${Math.round(rate * 100)}%${rate < OWED_SETTLE_RATE ? ' (등급 할인)' : ''} 빼고 ${fmtP(myOwed - fee)} 즉시 지급</span></span>
+      <span class="text-xs font-black text-rose-300 shrink-0">-${fmtP(fee)}</span>
+    </button>`;
   const left = boostLeftToday(), need = boostHoursNeeded();
   const opts = [...new Set([1, 3, 6, Math.min(need, left)])].filter(h => h >= 1 && h <= Math.min(need, left)).sort((a, b) => a - b);
-  set('owedOptions', left <= 0
+  set('owedOptions', lump + (left <= 0
     ? `<div class="text-center text-slate-400 text-xs py-2">오늘 단축 한도(${BOOST_DAILY_MAX}시간)를 다 썼어요.</div>`
     : opts.map(h => {
         const fee = boostFee(h), got = Math.min(myOwed, BOOST_HOUR_P * h);
@@ -638,7 +643,31 @@ function renderOwedModal() {
           <span class="text-xs font-black text-slate-800">⏩ ${h}시간 단축${all ? ' <span class="text-amber-600">(전부 받기)</span>' : ''}<br><span class="text-[10px] font-bold text-slate-400">즉시 ${fmtP(got)} 지급</span></span>
           <span class="text-xs font-black text-rose-600 shrink-0">-${fmtP(fee)}</span>
         </button>`;
-      }).join('') + `<div class="text-[10px] text-slate-400 text-center">오늘 남은 단축 ${left}시간 · 다음 1시간 ${fmtP(boostFee(1))}</div>`);
+      }).join('') + `<div class="text-[10px] text-slate-400 text-center">오늘 남은 단축 ${left}시간 · 다음 1시간 ${fmtP(boostFee(1))}</div>`));
+}
+
+// ⚡ 보류 일시불 정산: 보류 전액을 한 번에 받고, 전체 금액의 일정 비율을 수수료로 뗌 (수수료는 그대로 사라짐)
+//  일반·골드 30% · 블랙 20% · 화이트 10%
+const OWED_SETTLE_RATE = 0.3;
+function owedSettleRate() {
+  if (typeof isWhite === 'function' && isWhite()) return 0.1;
+  if (typeof isBlack === 'function' && isBlack()) return 0.2;
+  return OWED_SETTLE_RATE;
+}
+function settleOwedAll() {
+  if (!checkApprovalGuard()) return;
+  if (!(myOwed > 0)) return alert('보류 포인트가 없어요.');
+  if (myBudgetAt == null) return alert('잠시 후 다시 시도해 주세요.');
+  const total = myOwed, rate = owedSettleRate(), fee = Math.ceil(total * rate), pay = total - fee;
+  if (!confirm(`⚡ 보류 일시불 정산\n\n보류 ${fmtP(total)}\n수수료 ${Math.round(rate * 100)}% : -${fmtP(fee)}\n즉시 지급 : ${fmtP(pay)}\n\n진행할까요?`)) return;
+  myOwed = 0;
+  boostCredit += pay;      // 시간당 한도를 넘어도 이번 지급은 그대로 들어오게
+  boostDirty = true;
+  if (pay > 0) addPoints(pay, `⚡ 보류 일시불 정산 (${fmtP(total)} · 수수료 ${Math.round(rate * 100)}%)`);
+  updatePointsUI();
+  if (window.confetti) confetti({ particleCount: 120, spread: 90 });
+  bankToast('⚡ 일시불 정산 완료', `<strong>${fmtP(pay)}</strong>가 바로 들어왔어요. (수수료 ${fmtP(fee)})`);
+  renderOwedModal();
 }
 
 setInterval(updateOwedEta, 30000);

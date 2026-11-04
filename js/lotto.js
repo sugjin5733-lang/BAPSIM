@@ -3,7 +3,7 @@
 //  - 한 주 = 월요일 0시 ~ 다음 월요일 0시(한국 시각). 일요일 자정에 추첨
 //  - 티켓 1장 1만P + 수수료 10%(1,000P, 그대로 사라짐) · 1인 주당 최대 100장
 //  - 🎫 당첨금은 전부 '밥심 상품권'으로 지급 → 밥키우기 강화비 · 펫 비용에만 사용 (현금으로 못 뺌)
-//  - 🥇 1등 잭팟 = 지난주 이월금 + (판매액 50% + 은행 보탬 최대 300만P) × 2 · 최소 1,000만P 보장
+//  - 🥇 1등 잭팟 = max(1,000만P, 지난주 이월금 + 은행 보탬(최대 300만P)×2) + 판매액 50%×2 (티켓 1장마다 +1만P)
 //    · 1등은 매주 나오는 게 아님: 당첨 확률 = 판매 장수 ÷ 300 (최대 80%) → 안 나오면 잭팟 전액 다음 주로 이월
 //  - 🥈 2등 = 판매액 30% × 2 · 🥉 3등 = 판매액 20% × 2 (참가자 3명 이상이면 매주 나옴)
 //  - 당첨자는 서로 다른 사람 · 티켓을 많이 살수록 확률↑
@@ -56,7 +56,8 @@ function lottoCarryBefore(id) {
 }
 function lottoPrizes(id, w, seed) {
   const sales = lottoSold(w) * LOTTO_PRICE;
-  const jackpot = Math.max(LOTTO_JACKPOT_MIN, lottoCarryBefore(id) + Math.floor((sales * LOTTO_JACKPOT_RATE + seed) * LOTTO_COUPON_MULT));
+  // 바닥(최소 1,000만 또는 이월금+은행 보탬) 위에 티켓이 팔릴 때마다 바로 쌓임 → 살 때마다 잭팟이 오르는 게 보임
+  const jackpot = Math.max(LOTTO_JACKPOT_MIN, lottoCarryBefore(id) + seed * LOTTO_COUPON_MULT) + Math.floor(sales * LOTTO_JACKPOT_RATE * LOTTO_COUPON_MULT);
   return { jackpot, second: Math.floor(sales * LOTTO_2ND_RATE * LOTTO_COUPON_MULT), third: Math.floor(sales * LOTTO_3RD_RATE * LOTTO_COUPON_MULT) };
 }
 function lottoHitChance(w) { return Math.min(LOTTO_HIT_MAX, lottoSold(w) / LOTTO_HIT_TICKETS); }
@@ -204,7 +205,7 @@ function renderLotto() {
       <ul class="text-[10px] text-slate-400 leading-relaxed list-disc pl-4">
         <li>매주 일요일 자정 추첨 · 서로 다른 사람이 당첨 · 많이 살수록 확률↑</li>
         <li>당첨금은 🎫 <b>밥심 상품권</b> (밥키우기 강화비 · 펫 비용에 먼저 자동 사용)</li>
-        <li>1등이 안 나오면 잭팟이 통째로 다음 주로 이월 (최소 1,000만P 보장)</li>
+        <li>티켓 1장 팔릴 때마다 잭팟 +1만P · 1등이 안 나오면 통째로 다음 주로 이월 (최소 1,000만P)</li>
         <li>참가자가 3명 미만이면 티켓값 환불 (수수료 제외)</li>
       </ul>
     </div>
