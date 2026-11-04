@@ -33,6 +33,7 @@ const tamperAttempts = [];
 })();
 // 조작 시도 → tamper_reports 에 기록 (관리자만 읽음). 같은 종류는 1분에 한 번만
 let lastTamperReport = {};
+const ADMIN_UID = 'dmcVjopYCYVhlnnFv2WzANR0P3Y2'; // 관리자 구글 계정 uid
 function reportTamper(what) {
   try {
     const now = Date.now();

@@ -272,6 +272,11 @@ async function executeJudgment(ref) {
   if (got.type === 'chair_expel') { if (typeof executeChairExpel === 'function') executeChairExpel(got); return; }
   if (got.type === 'smite' || got.type === 'expel') { if (typeof executeWhiteJudgment === 'function') executeWhiteJudgment(got); return; }
   // 🛡️ 관리자 포인트 조정: 회원 화면이 꺼져 있거나 끊겨 있다가 옛 포인트로 덮어써도, 다음 접속 때 다시 적용됨
+  // 🛡️ 관리자 조정은 관리자 계정이 보낸 것만 인정 (judgments 는 누구나 쓸 수 있어서 위조 가능)
+  if ((got.type === 'admin_owed' || got.type === 'admin_set') && got.uid !== ADMIN_UID) {
+    if (typeof reportTamper === 'function') reportTamper('관리자 판결 위조');
+    return;
+  }
   if (got.type === 'admin_owed') {
     myOwed = Math.max(0, Math.round(Number(got.owed) || 0));
     updatePointsUI();

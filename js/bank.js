@@ -12,6 +12,7 @@
 //  ⏳ 보류 포인트 지급 예정 시각도 여기서 계산해 헤더에 표시.
 
 const TRANSFER_MIN = 100;
+const TRANSFER_MAX = 10000000; // 1건 최대 1,000만P (넘는 건 받는 쪽에서 보류 → 관리자 확인)
 const DONOR_BADGE_GOAL = 10000000;
 const DONOR_BADGE = 'nb-angel';
 const TAX_TABLE = [100000, 70000, 50000];
@@ -144,6 +145,7 @@ async function sendPoints() {
   if (!to) return alert('받는 사람 닉네임을 입력해 주세요.');
   if (to === me) return alert('자기 자신에게는 보낼 수 없어요.');
   if (amount < TRANSFER_MIN) return alert(`최소 ${TRANSFER_MIN.toLocaleString()}P부터 보낼 수 있어요.`);
+  if (amount > TRANSFER_MAX) return alert(`한 번에 최대 ${TRANSFER_MAX.toLocaleString()}P까지 보낼 수 있어요.`);
   if (amount > userPoints) return alert(`❌ 포인트가 부족해요! (보유 ${fmtP(userPoints)})`);
   let target;
   try { target = (await db.ref(`user_points/${to}`).once('value')).val(); } catch (e) { target = null; }
@@ -162,6 +164,7 @@ async function sendPoints() {
   bankToast('💸 송금 완료', `[${esc(to)}] 님에게 <strong>${fmtP(amount)}</strong>를 보냈어요.`);
 }
 
+function me_() { return currentUser.nickname; }
 async function claimTransfer(ref) {
   let got = null;
   try {
@@ -173,6 +176,13 @@ async function claimTransfer(ref) {
   } catch (e) { return; }
   const amt = Math.floor(Number(got.amount) || 0);
   if (amt <= 0) return;
+  // 🚨 한도를 넘는 송금(조작 의심)은 받지 않고 관리자 확인함으로
+  if (amt > TRANSFER_MAX) {
+    db.ref(`bank/held_transfers/${me_()}`).push(Object.assign({}, got, { heldAt: firebase.database.ServerValue.TIMESTAMP })).catch(() => {});
+    if (typeof reportTamper === 'function') reportTamper(`한도 초과 송금 수신 ${got.from}→${amt}`);
+    bankToast('💸 송금 보류', `[${esc(got.from)}] 님의 ${fmtP(amt)} 송금은 한도(${fmtP(TRANSFER_MAX)})를 넘어서 관리자 확인 뒤에 처리돼요.`);
+    return;
+  }
   addPoints(amt, `💸 송금 ← ${String(got.from || '?').slice(0, 20)}`);
   updatePointsUI();
   bankToast('💸 포인트 도착!', `[${esc(got.from)}] 님이 <strong>${fmtP(amt)}</strong>를 보냈어요.${got.msg ? `<br>“${esc(got.msg)}”` : ''}`);
@@ -649,6 +659,7 @@ function renderOwedModal() {
 // ⚡ 보류 일시불 정산: 보류 전액을 한 번에 받고, 전체 금액의 일정 비율을 수수료로 뗌 (수수료는 그대로 사라짐)
 //  일반·골드 30% · 블랙 20% · 화이트 10%
 const OWED_SETTLE_RATE = 0.3;
+const OWED_SETTLE_MAX = 50000000; // 5,000만P 넘는 보류는 일시불 불가 (조작 의심 → 관리자 확인)
 function owedSettleRate() {
   if (typeof isWhite === 'function' && isWhite()) return 0.1;
   if (typeof isBlack === 'function' && isBlack()) return 0.2;
@@ -658,6 +669,7 @@ function settleOwedAll() {
   if (!checkApprovalGuard()) return;
   if (!(myOwed > 0)) return alert('보류 포인트가 없어요.');
   if (myBudgetAt == null) return alert('잠시 후 다시 시도해 주세요.');
+  if (myOwed > OWED_SETTLE_MAX) { if (typeof reportTamper === 'function') reportTamper(`과다 보류 일시불 시도 ${myOwed}`); return alert(`보류가 ${fmtP(OWED_SETTLE_MAX)}를 넘으면 일시불 정산은 관리자 확인이 필요해요. 관리자에게 문의해 주세요.`); }
   const total = myOwed, rate = owedSettleRate(), fee = Math.ceil(total * rate), pay = total - fee;
   if (!confirm(`⚡ 보류 일시불 정산\n\n보류 ${fmtP(total)}\n수수료 ${Math.round(rate * 100)}% : -${fmtP(fee)}\n즉시 지급 : ${fmtP(pay)}\n\n진행할까요?`)) return;
   myOwed = 0;

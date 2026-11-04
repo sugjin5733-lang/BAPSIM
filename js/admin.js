@@ -334,7 +334,8 @@ async function adminBanUser(nick) {
   if (!requireAdmin()) return;
   if (!confirm(`🚨 경고: [${nick}] 회원을 영구 차단하시겠습니까?\n차단된 닉네임은 다시는 사용할 수 없으며, 모든 계정 정보가 즉시 삭제됩니다.`)) return;
   try {
-    await removeUserRecords(nick, { [`banned_users/${nick}`]: { nickname: nick, bannedAt: Date.now() } });
+    const bu = (await db.ref(`user_points/${nick}`).once('value')).val() || {};
+    await removeUserRecords(nick, { [`banned_users/${nick}`]: { nickname: nick, uid: bu.uid || null, bannedAt: Date.now() } });
     alert(`⛔ [${nick}] 회원이 영구 차단되었습니다.\n해당 닉네임으로는 앞으로 가입할 수 없습니다.`);
   } catch (err) {
     alert("차단 처리 오류: " + err.message);

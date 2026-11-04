@@ -248,6 +248,8 @@ async function submitSignupRequest() {
       db.ref(`user_points/${nick}`).once('value')
     ]);
     if (banSnap.exists()) return alert(`⛔ [${nick}] 은(는) 운영자에 의해 차단된 닉네임입니다.`);
+    // 차단된 구글 계정은 다른 닉네임으로도 가입 불가
+    try { const all = (await db.ref('banned_users').once('value')).val() || {}; if (Object.values(all).some(b => b && b.uid && authUser && b.uid === authUser.uid)) return alert('⛔ 운영자에 의해 차단된 계정입니다.'); } catch (e) {}
 
     if (type === 'new' && userSnap.exists()) {
       return alert(`[${nick}] 은(는) 이미 있는 닉네임이에요.\n본인 닉네임이라면 위에서 [기존 회원이에요]를 선택해주세요.`);
