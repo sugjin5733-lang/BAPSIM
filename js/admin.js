@@ -612,13 +612,25 @@ async function adminResetCore({ label, clearPaths, keepSeasonBadges }) {
       ['uid', 'status', 'approved', 'createdAt', 'email'].forEach(k => { if (u[k] !== undefined) fresh[k] = u[k]; });
       updates[`user_points/${nick}`] = fresh;
     });
-    // 3) 데이터 삭제
-    clearPaths.forEach(p => { updates[p] = null; });
+    // 3) 회원 초기화 먼저 (한 번에)
     const groups = (await db.ref('groups').once('value')).val() || {};
     Object.keys(groups).forEach(g => { updates[`groups/${g}/bets`] = null; updates[`groups/${g}/results`] = null; });
-    updates['meta/season'] = { name: seasonName, startedAt: firebase.database.ServerValue.TIMESTAMP, startPoints: startPts };
-    updates['meta/resetAt'] = firebase.database.ServerValue.TIMESTAMP;
     await db.ref().update(updates);
+    // 4) 데이터 삭제: 큰 경로는 따로·조각내서 (한 번에 지우면 WRITE_TOO_BIG 으로 전부 실패하던 문제)
+    for (const p of clearPaths) {
+      try { await db.ref(p).remove(); }
+      catch (e) {
+        const tok = await firebase.auth().currentUser.getIdToken(), base = firebase.app().options.databaseURL;
+        const kids = Object.keys(await (await fetch(`${base}/${p}.json?shallow=true&auth=${tok}`)).json() || {});
+        for (const k of kids) {
+          try { await db.ref(`${p}/${k}`).remove(); continue; } catch (e2) {}
+          const keys = Object.keys(await (await fetch(`${base}/${p}/${encodeURIComponent(k)}.json?shallow=true&auth=${tok}`)).json() || {});
+          for (let i = 0; i < keys.length; i += 5000) { const up = {}; keys.slice(i, i + 5000).forEach(x => { up[x] = null; }); await db.ref(`${p}/${k}`).update(up); }
+        }
+      }
+    }
+    // 5) 마지막에 시즌 표시 (이걸 쓰는 순간 열려 있는 모든 화면이 새로고침됨 → 반드시 맨 끝에)
+    await db.ref('meta').update({ season: { name: seasonName, startedAt: firebase.database.ServerValue.TIMESTAMP, startPoints: startPts }, resetAt: firebase.database.ServerValue.TIMESTAMP });
     alert(`✅ ${label} 완료! [${seasonName}] ${Object.keys(users).length}명.\n백업: 내 PC 다운로드 파일 + DB admin_backups/${backupKey}\n\n접속 중인 화면은 자동으로 새로고침돼요.`);
   } catch (err) {
     alert(`${label} 실패: ` + (err && err.message) + '\n(아무것도 바뀌지 않았거나 일부만 바뀌었을 수 있어요. 백업 파일을 확인하세요)');
