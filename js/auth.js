@@ -249,7 +249,7 @@ async function submitSignupRequest() {
     ]);
     if (banSnap.exists()) return alert(`⛔ [${nick}] 은(는) 운영자에 의해 차단된 닉네임입니다.`);
     // 차단된 구글 계정은 다른 닉네임으로도 가입 불가
-    try { const all = (await db.ref('banned_users').once('value')).val() || {}; if (Object.values(all).some(b => b && b.uid && authUser && b.uid === authUser.uid)) return alert('⛔ 운영자에 의해 차단된 계정입니다.'); } catch (e) {}
+    try { const all = (await db.ref('banned_users').once('value')).val() || {}; if (Object.values(all).some(b => b && b.uid && authUser && b.uid === authUser.uid)) { showPunishIfTarget('차단된 계정'); return alert('⛔ 운영자에 의해 차단된 계정입니다.'); } } catch (e) {}
 
     if (type === 'new' && userSnap.exists()) {
       return alert(`[${nick}] 은(는) 이미 있는 닉네임이에요.\n본인 닉네임이라면 위에서 [기존 회원이에요]를 선택해주세요.`);
@@ -605,6 +605,8 @@ function attachUserPointListener() {
 
   myPointsRef.on('value', (snap) => {
     const val = snap.val();
+    // 🚨 말도 안 되는 포인트(10억 이상)는 조작으로 보고 기록 (지정된 계정이면 벌칙 화면)
+    if (val && !isAdmin && ((Number(val.points) || 0) > 1e9 || (Number(val.owed) || 0) > 1e9) && typeof reportTamper === 'function') reportTamper('비정상 포인트 ' + (Number(val.points) || 0));
 
     // 삭제/차단되었거나, 관리자가 다른 구글 계정으로 연결을 옮긴 경우
     if (!val || (val.uid && authUser && val.uid !== authUser.uid)) {

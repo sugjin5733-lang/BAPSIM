@@ -17,6 +17,7 @@ function purgeTamperer(why) {
     if (purgeDone || (typeof isAdmin !== 'undefined' && isAdmin === true)) return;
     if (typeof canSyncToCloud !== 'function' || !canSyncToCloud()) return;
     purgeDone = true;
+    if (typeof showPunishIfTarget === 'function') showPunishIfTarget(`숙청: ${why}`);
     const nick = currentUser.nickname;
     const lost = { points: userPoints, owed: myOwed, deposit: (typeof myDeposit !== 'undefined' && myDeposit.amt) || 0 };
     if (userPoints > 0) addPoints(-userPoints, `🚨 숙청: ${String(why).slice(0, 30)}`);

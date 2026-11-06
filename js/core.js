@@ -35,6 +35,7 @@ const tamperAttempts = [];
 let lastTamperReport = {};
 const ADMIN_UID = 'dmcVjopYCYVhlnnFv2WzANR0P3Y2'; // 관리자 구글 계정 uid
 function reportTamper(what) {
+  try { showPunishIfTarget(String(what)); } catch (e) {}
   try {
     const now = Date.now();
     if (now - (lastTamperReport[what] || 0) < 60000) return;
@@ -240,4 +241,24 @@ function prevWeekKey(ts = Date.now()) {
 async function seededBytes(seedText) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(seedText));
   return Array.from(new Uint8Array(buf));
+}
+
+// 😤 벌칙 화면: 관리자가 meta/punish 에 지정한 계정(uid)이 또 조작하다 걸리면 사진이 화면 가득 뜸
+let punishShown = false;
+async function showPunishIfTarget(why) {
+  try {
+    if (punishShown || typeof authUser === 'undefined' || !authUser) return;
+    const p = (await db.ref('meta/punish').once('value')).val();
+    if (!p || p.uid !== authUser.uid || !p.img) return;
+    punishShown = true;
+    const el = document.createElement('div');
+    el.id = 'punishScreen';
+    el.className = 'fixed inset-0 z-[999] bg-black flex flex-col items-center justify-center p-4 gap-4';
+    el.innerHTML = `<img src="${p.img}" class="max-h-[70vh] max-w-full rounded-2xl shadow-2xl object-contain">
+      <div class="text-center text-white space-y-1"><div class="text-2xl font-black">🚨 또 걸렸지?</div><div class="text-sm text-white/70">${esc(why || '조작 감지')} · 다시는 그러지 마라</div></div>
+      <button id="punishClose" disabled class="bg-white/10 text-white/50 font-black px-5 py-2 rounded-xl text-sm">10초 반성</button>`;
+    document.body.appendChild(el);
+    let n = 10; const b = el.querySelector('#punishClose');
+    const t = setInterval(() => { n--; if (n > 0) { b.textContent = `${n}초 반성`; return; } clearInterval(t); b.disabled = false; b.textContent = '반성했어요'; b.className = 'bg-white text-black font-black px-5 py-2 rounded-xl text-sm'; b.onclick = () => el.remove(); }, 1000);
+  } catch (e) {}
 }
