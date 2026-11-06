@@ -661,14 +661,22 @@ function renderOwedModal() {
 const OWED_SETTLE_RATE = 0.45; // 일시불은 수수료 45% (누구나 같음)
 const OWED_SETTLE_MAX = 50000000; // 5,000만P 넘는 보류는 일시불 불가 (조작 의심 → 관리자 확인)
 function owedSettleRate() { return OWED_SETTLE_RATE; }
-function settleOwedAll() {
+async function settleOwedAll() {
   if (!checkApprovalGuard()) return;
   if (!(myOwed > 0)) return alert('보류 포인트가 없어요.');
   if (myBudgetAt == null) return alert('잠시 후 다시 시도해 주세요.');
   if (myOwed > OWED_SETTLE_MAX) { if (typeof reportTamper === 'function') reportTamper(`과다 보류 일시불 시도 ${myOwed}`); return alert(`보류가 ${fmtP(OWED_SETTLE_MAX)}를 넘으면 일시불 정산은 관리자 확인이 필요해요. 관리자에게 문의해 주세요.`); }
   const total = myOwed, rate = owedSettleRate(), fee = Math.ceil(total * rate), pay = total - fee;
   if (!confirm(`⚡ 보류 일시불 정산\n\n보류 ${fmtP(total)}\n수수료 ${Math.round(rate * 100)}% : -${fmtP(fee)}\n즉시 지급 : ${fmtP(pay)}\n\n진행할까요?`)) return;
+  // 서버의 보류 값으로 한 번만 정산 (탭 두 개에서 동시에 누르면 두 번 받던 버그 방지)
+  let ok = false;
+  try {
+    const r = await db.ref(`user_points/${currentUser.nickname}/owed`).transaction(c => (Number(c) || 0) === total ? 0 : undefined);
+    ok = r.committed;
+  } catch (e) { ok = false; }
+  if (!ok) return alert('보류 금액이 방금 바뀌었어요 (다른 탭/기기에서 열려 있나요?). 새로고침 후 다시 시도해 주세요.');
   myOwed = 0;
+  if (typeof lastServerState === 'object' && lastServerState) lastServerState.owed = 0;
   boostCredit += pay;      // 시간당 한도를 넘어도 이번 지급은 그대로 들어오게
   boostDirty = true;
   if (pay > 0) addPoints(pay, `⚡ 보류 일시불 정산 (${fmtP(total)} · 수수료 ${Math.round(rate * 100)}%)`);

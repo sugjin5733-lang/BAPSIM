@@ -226,6 +226,7 @@ async function withdrawInterest() {
   myDeposit.int -= amt;
   depositDirty = true;
   addPoints(amt, '🏦 예치 이자 출금');
+  if (typeof boostCredit === 'number') { boostCredit += amt; boostDirty = true; }
   db.ref(`bank/deposit_log/${currentUser.nickname}`).push({ at: firebase.database.ServerValue.TIMESTAMP, withdraw: amt, bal: myDeposit.amt }).catch(() => {});
   updatePointsUI();
   renderTierBox();
@@ -264,6 +265,8 @@ async function depositPoints(inputId = 'tierDepositAmount') {
   if (myDeposit.amt > 0) await accrueDeposit();
   updatePointsUI();
   addPoints(-amount, '🏦 은행 예치');
+  // 예치는 '쓴 돈'이 아니라 옮긴 돈 → 시간당 한도를 되돌려주지 않음 (예치 반복으로 보류를 무제한 빼내던 구멍)
+  if (typeof boostCredit === 'number') { boostCredit -= amount; boostDirty = true; }
   // 새로 넣은 돈만 따로 '대기'로 (기존 원금의 이자 시계는 그대로)
   const nowT = tierNow();
   myDeposit = { amt: myDeposit.amt + amount, since: myDeposit.amt > 0 && myDeposit.since ? myDeposit.since : nowT, int: myDeposit.int || 0, fresh: (myDeposit.fresh || 0) + amount, freshAt: nowT };
@@ -284,6 +287,8 @@ async function withdrawDeposit() {
   myDeposit = { amt: 0, since: 0, int: 0, fresh: 0, freshAt: 0 };
   depositDirty = true;
   addPoints(amt, '🏦 예치금 출금');
+  // 내 돈을 꺼내는 것 → 시간당 한도와 상관없이 바로 (보류로 빠지지 않게)
+  if (typeof boostCredit === 'number') { boostCredit += amt; boostDirty = true; }
   updatePointsUI();
   renderTierBox();
 }
