@@ -555,7 +555,8 @@ function adminQuickSetPoint(nick) {
 // ==========================================
 const SEASON_RESET_CLEAR_PATHS = ['point_logs', 'bank', 'transfers', 'seasons', 'duels', 'game_feed', 'market', 'admin_snapshots'];
 // 💣 전체 초기화는 여기에 더해 블랙 클럽·시즌 정보·요청·조작 기록까지 (식당·그룹·채팅·공지·차단·계정·백업은 유지)
-const FULL_RESET_CLEAR_PATHS = [...SEASON_RESET_CLEAR_PATHS, 'policies', 'policy_log', 'judgments', 'hotline', 'tamper_reports', 'meta', 'point_requests', 'rename_requests'];
+const FULL_RESET_CLEAR_PATHS = [...SEASON_RESET_CLEAR_PATHS, 'policies', 'policy_log', 'judgments', 'hotline', 'tamper_reports', 'point_requests', 'rename_requests'];
+// (meta 는 통째로 지우지 않고 meta/season · meta/resetAt 만 새로 씀 — 같이 지우면 Firebase가 거부)
 
 async function handleAdminSeasonReset() {
   if (!requireAdmin()) return;
